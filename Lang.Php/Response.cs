@@ -33,7 +33,7 @@ namespace Lang.Php
         }
 
         [DirectCall("echo")]
-        public static void Echo(string x)
+        public static void Echo(object x)
         {
             throw new NotImplementedException();
         }
