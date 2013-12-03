@@ -1,0 +1,214 @@
+﻿<#@ template debug="false" hostspecific="false" language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ output extension=".cs" #>
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+
+namespace Lang.Php
+{
+    [EnumRender(EnumRenderOptions.MinusLowercase)]
+	 public enum Tags
+    {
+	<#
+		X("Html Body Head Meta Script Div Form Input A Button Table Tr Td Th Label Select Option Textarea P Link Br Style Title Img B");
+		X("H1 H2 H3 H4 H5 H6");
+ 
+	#>     
+    }
+
+    public enum Attr 
+    {
+	<#
+		X("Method Action Enctype AcceptCharset Type Name Value Class Src Property Content Style Href Target Id For Checked Selected Rel Alt");
+		X("Rowspan Colspan");
+		X("OnClick", "onclick");
+		X("XmlNs", "xmlns");
+		X("XmlLang", "xml:lang");
+		X("HttpEquiv","http-equiv");
+	#>     
+    }
+	public enum MimeTypes 
+    {
+	<#
+		X("TextCss", "text/css");
+	#>     
+    }
+
+	
+
+	public enum ATargets
+    {
+	<#
+		X("Blank","_blank");
+	#>     
+    }
+
+    public enum ScriptTypes
+    {
+	<#
+		X("TextJavascript","text/javascript");
+	#>     
+    }
+	 public enum InputTypes
+    {
+	<#
+		X("Hidden Text Submit Button Checkbox");
+	#>     
+    }
+
+	 public enum TagsSpecial
+    {
+	<#
+		X("Open","<");
+		X("Close",">");
+		X("CloseSingle", " />");
+		X("OpenClosing","</");
+		X("CDataOpen", "//<![CDATA[");
+		X("CDataClose", "//]]>");
+	#>     
+    }
+
+	public enum Doctypes {
+	<#
+		X("XHTML_Transitional",  
+			@"<!DOCTYPE html PUBLIC ""-//W3C//DTD XHTML 1.0 Transitional//EN"" ""http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"">");
+	#>
+	}
+
+
+	public enum CssTextAlign
+    {
+	<#
+		X("Left Right Center");
+	#>     
+    }
+	public enum CssVerticalAlign
+    {
+	<#
+		X("Top Bottom");
+	#>     
+    }
+
+	[EnumRender(EnumRenderOptions.MinusLowercase)]
+	public enum CssColors
+    {
+	<#
+		X("Yellow Red Black White Green Blue");
+	#>     
+    }
+	public enum ProtocolsLong
+    {
+	<#
+		X("Http", "http://");
+		X("HttpSecured", "https://");
+		X("Ftp", "ftp://");
+	#>     
+    }
+	public enum LinkRels
+    {
+	<#
+		X("Stylesheet");
+	#>     
+    }
+	[EnumRender(EnumRenderOptions.MinusLowercase)]
+	public enum CssFontSizes
+    {
+	<#
+		Y("XxSmall XSmall Small Medium Large XLarge XxLarge Smaller Sarger Inherit");
+	#>     
+    
+	}
+	[EnumRender(EnumRenderOptions.MinusLowercase)]
+	public enum CssBorderStyles
+    {
+	<#
+		Y("None Hidden Dotted Dashed Solid Double Groove Ridge Inset Outset Inherit");
+	#>     
+    }
+
+	[Flags]
+	public enum FilePutContentsFlags {
+	<#
+		X("UseIncludePath", "FILE_USE_INCLUDE_PATH", true);
+		X("Append", "FILE_APPEND", true);
+		X("LockEx", "LOCK_EX", true);
+	#>    
+	}
+
+	public enum CssFontFamilies 
+	{
+	<#
+		X("Arial", "arial");
+		X("Arial_verdana", "arial,verdana");
+		X("Helvetica_impact_sansserif", "helvetica,impact,sans-serif");
+	#>     	
+	}
+	public enum DateTimeFormats 
+	{
+	<#
+X("ATOM", "DateTime::ATOM", true);
+X("COOKIE", "DateTime::COOKIE", true);
+X("ISO8601", "DateTime::ISO8601", true);
+X("RFC822", "DateTime::RFC822", true);
+X("RFC850", "DateTime::RFC850", true);
+X("RFC1036", "DateTime::RFC1036", true);
+X("RFC1123", "DateTime::RFC1123", true);
+X("RFC2822", "DateTime::RFC2822", true);
+X("RFC3339", "DateTime::RFC3339", true);
+X("RSS", "DateTime::RSS", true);
+X("W3C", "DateTime::W3C", true);
+
+X("MySQL", "Y-m-d H:i:s");
+X("HttpHeader", "D, d M Y H:i:s T");
+	#>     	
+	}
+
+	public enum PhpTypes 
+	{
+	<#
+	X("Boolean", "boolean");
+	X("Integer", "integer");
+	X("Double", "double");
+	X("String", "string");
+	X("Array", "array");
+	X("Object", "object");
+	X("Resource", "resource");
+	X("Null", "NULL");
+	X("Unknown", "unknown type");
+	#>     	
+	}
+ 
+}
+<#+
+void X(string Cs, string php = null, bool direct = false) {
+    if (Cs.Contains(" ")) {
+		var t = Cs.Split(' ');
+		foreach(var cs1 in t)
+			X(cs1);
+		return;
+	}
+    if (string.IsNullOrEmpty(php))
+	    php = Cs.Substring(0,1).ToLower() + Cs.Substring(1);
+	if (!direct) {
+		php="'" + php.Replace("\\","\\\\").Replace("\"", "\\\"") + "'";	
+	}
+	Write("    [RenderValue(\""+php+"\")]\r\n");
+	Write("    "+Cs+",\r\n");
+}
+
+void Y(string Cs) {
+    if (Cs.Contains(" ")) {
+		var t = Cs.Split(' ');
+		foreach(var cs1 in t)
+			Y(cs1);
+		return;
+	}
+	Write("    "+Cs+",\r\n");
+
+}
+#>

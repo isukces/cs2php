@@ -1,0 +1,86 @@
+﻿<#@ template debug="false" hostspecific="false" language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ output extension=".cs" #>
+using Lang.Php;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Lang.Php.Framework.Replacers
+{
+	[Replace(typeof(Math))]
+	internal partial class MathReplacer
+    {
+	<#
+		subst4("abs,Abs,System.SByte,System.SByte,System.Math");
+		subst4("abs,Abs,System.Int16,System.Int16,System.Math");
+		subst4("abs,Abs,int,int,System.Math");
+		subst4("abs,Abs,long,long,System.Math");
+		subst4("abs,Abs,System.Single,System.Single,System.Math");
+		subst4("abs,Abs,double,double,System.Math");
+		subst4("abs,Abs,decimal,decimal,System.Math");
+		subst4("acos,Acos,double,double,System.Math");
+		subst4("asin,Asin,double,double,System.Math");
+		subst4("atan,Atan,double,double,System.Math");
+		subst4("ceil,Ceiling,decimal,decimal,System.Math");
+		subst4("ceil,Ceiling,double,double,System.Math");
+		subst4("cos,Cos,double,double,System.Math");
+		subst4("cosh,Cosh,double,double,System.Math");
+		subst4("exp,Exp,double,double,System.Math");
+		subst4("floor,Floor,decimal,decimal,System.Math");
+		subst4("floor,Floor,double,double,System.Math");
+		subst4("log,Log,double,double,System.Math");
+		subst4("log10,Log10,double,double,System.Math");
+		subst4("round,Round,double,double,System.Math");
+		subst4("round,Round,decimal,decimal,System.Math");
+		subst4("sin,Sin,double,double,System.Math");
+		subst4("sinh,Sinh,double,double,System.Math");
+		subst4("sqrt,Sqrt,double,double,System.Math");
+		subst4("tan,Tan,double,double,System.Math");
+		subst4("tanh,Tanh,double,double,System.Math");
+	#>
+	}
+
+	[Replace(typeof(double))]
+	internal partial class DoubleReplacer
+    {
+		[DirectCall("","0")]
+        public static double Parse(string s)
+        {
+            return double.Parse(s);
+        }
+	<#
+		subst4("is_infinite,IsInfinity,double,bool,double");
+		subst4("is_nan,IsNaN,double,bool,double");
+	#>
+	}
+
+	[Replace(typeof(System.IO.File))]
+	internal partial class System__IO__FileReplacer
+    {
+	<#
+		subst4("file_exists,Exists,string,bool,System.IO.File");
+	#>
+	}
+
+}
+<#+
+		void subst4(string a)
+        {
+            var b = a.Split(',');
+            subst(b[0].Trim(), b[1].Trim(), b[2].Trim(), b[3].Trim(), b[4].Trim());
+        }
+        void subst(string phpFunctionName, string csFunctionName, string typeIn, string TypeOut, string originalType)
+        {
+            Write("        [DirectCall(\"" + phpFunctionName + "\")]\r\n");
+            Write(string.Format("        public static {0} {1}({2} x)\r\n", TypeOut, csFunctionName, typeIn));
+            Write("        {\r\n");
+            Write(string.Format("            return {0}.{1}(x);\r\n",originalType, csFunctionName));
+            Write("        }\r\n\r\n");
+        }
+#>

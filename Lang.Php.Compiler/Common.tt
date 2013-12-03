@@ -1,0 +1,95 @@
+﻿<#@ template debug="false" hostspecific="false" language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ output extension=".txt" #>
+<#+
+
+  private Tuple<string, string, string> Convert(string i)
+        {
+            int a = i.IndexOf(' ');
+            string _type = i.Substring(0, a).Trim();
+            string _name, _comment;
+            string ii = i.Substring(a).Trim();
+            a = ii.IndexOf(';');
+            if (a < 0)
+            {
+                _name = ii;
+                _comment = null;
+            }
+            else
+            {
+                _name = ii.Substring(0, a).Trim();
+                _comment = ii.Substring(a + 1).Trim();
+            }
+            return new Tuple<string, string, string>(_type, _name, _comment);
+        }
+        public Tuple<string, string, string>[] Convert(string[] i)
+        {
+            return i.Select(ii => Convert(ii)).ToArray();
+        }
+        private string FirstLower(string i)
+        {
+            i = i.Substring(0, 1).ToLower() + i.Substring(1);
+            if (i == "operator" || i == "value") return "_" + i;
+            return i;
+        }
+        private void MakeClass(string cn, string derived, params string[] properties)
+        {
+            if (!string.IsNullOrEmpty(derived))
+                derived = " : " + derived;
+            Write(string.Format("    public partial class {0}{1} {{\r\n", cn, derived));
+            var p1 = Convert(properties);
+            {
+                var pp = string.Join(", ", p1.Select(q => string.Format("{0} {1}", q.Item1, q.Item2)));
+                Write(string.Format("      public {0}({1}){{\r\n", cn, pp));
+                foreach (var i in p1)
+                {
+                    Write(string.Format("        this.{0} = {1};\r\n", FirstLower(i.Item2), i.Item2));
+                }
+                Write(string.Format("      }}\r\n"));
+            }
+
+
+            foreach (var i in p1)
+            {
+                if (!string.IsNullOrEmpty(i.Item3))
+                {
+                    Write(string.Format("      /// <summary>\r\n"));
+                    Write(string.Format("      /// {0}\r\n", i.Item3));
+                    Write(string.Format("      /// </summary>\r\n"));
+                }
+                Write(string.Format("      public {0} {1} {{\r\n", i.Item1, i.Item2));
+                Write(string.Format("        get {{\r\n"));
+                Write(string.Format("          return {0};\r\n", FirstLower(i.Item2)));
+                Write(string.Format("        }}\r\n"));
+                Write(string.Format("      }}\r\n"));
+                Write(string.Format("      private {0} {1};\r\n", i.Item1, FirstLower(i.Item2)));
+            }
+            Write(string.Format("    }} // end of {0}\r\n", cn));
+        }
+
+
+		 private void MakeInterface(string cn, string derived, params string[] properties)
+        {
+            if (!string.IsNullOrEmpty(derived))
+                derived = " : " + derived;
+            Write(string.Format("    public interface {0}{1} {{\r\n", cn, derived));
+
+            var p1 = Convert(properties);
+            foreach (var i in p1)
+            {
+                if (!string.IsNullOrEmpty(i.Item3))
+                {
+                    Write(string.Format("      /// <summary>\r\n"));
+                    Write(string.Format("      /// {0}\r\n", i.Item3));
+                    Write(string.Format("      /// </summary>\r\n"));
+                }
+                Write(string.Format("      {0} {1} {{ get; }}\r\n", i.Item1, i.Item2));
+            }
+            Write(string.Format("    }} // end of {0}\r\n", cn));
+        }
+
+
+#>

@@ -1,0 +1,118 @@
+﻿<#@ template debug="false" hostspecific="false" language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ output extension=".cs" #>
+<#@ include file="Common.tt" #>
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Reflection;
+    
+namespace Lang.Cs.Compiler
+{
+<# 
+	baseClass = "CSharpBase";
+	classes.Clear();
+	MakeInterface("IStatement", null);
+	MakeInterface("IClassMember", null);
+	MakeInterface("IValue", null, "Type ValueType");	 
+	MakeInterface("INamespaceMember", null);
+	 
+	MakeClass("NameType","", "string Name", "LangType Type");
+	
+	MakeClass("CompilationUnit", "",  "ImportNamespace[] ImportNamespaces", "NamespaceDeclaration[] NamespaceDeclarations");
+	 
+	MakeClass("ImportNamespaceCollection", "IStatement",  "ImportNamespace[] Items;Lista definicji");
+	MakeClass("ImportNamespace", "IStatement",  "string Name;Nazwa przestrzeni nazw", "string Alias;Opcjonalny alias dla przestrzeni nazw lub typu");
+	
+	MakeClass("NamespaceDeclaration", null, "string Name;Nazwa przestrzeni", "INamespaceMember[] Members; Elementy");
+	MakeClass("ClassDeclaration", "INamespaceMember,IClassMember", "string Name;Nazwa klasy", "IClassMember[] Members;Elementy");
+	MakeClass("FieldDeclaration", "IClassMember",  "LangType Type", "VariableDeclarator[] Items", "Modifiers Modifiers");
+	MakeClass("VariableDeclarator", "", "string Name", "IValue Value", "FieldInfo OptionalFieldInfo");
+
+	MakeClass("CsharpPropertyDeclaration", "IClassMember", "string PropertyName", "LangType Type", 
+			  "CsharpPropertyDeclarationAccessor[] Accessors", 
+			  "Modifiers Modifiers",
+			  "DeclarationItemDescription Description");
+	MakeClass("EnumDeclaration", "INamespaceMember,IClassMember", "string Name");
+	
+	// MakeClass("ConstDeclaration", "IClassMember", "string ConstName", "Object ConstValue");
+	MakeClass("CsharpPropertyDeclarationAccessor", "", "string Name", "Modifiers Modifiers", "IStatement Statement");
+
+	MakeClass("ConstValue", "IValue", "object MyValue;Wartość stała");
+	MakeClass("TypeValue", "IValue", "Type DotnetType");
+	MakeClass("TypeOfExpression", "IValue", "Type DotnetType");
+	MakeClass("InvocationExpression","IValue", "IValue Expression", "FunctionArgument[] Arguments");
+	MakeClass("LocalVariableExpression", "IValue", "string Name", "LangType Type");
+	MakeClass("ArgumentExpression", "IValue", "string Name", "LangType Type");
+	MakeClass("SimpleLambdaExpression", "IValue", "FunctionDeclarationParameter Parameter", "IValue Expression");
+	MakeClass("CastExpression", "IValue", "IValue Expression", "Type DotnetType");
+	 
+
+	MakeClass("VariableDeclaration", "IStatement", "LangType Type", "VariableDeclarator[] Declarators");
+
+
+	MakeClass("LangType", "", "Type DotnetType;Typ .NET");
+
+	MakeClass("CallConstructor", "IValue", "ConstructorInfo Info", "FunctionArgument[] Arguments", "IValue[] Initializers");
+	MakeClass("FunctionArgument", "IValue", "string RefOrOutKeyword", "IValue MyValue");
+	MakeClass("Modifiers", "", "string[] Items");
+	MakeClass("FunctionDeclarationParameter", "", "string Name", "Modifiers Modifiers", "LangType Type", "IValue Initial");
+	MakeClass("CodeBlock", "IStatement", "IStatement[] Items");
+	MakeClass("ReturnStatement", "IStatement", "IValue ReturnValue");
+	MakeClass("MethodDeclaration", "IClassMember",  "MethodInfo Info", "IStatement Body");
+	MakeClass("ConstructorDeclaration", "IClassMember",  "ConstructorInfo Info", "IStatement Body");
+	MakeClass("LocalDeclarationStatement", "IStatement", "bool IsConst", "bool IsFixed", "VariableDeclaration Declaration");
+
+
+	MakeClass("ThisExpression", "IValue", "Type ObjectType");
+	MakeClass("MemberAccessExpression", "IValue", "string MemberName", "IValue Expression");
+	MakeClass("ClassFieldAccessExpression", "IValue", "FieldInfo Member", "bool IsStatic");
+	MakeClass("ClassPropertyAccessExpression", "IValue", "PropertyInfo Member");
+	MakeClass("InstanceFieldAccessExpression", "IValue", "FieldInfo Member", "IValue TargetObject");
+
+
+
+	MakeClass("ArrayCreateExpression", "IValue", "Type ArrayType", "IValue[] Initializers");
+
+	MakeClass("StaticMemberAccessExpression", "IValue", "string MemberName", "LangType Expression");
+	MakeClass("InstanceMemberAccessExpression", "IValue", "string MemberName", "IValue Expression", "MemberInfo Member");
+	MakeClass("CsharpInstancePropertyAccessExpression", "IValue", "PropertyInfo Member", "IValue TargetObject");
+	MakeClass("CsharpMethodCallExpression","IValue, IStatement", "MethodInfo MethodInfo", "IValue TargetObject",  "FunctionArgument[] Arguments", "Type[] GenericTypes", "bool IsDelegate");
+
+	MakeClass("IfStatement", "IStatement", "IValue Condition", "IStatement IfTrue", "IStatement IfFalse");
+	MakeClass("WhileStatement", "IStatement", "IValue Condition", "IStatement Statement");
+	MakeClass("ForStatement", "IStatement", "VariableDeclaration Declaration", "IValue Condition", "IStatement Statement", "IStatement[] Incrementors");
+	MakeClass("ForEachStatement", "IStatement","LangType ItemType", "string VarName", "IValue Collection", "IStatement Statement");
+
+	MakeClass("BreakStatement", "IStatement");
+	MakeClass("ContinueStatement", "IStatement");
+
+
+	MakeClass("BinaryOperatorExpression", "IValue", "IValue Left", "IValue Right", "string Operator", "Type ForceType;Typ jeśli znany", "MethodInfo OperatorMethod;operator jeśli użyty");
+	MakeClass("UnaryOperatorExpression", "IValue", "IValue Operand", "string Operator", "Type ForceType;Typ jeśli znany");
+	MakeClass("CsharpAssignExpression", "IValue, IStatement", "IValue Left", "IValue Right", "string OptionalOperator");
+	MakeClass("IncrementDecrementExpression", "IValue, IStatement", "IValue Operand", "bool Increment", "bool Pre");
+	MakeClass("ElementAccessExpression", "IValue", "IValue Expression", "FunctionArgument[] Arguments", "Type ElementType");
+	MakeClass("ConditionalExpression", "IValue", "IValue Condition", "IValue WhenTrue", "IValue WhenFalse", "Type ResultType");
+
+	MakeClass("CompileResult", "", "string Source", "CompilationUnit Compiled");
+
+	MakeClass("ParenthesizedExpression", "IValue", "IValue Expression");
+
+	MakeClass("UnknownIdentifierValue", "IValue", "string Identifier", "IValue[] OptionalGenericTypes");
+	//  MakeClass("CsharpAssignExpressionTable_PseudoValue", "IValue", "CsharpAssignExpression[] Items");
+	MakeClass("IValueTable_PseudoValue", "IValue", "IValue[] Items");
+	MakeClass("IValueTable2_PseudoValue", "IValue", "IValueTable_PseudoValue[] Items");
+
+	MakeClass("MethodExpression", "IValue", "MethodInfo Method");
+	MakeClass("LambdaExpression", "IValue", "Type DotnetType", "FunctionDeclarationParameter[] Parameters", "IStatement Body");
+
+	MakeClassBase();
+	 
+#>
+}

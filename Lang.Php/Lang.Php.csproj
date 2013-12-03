@@ -1,0 +1,174 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{ED717576-B7B9-4775-8236-1855E20E52D5}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Lang.Php</RootNamespace>
+    <AssemblyName>Lang.Php</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>key.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="MySql.Data">
+      <HintPath>..\packages\MySql.Data.6.7.4\lib\net40\MySql.Data.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Falsable.cs" />
+    <Compile Include="Filters\FilterInputServer.cs" />
+    <Compile Include="Filters\FilterVar.cs" />
+    <Compile Include="Filters\KnownFilters.cs" />
+    <Compile Include="Filters\ServerVariables.cs" />
+    <Compile Include="Filters\_options\EmailOptions.cs" />
+    <Compile Include="Filters\_options\FloatOptions.cs" />
+    <Compile Include="Filters\_flags\IntFlags.cs" />
+    <Compile Include="Filters\_options\IntOptions.cs" />
+    <Compile Include="Filters\_flags\IpFlags.cs" />
+    <Compile Include="Filters\_options\IpOptions.cs" />
+    <Compile Include="Filters\_flags\UrlFlags.cs" />
+    <Compile Include="Filters\_options\RegExpOptions.cs" />
+    <Compile Include="Filters\_options\UrlOptions.cs" />
+    <Compile Include="Html.cs" />
+    <Compile Include="Filters\FilterInput.cs" />
+    <Compile Include="MbPhpString.cs" />
+    <Compile Include="Runtime\RuntimePhpDirectory.cs" />
+    <Compile Include="_attributes\RequireOnceAttribute.cs" />
+    <Compile Include="_DateTime\UnixTimestamp.cs" />
+    <Compile Include="_Files\PhpDirectoryEntry.cs" />
+    <Compile Include="_Files\PhpDirectory.cs" />
+    <Compile Include="PhpMath.cs" />
+    <Compile Include="PhpDummy.cs" />
+    <Compile Include="PhpString.cs" />
+    <Compile Include="Runtime\HttpRequest.cs" />
+    <Compile Include="Runtime\HttpResponse.cs" />
+    <Compile Include="Runtime\PhpStringBuilder.cs" />
+    <Compile Include="Runtime\PhpValues.cs" />
+    <Compile Include="Runtime\RuntimeMysqlResult.cs" />
+    <Compile Include="_attributes\AsDefinedConst.cs" />
+    <Compile Include="_attributes\GlobalVariableAttribute.cs" />
+    <Compile Include="_attributes\AsValue.cs" />
+    <Compile Include="_attributes\EnumRenderAttribute.cs" />
+    <Compile Include="_attributes\_assembly\ModuleIncludeConstAttribute.cs" />
+    <Compile Include="_attributes\TranslatorAttribute.cs" />
+    <Compile Include="_attributes\UseBinaryExpressionAttribute.cs" />
+    <Compile Include="_attributes\_assembly\ModulesSubDirAttribute.cs" />
+    <Compile Include="_attributes\_assembly\PriovidesTranslatorAttribute.cs" />
+    <Compile Include="_attributes\_assembly\RequiredTranslatorAttribute.cs" />
+    <Compile Include="_enums\Enums.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Enums.tt</DependentUpon>
+    </Compile>
+    <Compile Include="_enums\CssMediaTypes.cs" />
+    <Compile Include="_enums\Css.cs" />
+    <Compile Include="_enums\EnumRenderOptions.cs" />
+    <Compile Include="_enums\FileStreamOpenModes.cs" />
+    <Compile Include="_enums\FormEncodings.cs" />
+    <Compile Include="_enums\FormMethods.cs" />
+    <Compile Include="_enums\HttpEnums.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>HttpEnums.tt</DependentUpon>
+    </Compile>
+    <Compile Include="_enums\RoundMode.cs" />
+    <Compile Include="_exceptions\PlatformImplementationException.cs" />
+    <Compile Include="_extensions\DateTimeExtension.cs" />
+    <Compile Include="_extensions\StringExtension.cs" />
+    <Compile Include="IntOrFalse.cs" />
+    <Compile Include="PhpFileStream.cs" />
+    <Compile Include="_attributes\UseOperatorAttribute.cs" />
+    <Compile Include="_enums\Charsets.cs" />
+    <Compile Include="_Files\PhpFiles.cs" />
+    <Compile Include="GlobalMethods.cs" />
+    <Compile Include="HtmlEntitiesFlags.cs" />
+    <Compile Include="_MySql\MySQL.cs" />
+    <Compile Include="_MySql\MySqlDateTime.cs" />
+    <Compile Include="_MySql\MysqlResult.cs" />
+    <Compile Include="OutputCallbackDelegates.cs" />
+    <Compile Include="_enums\PathInfoOptions.cs" />
+    <Compile Include="_Files\PathInfoResult.cs" />
+    <Compile Include="Request.cs" />
+    <Compile Include="Response.cs" />
+    <Compile Include="Script.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SLFSupport.cs" />
+    <Compile Include="_Files\UploadFileInfo.cs" />
+    <Compile Include="_attributes\DirectCallAttribute.cs" />
+    <Compile Include="_attributes\AsArrayAttribute.cs" />
+    <Compile Include="_attributes\IgnoreNamespaceAttribute.cs" />
+    <Compile Include="_attributes\PageAttribute.cs" />
+    <Compile Include="_attributes\RenderValueAttribute.cs" />
+    <Compile Include="_attributes\PhpValueMapperAttribute.cs" />
+    <Compile Include="_attributes\ModuleAttribute.cs" />
+    <Compile Include="_attributes\ReplaceAttribute.cs" />
+    <Compile Include="_attributes\ScriptNameAttribute.cs" />
+    <Compile Include="_attributes\SinceAttribute.cs" />
+    <Compile Include="_attributes\SkipAttribute.cs" />
+    <Compile Include="_enums\UnixFileGroupPermissions.cs" />
+    <Compile Include="_enums\UnixFilePermissions.cs" />
+    <Compile Include="_exceptions\MockMethodException.cs" />
+    <Compile Include="_ResponseHeader\ResponseHeader.cs" />
+    <Compile Include="_Server.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="key.snk" />
+    <None Include="packages.config" />
+    <None Include="_enums\Enums.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>Enums.cs</LastGenOutput>
+    </None>
+    <None Include="_enums\HttpEnums.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>HttpEnums.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="_interfaces\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

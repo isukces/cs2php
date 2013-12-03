@@ -1,0 +1,246 @@
+﻿<#@ template debug="false" hostspecific="false" language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ output extension=".cs" #>
+using Roslyn.Compilers.CSharp;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Lang.Cs.Compiler.Visitors
+{
+    public class CodeVisitor<T>
+    {
+	    public LangParseContext context = new LangParseContext();
+        public bool ThrowNotImplementedException = true;
+
+        public virtual T Visit(SyntaxNode node)
+        {
+			if (node == null)
+				return VisitNull();
+            switch (node.Kind)
+            {
+            <#
+            foreach(var i in GetDirectives()) {
+                var j = i.Split(',');	
+            #>    case SyntaxKind.<#=j[0]#>:
+                      return Visit<#=j[0]#>(node as <#=j[1]#>);
+            <#
+            }
+            #>    default: throw new NotSupportedException(node.Kind.ToString() + "," + node.GetType().Name);
+            }
+        }
+
+		protected virtual T VisitNull()
+        {
+            if (ThrowNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported", "VisitXmlAttribute"));
+            return default(T);
+        }
+
+            <#
+            foreach(var i in GetDirectives()) {
+                var j = i.Split(',');	
+            #>
+
+        protected virtual T Visit<#=j[0]#>(<#=j[1]#> node)
+        {
+            if (ThrowNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "Visit<#=j[0]#>", this.GetType().FullName));
+            return default(T);
+        }
+<#
+            }
+            #>
+    }
+}
+<#+
+string[] GetDirectives() {
+
+    var recznie = new string[] {
+        "StringLiteralExpression,LiteralExpressionSyntax",
+		"Parameter,ParameterSyntax",
+		"ArrayType,ArrayTypeSyntax",
+		"NumericLiteralExpression,LiteralExpressionSyntax",
+		"Block,BlockSyntax",
+		"Argument,ArgumentSyntax",
+		"GenericName,GenericNameSyntax",
+		"ForEachStatement,Roslyn.Compilers.CSharp.ForEachStatementSyntax"
+    };
+    var auto= new string[] {
+"DocumentationCommentTrivia,DocumentationCommentTriviaSyntax",
+"IfDirectiveTrivia,IfDirectiveTriviaSyntax",
+"ElifDirectiveTrivia,ElifDirectiveTriviaSyntax",
+"ElseDirectiveTrivia,ElseDirectiveTriviaSyntax",
+"EndIfDirectiveTrivia,EndIfDirectiveTriviaSyntax",
+"RegionDirectiveTrivia,RegionDirectiveTriviaSyntax",
+"EndRegionDirectiveTrivia,EndRegionDirectiveTriviaSyntax",
+"DefineDirectiveTrivia,DefineDirectiveTriviaSyntax",
+"UndefDirectiveTrivia,UndefDirectiveTriviaSyntax",
+"ErrorDirectiveTrivia,ErrorDirectiveTriviaSyntax",
+"WarningDirectiveTrivia,WarningDirectiveTriviaSyntax",
+"LineDirectiveTrivia,LineDirectiveTriviaSyntax",
+"PragmaWarningDirectiveTrivia,PragmaWarningDirectiveTriviaSyntax",
+"PragmaChecksumDirectiveTrivia,PragmaChecksumDirectiveTriviaSyntax",
+"ReferenceDirectiveTrivia,ReferenceDirectiveTriviaSyntax",
+"BadDirectiveTrivia,BadDirectiveTriviaSyntax",
+"SkippedTokensTrivia,SkippedTokensTriviaSyntax",
+"XmlElementStartTag,XmlElementStartTagSyntax",
+"XmlElementEndTag,XmlElementEndTagSyntax",
+"XmlEmptyElement,XmlEmptyElementSyntax",
+"XmlAttribute,XmlAttributeSyntax",
+"XmlName,XmlNameSyntax",
+"XmlPrefix,XmlPrefixSyntax",
+"XmlText,XmlTextSyntax",
+"XmlCDataSection,XmlCDataSectionSyntax",
+"XmlComment,XmlCommentSyntax",
+"XmlProcessingInstruction,XmlProcessingInstructionSyntax",
+"IdentifierName,IdentifierNameSyntax",
+"QualifiedName,QualifiedNameSyntax",
+"TypeArgumentList,TypeArgumentListSyntax",
+"AliasQualifiedName,AliasQualifiedNameSyntax",
+"PredefinedType,PredefinedTypeSyntax",
+"ArrayRankSpecifier,ArrayRankSpecifierSyntax",
+"NullableType,NullableTypeSyntax",
+"OmittedTypeArgument,OmittedTypeArgumentSyntax",
+"ParenthesizedExpression,ParenthesizedExpressionSyntax",
+"ConditionalExpression,ConditionalExpressionSyntax",
+"InvocationExpression,InvocationExpressionSyntax",
+"ElementAccessExpression,ElementAccessExpressionSyntax",
+"ArgumentList,ArgumentListSyntax",
+"BracketedArgumentList,BracketedArgumentListSyntax",
+"NameColon,NameColonSyntax",
+"CastExpression,CastExpressionSyntax",
+"AnonymousMethodExpression,AnonymousMethodExpressionSyntax",
+"SimpleLambdaExpression,SimpleLambdaExpressionSyntax",
+"ParenthesizedLambdaExpression,ParenthesizedLambdaExpressionSyntax",
+"AnonymousObjectMemberDeclarator,AnonymousObjectMemberDeclaratorSyntax",
+"ObjectCreationExpression,ObjectCreationExpressionSyntax",
+"AnonymousObjectCreationExpression,AnonymousObjectCreationExpressionSyntax",
+"ArrayCreationExpression,ArrayCreationExpressionSyntax",
+"ImplicitArrayCreationExpression,ImplicitArrayCreationExpressionSyntax",
+"StackAllocArrayCreationExpression,StackAllocArrayCreationExpressionSyntax",
+"OmittedArraySizeExpression,OmittedArraySizeExpressionSyntax",
+"MemberAccessExpression,MemberAccessExpressionSyntax",
+"ThisExpression,ThisExpressionSyntax",
+"BaseExpression,BaseExpressionSyntax",
+"TypeOfExpression,TypeOfExpressionSyntax",
+"SizeOfExpression,SizeOfExpressionSyntax",
+"CheckedExpression,CheckedExpressionSyntax",
+"DefaultExpression,DefaultExpressionSyntax",
+"MakeRefExpression,MakeRefExpressionSyntax",
+"RefValueExpression,RefValueExpressionSyntax",
+"RefTypeExpression,RefTypeExpressionSyntax",
+"QueryExpression,QueryExpressionSyntax",
+"QueryBody,QueryBodySyntax",
+"FromClause,FromClauseSyntax",
+"LetClause,LetClauseSyntax",
+"JoinClause,JoinClauseSyntax",
+"JoinIntoClause,JoinIntoClauseSyntax",
+"WhereClause,WhereClauseSyntax",
+"OrderByClause,OrderByClauseSyntax",
+"SelectClause,SelectClauseSyntax",
+"GroupClause,GroupClauseSyntax",
+"QueryContinuation,QueryContinuationSyntax",
+"LocalDeclarationStatement,LocalDeclarationStatementSyntax",
+"VariableDeclaration,VariableDeclarationSyntax",
+"VariableDeclarator,VariableDeclaratorSyntax",
+"EqualsValueClause,EqualsValueClauseSyntax",
+"ExpressionStatement,ExpressionStatementSyntax",
+"EmptyStatement,EmptyStatementSyntax",
+"LabeledStatement,LabeledStatementSyntax",
+"GotoStatement,GotoStatementSyntax",
+"BreakStatement,BreakStatementSyntax",
+"ContinueStatement,ContinueStatementSyntax",
+"ReturnStatement,ReturnStatementSyntax",
+"ThrowStatement,ThrowStatementSyntax",
+"WhileStatement,WhileStatementSyntax",
+"DoStatement,DoStatementSyntax",
+"ForStatement,ForStatementSyntax",
+"CheckedStatement,CheckedStatementSyntax",
+"UnsafeStatement,UnsafeStatementSyntax",
+"LockStatement,LockStatementSyntax",
+"IfStatement,IfStatementSyntax",
+"ElseClause,ElseClauseSyntax",
+"SwitchStatement,SwitchStatementSyntax",
+"SwitchSection,SwitchSectionSyntax",
+"TryStatement,TryStatementSyntax",
+"CatchClause,CatchClauseSyntax",
+"CatchDeclaration,CatchDeclarationSyntax",
+"FinallyClause,FinallyClauseSyntax",
+"CompilationUnit,CompilationUnitSyntax",
+"GlobalStatement,GlobalStatementSyntax",
+"NamespaceDeclaration,NamespaceDeclarationSyntax",
+"UsingDirective,UsingDirectiveSyntax",
+"ExternAliasDirective,ExternAliasDirectiveSyntax",
+"AttributeList,AttributeListSyntax",
+"AttributeTargetSpecifier,AttributeTargetSpecifierSyntax",
+"AttributeArgumentList,AttributeArgumentListSyntax",
+"NameEquals,NameEqualsSyntax",
+"ClassDeclaration,ClassDeclarationSyntax",
+"StructDeclaration,StructDeclarationSyntax",
+"InterfaceDeclaration,InterfaceDeclarationSyntax",
+"EnumDeclaration,EnumDeclarationSyntax",
+"DelegateDeclaration,DelegateDeclarationSyntax",
+"BaseList,BaseListSyntax",
+"ConstructorConstraint,ConstructorConstraintSyntax",
+"TypeConstraint,TypeConstraintSyntax",
+"ExplicitInterfaceSpecifier,ExplicitInterfaceSpecifierSyntax",
+"EnumMemberDeclaration,EnumMemberDeclarationSyntax",
+"FieldDeclaration,FieldDeclarationSyntax",
+"EventFieldDeclaration,EventFieldDeclarationSyntax",
+"MethodDeclaration,MethodDeclarationSyntax",
+"OperatorDeclaration,OperatorDeclarationSyntax",
+"ConversionOperatorDeclaration,ConversionOperatorDeclarationSyntax",
+"ConstructorDeclaration,ConstructorDeclarationSyntax",
+"DestructorDeclaration,DestructorDeclarationSyntax",
+"PropertyDeclaration,PropertyDeclarationSyntax",
+"EventDeclaration,EventDeclarationSyntax",
+"IndexerDeclaration,IndexerDeclarationSyntax",
+"AccessorList,AccessorListSyntax",
+"ParameterList,ParameterListSyntax",
+"BracketedParameterList,BracketedParameterListSyntax",
+"TypeParameterList,TypeParameterListSyntax",
+"IncompleteMember,IncompleteMemberSyntax",
+"EqualsExpression,BinaryExpressionSyntax",
+"GetAccessorDeclaration,AccessorDeclarationSyntax",
+"SetAccessorDeclaration,AccessorDeclarationSyntax",
+"DivideExpression,BinaryExpressionSyntax",
+"AssignExpression,BinaryExpressionSyntax",
+"AddExpression,BinaryExpressionSyntax",
+"FalseLiteralExpression,LiteralExpressionSyntax",
+"CharacterLiteralExpression,LiteralExpressionSyntax",
+"MultiplyExpression,BinaryExpressionSyntax",
+"TrueLiteralExpression,LiteralExpressionSyntax",
+"LessThanExpression,BinaryExpressionSyntax",
+"PostIncrementExpression,PostfixUnaryExpressionSyntax",
+"GreaterThanExpression,BinaryExpressionSyntax",
+"NegateExpression,PrefixUnaryExpressionSyntax",
+"NullLiteralExpression,LiteralExpressionSyntax",
+"LogicalAndExpression,BinaryExpressionSyntax", 
+"AddAssignExpression,BinaryExpressionSyntax",
+"AsExpression,BinaryExpressionSyntax",
+"LogicalNotExpression,PrefixUnaryExpressionSyntax",
+"SubtractExpression,BinaryExpressionSyntax",
+"SubtractAssignExpression,BinaryExpressionSyntax",
+"GreaterThanOrEqualExpression,BinaryExpressionSyntax",
+"LessThanOrEqualExpression,BinaryExpressionSyntax",
+"LogicalOrExpression,BinaryExpressionSyntax",
+"PostDecrementExpression,PostfixUnaryExpressionSyntax",
+"CollectionInitializerExpression,InitializerExpressionSyntax",
+"ComplexElementInitializerExpression,InitializerExpressionSyntax",
+"ObjectInitializerExpression,InitializerExpressionSyntax",
+"NotEqualsExpression,BinaryExpressionSyntax",
+"ModuloExpression,BinaryExpressionSyntax",
+"BitwiseOrExpression,BinaryExpressionSyntax",
+"ArrayInitializerExpression,InitializerExpressionSyntax"
+
+
+};
+    return auto.Union(recznie).ToArray();
+}
+#>

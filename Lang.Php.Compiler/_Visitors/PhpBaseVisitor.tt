@@ -1,0 +1,112 @@
+﻿<#@ template debug="false" hostspecific="false" language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ output extension=".cs" #>
+using Lang.Php.Compiler.Source;
+using Roslyn.Compilers.CSharp;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Lang.Php.Compiler.Translator
+{
+    public class PhpBaseVisitor<T>
+    {
+	    // public LangParseContext context = new LangParseContext();
+        public bool ThrowNotImplementedException = true;
+
+        public virtual T Visit(PhpSourceBase node)
+        {
+			if (node == null)
+				return VisitNull();
+            switch (node.Kind)
+            {
+            <#
+            foreach(var j in GetDirectives()) {
+               
+            #>    case PhpSourceItems.<#=j#>:
+                    return Visit<#=j#>(node as <#=j#>);
+            <#
+            }
+            #>    default: throw new NotSupportedException(node.Kind.ToString() + "," + node.GetType().Name);
+            }
+        }
+
+		protected virtual T VisitNull()
+        {
+            if (ThrowNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported", "VisitNull"));
+            return default(T);
+        }
+
+            <#
+            foreach(var j in GetDirectives()) {                 
+            #>
+
+        protected virtual T Visit<#=j#>(<#=j#> node)
+        {
+            if (ThrowNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "Visit<#=j#>", this.GetType().FullName));
+            return default(T);
+        }
+<#
+            }
+            #>
+		public static PhpSourceItems GetKind(PhpSourceBase x) {
+			if (x == null) throw new ArgumentNullException();           
+<# foreach(var j in GetDirectives())  { #>
+			if (x.GetType() == typeof(<#=j#>)) return PhpSourceItems.<#=j#>;
+<# } #>
+            throw new NotSupportedException(x.GetType().FullName);
+		}
+    }
+	public enum PhpSourceItems
+	{
+		<#
+			foreach(var j in GetDirectives()) 
+				Write(j+",\r\n");               
+         #>
+	}
+}
+<#+
+string[] GetDirectives() {
+
+    var x = new string[] {
+	    "PhpCodeBlock",
+		"PhpArrayCreateExpression",
+		"PhpDefinedConstExpression",
+		"PhpFreeExpression",
+		"PhpBreakStatement",
+		"PhpCodeModuleName",
+		"PhpArrayAccessExpression",
+		"PhpAssignExpression",
+		"PhpClassFieldAccessExpression",
+		"PhpBinaryOperatorExpression",
+		"PhpConditionalExpression",
+		"PhpConstValue",
+		"PhpElementAccessExpression",
+		"PhpContinueStatement",
+		"PhpExpressionStatement",
+		"PhpForEachStatement",
+		"PhpForStatement",
+		"PhpIfStatement",
+		"PhpIncrementDecrementExpression",
+		"PhpInstanceFieldAccessExpression",
+		"PhpPropertyAccessExpression",
+		"PhpMethodInvokeValue",
+		"PhpMethodCallExpression",
+		"PhpParenthesizedExpression",
+		"PhpReturnStatement",
+		"PhpThisExpression",
+		"PhpUnaryOperatorExpression",
+		"PhpVariableExpression",
+		"PhpWhileStatement"
+    };
+	return x;
+   
+}
+#>

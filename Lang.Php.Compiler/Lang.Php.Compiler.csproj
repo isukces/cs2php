@@ -1,0 +1,225 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{88A316A0-0CC6-486D-8323-1966CD501BF8}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Lang.Php.Compiler</RootNamespace>
+    <AssemblyName>Lang.Php.Compiler</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>key.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Roslyn.Compilers, Version=1.2.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Roslyn.Compilers.Common.1.2.20906.2\lib\net45\Roslyn.Compilers.dll</HintPath>
+    </Reference>
+    <Reference Include="Roslyn.Compilers.CSharp, Version=1.2.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Roslyn.Compilers.CSharp.1.2.20906.2\lib\net45\Roslyn.Compilers.CSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="Roslyn.Services">
+      <HintPath>..\packages\Roslyn.Services.Common.1.2.20906.2\lib\net45\Roslyn.Services.dll</HintPath>
+    </Reference>
+    <Reference Include="Roslyn.Utilities">
+      <HintPath>..\packages\Roslyn.Services.Common.1.2.20906.2\lib\net45\Roslyn.Utilities.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Cs2PhpCompiler.cs" />
+    <Compile Include="EmitContext.cs" />
+    <Compile Include="OptimizeOptions.cs" />
+    <Compile Include="Source\PhpSourceBase.cs" />
+    <Compile Include="Source\_Expressions\PhpArrayCreateExpression.cs" />
+    <Compile Include="Source\_Expressions\PhpDefinedConstExpression.cs" />
+    <Compile Include="Source\_Expressions\PhpFreeExpression.cs" />
+    <Compile Include="Source\_Expressions\PhpLambdaExpression.cs" />
+    <Compile Include="Source\_Expressions\PhpPropertyAccessExpression.cs" />
+    <Compile Include="Source\_Statements\IPhpStatementBase.cs" />
+    <Compile Include="Source\_Statements\PhpBreakStatement.cs" />
+    <Compile Include="Translator\ExpressionSimplifier.cs" />
+    <Compile Include="Translator\Node\BasicTranslator.cs" />
+    <Compile Include="Translator\Node\BasicTranslator_Property.cs" />
+    <Compile Include="Translator\Node\DateTimeTranslator.cs" />
+    <Compile Include="Translator\Node\DotnetMethodCallTranslator.cs" />
+    <Compile Include="Translator\Node\EnumTranslator.cs" />
+    <Compile Include="Translator\Node\FilterTranslator.cs" />
+    <Compile Include="Translator\Node\Lang__Php__Html__Methods.cs" />
+    <Compile Include="Translator\Node\Linq\EnumerableTranslator.cs" />
+    <Compile Include="Translator\Node\MysqlMethods.cs" />
+    <Compile Include="Translator\Node\PhpDirectoryEntryTranslator.cs" />
+    <Compile Include="Translator\Node\ResponseHeaderTranslator.cs" />
+    <Compile Include="Translator\Node\StringExtensionsTranslator.cs" />
+    <Compile Include="Translator\Node\TimeSpanTranslator.cs" />
+    <Compile Include="Translator\StatementSimplifier.cs" />
+    <Compile Include="_CodeRequests\ClassCodeRequest.cs" />
+    <Compile Include="_CodeRequests\GlobalVariableRequest.cs" />
+    <Compile Include="_CodeRequests\LocalVariableRequest.cs" />
+    <Compile Include="_CodeRequests\ModuleCodeRequest.cs" />
+    <Compile Include="_enum\FieldTranslationDestionations.cs" />
+    <Compile Include="_enum\PhpVariableKind.cs" />
+    <Compile Include="_enum\StatementEmitInfo.cs" />
+    <Compile Include="_interfaces\ICodeRelated.cs" />
+    <Compile Include="_interfaces\ICodeRequest.cs" />
+    <Compile Include="_interfaces\IExternalTranslationContext.cs" />
+    <Compile Include="_interfaces\IModuleProcessor.cs" />
+    <Compile Include="_interfaces\IPhpExpressionSimplifier.cs" />
+    <Compile Include="_interfaces\IPhpNodeTranslator.cs" />
+    <Compile Include="_interfaces\IPhpSimplifier.cs" />
+    <Compile Include="_TranslationInfo\AssemblyTranslationInfo.cs" />
+    <Compile Include="_TranslationInfo\ClassTranslationInfo.cs" />
+    <Compile Include="_TranslationInfo\MethodTranslationInfo.cs" />
+    <Compile Include="PhpEmitStyle.cs" />
+    <Compile Include="Source\PhpQualifiedName.cs" />
+    <Compile Include="Source\PhpCodeModuleName.cs" />
+    <Compile Include="Source\_Definitions\PhpClassFieldDefinition.cs" />
+    <Compile Include="Source\_Expressions\IPhpValueBase.cs" />
+    <Compile Include="Source\_Expressions\PhpArrayAccessExpression.cs" />
+    <Compile Include="Source\_Expressions\PhpAssignExpression.cs" />
+    <Compile Include="Source\_Expressions\PhpClassFieldAccessExpression.cs" />
+    <Compile Include="Source\_Expressions\PhpBinaryOperatorExpression.cs" />
+    <Compile Include="Source\_Statements\PhpCodeBlock.cs" />
+    <Compile Include="Source\_Expressions\PhpConditionalExpression.cs" />
+    <Compile Include="Source\_Expressions\PhpConstValue.cs" />
+    <Compile Include="Source\_Expressions\PhpElementAccessExpression.cs" />
+    <Compile Include="Source\_Statements\PhpContinueStatement.cs" />
+    <Compile Include="Source\_Statements\PhpExpressionStatement.cs" />
+    <Compile Include="Source\_Statements\PhpForEachStatement.cs" />
+    <Compile Include="Source\_Statements\PhpForStatement.cs" />
+    <Compile Include="Source\_Statements\PhpIfStatement.cs" />
+    <Compile Include="Source\_Expressions\PhpIncrementDecrementExpression.cs" />
+    <Compile Include="Source\_Expressions\PhpInstanceFieldAccessExpression.cs" />
+    <Compile Include="Source\PhpMethodInvokeValue.cs" />
+    <Compile Include="Source\_Expressions\PhpMethodCallExpression.cs" />
+    <Compile Include="Source\_Expressions\PhpParenthesizedExpression.cs" />
+    <Compile Include="Source\_Statements\PhpReturnStatement.cs" />
+    <Compile Include="Source\PhpThisExpression.cs" />
+    <Compile Include="Source\PhpUnaryOperatorExpression.cs" />
+    <Compile Include="Source\_Expressions\PhpVariableExpression.cs" />
+    <Compile Include="Source\_Statements\PhpWhileStatement.cs" />
+    <Compile Include="Translator\ClassReplaceInfo.cs" />
+    <Compile Include="_TranslationInfo\FieldTranslationInfo.cs" />
+    <Compile Include="Translator\PhpValueTranslator.cs" />
+    <Compile Include="Translator\StatementTranslatorVisitor.cs" />
+    <Compile Include="Translator\TranslationState.cs" />
+    <Compile Include="Translator\TranslatorBase.cs" />
+    <Compile Include="_enum\EmitStyleCompression.cs" />
+    <Compile Include="_enum\ShowBracketsEnum.cs" />
+    <Compile Include="_interfaces\IClassMember.cs" />
+    <Compile Include="ImmutableClasses.cs">
+      <DependentUpon>ImmutableClasses.tt</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="PhpSourceCodeEmiter.cs" />
+    <Compile Include="PhpSourceCodeWriter.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Source\_Definitions\PhpClassDefinition.cs" />
+    <Compile Include="Source\_Definitions\PhpClassMethodDefinition.cs" />
+    <Compile Include="Source\_Definitions\PhpCodeModule.cs" />
+    <Compile Include="Source\_Definitions\PhpMethodDefinition.cs" />
+    <Compile Include="Source\_Expressions\PhpMethodArgument.cs" />
+    <Compile Include="_TranslationInfo\NodeTranslatorBound.cs" />
+    <Compile Include="_TranslationInfo\NodeTranslatorsContainer.cs" />
+    <Compile Include="_TranslationInfo\PropertyTranslationInfo.cs" />
+    <Compile Include="_TranslationInfo\TranslationInfo.cs" />
+    <Compile Include="Translator\Translator.cs" />
+    <Compile Include="Visibility.cs" />
+    <Compile Include="_interfaces\IPhpStatement.cs" />
+    <Compile Include="_interfaces\IPhpValue.cs" />
+    <Compile Include="_Visitors\PhpBaseVisitor.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>PhpBaseVisitor.tt</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Lang.Cs.Compiler\Lang.Cs.Compiler.csproj">
+      <Project>{db0bf6b7-adea-496b-af49-f4a0cd39ada9}</Project>
+      <Name>Lang.Cs.Compiler</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Lang.PHP\Lang.Php.csproj">
+      <Project>{ed717576-b7b9-4775-8236-1855e20e52d5}</Project>
+      <Name>Lang.Php</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Common.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>Common.txt</LastGenOutput>
+    </None>
+    <None Include="ImmutableClasses.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>ImmutableClasses.cs</LastGenOutput>
+    </None>
+    <None Include="key.snk" />
+    <None Include="packages.config" />
+    <None Include="_Visitors\PhpBaseVisitor.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>PhpBaseVisitor.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Common.txt">
+      <DependentUpon>Common.tt</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="_attributes\" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
