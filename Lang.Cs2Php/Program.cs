@@ -12,7 +12,7 @@ namespace Lang.Cs2Php
 
         static void Usage()
         {
-          
+
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Usage:");
             Console.ResetColor();
@@ -39,30 +39,33 @@ namespace Lang.Cs2Php
             {
                 List<string> files = new List<string>();
                 string command = "";
-                foreach (var i in args)
+                foreach (var arg in args)
                 {
-                    if (i.StartsWith("-"))
+                    if (arg.StartsWith("-"))
                     {
-                        command = i.Substring(1).ToLower();
+                        command = arg.Substring(1).ToLower();
                     }
                     else
                     {
+                        var fi = new FileInfo(arg);
+                        var fileName = fi.FullName;
+
                         if (string.IsNullOrEmpty(command))
-                            files.Add(i);
+                            files.Add(fileName);
                         else
                         {
                             switch (command)
                             {
                                 case "r":
-                                    if (!File.Exists(i))
-                                        throw new Exception("Referenced library " + i + " doesn't exist");
-                                    engine.Referenced.Add(i);
+                                    if (!File.Exists(fileName))
+                                        throw new Exception("Referenced library " + fileName + " doesn't exist");
+                                    engine.Referenced.Add(fileName);
                                     command = null;
                                     break;
                                 case "t":
-                                    if (!File.Exists(i))
-                                        throw new Exception("Referenced library " + i + " doesn't exist");
-                                    engine.TranlationHelpers.Add(i);
+                                    if (!File.Exists(fileName))
+                                        throw new Exception("Referenced library " + fileName + " doesn't exist");
+                                    engine.TranlationHelpers.Add(fileName);
                                     command = null;
                                     break;
                                 default:

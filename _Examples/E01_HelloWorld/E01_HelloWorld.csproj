@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{D9FECFA8-12BB-44B6-8583-2D8A8A22EC9B}</ProjectGuid>
+    <ProjectGuid>{CB3A20F2-7912-41D1-B48F-580033692B65}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Lang.Php.Wp.Compile</RootNamespace>
-    <AssemblyName>Lang.Php.Wp.Compile</AssemblyName>
+    <RootNamespace>Lang.Php.Examples.HelloWorld</RootNamespace>
+    <AssemblyName>E01_HelloWorld</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
@@ -32,12 +32,6 @@
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
-  <PropertyGroup>
-    <SignAssembly>true</SignAssembly>
-  </PropertyGroup>
-  <PropertyGroup>
-    <AssemblyOriginatorKeyFile>key.snk</AssemblyOriginatorKeyFile>
-  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -48,31 +42,20 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ClassFieldAccessExpressionConverter.cs" />
-    <Compile Include="MethodCallConverter.cs" />
-    <Compile Include="ModuleProcessor.cs" />
+    <Compile Include="Index.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="key.snk" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Lang.Cs.Compiler\Lang.Cs.Compiler.csproj">
-      <Project>{db0bf6b7-adea-496b-af49-f4a0cd39ada9}</Project>
-      <Name>Lang.Cs.Compiler</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Lang.Php.Compiler\Lang.Php.Compiler.csproj">
-      <Project>{88a316a0-0cc6-486d-8323-1966cd501bf8}</Project>
-      <Name>Lang.Php.Compiler</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Lang.Php.Wp\Lang.Php.Wp.csproj">
-      <Project>{d79a6a64-f00b-4ee1-80f2-7c155cc1bbe0}</Project>
-      <Name>Lang.Php.Wp</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Lang.PHP\Lang.Php.csproj">
+    <ProjectReference Include="..\..\Lang.PHP\Lang.Php.csproj">
       <Project>{ed717576-b7b9-4775-8236-1855e20e52d5}</Project>
       <Name>Lang.Php</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="readme.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="compile.bat" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
