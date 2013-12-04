@@ -5,14 +5,22 @@ using System.Text;
 
 namespace Lang.Php
 {
+
+    /// <summary>
+    /// ScriptNameAttribute is used to decorate classes or methods with an alternate name optionally including namespace that should be presented in PHP code. 
+    /// <see cref="https://github.com/isukces/cs2php/wiki/ScriptNameAttribute">Wiki</see>
+    /// </summary>
     public class ScriptNameAttribute : Attribute
     {
+        /// <summary>
+        /// Creates instance of attribute
+        /// </summary>
         public ScriptNameAttribute()
         {
 
         }
         /// <summary>
-        /// 
+        /// Creates instance of attribute
         /// </summary>
         /// <param name="name">Name in script</param>
         public ScriptNameAttribute(string name)
@@ -22,6 +30,6 @@ namespace Lang.Php
         /// <summary>
         /// Name in script
         /// </summary>
-        public string Name { get; set; }
+        public string Name { get; private set; }
     }
 }
