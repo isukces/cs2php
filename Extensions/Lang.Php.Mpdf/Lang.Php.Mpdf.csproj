@@ -4,14 +4,13 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{D9FECFA8-12BB-44B6-8583-2D8A8A22EC9B}</ProjectGuid>
+    <ProjectGuid>{B17C6A4D-D985-404F-B286-7D229B388D56}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Lang.Php.Wp.Compile</RootNamespace>
-    <AssemblyName>Lang.Php.Wp.Compile</AssemblyName>
+    <RootNamespace>Lang.Php.Mpdf</RootNamespace>
+    <AssemblyName>Lang.Php.Mpdf</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -21,7 +20,6 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -30,13 +28,6 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup>
-    <SignAssembly>true</SignAssembly>
-  </PropertyGroup>
-  <PropertyGroup>
-    <AssemblyOriginatorKeyFile>key.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -48,28 +39,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ClassFieldAccessExpressionConverter.cs" />
-    <Compile Include="MethodCallConverter.cs" />
-    <Compile Include="ModuleProcessor.cs" />
+    <Compile Include="Mpdf.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="key.snk" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Lang.Cs.Compiler\Lang.Cs.Compiler.csproj">
-      <Project>{db0bf6b7-adea-496b-af49-f4a0cd39ada9}</Project>
-      <Name>Lang.Cs.Compiler</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Lang.Php.Compiler\Lang.Php.Compiler.csproj">
-      <Project>{88a316a0-0cc6-486d-8323-1966cd501bf8}</Project>
-      <Name>Lang.Php.Compiler</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Lang.Php.Wp\Lang.Php.Wp.csproj">
-      <Project>{d79a6a64-f00b-4ee1-80f2-7c155cc1bbe0}</Project>
-      <Name>Lang.Php.Wp</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Lang.PHP\Lang.Php.csproj">
+    <ProjectReference Include="..\..\Lang.PHP\Lang.Php.csproj">
       <Project>{ed717576-b7b9-4775-8236-1855e20e52d5}</Project>
       <Name>Lang.Php</Name>
     </ProjectReference>

@@ -4,12 +4,12 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{6A15A812-62FF-4C04-BB5F-E5AE929236B1}</ProjectGuid>
+    <ProjectGuid>{D79A6A64-F00B-4EE1-80F2-7C155CC1BBE0}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Lang.Php.Mpdf</RootNamespace>
-    <AssemblyName>Lang.Php.Mpdf</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <RootNamespace>Lang.Php.Wp</RootNamespace>
+    <AssemblyName>Lang.Php.Wp</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -29,6 +29,12 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>key.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -39,14 +45,40 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Mpdf.cs" />
+    <Compile Include="AddAction.cs" />
+    <Compile Include="AddFilter.cs" />
+    <Compile Include="CoreMenuItemsPositions.cs" />
+    <Compile Include="Post.cs" />
+    <Compile Include="PostInfo.cs" />
+    <Compile Include="Wp.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="WpDb.cs" />
+    <Compile Include="WpPluginConfig.cs" />
+    <Compile Include="WpPost.cs" />
+    <Compile Include="WpTxt.cs" />
+    <Compile Include="WP_Http.cs" />
+    <Compile Include="_attributes\HookAttribute.cs" />
+    <Compile Include="_enums\Permissions.cs" />
+    <Compile Include="_enums\WpTags.cs" />
+    <Compile Include="_attributes\MainPluginModuleAttribute.cs" />
+    <Compile Include="_enums\BlogInfoFilters.cs" />
+    <Compile Include="_enums\BlogInfoShows.cs" />
+    <Compile Include="_enums\Hooks.cs" />
+    <Compile Include="_enums\PartOfPage.cs" />
+    <Compile Include="_enums\PostTypes.cs" />
+    <Compile Include="_enums\Priority.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Lang.PHP\Lang.Php.csproj">
+    <ProjectReference Include="..\..\Lang.PHP\Lang.Php.csproj">
       <Project>{ed717576-b7b9-4775-8236-1855e20e52d5}</Project>
       <Name>Lang.Php</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="_SRC\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="key.snk" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

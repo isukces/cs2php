@@ -117,3 +117,7 @@ UpgradeLog*.XML
 /Lang.Php.Compiler/*.nuspec
 /Lang.Php.Wp.Compile/*.nuspec
 /Lang.Php/*.nuspec
+
+/Extensions/Lang.Php.Wp/*.nuspec
+
+/Extensions/Lang.Php.Wp.Compile/*.nuspec

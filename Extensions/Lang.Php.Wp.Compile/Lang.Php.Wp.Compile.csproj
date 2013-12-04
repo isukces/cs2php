@@ -4,13 +4,14 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{D79A6A64-F00B-4EE1-80F2-7C155CC1BBE0}</ProjectGuid>
+    <ProjectGuid>{D9FECFA8-12BB-44B6-8583-2D8A8A22EC9B}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Lang.Php.Wp</RootNamespace>
-    <AssemblyName>Lang.Php.Wp</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <RootNamespace>Lang.Php.Wp.Compile</RootNamespace>
+    <AssemblyName>Lang.Php.Wp.Compile</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -20,6 +21,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -28,6 +30,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup>
     <SignAssembly>true</SignAssembly>
@@ -45,40 +48,31 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AddAction.cs" />
-    <Compile Include="AddFilter.cs" />
-    <Compile Include="CoreMenuItemsPositions.cs" />
-    <Compile Include="Post.cs" />
-    <Compile Include="PostInfo.cs" />
-    <Compile Include="Wp.cs" />
+    <Compile Include="ClassFieldAccessExpressionConverter.cs" />
+    <Compile Include="MethodCallConverter.cs" />
+    <Compile Include="ModuleProcessor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="WpDb.cs" />
-    <Compile Include="WpPluginConfig.cs" />
-    <Compile Include="WpPost.cs" />
-    <Compile Include="WpTxt.cs" />
-    <Compile Include="WP_Http.cs" />
-    <Compile Include="_attributes\HookAttribute.cs" />
-    <Compile Include="_enums\Permissions.cs" />
-    <Compile Include="_enums\WpTags.cs" />
-    <Compile Include="_attributes\MainPluginModuleAttribute.cs" />
-    <Compile Include="_enums\BlogInfoFilters.cs" />
-    <Compile Include="_enums\BlogInfoShows.cs" />
-    <Compile Include="_enums\Hooks.cs" />
-    <Compile Include="_enums\PartOfPage.cs" />
-    <Compile Include="_enums\PostTypes.cs" />
-    <Compile Include="_enums\Priority.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Lang.PHP\Lang.Php.csproj">
-      <Project>{ed717576-b7b9-4775-8236-1855e20e52d5}</Project>
-      <Name>Lang.Php</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="_SRC\" />
   </ItemGroup>
   <ItemGroup>
     <None Include="key.snk" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Lang.Cs.Compiler\Lang.Cs.Compiler.csproj">
+      <Project>{db0bf6b7-adea-496b-af49-f4a0cd39ada9}</Project>
+      <Name>Lang.Cs.Compiler</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Lang.Php.Compiler\Lang.Php.Compiler.csproj">
+      <Project>{88a316a0-0cc6-486d-8323-1966cd501bf8}</Project>
+      <Name>Lang.Php.Compiler</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Lang.Php.Wp\Lang.Php.Wp.csproj">
+      <Project>{d79a6a64-f00b-4ee1-80f2-7c155cc1bbe0}</Project>
+      <Name>Lang.Php.Wp</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Lang.PHP\Lang.Php.csproj">
+      <Project>{ed717576-b7b9-4775-8236-1855e20e52d5}</Project>
+      <Name>Lang.Php</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
