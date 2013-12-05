@@ -14,10 +14,27 @@ namespace Lang.Php
     [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = false)]
     public class PhpPackageSourceAttribute : Attribute
     {
+		#region Constructors 
+
         public PhpPackageSourceAttribute(string sourceUri)
         {
             this.SourceUri = sourceUri;
         }
+
+        public PhpPackageSourceAttribute(string sourceUri, string stripArchivePath)
+        {
+            this.SourceUri = sourceUri;
+            this.StripArchivePath = stripArchivePath;
+        }
+
+		#endregion Constructors 
+
+		#region Properties 
+
         public string SourceUri { get; private set; }
+
+        public string StripArchivePath { get; private set; }
+
+		#endregion Properties 
     }
 }

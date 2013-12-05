@@ -16,6 +16,9 @@ using Lang.Php.Compiler.Source;
 using System.Xml.Linq;
 using Lang.Php;
 using System.Runtime.InteropServices;
+using System.Net;
+using System.ComponentModel;
+using System.Threading;
 
 
 namespace Lang.Php.Compiler
@@ -74,6 +77,15 @@ namespace Lang.Php.Compiler
             return result;
         }
 
+        public void DisplayRef(string title)
+        {
+            Console.WriteLine(" ==== " + title);
+            foreach (var i in Project.MetadataReferences)
+                Console.WriteLine("  MetadataReference {0}", i.Display);
+            foreach (var i in Project.ProjectReferences)
+                Console.WriteLine("  ProjectReferences {0}", i.Id);
+        }
+
         public Compilation GetCompilation(out EmitResult result)
         {
             projectCompilation = project.GetCompilation() as Compilation;
@@ -85,14 +97,6 @@ namespace Lang.Php.Compiler
             return projectCompilation;
         }
 
-        public void DisplayRef(string title)
-        {
-            Console.WriteLine(" ==== " + title);
-            foreach (var i in Project.MetadataReferences)
-                Console.WriteLine("  MetadataReference {0}", i.Display);
-            foreach (var i in Project.ProjectReferences)
-                Console.WriteLine("  ProjectReferences {0}", i.Id);
-        }
         public void LoadProject(string csProj, string configuration)
         {
             if (verboseToConsole)
@@ -155,6 +159,15 @@ namespace Lang.Php.Compiler
                 Console.WriteLine("Translate C# -> Php");
 
             info.CurrentAssembly = compiledAssembly;
+            var assemblyTI = AssemblyTranslationInfo.FromAssembly(compiledAssembly);
+            var ec_BaseDir = Path.Combine(OutDir, assemblyTI.RootPath);
+            Console.WriteLine("Output root {0}", ec_BaseDir);
+
+            if (!string.IsNullOrEmpty(assemblyTI.PhpPackageSourceUri))
+            {
+                DownloadAndUnzip(assemblyTI.PhpPackageSourceUri, ec_BaseDir, assemblyTI.PhpPackagePathStrip);
+                return;
+            }
             TranslationState s = new TranslationState(info);
             Lang.Php.Compiler.Translator.Translator translator = new Lang.Php.Compiler.Translator.Translator(s);
             translator.Translate();
@@ -162,11 +175,9 @@ namespace Lang.Php.Compiler
                 Console.WriteLine("Create Php output files");
             #region Tworzenie plików php
             {
-                var assemblyTI = AssemblyTranslationInfo.FromAssembly(compiledAssembly);
+
 
                 EmitContext ec = new EmitContext();
-                var ec_BaseDir = Path.Combine(OutDir, assemblyTI.RootPath);
-                Console.WriteLine("Output root {0}", ec_BaseDir);
                 var libName = PhpCodeModuleName.LibNameFromAssembly(this.compiledAssembly);
 
                 info.CurrentAssembly = compiledAssembly;// dla pewności
@@ -218,6 +229,88 @@ namespace Lang.Php.Compiler
             throw new Exception(string.Format("There is no tranlation helper for\r\n{0}\r\n\r\n{1}\r\nis suggested.", A, _req.Suggested));
 
         }
+
+        private void DownloadAndUnzip(string src, string outDir, string str)
+        {
+            Console.WriteLine("Downloading {0}...", src);
+            if (!src.ToLower().EndsWith(".zip"))
+                throw new Exception("Only ZIP files are supported. Sorry.");
+
+            var tmp = src.Substring(src.LastIndexOf('/') + 1);
+            tmp = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                "cs2php",
+                "libcache",
+                tmp);
+            Console.WriteLine("Cache file={0}", tmp);
+            new FileInfo(tmp).Directory.Create();
+            if (!File.Exists(tmp))
+            {
+                #region Download
+                {
+                    WebClient c = new WebClient();
+                    c.DownloadProgressChanged += (object sender, DownloadProgressChangedEventArgs e) =>
+                    {
+                        Console.Write("\r {0}%", e.ProgressPercentage);
+                    };
+                    ManualResetEvent allDone = new ManualResetEvent(false);
+                    c.DownloadFileCompleted += (object sender, AsyncCompletedEventArgs e) =>
+                    {
+                        allDone.Set();
+                    };
+                    allDone.Reset();
+                    c.DownloadFileAsync(new Uri(src), tmp);
+                    allDone.WaitOne();
+                    Console.WriteLine("\rCompleted");
+                }
+                #endregion
+            }
+            #region Unzip
+            {
+                if (!string.IsNullOrEmpty(str))
+                {
+                    if (!str.EndsWith("\\"))
+                        str += "\\";
+                    str = str.ToLower();
+                }
+
+                Console.WriteLine("Extracting...");
+                using (var za = System.IO.Compression.ZipFile.OpenRead(tmp))
+                {
+                    foreach (var e in za.Entries)
+                    {
+                        var name = e.FullName.Replace("/", "\\");
+                        if (name.EndsWith("\\"))
+                            continue;
+                        if (!string.IsNullOrEmpty(str))
+                        {
+                            if (name.ToLower().StartsWith(str))
+                                name = name.Substring(str.Length);
+                        }
+                        if (name.StartsWith("\\"))
+                            name = name.Substring(1);
+                        name = Path.Combine(outDir, name);
+                        var gg = new FileInfo(name);
+                        gg.Directory.Create();
+                        using (var a = e.Open())
+                        {
+                            using (FileStream writer = new FileStream(name, FileMode.Create))
+                            {
+                                a.CopyTo(writer);
+                            }
+
+                        }
+                        gg.LastWriteTime = e.LastWriteTime.LocalDateTime;
+                    }
+                }
+
+                //System.IO.Compression.ZipFile.ExtractToDirectory(tmp, outDir, );
+                Console.WriteLine("Done.");
+            }
+            #endregion
+        }
+
+
+
 
         private Type[] GetKnownTypes()
         {

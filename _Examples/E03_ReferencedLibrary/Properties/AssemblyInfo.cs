@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Lang.Php.Mpdf")]
-[assembly: AssemblyDescription("Simple facade for mPDF library")]
+[assembly: AssemblyTitle("E03_ReferencedLibrary")]
+[assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Internet Sukces Piotr Stęclik")]
-[assembly: AssemblyProduct("C# to PHP package")]
-[assembly: AssemblyCopyright("Copyright © Internet Sukces Piotr Stęclik 2013")]
+[assembly: AssemblyCompany("")]
+[assembly: AssemblyProduct("E03_ReferencedLibrary")]
+[assembly: AssemblyCopyright("Copyright ©  2013")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("fa979abe-9003-464d-a0ae-90e5feff29ea")]
+[assembly: Guid("6fed97bd-c008-407b-b866-60a574ccfa0b")]
 
 // Version information for an assembly consists of the following four values:
 //
@@ -34,8 +34,3 @@ using System.Runtime.InteropServices;
 // [assembly: AssemblyVersion("1.0.*")]
 [assembly: AssemblyVersion("1.0.0.0")]
 [assembly: AssemblyFileVersion("1.0.0.0")]
-
-
-
-[assembly: Lang.Php.RootPath("/lib/mpdf")]
-[assembly: Lang.Php.PhpPackageSource("http://mpdf1.com/repos/MPDF57.zip", "MPDF57")]
