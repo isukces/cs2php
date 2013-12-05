@@ -121,3 +121,6 @@ UpgradeLog*.XML
 /Extensions/Lang.Php.Wp/*.nuspec
 
 /Extensions/Lang.Php.Wp.Compile/*.nuspec
+
+
+*.csbak

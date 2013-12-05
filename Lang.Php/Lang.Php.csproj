@@ -67,7 +67,10 @@
     <Compile Include="Filters\FilterInput.cs" />
     <Compile Include="MbPhpString.cs" />
     <Compile Include="Runtime\RuntimePhpDirectory.cs" />
+    <Compile Include="_attributes\_assembly\PhpPackageSourceAttribute.cs" />
     <Compile Include="_attributes\RequireOnceAttribute.cs" />
+    <Compile Include="_attributes\_assembly\RootPathAttribute.cs" />
+    <Compile Include="_attributes\_assembly\ConfigModuleAttribute.cs" />
     <Compile Include="_DateTime\UnixTimestamp.cs" />
     <Compile Include="_Files\PhpDirectoryEntry.cs" />
     <Compile Include="_Files\PhpDirectory.cs" />

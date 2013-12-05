@@ -17,9 +17,15 @@ namespace Lang.Php.Compiler
     property LibraryName string 
     
     property IncludePathConstOrVarName string nazwa stałej lub zmiennej, która oznacza ścieżkę do biblioteki
+    
+    property RootPath string 
+    	preprocess value = value.Replace("/", "\\");
+    	preprocess value = value.StartsWith("\\") ? value.Substring(1) : value;
+    
+    property PhpPackageSourceUri string 
     smartClassEnd
     */
-    
+
     public partial class AssemblyTranslationInfo
     {
         public static AssemblyTranslationInfo FromAssembly(Assembly assembly)
@@ -31,6 +37,13 @@ namespace Lang.Php.Compiler
                 var _ModuleIncludeConst = assembly.GetCustomAttribute<ModuleIncludeConstAttribute>();
                 if (_ModuleIncludeConst != null)
                     a.IncludePathConstOrVarName = _ModuleIncludeConst.ConstOrVarName;
+                var _RootPath = assembly.GetCustomAttribute<RootPathAttribute>();
+                if (_RootPath != null)
+                    a.RootPath = _RootPath.Path;
+
+                var _PhpPackageSource = assembly.GetCustomAttribute<PhpPackageSourceAttribute>();
+                if (_PhpPackageSource != null)
+                    a.PhpPackageSourceUri = _PhpPackageSource.SourceUri;
             }
             a.LibraryName = PhpCodeModuleName.LibNameFromAssembly(assembly);
             return a;
@@ -41,12 +54,12 @@ namespace Lang.Php.Compiler
 }
 
 
-// -----:::::##### smartClass embedded code begin #####:::::----- generated 2013-11-14 10:17
+// -----:::::##### smartClass embedded code begin #####:::::----- generated 2013-12-05 11:17
 // File generated automatically ver 2013-07-10 08:43
 // Smartclass.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0c4d5d36fb5eb4ac
 namespace Lang.Php.Compiler
 {
-    public partial class AssemblyTranslationInfo 
+    public partial class AssemblyTranslationInfo
     {
         /*
         /// <summary>
@@ -60,9 +73,9 @@ namespace Lang.Php.Compiler
 
         implement INotifyPropertyChanged
         implement INotifyPropertyChanged_Passive
-        implement ToString ##LibraryName## ##IncludePathConstOrVarName##
-        implement ToString LibraryName=##LibraryName##, IncludePathConstOrVarName=##IncludePathConstOrVarName##
-        implement equals LibraryName, IncludePathConstOrVarName
+        implement ToString ##LibraryName## ##IncludePathConstOrVarName## ##RootPath## ##PhpPackageSourceUri##
+        implement ToString LibraryName=##LibraryName##, IncludePathConstOrVarName=##IncludePathConstOrVarName##, RootPath=##RootPath##, PhpPackageSourceUri=##PhpPackageSourceUri##
+        implement equals LibraryName, IncludePathConstOrVarName, RootPath, PhpPackageSourceUri
         implement equals *
         implement equals *, ~exclude1, ~exclude2
         */
@@ -75,6 +88,14 @@ namespace Lang.Php.Compiler
         /// Nazwa własności IncludePathConstOrVarName; nazwa stałej lub zmiennej, która oznacza ścieżkę do biblioteki
         /// </summary>
         public const string PROPERTYNAME_INCLUDEPATHCONSTORVARNAME = "IncludePathConstOrVarName";
+        /// <summary>
+        /// Nazwa własności RootPath; 
+        /// </summary>
+        public const string PROPERTYNAME_ROOTPATH = "RootPath";
+        /// <summary>
+        /// Nazwa własności PhpPackageSourceUri; 
+        /// </summary>
+        public const string PROPERTYNAME_PHPPACKAGESOURCEURI = "PhpPackageSourceUri";
         #endregion Constants
 
         #region Methods
@@ -113,6 +134,40 @@ namespace Lang.Php.Compiler
             }
         }
         private string includePathConstOrVarName = string.Empty;
+        /// <summary>
+        /// 
+        /// </summary>
+        public string RootPath
+        {
+            get
+            {
+                return rootPath;
+            }
+            set
+            {
+                value = (value ?? String.Empty).Trim();
+                value = value.Replace("/", "\\");
+                value = value.StartsWith("\\") ? value.Substring(1) : value;
+                rootPath = value;
+            }
+        }
+        private string rootPath = string.Empty;
+        /// <summary>
+        /// 
+        /// </summary>
+        public string PhpPackageSourceUri
+        {
+            get
+            {
+                return phpPackageSourceUri;
+            }
+            set
+            {
+                value = (value ?? String.Empty).Trim();
+                phpPackageSourceUri = value;
+            }
+        }
+        private string phpPackageSourceUri = string.Empty;
         #endregion Properties
 
     }

@@ -45,9 +45,9 @@ namespace Lang.Php.Compiler
 
     public partial class Cs2PhpCompiler
     {
-		#region Methods 
+        #region Methods
 
-		// Public Methods 
+        // Public Methods 
 
         public void AddMetadataReferences(params MetadataReference[] adds)
         {
@@ -79,19 +79,33 @@ namespace Lang.Php.Compiler
             projectCompilation = project.GetCompilation() as Compilation;
             projectCompilation = projectCompilation.WithOptions(new CompilationOptions(OutputKind.DynamicallyLinkedLibrary));
             projectCompilation = projectCompilation.WithReferences(project.MetadataReferences);
+            foreach (var i in projectCompilation.References)
+                Console.WriteLine("   linked with {0}", i.Display);
             compiledAssembly = RoslynHelper.CompileAssembly(projectCompilation, out result);
             return projectCompilation;
         }
 
-        public void LoadProject(string csProj)
+        public void DisplayRef(string title)
+        {
+            Console.WriteLine(" ==== " + title);
+            foreach (var i in Project.MetadataReferences)
+                Console.WriteLine("  MetadataReference {0}", i.Display);
+            foreach (var i in Project.ProjectReferences)
+                Console.WriteLine("  ProjectReferences {0}", i.Id);
+        }
+        public void LoadProject(string csProj, string configuration)
         {
             if (verboseToConsole)
                 Console.WriteLine("Loading {0}", csProj);
             var a = XDocument.Load(csProj);
-            var w = Workspace.LoadStandAloneProject(csProj);
+            var w = Workspace.LoadStandAloneProject(csProj, configuration);
             solution = w.CurrentSolution;
             project = solution.Projects.Single();
             UpdateCompilationOptions(new CompilationOptions(OutputKind.DynamicallyLinkedLibrary));
+
+            // UpdateCompilationOptions(new Comp)
+            DisplayRef(" just after loaded");
+
             GreenOk();
         }
 
@@ -148,8 +162,11 @@ namespace Lang.Php.Compiler
                 Console.WriteLine("Create Php output files");
             #region Tworzenie plików php
             {
+                var assemblyTI = AssemblyTranslationInfo.FromAssembly(compiledAssembly);
+
                 EmitContext ec = new EmitContext();
-                var ec_BaseDir = OutDir; // Path.Combine(OutDir, "phpCompiled");
+                var ec_BaseDir = Path.Combine(OutDir, assemblyTI.RootPath);
+                Console.WriteLine("Output root {0}", ec_BaseDir);
                 var libName = PhpCodeModuleName.LibNameFromAssembly(this.compiledAssembly);
 
                 info.CurrentAssembly = compiledAssembly;// dla pewności
@@ -172,7 +189,7 @@ namespace Lang.Php.Compiler
             solution = solution.UpdateCompilationOptions(project.Id, options);
             project = solution.Projects.Single();
         }
-		// Private Methods 
+        // Private Methods 
 
         private void CheckRequiredTranslator()
         {
@@ -221,7 +238,7 @@ namespace Lang.Php.Compiler
             }
         }
 
-		#endregion Methods 
+        #endregion Methods
     }
 }
 

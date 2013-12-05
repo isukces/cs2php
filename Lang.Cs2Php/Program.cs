@@ -86,7 +86,7 @@ namespace Lang.Cs2Php
                 engine.OutDir = files.Last();
                 engine.Check();
                 showUsage = false;
-                engine.Compile();
+                engine.Compile("RELEASE");
 
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("Sucess");

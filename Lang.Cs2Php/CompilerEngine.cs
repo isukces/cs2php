@@ -25,7 +25,7 @@ namespace Lang.Cs2Php
     	init #
     smartClassEnd
     */
-    
+
     public partial class CompilerEngine
     {
         #region Methods
@@ -45,7 +45,7 @@ namespace Lang.Cs2Php
         private void Swap(Cs2PhpCompiler comp)
         {
             var aaa = typeof(Program).Assembly.GetReferencedAssemblies();
-            var bbb = new DirectoryInfo( ExeDir).GetFiles("*.*");
+            var bbb = new DirectoryInfo(ExeDir).GetFiles("*.*");
             var h = comp.Project.MetadataReferences.OfType<MetadataFileReference>().Select(i => new { REF = i, fn = new FileInfo(i.FullPath).Name.ToLower() }).ToArray();
 
             foreach (var hh in h)
@@ -63,12 +63,14 @@ namespace Lang.Cs2Php
                 }
             }
         }
-        public void Compile()
+        public void Compile(string configuration = "RELEASE")
         {
             Cs2PhpCompiler comp = new Cs2PhpCompiler();
             comp.VerboseToConsole = true;
             comp.ThrowExceptions = true;
-            comp.LoadProject(Path.Combine(SlnDir, csProject));
+            comp.LoadProject(Path.Combine(SlnDir, csProject), configuration);
+
+
 
             Console.WriteLine("Preparing before compilation");
 
@@ -79,10 +81,13 @@ namespace Lang.Cs2Php
             comp.RemoveMetadataReferences(remove);
             comp.AddMetadataReferences(ref_Lang_PHP);
 
+
+
             foreach (var i in referenced)
             {
                 var g = new MetadataFileReference(i, MetadataReferenceProperties.Assembly);
                 comp.AddMetadataReferences(g);
+                Console.WriteLine("  Add reference     {0}", g.Display);
             }
             Swap(comp);
 
@@ -91,13 +96,13 @@ namespace Lang.Cs2Php
                 {
                     var a = Assembly.LoadFile(i);
                     var an = a.GetName();
-                    Console.WriteLine(" Add tranlation helper {0}", a.FullName);
+                    Console.WriteLine(" Add translation helper {0}", a.FullName);
                     comp.TranslationAssemblies.Add(a);
                 }
             }
             comp.TranslationAssemblies.Add(typeof(Lang.Php.Framework.Extension).Assembly);
             comp.TranslationAssemblies.Add(typeof(Lang.Php.Compiler.Translator.Translator).Assembly);
-           
+
             //  comp.TranslationAssemblies.Add(typeof(Lang.Php.Wp.Compile.ModuleProcessor).Assembly);
 
             /// DebugDisplayReferences(comp);
@@ -129,7 +134,7 @@ namespace Lang.Cs2Php
                     return;
             }
             Console.ResetColor();
-            Console.WriteLine(": "+info.GetMessage());
+            Console.WriteLine(": " + info.GetMessage());
         }
 
         #endregion Methods
@@ -165,7 +170,7 @@ namespace Lang.Cs2Php
 // Smartclass.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0c4d5d36fb5eb4ac
 namespace Lang.Cs2Php
 {
-    public partial class CompilerEngine 
+    public partial class CompilerEngine
     {
         /*
         /// <summary>
