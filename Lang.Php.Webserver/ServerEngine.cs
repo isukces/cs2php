@@ -70,7 +70,7 @@ namespace Lang.Php.Webserver
         }
 
         #endregion Static Methods
-
+        TranslationInfo translationInfo = new TranslationInfo();
         #region Methods
 
         // Public Methods 
@@ -161,7 +161,7 @@ namespace Lang.Php.Webserver
                     HttpRequest r = HttpRequest.Parse(content);
                     {
                         r.Server.DocumentRoot = documentRoot.Replace("\\", "/");
-                       
+
                         if (!r.Server.DocumentRoot.EndsWith("/"))
                             r.Server.DocumentRoot += "/";
                         r.Update();
@@ -248,23 +248,20 @@ namespace Lang.Php.Webserver
             OnLog(this, new OnLogEventArgs() { Text = x });
         }
 
-        private HttpResponse ProcessRequest(HttpRequest x, Type t)
+        private HttpResponse ProcessRequest(HttpRequest req, Type type)
         {
             var y = new HttpResponse();
-
-
-            ClassTranslationInfo ci = new ClassTranslationInfo(t);
-            ci.ModuleName = new Lang.Php.Compiler.Source.PhpCodeModuleName(t.Assembly, "loaded");
-            ci.UpdatFromAttributes();
+            ClassTranslationInfo ci = translationInfo.GetOrMakeTranslationInfo(type);
+           
             if (ci.PageMethod == null)
-                throw new Exception(string.Format("Page method not found in type {0}", t.FullName));
+                throw new Exception(string.Format("Page method not found in type {0}", type.FullName));
             {
                 // prepare sandbox
                 Response.RuntimeResponse = y;
-                Request.RuntimeRequest = x;
-                Script.Get = x.Get;
-                Script.Post = x.Post;
-                Script.Server = x.Server;
+                Request.RuntimeRequest = req;
+                Script.Get = req.Get;
+                Script.Post = req.Post;
+                Script.Server = req.Server;
             }
 
             Action phpMain = (Action)Delegate.CreateDelegate(typeof(Action), ci.PageMethod);

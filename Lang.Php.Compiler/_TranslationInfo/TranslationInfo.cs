@@ -26,9 +26,6 @@ namespace Lang.Php.Compiler
     property Compiled List<CompilationUnit> 
     	init #
     
-    property ClassTranslationInfos Dictionary<Type, ClassTranslationInfo> Informacje o sposobie konwersji klasy na inny język
-    	init #
-    
     property TranslationAssemblies List<Assembly> 
     	init #
     
@@ -36,6 +33,15 @@ namespace Lang.Php.Compiler
     	init #
     
     property ModuleProcessors List<IModuleProcessor> 
+    	init #
+    
+    property ClassTranslations Dictionary<Type, ClassTranslationInfo> Class translation info collection
+    	init #
+    
+    property AssemblyTranslations Dictionary<Assembly, AssemblyTranslationInfo> Assembly translation info collection
+    	init #
+    
+    property FieldTranslations Dictionary<FieldInfo, FieldTranslationInfo> Field translation info collection
     	init #
     
     property State CompileState 
@@ -61,7 +67,7 @@ namespace Lang.Php.Compiler
                 return;
             var tt = GetTI(m.DeclaringType, false);
             if (tt.IsPage || tt.IsArray)
-            {                
+            {
                 if (tt.ModuleName != CurrentTypeTranslationInfo.ModuleName)
                 {
                     if (m is ConstructorInfo)
@@ -96,12 +102,14 @@ namespace Lang.Php.Compiler
 
         /// <summary>
         /// Sprawdza jakie klasy są w sparsowanych źródłach a następnie wypełnia wstępną informację  
-        /// <see cref="ClassTranslationInfos">ClassTranslationInfos</see> dla tych klas
+        /// <see cref="ClassTranslations">ClassTranslations</see> dla tych klas
         /// </summary>
         /// <param name="KnownTypes"></param>
-        public void FillClassTranslationInfos(Type[] KnownTypes)
+        public void FillClassTranslations(Type[] KnownTypes)
         {
+#if OLD
             List<Type> dotnetClasses = new List<Type>();
+
             {
                 Action<Type[]> searchNested = null;
                 searchNested = (n) =>
@@ -122,33 +130,78 @@ namespace Lang.Php.Compiler
                     dotnetClasses.Add(dotNetType);
                 }
                 searchNested(dotnetClasses.ToArray());
-
-                //var assemblies = dotnetClasses.Select(i => i.Assembly).Distinct().ToArray();
-                //dotnetClasses = (from aa in assemblies
-                //       from t in aa.GetTypes()
-                //       where !t.IsEnum
-                //       select t).ToList();
-            }
+            } 
+#endif
             {
-                classTranslationInfos.Clear();
+                classTranslations.Clear();
                 var classes = GetClasses().Select(i => i.FullName).Distinct().ToArray();
-                foreach (var dotNetType in dotnetClasses)
-                {
-                    if (dotNetType.IsEnum)
-                        continue;
-                    // var dotNetType = KnownTypes.Where(i => i.FullName == c).FirstOrDefault();
-                    var cti = new ClassTranslationInfo(dotNetType);
 
-                    classTranslationInfos[dotNetType] = cti;
-                }
-
+                foreach (var type in KnownTypes.Where(i => !i.IsEnum))
+                    GetOrMakeTranslationInfo(type); // it is created and stored in classTranslations                  
             }
+        }
+
+        public ClassTranslationInfo GetOrMakeTranslationInfo(Type type)
+        {
+            if (type == null)
+                throw new ArgumentNullException("type");
+            ClassTranslationInfo cti;
+            if (!classTranslations.TryGetValue(type, out cti))
+            {
+                cti = classTranslations[type] = new ClassTranslationInfo(type, this);
+                if (OnTranslationInfoCreated != null)
+                    OnTranslationInfoCreated(this, new TranslationInfoCreatedEventArgs() { ClassTranslation = cti });
+            }
+            return cti;
+        }
+
+        public AssemblyTranslationInfo GetOrMakeTranslationInfo(Assembly assembly)
+        {
+            if (assembly == null)
+                throw new ArgumentNullException("assembly");
+            AssemblyTranslationInfo ati;
+            if (!assemblyTranslations.TryGetValue(assembly, out ati))
+            {
+                ati = assemblyTranslations[assembly] = AssemblyTranslationInfo.FromAssembly(assembly);
+                if (OnTranslationInfoCreated != null)
+                    OnTranslationInfoCreated(this, new TranslationInfoCreatedEventArgs()
+                    {
+                        AssemblyTranslation = ati
+                    });
+            }
+            return ati;
+        }
+
+        public FieldTranslationInfo GetOrMakeTranslationInfo(FieldInfo fieldInfo)
+        {
+            if (fieldInfo == null)
+                throw new ArgumentNullException("fieldInfo");
+            FieldTranslationInfo fti;
+            if (!fieldTranslations.TryGetValue(fieldInfo, out fti))
+            {
+                fti = fieldTranslations[fieldInfo] = FieldTranslationInfo.FromFieldInfo(fieldInfo, this);
+                if (OnTranslationInfoCreated != null)
+                    OnTranslationInfoCreated(this, new TranslationInfoCreatedEventArgs()
+                    {
+                        FieldTranslation = fti
+                    });
+            }
+            return fti;
+        }
+
+        public event EventHandler<TranslationInfoCreatedEventArgs> OnTranslationInfoCreated;
+
+        public class TranslationInfoCreatedEventArgs : EventArgs
+        {
+            public AssemblyTranslationInfo AssemblyTranslation { get; set; }
+            public ClassTranslationInfo ClassTranslation { get; set; }
+            public FieldTranslationInfo FieldTranslation { get; set; }
         }
 
         public ClassTranslationInfo FindClassTranslationInfo(Type t)
         {
             ClassTranslationInfo o;
-            if (classTranslationInfos.TryGetValue(t, out o))
+            if (classTranslations.TryGetValue(t, out o))
                 return o;
             return null;
         }
@@ -173,15 +226,7 @@ namespace Lang.Php.Compiler
                 return null;
             if (DoCheckAccesibility)
                 CheckAccesibility(t);
-            ClassTranslationInfo a;
-            if (!classTranslationInfos.TryGetValue(t, out a))
-            {
-                a = new ClassTranslationInfo(t);
-                a.UpdatFromAttributes();
-                a.IsReflected = true;
-                classTranslationInfos[t] = a;
-                // return a.ScriptName;
-            }
+            ClassTranslationInfo a = GetOrMakeTranslationInfo(t);
             var b = a.ScriptName.XClone();
             if (currentType != null)
             {
@@ -206,7 +251,7 @@ namespace Lang.Php.Compiler
             if (t == null)
                 return null;
             var a = GetPhpType(t, DoCheckAccesibility);
-            return classTranslationInfos[t];
+            return classTranslations[t];
         }
 
         /// <summary>
@@ -258,7 +303,7 @@ namespace Lang.Php.Compiler
 }
 
 
-// -----:::::##### smartClass embedded code begin #####:::::----- generated 2013-11-26 10:37
+// -----:::::##### smartClass embedded code begin #####:::::----- generated 2013-12-06 10:13
 // File generated automatically ver 2013-07-10 08:43
 // Smartclass.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0c4d5d36fb5eb4ac
 namespace Lang.Php.Compiler
@@ -277,9 +322,9 @@ namespace Lang.Php.Compiler
 
         implement INotifyPropertyChanged
         implement INotifyPropertyChanged_Passive
-        implement ToString ##CurrentAssembly## ##CurrentType## ##CurrentTypeTranslationInfo## ##CurrentMethod## ##Compiled## ##ClassTranslationInfos## ##TranslationAssemblies## ##NodeTranslators## ##ModuleProcessors## ##State##
-        implement ToString CurrentAssembly=##CurrentAssembly##, CurrentType=##CurrentType##, CurrentTypeTranslationInfo=##CurrentTypeTranslationInfo##, CurrentMethod=##CurrentMethod##, Compiled=##Compiled##, ClassTranslationInfos=##ClassTranslationInfos##, TranslationAssemblies=##TranslationAssemblies##, NodeTranslators=##NodeTranslators##, ModuleProcessors=##ModuleProcessors##, State=##State##
-        implement equals CurrentAssembly, CurrentType, CurrentTypeTranslationInfo, CurrentMethod, Compiled, ClassTranslationInfos, TranslationAssemblies, NodeTranslators, ModuleProcessors, State
+        implement ToString ##CurrentAssembly## ##CurrentType## ##CurrentTypeTranslationInfo## ##CurrentMethod## ##Compiled## ##TranslationAssemblies## ##NodeTranslators## ##ModuleProcessors## ##ClassTranslations## ##AssemblyTranslations## ##FieldTranslations## ##State##
+        implement ToString CurrentAssembly=##CurrentAssembly##, CurrentType=##CurrentType##, CurrentTypeTranslationInfo=##CurrentTypeTranslationInfo##, CurrentMethod=##CurrentMethod##, Compiled=##Compiled##, TranslationAssemblies=##TranslationAssemblies##, NodeTranslators=##NodeTranslators##, ModuleProcessors=##ModuleProcessors##, ClassTranslations=##ClassTranslations##, AssemblyTranslations=##AssemblyTranslations##, FieldTranslations=##FieldTranslations##, State=##State##
+        implement equals CurrentAssembly, CurrentType, CurrentTypeTranslationInfo, CurrentMethod, Compiled, TranslationAssemblies, NodeTranslators, ModuleProcessors, ClassTranslations, AssemblyTranslations, FieldTranslations, State
         implement equals *
         implement equals *, ~exclude1, ~exclude2
         */
@@ -305,10 +350,6 @@ namespace Lang.Php.Compiler
         /// </summary>
         public const string PROPERTYNAME_COMPILED = "Compiled";
         /// <summary>
-        /// Nazwa własności ClassTranslationInfos; Informacje o sposobie konwersji klasy na inny język
-        /// </summary>
-        public const string PROPERTYNAME_CLASSTRANSLATIONINFOS = "ClassTranslationInfos";
-        /// <summary>
         /// Nazwa własności TranslationAssemblies; 
         /// </summary>
         public const string PROPERTYNAME_TRANSLATIONASSEMBLIES = "TranslationAssemblies";
@@ -320,6 +361,18 @@ namespace Lang.Php.Compiler
         /// Nazwa własności ModuleProcessors; 
         /// </summary>
         public const string PROPERTYNAME_MODULEPROCESSORS = "ModuleProcessors";
+        /// <summary>
+        /// Nazwa własności ClassTranslations; Class translation info collection
+        /// </summary>
+        public const string PROPERTYNAME_CLASSTRANSLATIONS = "ClassTranslations";
+        /// <summary>
+        /// Nazwa własności AssemblyTranslations; Assembly translation info collection
+        /// </summary>
+        public const string PROPERTYNAME_ASSEMBLYTRANSLATIONS = "AssemblyTranslations";
+        /// <summary>
+        /// Nazwa własności FieldTranslations; Field translation info collection
+        /// </summary>
+        public const string PROPERTYNAME_FIELDTRANSLATIONS = "FieldTranslations";
         /// <summary>
         /// Nazwa własności State; 
         /// </summary>
@@ -404,21 +457,6 @@ namespace Lang.Php.Compiler
         }
         private List<CompilationUnit> compiled = new List<CompilationUnit>();
         /// <summary>
-        /// Informacje o sposobie konwersji klasy na inny język
-        /// </summary>
-        public Dictionary<Type, ClassTranslationInfo> ClassTranslationInfos
-        {
-            get
-            {
-                return classTranslationInfos;
-            }
-            set
-            {
-                classTranslationInfos = value;
-            }
-        }
-        private Dictionary<Type, ClassTranslationInfo> classTranslationInfos = new Dictionary<Type, ClassTranslationInfo>();
-        /// <summary>
         /// 
         /// </summary>
         public List<Assembly> TranslationAssemblies
@@ -463,6 +501,51 @@ namespace Lang.Php.Compiler
             }
         }
         private List<IModuleProcessor> moduleProcessors = new List<IModuleProcessor>();
+        /// <summary>
+        /// Class translation info collection
+        /// </summary>
+        public Dictionary<Type, ClassTranslationInfo> ClassTranslations
+        {
+            get
+            {
+                return classTranslations;
+            }
+            set
+            {
+                classTranslations = value;
+            }
+        }
+        private Dictionary<Type, ClassTranslationInfo> classTranslations = new Dictionary<Type, ClassTranslationInfo>();
+        /// <summary>
+        /// Assembly translation info collection
+        /// </summary>
+        public Dictionary<Assembly, AssemblyTranslationInfo> AssemblyTranslations
+        {
+            get
+            {
+                return assemblyTranslations;
+            }
+            set
+            {
+                assemblyTranslations = value;
+            }
+        }
+        private Dictionary<Assembly, AssemblyTranslationInfo> assemblyTranslations = new Dictionary<Assembly, AssemblyTranslationInfo>();
+        /// <summary>
+        /// Field translation info collection
+        /// </summary>
+        public Dictionary<FieldInfo, FieldTranslationInfo> FieldTranslations
+        {
+            get
+            {
+                return fieldTranslations;
+            }
+            set
+            {
+                fieldTranslations = value;
+            }
+        }
+        private Dictionary<FieldInfo, FieldTranslationInfo> fieldTranslations = new Dictionary<FieldInfo, FieldTranslationInfo>();
         /// <summary>
         /// 
         /// </summary>

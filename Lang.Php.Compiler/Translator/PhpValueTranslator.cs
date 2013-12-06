@@ -14,18 +14,18 @@ namespace Lang.Php.Compiler.Translator
 {
     class PhpValueTranslator : CSharpBaseVisitor<IPhpValue>
     {
-		#region Constructors 
+        #region Constructors
 
         public PhpValueTranslator(TranslationState state)
         {
             this.state = state;
         }
 
-		#endregion Constructors 
+        #endregion Constructors
 
-		#region Static Methods 
+        #region Static Methods
 
-		// Public Methods 
+        // Public Methods 
 
         public static IPhpValue GetValueForExpression(IPhpValue phpTargetObject, string valueAsString)
         {
@@ -51,11 +51,11 @@ namespace Lang.Php.Compiler.Translator
             throw new Exception(string.Format("bald boa, Unable to convert {0} into php value", valueAsString));
         }
 
-		#endregion Static Methods 
+        #endregion Static Methods
 
-		#region Methods 
+        #region Methods
 
-		// Public Methods 
+        // Public Methods 
 
         public IPhpValue ConvertValueToPredefined(object o)
         {
@@ -87,7 +87,7 @@ namespace Lang.Php.Compiler.Translator
                 return Visit(value as CSharpBase);
             throw new NotSupportedException();
         }
-		// Protected Methods 
+        // Protected Methods 
 
         protected override IPhpValue VisitArgumentExpression(ArgumentExpression src)
         {
@@ -265,7 +265,7 @@ namespace Lang.Php.Compiler.Translator
             var member_declaring_type = member.DeclaringType;
 
             {
-                FieldTranslationInfo tInfo = FieldTranslationInfo.FromClassFieldAccessExpression(src);
+                FieldTranslationInfo tInfo = state.Principles.GetOrMakeTranslationInfo(src.Member);
                 if (tInfo.IsDefinedInNonincludableModule)
                 {
                     var a = state.Principles.CurrentType;
@@ -409,7 +409,7 @@ namespace Lang.Php.Compiler.Translator
 
         protected override IPhpValue VisitInstanceFieldAccessExpression(InstanceFieldAccessExpression src)
         {
-            var fti = FieldTranslationInfo.FromFieldInfo(src.Member);
+            var fti = state.Principles.GetOrMakeTranslationInfo(src.Member);
             var to = TransValue(src.TargetObject);
             if (src.Member.DeclaringType.IsDefined(typeof(AsArrayAttribute)))
             {
@@ -609,7 +609,7 @@ namespace Lang.Php.Compiler.Translator
             var a = new PhpUnaryOperatorExpression(v, src.Operator);
             return SimplifyPhpExpression(a);
         }
-		// Private Methods 
+        // Private Methods 
 
         private object ReadEnumValueAndProcessForPhp(FieldInfo fi)
         {
@@ -624,12 +624,12 @@ namespace Lang.Php.Compiler.Translator
 
         }
 
-		#endregion Methods 
+        #endregion Methods
 
-		#region Fields 
+        #region Fields
 
         TranslationState state;
 
-		#endregion Fields 
+        #endregion Fields
     }
 }

@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 
-namespace Lang.Php.Compiler.Translator
+namespace Lang.Php.Compiler
 {
 
     /*
@@ -30,13 +30,12 @@ namespace Lang.Php.Compiler.Translator
     property IsDefinedInNonincludableModule bool czy jest zdefiniowany w module, którego nie można includować
     smartClassEnd
     */
-    
+
     public partial class FieldTranslationInfo
     {
 
-       
 
-        public static FieldTranslationInfo FromFieldInfo(FieldInfo fieldInfo)
+        public static FieldTranslationInfo FromFieldInfo(FieldInfo fieldInfo, TranslationInfo info)
         {
             if (fieldInfo == null)
                 return null;
@@ -55,7 +54,7 @@ namespace Lang.Php.Compiler.Translator
                 {
                     fti.Destination = FieldTranslationDestionations.DefinedConst;
                     if (!string.IsNullOrEmpty(_definedConst.DefinedConstName))
-                        fti.scriptName = _definedConst.DefinedConstName;                   
+                        fti.scriptName = _definedConst.DefinedConstName;
                 }
             }
             {
@@ -84,8 +83,8 @@ namespace Lang.Php.Compiler.Translator
                     break;
                 case FieldTranslationDestionations.DefinedConst:
                 case FieldTranslationDestionations.NormalField:
-                    var cti = new ClassTranslationInfo(fieldInfo.DeclaringType);
-                    fti.IncludeModule = new ClassTranslationInfo(fieldInfo.DeclaringType).IncludeModule;
+                    var cti = info.GetOrMakeTranslationInfo(fieldInfo.DeclaringType);
+                    fti.IncludeModule = cti.ModuleName;
                     if (fti.includeModule != null)
                     {
                         if (cti.IsPage)
@@ -102,23 +101,17 @@ namespace Lang.Php.Compiler.Translator
             if (fti.Destination != FieldTranslationDestionations.NormalField)
                 throw new Exception(string.Format("Unable to find right way to convert field {0}.{1}", fieldInfo.DeclaringType.FullName, fieldInfo.Name));
         }
-        public static FieldTranslationInfo FromClassFieldAccessExpression(ClassFieldAccessExpression x)
-        {
-            if (x == null)
-                return null;
-            FieldTranslationInfo fti = FieldTranslationInfo.FromFieldInfo(x.Member);
-            return fti;
-        }
+      
     }
 }
 
 
-// -----:::::##### smartClass embedded code begin #####:::::----- generated 2013-11-19 23:45
+// -----:::::##### smartClass embedded code begin #####:::::----- generated 2013-12-06 10:16
 // File generated automatically ver 2013-07-10 08:43
 // Smartclass.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0c4d5d36fb5eb4ac
-namespace Lang.Php.Compiler.Translator
+namespace Lang.Php.Compiler
 {
-    public partial class FieldTranslationInfo 
+    public partial class FieldTranslationInfo
     {
         /*
         /// <summary>

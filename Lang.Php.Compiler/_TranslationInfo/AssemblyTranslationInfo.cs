@@ -14,61 +14,79 @@ namespace Lang.Php.Compiler
     smartClass
     option NoAdditionalFile
     
+    property Assembly Assembly 
+    	access public private private
+    
     property LibraryName string 
+    	read only
     
     property IncludePathConstOrVarName string nazwa stałej lub zmiennej, która oznacza ścieżkę do biblioteki
     
     property RootPath string 
     	preprocess value = value.Replace("/", "\\");
     	preprocess value = value.StartsWith("\\") ? value.Substring(1) : value;
+    	preprocess value = value.EndsWith("\\") ? value : (value + "\\");
+    	preprocess value = value.Replace("\\", "\\\\");
+    	preprocess value = value == "\\" ? "" : value;
     
     property PhpPackageSourceUri string 
     
     property PhpPackagePathStrip string 
     smartClassEnd
     */
-    
+
     public partial class AssemblyTranslationInfo
     {
-		#region Static Methods 
+        #region Static Methods
 
-		// Public Methods 
+        // Public Methods 
+        public static string LibNameFromAssembly(Assembly a)
+        {
+            var tmp = a.ManifestModule.ScopeName.ToLower();
+            if (tmp.EndsWith(".dll"))
+                tmp = tmp.Substring(0, tmp.Length - 4);
+            return tmp;
+        }
 
         public static AssemblyTranslationInfo FromAssembly(Assembly assembly)
         {
             if (assembly == null)
                 return null;
-            AssemblyTranslationInfo a = new AssemblyTranslationInfo();
+            AssemblyTranslationInfo ati = new AssemblyTranslationInfo();
             {
+                ati.assembly = assembly;
+
                 var _ModuleIncludeConst = assembly.GetCustomAttribute<ModuleIncludeConstAttribute>();
                 if (_ModuleIncludeConst != null)
-                    a.IncludePathConstOrVarName = _ModuleIncludeConst.ConstOrVarName;
+                    ati.IncludePathConstOrVarName = _ModuleIncludeConst.ConstOrVarName;
                 var _RootPath = assembly.GetCustomAttribute<RootPathAttribute>();
                 if (_RootPath != null)
-                    a.RootPath = _RootPath.Path;
+                    ati.RootPath = _RootPath.Path;
+                else
+                    ati.rootPath = "/";
 
                 var _PhpPackageSource = assembly.GetCustomAttribute<PhpPackageSourceAttribute>();
                 if (_PhpPackageSource != null)
                 {
-                    a.PhpPackageSourceUri = _PhpPackageSource.SourceUri;
-                    a.PhpPackagePathStrip = _PhpPackageSource.StripArchivePath;
+                    ati.PhpPackageSourceUri = _PhpPackageSource.SourceUri;
+                    ati.PhpPackagePathStrip = _PhpPackageSource.StripArchivePath;
                 }
             }
-            a.LibraryName = PhpCodeModuleName.LibNameFromAssembly(assembly);
-            return a;
+            ati.libraryName = LibNameFromAssembly(assembly);
+            return ati;
         }
 
-		#endregion Static Methods 
+        #endregion Static Methods
     }
 }
 
 
-// -----:::::##### smartClass embedded code begin #####:::::----- generated 2013-12-05 13:24
+// -----:::::##### smartClass embedded code begin #####:::::----- generated 2013-12-06 09:09
 // File generated automatically ver 2013-07-10 08:43
 // Smartclass.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0c4d5d36fb5eb4ac
 namespace Lang.Php.Compiler
 {
-    public partial class AssemblyTranslationInfo 
+    public partial class AssemblyTranslationInfo
     {
         /*
         /// <summary>
@@ -82,13 +100,17 @@ namespace Lang.Php.Compiler
 
         implement INotifyPropertyChanged
         implement INotifyPropertyChanged_Passive
-        implement ToString ##LibraryName## ##IncludePathConstOrVarName## ##RootPath## ##PhpPackageSourceUri## ##PhpPackagePathStrip##
-        implement ToString LibraryName=##LibraryName##, IncludePathConstOrVarName=##IncludePathConstOrVarName##, RootPath=##RootPath##, PhpPackageSourceUri=##PhpPackageSourceUri##, PhpPackagePathStrip=##PhpPackagePathStrip##
-        implement equals LibraryName, IncludePathConstOrVarName, RootPath, PhpPackageSourceUri, PhpPackagePathStrip
+        implement ToString ##Assembly## ##LibraryName## ##IncludePathConstOrVarName## ##RootPath## ##PhpPackageSourceUri## ##PhpPackagePathStrip##
+        implement ToString Assembly=##Assembly##, LibraryName=##LibraryName##, IncludePathConstOrVarName=##IncludePathConstOrVarName##, RootPath=##RootPath##, PhpPackageSourceUri=##PhpPackageSourceUri##, PhpPackagePathStrip=##PhpPackagePathStrip##
+        implement equals Assembly, LibraryName, IncludePathConstOrVarName, RootPath, PhpPackageSourceUri, PhpPackagePathStrip
         implement equals *
         implement equals *, ~exclude1, ~exclude2
         */
         #region Constants
+        /// <summary>
+        /// Nazwa własności Assembly; 
+        /// </summary>
+        public const string PROPERTYNAME_ASSEMBLY = "Assembly";
         /// <summary>
         /// Nazwa własności LibraryName; 
         /// </summary>
@@ -118,16 +140,26 @@ namespace Lang.Php.Compiler
         /// <summary>
         /// 
         /// </summary>
+        public Assembly Assembly
+        {
+            get
+            {
+                return assembly;
+            }
+            private set
+            {
+                assembly = value;
+            }
+        }
+        private Assembly assembly;
+        /// <summary>
+        /// Własność jest tylko do odczytu.
+        /// </summary>
         public string LibraryName
         {
             get
             {
                 return libraryName;
-            }
-            set
-            {
-                value = (value ?? String.Empty).Trim();
-                libraryName = value;
             }
         }
         private string libraryName = string.Empty;
@@ -161,6 +193,9 @@ namespace Lang.Php.Compiler
                 value = (value ?? String.Empty).Trim();
                 value = value.Replace("/", "\\");
                 value = value.StartsWith("\\") ? value.Substring(1) : value;
+                value = value.EndsWith("\\") ? value : (value + "\\");
+                value = value.Replace("\\", "\\\\");
+                value = value == "\\" ? "" : value;
                 rootPath = value;
             }
         }

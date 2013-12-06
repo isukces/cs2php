@@ -69,11 +69,13 @@ namespace Lang.Php.Compiler.Translator
         public void Translate()
         {
             var _classes = info.GetClasses();
-            var classesToTranslate = info.ClassTranslationInfos.Values.Where(u => !u.IsReflected).ToArray();
+            var classesToTranslate = info.ClassTranslations.Values.Where(u => !u.IsReflected).ToArray();
             foreach (ClassTranslationInfo classTI in classesToTranslate)
             {
                 PhpClassDefinition phpClass;
-                PhpCodeModule phpModule = GetModule(classTI.ModuleName.ShortName, classTI.Type.Assembly);
+                PhpCodeModule phpModule = GetOrMakeModuleByName(classTI.ModuleName);
+                var assemblyTI = AssemblyTranslationInfo.FromAssembly(info.CurrentAssembly);
+                phpModule.Name.MakeEmitPath(assemblyTI.RootPath);
                 #region Szukanie / Tworzenie PhpClassDefinition
                 {
                     PhpQualifiedName phpBaseClassName;
@@ -85,7 +87,7 @@ namespace Lang.Php.Compiler.Translator
                         else
                         {
                             phpBaseClassName = state.Principles.GetPhpType(netBaseType, true);
-                            ClassTranslationInfo baseTypeTI = state.Principles.ClassTranslationInfos[netBaseType];
+                            ClassTranslationInfo baseTypeTI = state.Principles.ClassTranslations[netBaseType];
                             if (baseTypeTI.Skip)
                                 phpBaseClassName = null;
                         }
@@ -155,6 +157,8 @@ namespace Lang.Php.Compiler.Translator
                 #endregion
                 #region includy
                 {
+
+
                     List<ModuleCodeRequest> uuu = new List<ModuleCodeRequest>();
                     var cr = (phpModule as ICodeRelated).GetCodeRequests();
                     var g = cr.ToArray();
@@ -165,7 +169,7 @@ namespace Lang.Php.Compiler.Translator
 
                         foreach (var c in clas)
                         {
-                            var m = info.ClassTranslationInfos.Values.Where(i => i.ScriptName.FullName == c).ToArray();
+                            var m = info.ClassTranslations.Values.Where(i => i.ScriptName.FullName == c).ToArray();
                             if (m.Length != 1)
                                 throw new NotSupportedException();
                             var mm = m[0];
@@ -217,9 +221,13 @@ namespace Lang.Php.Compiler.Translator
         }
 		// Private Methods 
 
-        PhpCodeModule GetModule(string moduleName, Assembly assembly)
+        /// <summary>
+        /// Gets existing or creates code module for given name
+        /// </summary>
+        /// <param name="requiredModuleName"></param>
+        /// <returns></returns>
+        PhpCodeModule GetOrMakeModuleByName(PhpCodeModuleName requiredModuleName)
         {
-            var requiredModuleName = new PhpCodeModuleName(assembly, moduleName);
             var mod = modules.Where(i => i.Name == requiredModuleName).FirstOrDefault();
             if (mod == null)
             {
@@ -319,7 +327,7 @@ namespace Lang.Php.Compiler.Translator
 
                 if (item.OptionalFieldInfo != null)
                 {
-                    fti = FieldTranslationInfo.FromFieldInfo(item.OptionalFieldInfo);
+                    fti = info.GetOrMakeTranslationInfo(item.OptionalFieldInfo);
                     switch (fti.Destination)
                     {
                         case FieldTranslationDestionations.DefinedConst:
@@ -400,7 +408,7 @@ namespace Lang.Php.Compiler.Translator
 
         private void TranslateMethod(PhpClassDefinition phpClass, MethodDeclaration md)
         {
-            Tranlate_MethodOrProperty(phpClass, md.Info, md.Body, null);           
+            Tranlate_MethodOrProperty(phpClass, md.Info, md.Body, null);
         }
 
         private void TranslateProperty(PhpClassDefinition phpClass, CsharpPropertyDeclaration pd)

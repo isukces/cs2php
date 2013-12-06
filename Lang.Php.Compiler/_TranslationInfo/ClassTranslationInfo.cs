@@ -21,7 +21,7 @@ namespace Lang.Php.Compiler
     
     property IgnoreNamespace bool 
     
-    property ScriptName PhpClassName 
+    property ScriptName PhpQualifiedName 
     
     property IsPage bool czy klasa ma wygenerować moduł z odpalaną metodą PHPMain
     
@@ -46,68 +46,20 @@ namespace Lang.Php.Compiler
 
         /// <summary>
         /// Tworzy instancję obiektu
-        /// <param name="Type"></param>
+        /// <param name="type"></param>
         /// </summary>
-        public ClassTranslationInfo(Type Type)
+        public ClassTranslationInfo(Type type, TranslationInfo info)
         {
-            this.type = Type;
-            moduleName = new PhpCodeModuleName(Type.Assembly, "?");
-            moduleName.ShortName = type.FullName.Replace(".", "_").Replace("+", "__");
-            UpdatFromAttributes();
-        }
+            var ati = info.GetOrMakeTranslationInfo(type.Assembly);
+            this.type = type;
 
-        #endregion Constructors
-
-        #region Static Methods
-
-        // Public Methods 
-
-        public static MethodInfo FF(Type type)
-        {
-            var a = type.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
-            var aa = a.Where(i => i.Name == "PHPMain").FirstOrDefault();
-            if (aa != null) return aa;
-            aa = a.Where(i => i.Name == "PhpMain").FirstOrDefault();
-            if (aa != null) return aa;
-            var bb = a.Where(i => i.Name.ToLower() == "phpmain").ToArray();
-            if (bb.Length == 1)
-                return bb[0];
-            throw new Exception("tearful leopard");
-        }
-
-        #endregion Static Methods
-
-        #region Methods
-
-        // Public Methods 
-
-        public override string ToString()
-        {
-            return string.Format("{0} => {1}@{2}", type.FullName, this.scriptName, this.moduleName);
-        }
-        string DotNetNameToPhpName(string FullName)
-        {
-            return string.Join("",
-                    from i in FullName.Replace("+", ".").Split('.')
-                    select PhpQualifiedName.T_NS_SEPARATOR + PhpQualifiedName.SanitizePhpName(i));
-        }
-        /// <summary>
-        /// Ustawia parametry tłumaczenia na podstawie atrybutów dodanych do kodu źródłowego w C#
-        /// </summary>
-        public void UpdatFromAttributes(bool @checked = false)
-        {
-            ClassTranslationInfo dt = type.DeclaringType != null ? new ClassTranslationInfo(type.DeclaringType) : null;
+            ClassTranslationInfo declaringTypeTI = type.DeclaringType == null
+                ? null
+                : info.GetOrMakeTranslationInfo(type.DeclaringType);
             var ats = type.GetCustomAttributes(false);
             IgnoreNamespace = ats.OfType<IgnoreNamespaceAttribute>().Any();
-            if (IgnoreNamespace)
-                ScriptName = PhpQualifiedName.SanitizePhpName(type.Name);
-            else
-                ScriptName = DotNetNameToPhpName(type.FullName); // beware of generic types
-            if (dt != null)
-            {
-                ScriptName = dt.ScriptName + "__" + type.Name;
-                moduleName.ShortName = dt.moduleName.ShortName;
-            }
+
+            #region ScriptName
             {
                 var _scriptName = ats.OfType<ScriptNameAttribute>().FirstOrDefault();
                 if (_scriptName != null)
@@ -119,32 +71,77 @@ namespace Lang.Php.Compiler
                     else
                         ScriptName = DotNetNameToPhpName(type.FullName) + PhpQualifiedName.T_NS_SEPARATOR + _scriptName.Name;
                 }
+                if (declaringTypeTI != null)
+                    ScriptName = declaringTypeTI.ScriptName + "__" + type.Name; // parent clas followed by __ and short name
+                else if (IgnoreNamespace)
+                    ScriptName = PhpQualifiedName.SanitizePhpName(type.Name); // only short name without namespace
+                else
+                    ScriptName = DotNetNameToPhpName(type.FullName); // beware of generic types
             }
+            #endregion
+            #region Module name
             {
-                ModuleAttribute _module = ats.OfType<ModuleAttribute>().FirstOrDefault();
-                if (_module != null)
-                    moduleName.ShortName = _module.ModuleShortName;
+                moduleName = new PhpCodeModuleName(type, ati, declaringTypeTI);
             }
+            #endregion
+            #region PageAttribute
             {
                 var _page = ats.OfType<PageAttribute>().FirstOrDefault();
                 IsPage = _page != null;
-                pageMethod = isPage ? FF(type) : null;
-                if (_page != null)
-                {
-                    if (ModuleName == null)
-                        throw new NotSupportedException();
-                    ModuleName.ShortName = _page.ModuleShortName;
-                }
+                pageMethod = isPage ? FindPHPMainMethod(type) : null;
             }
+            #endregion
+            #region AsArrayAttribute
             {
                 var _page = ats.OfType<AsArrayAttribute>().FirstOrDefault();
                 IsArray = _page != null;
             }
+            #endregion
+            #region SkipAttribute
             {
                 var _skip = ats.OfType<SkipAttribute>().FirstOrDefault();
                 if (_skip != null)
                     Skip = true;
             }
+            #endregion
+
+        }
+
+        #endregion Constructors
+
+        #region Static Methods
+
+        // Private Methods 
+
+        static string DotNetNameToPhpName(string fullName)
+        {
+            return string.Join("",
+                    from i in fullName.Replace("+", ".").Split('.')
+                    select PhpQualifiedName.T_NS_SEPARATOR + PhpQualifiedName.SanitizePhpName(i));
+        }
+
+        static MethodInfo FindPHPMainMethod(Type type)
+        {
+            var a = type.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+            var aa = a.Where(i => i.Name == "PhpMain").FirstOrDefault();
+            if (aa != null) return aa;
+            aa = a.Where(i => i.Name == "PHPMain").FirstOrDefault();
+            if (aa != null) return aa;
+            var bb = a.Where(i => i.Name.ToLower() == "phpmain").ToArray();
+            if (bb.Length == 1)
+                return bb[0];
+            throw new Exception(string.Format("tearful leopard: Type {0} has no PhpMain method", type.FullName));
+        }
+
+        #endregion Static Methods
+
+        #region Methods
+
+        // Public Methods 
+
+        public override string ToString()
+        {
+            return string.Format("{0} => {1}@{2}", type.FullName, this.scriptName, this.moduleName);
         }
         // Private Methods 
 
@@ -160,7 +157,7 @@ namespace Lang.Php.Compiler
 }
 
 
-// -----:::::##### smartClass embedded code begin #####:::::----- generated 2013-12-03 08:31
+// -----:::::##### smartClass embedded code begin #####:::::----- generated 2013-12-06 10:40
 // File generated automatically ver 2013-07-10 08:43
 // Smartclass.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0c4d5d36fb5eb4ac
 namespace Lang.Php.Compiler
@@ -174,9 +171,7 @@ namespace Lang.Php.Compiler
         public ClassTranslationInfo()
         {
         }
-
         Przykłady użycia
-
         implement INotifyPropertyChanged
         implement INotifyPropertyChanged_Passive
         implement ToString ##Type## ##ParsedCode## ##IgnoreNamespace## ##ScriptName## ##IsPage## ##Skip## ##PageMethod## ##ModuleName## ##IncludeModule## ##IsReflected## ##IsArray##
@@ -185,6 +180,8 @@ namespace Lang.Php.Compiler
         implement equals *
         implement equals *, ~exclude1, ~exclude2
         */
+
+
         #region Constants
         /// <summary>
         /// Nazwa własności Type; 
@@ -232,8 +229,10 @@ namespace Lang.Php.Compiler
         public const string PROPERTYNAME_ISARRAY = "IsArray";
         #endregion Constants
 
+
         #region Methods
         #endregion Methods
+
 
         #region Properties
         /// <summary>
@@ -393,6 +392,5 @@ namespace Lang.Php.Compiler
         }
         private bool isArray;
         #endregion Properties
-
     }
 }

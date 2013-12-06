@@ -142,7 +142,7 @@ namespace Lang.Php.Compiler
                 System.Console.WriteLine("    {0:0.0} sek", DateTime.Now.Subtract(now).TotalSeconds);
             }
             Console.WriteLine("Parsowanie c# skończone, mamy drzewo definicji");
-            tInfo.FillClassTranslationInfos(KnownTypes);
+            tInfo.FillClassTranslations(KnownTypes);
             return tInfo;
         }
 
@@ -153,12 +153,12 @@ namespace Lang.Php.Compiler
             project = solution.Projects.Single();
         }
 
-        public void TranslateAndCreatePHPFiles(TranslationInfo info, string OutDir)
+        public void TranslateAndCreatePHPFiles(TranslationInfo translationInfo, string OutDir)
         {
             if (verboseToConsole)
                 Console.WriteLine("Translate C# -> Php");
 
-            info.CurrentAssembly = compiledAssembly;
+            translationInfo.CurrentAssembly = compiledAssembly;
             var assemblyTI = AssemblyTranslationInfo.FromAssembly(compiledAssembly);
             var ec_BaseDir = Path.Combine(OutDir, assemblyTI.RootPath);
             Console.WriteLine("Output root {0}", ec_BaseDir);
@@ -168,8 +168,10 @@ namespace Lang.Php.Compiler
                 DownloadAndUnzip(assemblyTI.PhpPackageSourceUri, ec_BaseDir, assemblyTI.PhpPackagePathStrip);
                 return;
             }
-            TranslationState s = new TranslationState(info);
-            Lang.Php.Compiler.Translator.Translator translator = new Lang.Php.Compiler.Translator.Translator(s);
+            TranslationState translationState = new TranslationState(translationInfo);
+            Lang.Php.Compiler.Translator.Translator translator = new Lang.Php.Compiler.Translator.Translator(translationState);
+            var libName = assemblyTI.LibraryName;
+
             translator.Translate();
             if (verboseToConsole)
                 Console.WriteLine("Create Php output files");
@@ -178,14 +180,13 @@ namespace Lang.Php.Compiler
 
 
                 EmitContext ec = new EmitContext();
-                var libName = PhpCodeModuleName.LibNameFromAssembly(this.compiledAssembly);
 
-                info.CurrentAssembly = compiledAssembly;// dla pewności
+                translationInfo.CurrentAssembly = compiledAssembly;// dla pewności
                 foreach (var module in translator.Modules.Where(i => i.Name.Library == libName))
                 {
                     module.Name.MakeEmitPath(ec_BaseDir);
-                    foreach (var aaa in info.ModuleProcessors)
-                        aaa.BeforeEmit(module, info);
+                    foreach (var aaa in translationInfo.ModuleProcessors)
+                        aaa.BeforeEmit(module, translationInfo);
 
                 }
 
