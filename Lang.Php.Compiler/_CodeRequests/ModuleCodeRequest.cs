@@ -14,6 +14,7 @@ namespace Lang.Php.Compiler
     implement Constructor *
     
     property ModuleName PhpCodeModuleName 
+    
     smartClassEnd
     */
     

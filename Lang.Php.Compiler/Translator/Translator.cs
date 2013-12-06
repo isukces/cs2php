@@ -28,7 +28,7 @@ namespace Lang.Php.Compiler.Translator
 
     public partial class Translator
     {
-		#region Constructors 
+        #region Constructors
 
         public Translator(TranslationState state)
         {
@@ -36,58 +36,48 @@ namespace Lang.Php.Compiler.Translator
             info = state.Principles;
         }
 
-		#endregion Constructors 
+        #endregion Constructors
 
-		#region Static Methods 
+        #region Static Methods
 
-		// Private Methods 
+        // Private Methods 
 
         static IPhpStatement[] MkArray(IPhpStatement x)
         {
             return new IPhpStatement[] { x };
         }
 
-		#endregion Static Methods 
+        #endregion Static Methods
 
-		#region Methods 
+        #region Methods
 
-		// Public Methods 
+        // Public Methods 
 
-        public void EmitAll(EmitContext context)
-        {
-            PhpEmitStyle style = new PhpEmitStyle();
-            // style.Compression = EmitStyleCompression.Compact;
-            foreach (var module in this.modules)
-            {
-                if (module.IsEmpty)
-                    continue;
-                var emiter = new PhpSourceCodeEmiter();
-                module.Emit(emiter, style);
-            }
-        }
+
+
 
         public void Translate()
         {
             var _classes = info.GetClasses();
-            var classesToTranslate = info.ClassTranslations.Values.Where(u => !u.IsReflected).ToArray();
+            var classesToTranslate = info.ClassTranslations.Values.Where(u => u.Type.Assembly == info.CurrentAssembly).ToArray();
             foreach (ClassTranslationInfo classTI in classesToTranslate)
             {
                 PhpClassDefinition phpClass;
                 PhpCodeModule phpModule = GetOrMakeModuleByName(classTI.ModuleName);
-                var assemblyTI = AssemblyTranslationInfo.FromAssembly(info.CurrentAssembly);
-                phpModule.Name.MakeEmitPath(assemblyTI.RootPath);
+                var assemblyTI = info.GetOrMakeTranslationInfo(info.CurrentAssembly);
+
                 #region Szukanie / Tworzenie PhpClassDefinition
                 {
                     PhpQualifiedName phpBaseClassName;
                     #region Szukanie nazwy klasy bazowej
                     {
                         var netBaseType = classTI.Type.BaseType;
-                        if (netBaseType == typeof(object))
+                        if (netBaseType == null || netBaseType == typeof(object))
                             phpBaseClassName = null;
                         else
                         {
                             phpBaseClassName = state.Principles.GetPhpType(netBaseType, true);
-                            ClassTranslationInfo baseTypeTI = state.Principles.ClassTranslations[netBaseType];
+                            ClassTranslationInfo baseTypeTI = state.Principles.GetOrMakeTranslationInfo(netBaseType);
                             if (baseTypeTI.Skip)
                                 phpBaseClassName = null;
                         }
@@ -191,16 +181,99 @@ namespace Lang.Php.Compiler.Translator
                                            where mName != null
                                            select mName
                                     ).Distinct().ToArray();
+                        foreach (var i in moduleNames)
+                            AppendCodeReq(i, phpModule);
 
-                        var rf = (from i in moduleNames
-                                  let fn = i.MakeIncludePath(phpModule.Name)
-                                  where fn != null
-                                  select fn).ToArray();
-                        phpModule.RequiredFiles.AddRange(rf);
                     }
                 }
                 #endregion
             }
+        }
+
+        void AppendCodeReq(PhpCodeModuleName req, PhpCodeModule current)
+        {
+            if (req == current.Name)
+                return;
+            if (req.Name == PhpCodeModuleName.CS2PHP_CONFIG_MODULE_NAME)
+            {
+                PhpCodeModule phpModule = CurrentConfigModule();
+                req = phpModule.Name;
+            }
+
+            if (req.AssemblyInfo != null && !string.IsNullOrEmpty(req.AssemblyInfo.IncludePathConstOrVarName))
+            {
+                var tmp = req.AssemblyInfo.IncludePathConstOrVarName;
+                if (tmp.StartsWith("$"))
+                    throw new NotSupportedException();
+                if (!tmp.StartsWith("\\")) tmp = "\\" + tmp;
+                PhpCodeModule phpModule = CurrentConfigModule();
+                if (!phpModule.DefinedConsts.Where(i => i.Key == tmp).Any())
+                {
+                    KnownConstInfo value;
+                    if (info.KnownConstsValues.TryGetValue(tmp, out value))
+                    {
+                        if (value.Value == null)
+                            info.Log(MessageLevels.Warning,
+                                   string.Format("Const value {0} must be a string (currently is null)", tmp, phpModule.Name));
+                        else if (value.Value is string)
+                        {
+                            var txt = value.Value as string;
+                            if (txt != "" && !txt.EndsWith("/"))
+                            {
+                                value.Value = txt + "/";
+                                info.Log(MessageLevels.Warning,
+                                    string.Format("Const value {0} is a path to library and must be empty string or must end with slash. New value is {1}",
+                                    tmp,
+                                    value.Value));
+
+                            }
+                        }
+                        else
+                            info.Log(MessageLevels.Warning,
+                               string.Format("Const value {0} must be a string", tmp, phpModule.Name));
+
+                        if (!value.UseFixedValue)
+                            phpModule.DefinedConsts.Add(new KeyValuePair<string, IPhpValue>(tmp, new PhpConstValue(value)));
+                    }
+                    else
+                    {
+                        info.Log(MessageLevels.Error,
+                            string.Format("const {0} defined in {1} has no known value", tmp, phpModule.Name));
+                        phpModule.DefinedConsts.Add(new KeyValuePair<string, IPhpValue>(tmp, new PhpConstValue("UNKNOWN")));
+                    }
+                }
+            }
+
+            IPhpValue fileNameExpression = req.MakeIncludePath(current.Name);
+            if (fileNameExpression == null) return;
+            if (current.RequiredFiles.Any())
+            {
+                var s = new PhpEmitStyle();
+                var code = fileNameExpression.GetPhpCode(s);
+                var a = current.RequiredFiles.Select(i => i.GetPhpCode(s)).ToArray();
+                if (a.Where(i => i == code).Any())
+                    return;
+            }
+            if (fileNameExpression is ICodeRelated)
+            {
+                // scan nested requests
+                var nestedCodeRequests = (fileNameExpression as ICodeRelated).GetCodeRequests().ToArray();
+                if (nestedCodeRequests.Any())
+                {
+                    var nestedModuleCodeRequests = nestedCodeRequests.OfType<ModuleCodeRequest>();
+                    foreach (var nested in nestedModuleCodeRequests)
+                        AppendCodeReq(nested.ModuleName, current);
+                }
+            }
+            current.RequiredFiles.Add(fileNameExpression);
+        }
+
+        private PhpCodeModule CurrentConfigModule()
+        {
+            var assemblyTI = info.GetOrMakeTranslationInfo(info.CurrentAssembly);
+            PhpCodeModuleName name = new PhpCodeModuleName(assemblyTI.ConfigModuleName, assemblyTI);
+            PhpCodeModule phpModule = GetOrMakeModuleByName(name);
+            return phpModule;
         }
 
         public IPhpStatement[] TranslateStatement(IStatement x)
@@ -219,7 +292,7 @@ namespace Lang.Php.Compiler.Translator
             }
             throw new Exception("Błąd translacji " + x.GetType().FullName);
         }
-		// Private Methods 
+        // Private Methods 
 
         /// <summary>
         /// Gets existing or creates code module for given name
@@ -231,7 +304,7 @@ namespace Lang.Php.Compiler.Translator
             var mod = modules.Where(i => i.Name == requiredModuleName).FirstOrDefault();
             if (mod == null)
             {
-                mod = new PhpCodeModule() { Name = requiredModuleName };
+                mod = new PhpCodeModule(requiredModuleName);
                 modules.Add(mod);
             }
             return mod;
@@ -433,13 +506,13 @@ namespace Lang.Php.Compiler.Translator
             }
         }
 
-		#endregion Methods 
+        #endregion Methods
 
-		#region Fields 
+        #region Fields
 
         TranslationState state;
 
-		#endregion Fields 
+        #endregion Fields
     }
 }
 

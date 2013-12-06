@@ -13,7 +13,7 @@ namespace Lang.Php.Wp.Compile
         public void BeforeEmit(PhpCodeModule module, TranslationInfo info)
         {
             //var a = info.CurrentAssembly.GetCustomAttributes(false);
-            var assemblyTI = AssemblyTranslationInfo.FromAssembly(info.CurrentAssembly);
+            var assemblyTI = info.GetOrMakeTranslationInfo(info.CurrentAssembly);
             // var c = info.ClassTranslations.Values.Where(u => u.ModuleName != null && u.ModuleName.Library == assemblyTI.LibraryName).ToArray();
             var typesInThisModule = info.ClassTranslations.Values.Where(u => u.ModuleName != null && u.ModuleName == module.Name).ToArray();
             var typesWithAttribute = from i in typesInThisModule

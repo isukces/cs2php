@@ -75,8 +75,10 @@ namespace Lang.Php.Compiler
                     ScriptName = declaringTypeTI.ScriptName + "__" + type.Name; // parent clas followed by __ and short name
                 else if (IgnoreNamespace)
                     ScriptName = PhpQualifiedName.SanitizePhpName(type.Name); // only short name without namespace
+                else if (type.IsGenericType)
+                    ScriptName = DotNetNameToPhpName(type.FullName == null ? type.Name : type.FullName); // beware of generic types
                 else
-                    ScriptName = DotNetNameToPhpName(type.FullName); // beware of generic types
+                    ScriptName = DotNetNameToPhpName(type.FullName == null ? type.Name : type.FullName);  
             }
             #endregion
             #region Module name
@@ -104,7 +106,8 @@ namespace Lang.Php.Compiler
                     Skip = true;
             }
             #endregion
-
+            if (type.IsGenericParameter)
+                Skip = true;
         }
 
         #endregion Constructors
@@ -115,6 +118,10 @@ namespace Lang.Php.Compiler
 
         static string DotNetNameToPhpName(string fullName)
         {
+            if (fullName == null)
+                throw new ArgumentNullException("fullName");
+            fullName = fullName.Replace("`", "__");
+
             return string.Join("",
                     from i in fullName.Replace("+", ".").Split('.')
                     select PhpQualifiedName.T_NS_SEPARATOR + PhpQualifiedName.SanitizePhpName(i));

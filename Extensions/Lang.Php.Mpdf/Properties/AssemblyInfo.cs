@@ -39,3 +39,4 @@ using System.Runtime.InteropServices;
 
 [assembly: Lang.Php.RootPath("/lib/mpdf")]
 [assembly: Lang.Php.PhpPackageSource("http://mpdf1.com/repos/MPDF57.zip", "MPDF57")]
+[assembly: Lang.Php.ModuleIncludeConst("MPDF_LIB_PATH")]

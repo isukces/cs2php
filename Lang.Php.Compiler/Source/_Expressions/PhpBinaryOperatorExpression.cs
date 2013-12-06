@@ -39,6 +39,30 @@ namespace Lang.Php.Compiler.Source
         {
             return IPhpStatementBase.XXX(left, right);
         }
+
+        /// <summary>
+        /// Helper method
+        /// </summary>
+        /// <param name="items"></param>
+        /// <returns></returns>
+        public static IPhpValue ConcatStrings(IEnumerable<IPhpValue> items)
+        {
+            if (items == null) return null;
+            IPhpValue result = null;
+            foreach (var i in items)
+            {
+                if (result == null)
+                    result = i;
+                else
+                    result = new PhpBinaryOperatorExpression(".", result, i);
+            }
+            if (result != null)
+            {
+                var simplifier = new Lang.Php.Compiler.Translator.ExpressionSimplifier(new OptimizeOptions());
+                result = simplifier.Simplify(result);
+            }
+            return result;
+        }
     }
 }
 

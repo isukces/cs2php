@@ -23,15 +23,20 @@ namespace Lang.Php.Compiler
     property IncludePathConstOrVarName string nazwa stałej lub zmiennej, która oznacza ścieżkę do biblioteki
     
     property RootPath string 
-    	preprocess value = value.Replace("/", "\\");
-    	preprocess value = value.StartsWith("\\") ? value.Substring(1) : value;
-    	preprocess value = value.EndsWith("\\") ? value : (value + "\\");
-    	preprocess value = value.Replace("\\", "\\\\");
-    	preprocess value = value == "\\" ? "" : value;
+    	preprocess value = value.Replace("\\", "/");
+    	preprocess value = value.StartsWith("/") ? value.Substring(1) : value;
+    	preprocess value = value.EndsWith("/") ? value : (value + "/");
+    	preprocess value = value.Replace("//", "/");
+    	preprocess value = value == "/" ? "" : value;
     
     property PhpPackageSourceUri string 
     
     property PhpPackagePathStrip string 
+    
+    property PhpIncludePathExpression IPhpValue 
+    
+    property ConfigModuleName string 
+    	init "cs2php"
     smartClassEnd
     */
 
@@ -40,15 +45,8 @@ namespace Lang.Php.Compiler
         #region Static Methods
 
         // Public Methods 
-        public static string LibNameFromAssembly(Assembly a)
-        {
-            var tmp = a.ManifestModule.ScopeName.ToLower();
-            if (tmp.EndsWith(".dll"))
-                tmp = tmp.Substring(0, tmp.Length - 4);
-            return tmp;
-        }
 
-        public static AssemblyTranslationInfo FromAssembly(Assembly assembly)
+        public static AssemblyTranslationInfo FromAssembly(Assembly assembly, TranslationInfo translationInfo)
         {
             if (assembly == null)
                 return null;
@@ -60,20 +58,67 @@ namespace Lang.Php.Compiler
                 if (_ModuleIncludeConst != null)
                     ati.IncludePathConstOrVarName = _ModuleIncludeConst.ConstOrVarName;
                 var _RootPath = assembly.GetCustomAttribute<RootPathAttribute>();
-                if (_RootPath != null)
-                    ati.RootPath = _RootPath.Path;
-                else
-                    ati.rootPath = "/";
-
+                ati.RootPath = _RootPath == null ? "/" : _RootPath.Path;
                 var _PhpPackageSource = assembly.GetCustomAttribute<PhpPackageSourceAttribute>();
                 if (_PhpPackageSource != null)
                 {
                     ati.PhpPackageSourceUri = _PhpPackageSource.SourceUri;
                     ati.PhpPackagePathStrip = _PhpPackageSource.StripArchivePath;
                 }
+                {
+                    var _ConfigModule = assembly.GetCustomAttribute<ConfigModuleAttribute>();
+                    if (_ConfigModule != null)
+                        ati.ConfigModuleName = _ConfigModule.Name;
+                }
             }
             ati.libraryName = LibNameFromAssembly(assembly);
+            ati.PhpIncludePathExpression = GetDefaultIncludePath(ati, translationInfo);
             return ati;
+        }
+
+        public static string LibNameFromAssembly(Assembly a)
+        {
+            var tmp = a.ManifestModule.ScopeName.ToLower();
+            if (tmp.EndsWith(".dll"))
+                tmp = tmp.Substring(0, tmp.Length - 4);
+            return tmp;
+        }
+        // Private Methods 
+        public override string ToString()
+        {
+            return libraryName;
+        }
+        static IPhpValue GetDefaultIncludePath(AssemblyTranslationInfo ati, TranslationInfo translationInfo)
+        {
+            List<IPhpValue> pathElements = new List<IPhpValue>();
+            #region Take include path variable or const
+            if (!string.IsNullOrEmpty(ati.IncludePathConstOrVarName))
+            {
+                if (ati.IncludePathConstOrVarName.StartsWith("$"))
+                    pathElements.Add(new PhpVariableExpression(ati.IncludePathConstOrVarName, PhpVariableKind.Global));
+                else
+                {
+                    var tmp = ati.IncludePathConstOrVarName;
+                    if (!tmp.StartsWith("\\")) // defined const is in global namespace ALWAYS
+                        tmp = "\\" + tmp;
+
+                    KnownConstInfo info;
+                    if (translationInfo != null && translationInfo.KnownConstsValues.TryGetValue(tmp, out info) && info.UseFixedValue)
+                        pathElements.Add(new PhpConstValue(info.Value));
+                    else
+                        pathElements.Add(new PhpDefinedConstExpression(tmp, PhpCodeModuleName.Cs2PhpConfigModuleName));
+                }
+            }
+            #endregion
+
+            #region RootPathAttribute
+            {
+                if (!string.IsNullOrEmpty(ati.RootPath) && ati.RootPath != "/")
+                    pathElements.Add(new PhpConstValue(ati.RootPath));
+            }
+            #endregion
+            IPhpValue result = PhpBinaryOperatorExpression.ConcatStrings(pathElements);
+            return result;
         }
 
         #endregion Static Methods
@@ -81,7 +126,7 @@ namespace Lang.Php.Compiler
 }
 
 
-// -----:::::##### smartClass embedded code begin #####:::::----- generated 2013-12-06 09:09
+// -----:::::##### smartClass embedded code begin #####:::::----- generated 2013-12-06 17:26
 // File generated automatically ver 2013-07-10 08:43
 // Smartclass.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0c4d5d36fb5eb4ac
 namespace Lang.Php.Compiler
@@ -100,9 +145,9 @@ namespace Lang.Php.Compiler
 
         implement INotifyPropertyChanged
         implement INotifyPropertyChanged_Passive
-        implement ToString ##Assembly## ##LibraryName## ##IncludePathConstOrVarName## ##RootPath## ##PhpPackageSourceUri## ##PhpPackagePathStrip##
-        implement ToString Assembly=##Assembly##, LibraryName=##LibraryName##, IncludePathConstOrVarName=##IncludePathConstOrVarName##, RootPath=##RootPath##, PhpPackageSourceUri=##PhpPackageSourceUri##, PhpPackagePathStrip=##PhpPackagePathStrip##
-        implement equals Assembly, LibraryName, IncludePathConstOrVarName, RootPath, PhpPackageSourceUri, PhpPackagePathStrip
+        implement ToString ##Assembly## ##LibraryName## ##IncludePathConstOrVarName## ##RootPath## ##PhpPackageSourceUri## ##PhpPackagePathStrip## ##PhpIncludePathExpression## ##ConfigModuleName##
+        implement ToString Assembly=##Assembly##, LibraryName=##LibraryName##, IncludePathConstOrVarName=##IncludePathConstOrVarName##, RootPath=##RootPath##, PhpPackageSourceUri=##PhpPackageSourceUri##, PhpPackagePathStrip=##PhpPackagePathStrip##, PhpIncludePathExpression=##PhpIncludePathExpression##, ConfigModuleName=##ConfigModuleName##
+        implement equals Assembly, LibraryName, IncludePathConstOrVarName, RootPath, PhpPackageSourceUri, PhpPackagePathStrip, PhpIncludePathExpression, ConfigModuleName
         implement equals *
         implement equals *, ~exclude1, ~exclude2
         */
@@ -131,6 +176,14 @@ namespace Lang.Php.Compiler
         /// Nazwa własności PhpPackagePathStrip; 
         /// </summary>
         public const string PROPERTYNAME_PHPPACKAGEPATHSTRIP = "PhpPackagePathStrip";
+        /// <summary>
+        /// Nazwa własności PhpIncludePathExpression; 
+        /// </summary>
+        public const string PROPERTYNAME_PHPINCLUDEPATHEXPRESSION = "PhpIncludePathExpression";
+        /// <summary>
+        /// Nazwa własności ConfigModuleName; 
+        /// </summary>
+        public const string PROPERTYNAME_CONFIGMODULENAME = "ConfigModuleName";
         #endregion Constants
 
         #region Methods
@@ -191,11 +244,11 @@ namespace Lang.Php.Compiler
             set
             {
                 value = (value ?? String.Empty).Trim();
-                value = value.Replace("/", "\\");
-                value = value.StartsWith("\\") ? value.Substring(1) : value;
-                value = value.EndsWith("\\") ? value : (value + "\\");
-                value = value.Replace("\\", "\\\\");
-                value = value == "\\" ? "" : value;
+                value = value.Replace("\\", "/");
+                value = value.StartsWith("/") ? value.Substring(1) : value;
+                value = value.EndsWith("/") ? value : (value + "/");
+                value = value.Replace("//", "/");
+                value = value == "/" ? "" : value;
                 rootPath = value;
             }
         }
@@ -232,6 +285,37 @@ namespace Lang.Php.Compiler
             }
         }
         private string phpPackagePathStrip = string.Empty;
+        /// <summary>
+        /// 
+        /// </summary>
+        public IPhpValue PhpIncludePathExpression
+        {
+            get
+            {
+                return phpIncludePathExpression;
+            }
+            set
+            {
+                phpIncludePathExpression = value;
+            }
+        }
+        private IPhpValue phpIncludePathExpression;
+        /// <summary>
+        /// 
+        /// </summary>
+        public string ConfigModuleName
+        {
+            get
+            {
+                return configModuleName;
+            }
+            set
+            {
+                value = (value ?? String.Empty).Trim();
+                configModuleName = value;
+            }
+        }
+        private string configModuleName = "cs2php";
         #endregion Properties
 
     }

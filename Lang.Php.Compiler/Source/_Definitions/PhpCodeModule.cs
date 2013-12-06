@@ -10,6 +10,7 @@ namespace Lang.Php.Compiler.Source
     /*
     smartClass
     option NoAdditionalFile
+    implement Constructor Name
     
     property Name PhpCodeModuleName nazwa pliku
     
@@ -53,8 +54,12 @@ namespace Lang.Php.Compiler.Source
 
         // Public Methods 
 
-        public void Emit(PhpSourceCodeEmiter emiter, PhpEmitStyle style)
+        public void Emit(PhpSourceCodeEmiter emiter, PhpEmitStyle style, string filename)
         {
+
+            if (string.IsNullOrEmpty(filename))
+                throw new ArgumentNullException("filename");
+
             PhpSourceCodeWriter writer = new PhpSourceCodeWriter();
             var style_CurrentNamespace = style.CurrentNamespace;
             try
@@ -69,14 +74,9 @@ namespace Lang.Php.Compiler.Source
                 {
                     var namespaces = module.classes.Select(a => a.Name.Namespace).Distinct().ToArray();
                     var manyNamespaces = namespaces.Length > 1;
-                    {
-                        //// Przestrzeń nazw
-                        //// określenie przestrzeni nazw
-                        //if (namespaces.Length > 1)
-                        //    throw new Exception("Only one namespace per file is supported, module=" + module.Name);
-                        //// var ns = namespaces.FirstOrDefault();
-                        if (!manyNamespaces && !string.IsNullOrEmpty(namespaces.First()))
-                        {
+                    {                        
+                        if (namespaces.Length == 1 && !string.IsNullOrEmpty(namespaces.First()))
+                        {                           
                             style.CurrentNamespace = namespaces.First();
                             writer.WriteLnF("namespace {0};", style.CurrentNamespace.Substring(1));
                         }
@@ -129,21 +129,13 @@ namespace Lang.Php.Compiler.Source
 
 
                 #region Save to file
-
-
-                if (string.IsNullOrEmpty(module.Name.EmitPath))
                 {
-                    throw new NotImplementedException();
-                    //string emitPathBase;
-                    //if (!context.LibraryDictionaries.TryGetValue(module.Name.Library, out emitPathBase))
-                    //    throw new Exception(string.Format("Unable to find base dir for '{0}'", module.Name.Library));
-                    //module.Name.MakeEmitPath(emitPathBase);
+                    FileInfo fi = new FileInfo(filename);
+                    fi.Directory.Create();
+                    var codeStr = writer.GetCode();
+                    var binary = Encoding.UTF8.GetBytes(codeStr);
+                    File.WriteAllBytes(fi.FullName, binary);
                 }
-                FileInfo fi = new FileInfo(module.Name.EmitPath);
-                fi.Directory.Create();
-                var codeStr = writer.GetCode();
-                var b = Encoding.UTF8.GetBytes(codeStr);
-                File.WriteAllBytes(fi.FullName, b);
                 #endregion
             }
             finally
@@ -212,7 +204,7 @@ namespace Lang.Php.Compiler.Source
 }
 
 
-// -----:::::##### smartClass embedded code begin #####:::::----- generated 2013-11-13 18:00
+// -----:::::##### smartClass embedded code begin #####:::::----- generated 2013-12-06 11:48
 // File generated automatically ver 2013-07-10 08:43
 // Smartclass.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0c4d5d36fb5eb4ac
 namespace Lang.Php.Compiler.Source
@@ -226,7 +218,9 @@ namespace Lang.Php.Compiler.Source
         public PhpCodeModule()
         {
         }
+
         Przykłady użycia
+
         implement INotifyPropertyChanged
         implement INotifyPropertyChanged_Passive
         implement ToString ##Name## ##TopComments## ##TopCode## ##BottomCode## ##Classes## ##RequiredFiles## ##DefinedConsts##
@@ -235,7 +229,17 @@ namespace Lang.Php.Compiler.Source
         implement equals *
         implement equals *, ~exclude1, ~exclude2
         */
+        #region Constructors
+        /// <summary>
+        /// Tworzy instancję obiektu
+        /// <param name="Name">nazwa pliku</param>
+        /// </summary>
+        public PhpCodeModule(PhpCodeModuleName Name)
+        {
+            this.Name = Name;
+        }
 
+        #endregion Constructors
 
         #region Constants
         /// <summary>
@@ -268,10 +272,8 @@ namespace Lang.Php.Compiler.Source
         public const string PROPERTYNAME_DEFINEDCONSTS = "DefinedConsts";
         #endregion Constants
 
-
         #region Methods
         #endregion Methods
-
 
         #region Properties
         /// <summary>
@@ -369,5 +371,6 @@ namespace Lang.Php.Compiler.Source
         }
         private List<KeyValuePair<string, IPhpValue>> definedConsts = new List<KeyValuePair<string, IPhpValue>>();
         #endregion Properties
+
     }
 }

@@ -159,8 +159,8 @@ namespace Lang.Php.Compiler
                 Console.WriteLine("Translate C# -> Php");
 
             translationInfo.CurrentAssembly = compiledAssembly;
-            var assemblyTI = AssemblyTranslationInfo.FromAssembly(compiledAssembly);
-            var ec_BaseDir = Path.Combine(OutDir, assemblyTI.RootPath);
+            var assemblyTI = translationInfo.GetOrMakeTranslationInfo(compiledAssembly);
+            var ec_BaseDir = Path.Combine(OutDir, assemblyTI.RootPath.Replace("/", "\\"));
             Console.WriteLine("Output root {0}", ec_BaseDir);
 
             if (!string.IsNullOrEmpty(assemblyTI.PhpPackageSourceUri))
@@ -180,17 +180,22 @@ namespace Lang.Php.Compiler
 
 
                 EmitContext ec = new EmitContext();
+                PhpEmitStyle style = new PhpEmitStyle();
 
                 translationInfo.CurrentAssembly = compiledAssembly;// dla pewności
-                foreach (var module in translator.Modules.Where(i => i.Name.Library == libName))
+                foreach (var module in translator.Modules.Where(i => i.Name.Library == libName && !i.IsEmpty))
                 {
-                    module.Name.MakeEmitPath(ec_BaseDir);
-                    foreach (var aaa in translationInfo.ModuleProcessors)
-                        aaa.BeforeEmit(module, translationInfo);
+
+                    string fileName = module.Name.MakeEmitPath(ec_BaseDir, 1);
+                    foreach (var modProcessor in translationInfo.ModuleProcessors)
+                    {
+                        modProcessor.BeforeEmit(module, translationInfo);
+
+                    }
+                    var emiter = new PhpSourceCodeEmiter();
+                    module.Emit(emiter, style, fileName);
 
                 }
-
-                translator.EmitAll(ec);
             }
 
             #endregion

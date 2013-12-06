@@ -45,14 +45,20 @@ namespace Lang.Php.Compiler
     	init #
     
     property State CompileState 
+    
+    property KnownConstsValues Dictionary<string, KnownConstInfo> Values of known constants i.e. paths to referenced libraries
+    	init #
+    
+    property Logs List<TranslationMessage> 
+    	init #
     smartClassEnd
     */
-    
+
     public partial class TranslationInfo
     {
-        #region Methods
+		#region Methods 
 
-        // Public Methods 
+		// Public Methods 
 
         public void CheckAccesibility(CsharpMethodCallExpression m)
         {
@@ -141,6 +147,28 @@ namespace Lang.Php.Compiler
             }
         }
 
+        public ClassTranslationInfo FindClassTranslationInfo(Type t)
+        {
+            ClassTranslationInfo o;
+            if (classTranslations.TryGetValue(t, out o))
+                return o;
+            return null;
+        }
+
+        /// <summary>
+        /// Zwraca listę klas w sparsowanych źródłach
+        /// </summary>
+        /// <returns></returns>
+        public FullClassDeclaration[] GetClasses()
+        {
+            var q = from _compiled_ in Compiled
+                    from nsDeclaration in _compiled_.NamespaceDeclarations
+                    from classDeclaration in nsDeclaration.Members.OfType<ClassDeclaration>()
+                    let fullName = nsDeclaration.Name + "." + classDeclaration.Name
+                    select new FullClassDeclaration(fullName, classDeclaration, nsDeclaration);
+            return q.ToArray();
+        }
+
         public ClassTranslationInfo GetOrMakeTranslationInfo(Type type)
         {
             if (type == null)
@@ -162,7 +190,7 @@ namespace Lang.Php.Compiler
             AssemblyTranslationInfo ati;
             if (!assemblyTranslations.TryGetValue(assembly, out ati))
             {
-                ati = assemblyTranslations[assembly] = AssemblyTranslationInfo.FromAssembly(assembly);
+                ati = assemblyTranslations[assembly] = AssemblyTranslationInfo.FromAssembly(assembly, this);
                 if (OnTranslationInfoCreated != null)
                     OnTranslationInfoCreated(this, new TranslationInfoCreatedEventArgs()
                     {
@@ -189,37 +217,7 @@ namespace Lang.Php.Compiler
             return fti;
         }
 
-        public event EventHandler<TranslationInfoCreatedEventArgs> OnTranslationInfoCreated;
-
-        public class TranslationInfoCreatedEventArgs : EventArgs
-        {
-            public AssemblyTranslationInfo AssemblyTranslation { get; set; }
-            public ClassTranslationInfo ClassTranslation { get; set; }
-            public FieldTranslationInfo FieldTranslation { get; set; }
-        }
-
-        public ClassTranslationInfo FindClassTranslationInfo(Type t)
-        {
-            ClassTranslationInfo o;
-            if (classTranslations.TryGetValue(t, out o))
-                return o;
-            return null;
-        }
-
-        /// <summary>
-        /// Zwraca listę klas w sparsowanych źródłach
-        /// </summary>
-        /// <returns></returns>
-        public FullClassDeclaration[] GetClasses()
-        {
-            var q = from _compiled_ in Compiled
-                    from nsDeclaration in _compiled_.NamespaceDeclarations
-                    from classDeclaration in nsDeclaration.Members.OfType<ClassDeclaration>()
-                    let fullName = nsDeclaration.Name + "." + classDeclaration.Name
-                    select new FullClassDeclaration(fullName, classDeclaration, nsDeclaration);
-            return q.ToArray();
-        }
-
+        [Obsolete("maybe will be better to resolve short names while emit proces")]
         public PhpQualifiedName GetPhpType(Type t, bool DoCheckAccesibility)
         {
             if (t == null)
@@ -230,8 +228,6 @@ namespace Lang.Php.Compiler
             var b = a.ScriptName.XClone();
             if (currentType != null)
             {
-                if (currentType.FullName.Contains("FormDefinition"))
-                    Console.Write("");
                 if (t == currentType)
                     b.CurrentEffectiveName = PhpQualifiedName.SELF;
                 else if (t != typeof(object) && t == currentType.BaseType)
@@ -243,15 +239,21 @@ namespace Lang.Php.Compiler
                 }
             }
             return b;
-
         }
 
+        [Obsolete("I don't think this is best way to obtain info..")]
         public ClassTranslationInfo GetTI(Type t, bool DoCheckAccesibility = true)
         {
             if (t == null)
                 return null;
             var a = GetPhpType(t, DoCheckAccesibility);
             return classTranslations[t];
+        }
+
+        public void Log(MessageLevels Level, string Text)
+        {
+            var a = new TranslationMessage(Text, Level);
+            logs.Add(a);
         }
 
         /// <summary>
@@ -298,17 +300,42 @@ namespace Lang.Php.Compiler
             return string.Format("Conversion {0} => {1}", currentType, currentMethod.ToString());
         }
 
-        #endregion Methods
+		#endregion Methods 
+
+		#region Delegates and Events 
+
+		// Events 
+
+        public event EventHandler<TranslationInfoCreatedEventArgs> OnTranslationInfoCreated;
+
+		#endregion Delegates and Events 
+
+		#region Nested Classes 
+
+
+        public class TranslationInfoCreatedEventArgs : EventArgs
+        {
+		#region Properties 
+
+            public AssemblyTranslationInfo AssemblyTranslation { get; set; }
+
+            public ClassTranslationInfo ClassTranslation { get; set; }
+
+            public FieldTranslationInfo FieldTranslation { get; set; }
+
+		#endregion Properties 
+        }
+		#endregion Nested Classes 
     }
 }
 
 
-// -----:::::##### smartClass embedded code begin #####:::::----- generated 2013-12-06 10:13
+// -----:::::##### smartClass embedded code begin #####:::::----- generated 2013-12-06 18:24
 // File generated automatically ver 2013-07-10 08:43
 // Smartclass.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0c4d5d36fb5eb4ac
 namespace Lang.Php.Compiler
 {
-    public partial class TranslationInfo 
+    public partial class TranslationInfo
     {
         /*
         /// <summary>
@@ -317,17 +344,17 @@ namespace Lang.Php.Compiler
         public TranslationInfo()
         {
         }
-
         Przykłady użycia
-
         implement INotifyPropertyChanged
         implement INotifyPropertyChanged_Passive
-        implement ToString ##CurrentAssembly## ##CurrentType## ##CurrentTypeTranslationInfo## ##CurrentMethod## ##Compiled## ##TranslationAssemblies## ##NodeTranslators## ##ModuleProcessors## ##ClassTranslations## ##AssemblyTranslations## ##FieldTranslations## ##State##
-        implement ToString CurrentAssembly=##CurrentAssembly##, CurrentType=##CurrentType##, CurrentTypeTranslationInfo=##CurrentTypeTranslationInfo##, CurrentMethod=##CurrentMethod##, Compiled=##Compiled##, TranslationAssemblies=##TranslationAssemblies##, NodeTranslators=##NodeTranslators##, ModuleProcessors=##ModuleProcessors##, ClassTranslations=##ClassTranslations##, AssemblyTranslations=##AssemblyTranslations##, FieldTranslations=##FieldTranslations##, State=##State##
-        implement equals CurrentAssembly, CurrentType, CurrentTypeTranslationInfo, CurrentMethod, Compiled, TranslationAssemblies, NodeTranslators, ModuleProcessors, ClassTranslations, AssemblyTranslations, FieldTranslations, State
+        implement ToString ##CurrentAssembly## ##CurrentType## ##CurrentTypeTranslationInfo## ##CurrentMethod## ##Compiled## ##TranslationAssemblies## ##NodeTranslators## ##ModuleProcessors## ##ClassTranslations## ##AssemblyTranslations## ##FieldTranslations## ##State## ##KnownConstsValues## ##Logs##
+        implement ToString CurrentAssembly=##CurrentAssembly##, CurrentType=##CurrentType##, CurrentTypeTranslationInfo=##CurrentTypeTranslationInfo##, CurrentMethod=##CurrentMethod##, Compiled=##Compiled##, TranslationAssemblies=##TranslationAssemblies##, NodeTranslators=##NodeTranslators##, ModuleProcessors=##ModuleProcessors##, ClassTranslations=##ClassTranslations##, AssemblyTranslations=##AssemblyTranslations##, FieldTranslations=##FieldTranslations##, State=##State##, KnownConstsValues=##KnownConstsValues##, Logs=##Logs##
+        implement equals CurrentAssembly, CurrentType, CurrentTypeTranslationInfo, CurrentMethod, Compiled, TranslationAssemblies, NodeTranslators, ModuleProcessors, ClassTranslations, AssemblyTranslations, FieldTranslations, State, KnownConstsValues, Logs
         implement equals *
         implement equals *, ~exclude1, ~exclude2
         */
+
+
         #region Constants
         /// <summary>
         /// Nazwa własności CurrentAssembly; obecnie konwertowane assembly
@@ -377,10 +404,20 @@ namespace Lang.Php.Compiler
         /// Nazwa własności State; 
         /// </summary>
         public const string PROPERTYNAME_STATE = "State";
+        /// <summary>
+        /// Nazwa własności KnownConstsValues; Values of known constants i.e. paths to referenced libraries
+        /// </summary>
+        public const string PROPERTYNAME_KNOWNCONSTSVALUES = "KnownConstsValues";
+        /// <summary>
+        /// Nazwa własności Logs; 
+        /// </summary>
+        public const string PROPERTYNAME_LOGS = "Logs";
         #endregion Constants
+
 
         #region Methods
         #endregion Methods
+
 
         #region Properties
         /// <summary>
@@ -561,7 +598,36 @@ namespace Lang.Php.Compiler
             }
         }
         private CompileState state;
+        /// <summary>
+        /// Values of known constants i.e. paths to referenced libraries
+        /// </summary>
+        public Dictionary<string, KnownConstInfo> KnownConstsValues
+        {
+            get
+            {
+                return knownConstsValues;
+            }
+            set
+            {
+                knownConstsValues = value;
+            }
+        }
+        private Dictionary<string, KnownConstInfo> knownConstsValues = new Dictionary<string, KnownConstInfo>();
+        /// <summary>
+        /// 
+        /// </summary>
+        public List<TranslationMessage> Logs
+        {
+            get
+            {
+                return logs;
+            }
+            set
+            {
+                logs = value;
+            }
+        }
+        private List<TranslationMessage> logs = new List<TranslationMessage>();
         #endregion Properties
-
     }
 }

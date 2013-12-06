@@ -101,6 +101,7 @@
     <Compile Include="_CodeRequests\LocalVariableRequest.cs" />
     <Compile Include="_CodeRequests\ModuleCodeRequest.cs" />
     <Compile Include="_enum\FieldTranslationDestionations.cs" />
+    <Compile Include="_enum\MessageLevels.cs" />
     <Compile Include="_enum\PhpVariableKind.cs" />
     <Compile Include="_enum\StatementEmitInfo.cs" />
     <Compile Include="_interfaces\ICodeRelated.cs" />
@@ -112,6 +113,7 @@
     <Compile Include="_interfaces\IPhpSimplifier.cs" />
     <Compile Include="_TranslationInfo\AssemblyTranslationInfo.cs" />
     <Compile Include="_TranslationInfo\ClassTranslationInfo.cs" />
+    <Compile Include="_TranslationInfo\KnownConstInfo.cs" />
     <Compile Include="_TranslationInfo\MethodTranslationInfo.cs" />
     <Compile Include="PhpEmitStyle.cs" />
     <Compile Include="Source\PhpQualifiedName.cs" />
@@ -171,6 +173,7 @@
     <Compile Include="Visibility.cs" />
     <Compile Include="_interfaces\IPhpStatement.cs" />
     <Compile Include="_interfaces\IPhpValue.cs" />
+    <Compile Include="_TranslationInfo\TranslationMessage.cs" />
     <Compile Include="_Visitors\PhpBaseVisitor.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
