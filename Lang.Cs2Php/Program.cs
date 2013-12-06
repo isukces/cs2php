@@ -89,10 +89,10 @@ namespace Lang.Cs2Php
                 engine.Compile("RELEASE");
 
                 Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine("Sucess");
+                Console.WriteLine("Success");
                 Console.ResetColor();
 
-                Console.ReadKey();
+               
             }
             catch (Exception ex)
             {
@@ -102,10 +102,10 @@ namespace Lang.Cs2Php
                 Console.WriteLine("   " + ex.Message + "\r\n");
                 if (showUsage)
                     Usage();
-                Console.WriteLine("press any key...");
-                Console.ReadKey();
+              
             }
-
+            Console.WriteLine("press any key...");
+            Console.ReadKey();
         }
 
 
