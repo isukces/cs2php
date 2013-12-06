@@ -14,8 +14,8 @@ namespace Lang.Php.Wp.Compile
         {
             //var a = info.CurrentAssembly.GetCustomAttributes(false);
             var assemblyTI = AssemblyTranslationInfo.FromAssembly(info.CurrentAssembly);
-            // var c = info.ClassTranslationInfos.Values.Where(u => u.ModuleName != null && u.ModuleName.Library == assemblyTI.LibraryName).ToArray();
-            var typesInThisModule = info.ClassTranslationInfos.Values.Where(u => u.ModuleName != null && u.ModuleName == module.Name).ToArray();
+            // var c = info.ClassTranslations.Values.Where(u => u.ModuleName != null && u.ModuleName.Library == assemblyTI.LibraryName).ToArray();
+            var typesInThisModule = info.ClassTranslations.Values.Where(u => u.ModuleName != null && u.ModuleName == module.Name).ToArray();
             var typesWithAttribute = from i in typesInThisModule
                                      let _attribute = i.Type.GetCustomAttribute<MainPluginModuleAttribute>(false)
                                      where _attribute != null
