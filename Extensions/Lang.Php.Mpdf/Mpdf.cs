@@ -8,9 +8,8 @@ namespace Lang.Php.Mpdf
 {
     /// <summary>
     /// Only simple facade....
-    /// </summary>
-    [Skip]
-    [Module("mpdf-DELETE")]
+    /// </summary>    
+    [Module("mpdf")]
     [IgnoreNamespace]
     [ScriptName("mPDF")]
     public class Mpdf
