@@ -72,6 +72,7 @@
   <ItemGroup>
     <Compile Include="Cs2PhpCompiler.cs" />
     <Compile Include="EmitContext.cs" />
+    <Compile Include="PathUtil.cs" />
     <Compile Include="OptimizeOptions.cs" />
     <Compile Include="Source\PhpSourceBase.cs" />
     <Compile Include="Source\_Expressions\PhpArrayCreateExpression.cs" />
@@ -81,6 +82,7 @@
     <Compile Include="Source\_Expressions\PhpPropertyAccessExpression.cs" />
     <Compile Include="Source\_Statements\IPhpStatementBase.cs" />
     <Compile Include="Source\_Statements\PhpBreakStatement.cs" />
+    <Compile Include="Source\_Statements\PhpNamespaceStatement.cs" />
     <Compile Include="Translator\ExpressionSimplifier.cs" />
     <Compile Include="Translator\Node\BasicTranslator.cs" />
     <Compile Include="Translator\Node\BasicTranslator_Property.cs" />

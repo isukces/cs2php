@@ -59,7 +59,7 @@ namespace Lang.Php.Compiler
             project = solution.Projects.Single();
         }
 
-        public EmitResult Compile2PhpAndEmit(string OutDir)
+        public EmitResult Compile2PhpAndEmit(string OutDir, Dictionary<string, KnownConstInfo> referencedLibsPaths)
         {
             EmitResult result;
             if (verboseToConsole)
@@ -70,7 +70,9 @@ namespace Lang.Php.Compiler
                 GreenOk();
                 if (verboseToConsole)
                     Console.WriteLine("Analize C# source");
-                var info = ParseCsSource();
+                TranslationInfo info = ParseCsSource();
+                foreach (var i in referencedLibsPaths)
+                    info.KnownConstsValues[i.Key] = i.Value;
                 GreenOk();
                 TranslateAndCreatePHPFiles(info, OutDir);
             }
@@ -108,7 +110,7 @@ namespace Lang.Php.Compiler
             UpdateCompilationOptions(new CompilationOptions(OutputKind.DynamicallyLinkedLibrary));
 
             // UpdateCompilationOptions(new Comp)
-            DisplayRef(" just after loaded");
+            // DisplayRef(" just after loaded");
 
             GreenOk();
         }

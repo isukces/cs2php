@@ -39,17 +39,6 @@ namespace Lang.Php.Compiler.Source
 
     public partial class PhpCodeModule : ICodeRelated
     {
-
-        public bool IsEmpty
-        {
-            get
-            {
-                foreach (var i in classes)
-                    if (!i.IsEmpty)
-                        return false;
-                return definedConsts.Count == 0 && !PhpCodeBlock.HasAny(topCode) && !PhpCodeBlock.HasAny(bottomCode);
-            }
-        }
         #region Methods
 
         // Public Methods 
@@ -74,9 +63,9 @@ namespace Lang.Php.Compiler.Source
                 {
                     var namespaces = module.classes.Select(a => a.Name.Namespace).Distinct().ToArray();
                     var manyNamespaces = namespaces.Length > 1;
-                    {                        
+                    {
                         if (namespaces.Length == 1 && !string.IsNullOrEmpty(namespaces.First()))
-                        {                           
+                        {
                             style.CurrentNamespace = namespaces.First();
                             writer.WriteLnF("namespace {0};", style.CurrentNamespace.Substring(1));
                         }
@@ -168,16 +157,35 @@ namespace Lang.Php.Compiler.Source
             List<IPhpStatement> result = new List<IPhpStatement>();
 
             List<string> alreadyDefined = new List<string>();
-            foreach (var item in definedConsts)
+            if (definedConsts.Any())
             {
-                if (alreadyDefined.Contains(item.Key))
-                    continue;
-                alreadyDefined.Add(item.Key);
-                var defined = new PhpMethodCallExpression("defined", new PhpConstValue(item.Key));
-                var notDefined = new PhpUnaryOperatorExpression(defined, "!");
-                var define = new PhpMethodCallExpression("define", new PhpConstValue(item.Key), item.Value);
-                PhpIfStatement ifStatement = new PhpIfStatement(notDefined, new PhpExpressionStatement(define), null);
-                result.Add(ifStatement);
+                var grouped = definedConsts.GroupBy(u => GetNamespace(u.Key)).ToArray();
+
+                bool useNamespaces = grouped.Length > 1 || grouped[0].Key != PathUtil.UNIX_SEP;
+                foreach (var group in grouped)
+                {
+                    List<IPhpStatement> container;
+                    if (useNamespaces)
+                    {
+                        var ns1 = new PhpNamespaceStatement(group.Key);
+                        container = ns1.Code.Statements;
+                        result.Add(ns1);
+                    }
+                    else
+                        container = result;
+                    foreach (var item in group)
+                    {
+                        var shortName = GetShortName(item.Key);
+                        if (alreadyDefined.Contains(item.Key))
+                            continue;
+                        alreadyDefined.Add(item.Key);
+                        var defined = new PhpMethodCallExpression("defined", new PhpConstValue(shortName));
+                        var notDefined = new PhpUnaryOperatorExpression(defined, "!");
+                        var define = new PhpMethodCallExpression("define", new PhpConstValue(shortName), item.Value);
+                        PhpIfStatement ifStatement = new PhpIfStatement(notDefined, new PhpExpressionStatement(define), null);
+                        container.Add(ifStatement);
+                    }
+                }
             }
             return result.ToArray();
         }
@@ -199,7 +207,36 @@ namespace Lang.Php.Compiler.Source
             return result.ToArray();
         }
 
+        string GetNamespace(string name)
+        {
+            var a = PathUtil.MakeUnixPath(PathUtil.UNIX_SEP + name);
+            var g = a.LastIndexOf(PathUtil.UNIX_SEP);
+            return a.Substring(0, g);
+        }
+
+        string GetShortName(string name)
+        {
+            var a = PathUtil.MakeUnixPath(PathUtil.UNIX_SEP + name);
+            var g = a.LastIndexOf(PathUtil.UNIX_SEP);
+            return a.Substring(g + 1);
+        }
+
         #endregion Methods
+
+        #region Properties
+
+        public bool IsEmpty
+        {
+            get
+            {
+                foreach (var i in classes)
+                    if (!i.IsEmpty)
+                        return false;
+                return definedConsts.Count == 0 && !PhpCodeBlock.HasAny(topCode) && !PhpCodeBlock.HasAny(bottomCode);
+            }
+        }
+
+        #endregion Properties
     }
 }
 
@@ -218,9 +255,7 @@ namespace Lang.Php.Compiler.Source
         public PhpCodeModule()
         {
         }
-
         Przykłady użycia
-
         implement INotifyPropertyChanged
         implement INotifyPropertyChanged_Passive
         implement ToString ##Name## ##TopComments## ##TopCode## ##BottomCode## ##Classes## ##RequiredFiles## ##DefinedConsts##
@@ -229,6 +264,8 @@ namespace Lang.Php.Compiler.Source
         implement equals *
         implement equals *, ~exclude1, ~exclude2
         */
+
+
         #region Constructors
         /// <summary>
         /// Tworzy instancję obiektu
@@ -240,6 +277,7 @@ namespace Lang.Php.Compiler.Source
         }
 
         #endregion Constructors
+
 
         #region Constants
         /// <summary>
@@ -272,8 +310,10 @@ namespace Lang.Php.Compiler.Source
         public const string PROPERTYNAME_DEFINEDCONSTS = "DefinedConsts";
         #endregion Constants
 
+
         #region Methods
         #endregion Methods
+
 
         #region Properties
         /// <summary>
@@ -371,6 +411,5 @@ namespace Lang.Php.Compiler.Source
         }
         private List<KeyValuePair<string, IPhpValue>> definedConsts = new List<KeyValuePair<string, IPhpValue>>();
         #endregion Properties
-
     }
 }

@@ -30,10 +30,15 @@ namespace Lang.Php.Compiler.Translator
     {
         #region Constructors
 
-        public Translator(TranslationState state)
+        public Translator(TranslationState translationState)
         {
-            this.state = state ?? new TranslationState(new TranslationInfo());
-            info = state.Principles;
+#if DEBUG
+            if (translationState == null)
+                throw new ArgumentNullException("translationState");
+
+#endif
+            this.state = translationState ?? new TranslationState(new TranslationInfo());
+            info = translationState.Principles;
         }
 
         #endregion Constructors
@@ -206,34 +211,20 @@ namespace Lang.Php.Compiler.Translator
                 if (tmp.StartsWith("$"))
                     throw new NotSupportedException();
                 if (!tmp.StartsWith("\\")) tmp = "\\" + tmp;
+                // leading slash is not necessary -> config is in global namespace
                 PhpCodeModule phpModule = CurrentConfigModule();
                 if (!phpModule.DefinedConsts.Where(i => i.Key == tmp).Any())
                 {
                     KnownConstInfo value;
                     if (info.KnownConstsValues.TryGetValue(tmp, out value))
                     {
-                        if (value.Value == null)
-                            info.Log(MessageLevels.Warning,
-                                   string.Format("Const value {0} must be a string (currently is null)", tmp, phpModule.Name));
-                        else if (value.Value is string)
+                        if (!value.UseFixedValue)
                         {
-                            var txt = value.Value as string;
-                            if (txt != "" && !txt.EndsWith("/"))
-                            {
-                                value.Value = txt + "/";
-                                info.Log(MessageLevels.Warning,
-                                    string.Format("Const value {0} is a path to library and must be empty string or must end with slash. New value is {1}",
-                                    tmp,
-                                    value.Value));
-
-                            }
+                            var expression = PathUtil.MakePathValueRelatedToFile(value, info);
+                            phpModule.DefinedConsts.Add(new KeyValuePair<string, IPhpValue>(tmp, expression));
                         }
                         else
-                            info.Log(MessageLevels.Warning,
-                               string.Format("Const value {0} must be a string", tmp, phpModule.Name));
-
-                        if (!value.UseFixedValue)
-                            phpModule.DefinedConsts.Add(new KeyValuePair<string, IPhpValue>(tmp, new PhpConstValue(value)));
+                            throw new NotImplementedException();
                     }
                     else
                     {
