@@ -139,6 +139,15 @@ namespace Lang.Php.Compiler.Source
             return p;
         }
 
+        /// <summary>
+        /// Used for patch only
+        /// </summary>
+        public static bool IsFrameworkName(PhpCodeModuleName name)
+        {
+            var List = "commonlanguageruntimelibrary".Split(' ');
+            return List.Contains(name.Library);
+        }
+
         public IPhpValue MakeIncludePath(PhpCodeModuleName relatedTo)
         {
             if (relatedTo.Library == Library)

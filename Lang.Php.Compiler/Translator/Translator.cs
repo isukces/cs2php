@@ -186,7 +186,7 @@ namespace Lang.Php.Compiler.Translator
                                            where mName != null
                                            select mName
                                     ).Distinct().ToArray();
-                        foreach (var i in moduleNames)
+                        foreach (var i in moduleNames.Where(x => !PhpCodeModuleName.IsFrameworkName(x)))
                             AppendCodeReq(i, phpModule);
 
                     }

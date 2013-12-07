@@ -89,7 +89,10 @@ namespace Lang.Php.Compiler
                     {
                         if (cti.IsPage)
                             fti.IsDefinedInNonincludableModule = true;
+                        if (cti.Skip)
+                            fti.IncludeModule = null;
                     }
+                  
                     break;
 
             }
