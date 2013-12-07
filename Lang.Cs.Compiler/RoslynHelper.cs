@@ -22,9 +22,9 @@ namespace Lang.Cs.Compiler
                 
                 memoryStream.Flush();
                 var g = memoryStream.GetBuffer();
-                var g2 = memoryStream.ToArray();
-                var sss = Assembly.Load(g2);
-                return sss;
+                var binaryData = memoryStream.ToArray();
+                var assembly = Assembly.Load(binaryData);
+                return assembly;
             }
 
         }

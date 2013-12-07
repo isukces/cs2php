@@ -89,13 +89,7 @@ namespace Lang.Cs.Compiler
                 a.Add(Compile(i));
             return a.ToArray();
         }
-
-        public Assembly ReferencedAssembly(string fn)
-        {
-            Assembly a = Assembly.Load(fn);
-            ReferencedAssemblies.Add(a);
-            return a;
-        }
+ 
 		// Private Methods 
 
         CompileResult Compile(string filename)
