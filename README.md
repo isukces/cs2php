@@ -7,15 +7,16 @@ C# to PHP compiler package
 
 Three scenarios have been prepared for translation process:
 
-1. If you like PHP programming philosophy you can derived C# class from PhpDummy and use well known methods like
+1. If you like PHP programming philosophy you can derive C# classes from `PhpDummy` and use well known methods like
 `echo`, `array_merge`, `empty`, `file_get_contents` and many more.
 
-2. If you're unwilling to use PHP (like me) and need substitute you're in right place. Use special designed classes like 
- `Lang.Php.MySQL` and `Lang.Php.MysqlResult` that collect MySQL methods in one place and classes 
- `Lang.Php.Filters.FilterInput` that serves PHP specific functionality in more attractive form.
+2. If you're unwilling to use PHP (like me) and need substitute you're in right place. Use special designed classes i.e. 
 
-3. If you need to translate existing C# library cs2php offers you extendable translator that is able to convert 
-into PHP equivalent methods (i.e. `string.IsNullOrEmpty` into `empty`), properties (i.e. `DateTime.Now` into `new DateTime`)
+ - `Lang.Php.MySQL` and `Lang.Php.MysqlResult` that collect MySQL methods in one place and classes
+ 
+ - `Lang.Php.Filters.FilterInput` that serves PHP specific functionality in more attractive form.
+
+3. If you need to translate existing C# library cs2php offers you extendable translator that is able to convert methods (i.e. `string.IsNullOrEmpty` into `empty`), properties (i.e. `DateTime.Now` into `new DateTime`)
 and classes (i.e. `System.TimeSpan` into `DateInterval`).
 
 All scenarios allows to take advantages of static type checking. C# code is compiled into dll before it is translated to PHP, so 
