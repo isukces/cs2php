@@ -73,6 +73,10 @@
       <Project>{1f0d844c-80dc-45e5-92c4-3d50d67b164e}</Project>
       <Name>Lang.Php.Framework</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Lang.PHP\Lang.Php.csproj">
+      <Project>{ed717576-b7b9-4775-8236-1855e20e52d5}</Project>
+      <Name>Lang.Php</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
@@ -81,7 +85,7 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties BuildVersion_StartDate="2000/1/1" BuildVersion_UpdateFileVersion="True" BuildVersion_UpdateAssemblyVersion="True" BuildVersion_BuildVersioningStyle="None.None.DeltaBaseDateInDays.Increment" />
+      <UserProperties BuildVersion_BuildVersioningStyle="None.None.DeltaBaseDateInDays.Increment" BuildVersion_UpdateAssemblyVersion="True" BuildVersion_UpdateFileVersion="True" BuildVersion_StartDate="2000/1/1" />
     </VisualStudio>
   </ProjectExtensions>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

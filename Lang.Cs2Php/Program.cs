@@ -39,6 +39,12 @@ namespace Lang.Cs2Php
             {
                 List<string> files = new List<string>();
                 string command = "";
+#if DEBUG
+                engine.Configuration = "DEBUG";
+#else
+                engine.Configuration = "RELEASE";                
+#endif
+
                 foreach (var arg in args)
                 {
                     if (arg.StartsWith("-"))
@@ -47,25 +53,40 @@ namespace Lang.Cs2Php
                     }
                     else
                     {
-                        var fi = new FileInfo(arg);
-                        var fileName = fi.FullName;
 
                         if (string.IsNullOrEmpty(command))
-                            files.Add(fileName);
+                            files.Add(new FileInfo(arg).FullName);
                         else
                         {
                             switch (command)
                             {
                                 case "r":
+                                    var fileName = new FileInfo(arg).FullName;
                                     if (!File.Exists(fileName))
                                         throw new Exception("Referenced library " + fileName + " doesn't exist");
                                     engine.Referenced.Add(fileName);
                                     command = null;
                                     break;
                                 case "t":
+                                    fileName = new FileInfo(arg).FullName;
                                     if (!File.Exists(fileName))
                                         throw new Exception("Referenced library " + fileName + " doesn't exist");
                                     engine.TranlationHelpers.Add(fileName);
+                                    command = null;
+                                    break;
+                                case "lib":
+                                    {
+                                        var a = arg.IndexOf("=");
+                                        if (a < 0)
+                                            throw new Exception("Invalid data for 'lib' option. Use 'lib libraryname=path'.");
+                                        var lib = arg.Substring(0, a).Trim();
+                                        var path = arg.Substring(a + 1).Trim();
+                                        engine.LibraryPath[lib] = path;
+                                    }
+                                    command = null;
+                                    break;
+                                case "conf":
+                                    engine.Configuration = arg;
                                     command = null;
                                     break;
                                 default:
@@ -86,13 +107,13 @@ namespace Lang.Cs2Php
                 engine.OutDir = files.Last();
                 engine.Check();
                 showUsage = false;
-                engine.Compile("RELEASE");
+                engine.Compile();
 
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("Success");
                 Console.ResetColor();
 
-               
+
             }
             catch (Exception ex)
             {
@@ -102,7 +123,7 @@ namespace Lang.Cs2Php
                 Console.WriteLine("   " + ex.Message + "\r\n");
                 if (showUsage)
                     Usage();
-              
+
             }
             Console.WriteLine("press any key...");
             Console.ReadKey();

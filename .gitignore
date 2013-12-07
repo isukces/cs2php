@@ -124,3 +124,6 @@ UpgradeLog*.XML
 
 
 *.csbak
+/_ExamplesOut/CommonLib/lib/mpdf
+/Lang.Php.Compiler/Common.txt
+/Lang.Cs.Compiler/Common.txt
