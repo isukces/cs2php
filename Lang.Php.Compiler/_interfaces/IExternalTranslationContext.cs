@@ -6,17 +6,19 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Lang.Php.Compiler 
+namespace Lang.Php.Compiler
 {
     public interface IExternalTranslationContext
     {
-		#region Operations 
+        #region Operations
 
-          IPhpValue TranslateValue(IValue srcValue);
-          TranslationInfo GetTranslationInfo();
+        IPhpValue TranslateValue(IValue srcValue);
+        TranslationInfo GetTranslationInfo();
 
-          ClassReplaceInfo FindOneClassReplacer(Type srcType);
+        ClassReplaceInfo FindOneClassReplacer(Type srcType);
 
-		#endregion Operations 
+        Version PhpVersion { get; }
+
+        #endregion Operations
     }
 }

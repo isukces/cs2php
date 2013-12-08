@@ -66,6 +66,7 @@
     <Compile Include="Html.cs" />
     <Compile Include="Filters\FilterInput.cs" />
     <Compile Include="MbPhpString.cs" />
+    <Compile Include="PhpVersions.cs" />
     <Compile Include="Runtime\RuntimePhpDirectory.cs" />
     <Compile Include="_attributes\_assembly\PhpPackageSourceAttribute.cs" />
     <Compile Include="_attributes\RequireOnceAttribute.cs" />

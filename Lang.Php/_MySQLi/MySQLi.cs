@@ -10,7 +10,7 @@ namespace Lang.Php
     [ScriptName("\\mysqli")]
     public class MySQLi
     {
-        #region Constructors
+		#region Constructors 
 
         /// <summary>
         /// 
@@ -32,11 +32,11 @@ namespace Lang.Php
 
         }
 
-        #endregion Constructors
+		#endregion Constructors 
 
-        #region Methods
+		#region Methods 
 
-        // Public Methods 
+		// Public Methods 
 
         [DirectCall("->autocommit")]
         public bool AutoCommit(bool mode)
@@ -65,24 +65,13 @@ namespace Lang.Php
             return true;
         }
 
-        [DirectCall("->rollback")]
-        public bool Rollback(int flags = 0, string name = null)
+        [DirectCall("->escape_string")]
+        public string EscapeString(string escapestr)
         {
-            // bool rollback ([ int $flags [, string $name ]] )
-            return true;
+            throw new NotSupportedException();
         }
-
-        [DirectCall("->set_charset", "0")]
-        public bool SetCharset(string charset)
-        {
-            // http://www.php.net/manual/en/mysqli.set-charset.php
-            throw new NotImplementedException();
-        }
-
 
         // public mixed query ( string $query [, int $resultmode = MYSQLI_STORE_RESULT ] )
-
-
         /// <summary>
         /// Query version for INSERT, UPDATE, DELETE etc.
         /// </summary>
@@ -98,6 +87,7 @@ namespace Lang.Php
             // For other successful queries mysqli_query() will return TRUE.
             throw new NotImplementedException();
         }
+
         /// <summary>
         /// Query version for SELECT, SHOW, DESCRIBE or EXPLAIN
         /// </summary>
@@ -114,9 +104,23 @@ namespace Lang.Php
             throw new NotImplementedException();
         }
 
-        #endregion Methods
+        [DirectCall("->rollback")]
+        public bool Rollback(int flags = 0, string name = null)
+        {
+            // bool rollback ([ int $flags [, string $name ]] )
+            return true;
+        }
 
-        #region Fields
+        [DirectCall("->set_charset", "0")]
+        public bool SetCharset(string charset)
+        {
+            // http://www.php.net/manual/en/mysqli.set-charset.php
+            throw new NotImplementedException();
+        }
+
+		#endregion Methods 
+
+		#region Fields 
 
         /// <summary>
         /// ini_get("mysqli.default_host")
@@ -139,9 +143,9 @@ namespace Lang.Php
         /// </summary>
         public const string default_user = "*default*";
 
-        #endregion Fields
+		#endregion Fields 
 
-        #region Properties
+		#region Properties 
 
         [DirectCall("$->affected_rows")]
         public int AffectedRows
@@ -188,7 +192,29 @@ namespace Lang.Php
             }
         }
 
-        #endregion Properties
+        /// <summary>
+        /// Translated into !empty($mysqli->connect_error)
+        /// </summary>
+        public bool WasConnectionError
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        /// <summary>
+        /// Translated into empty($mysqli->connect_error)
+        /// </summary>
+        public bool WasSuccessfulConnection
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+		#endregion Properties 
 
         /* Methods 
 __construct ([ string $host = ini_get("mysqli.default_host") [, string $username = ini_get("mysqli.default_user") [, string $passwd = ini_get("mysqli.default_pw") [, string $dbname = "" [, int $port = ini_get("mysqli.default_port") [, string $socket = ini_get("mysqli.default_socket") ]]]]]] )
@@ -208,15 +234,12 @@ bool options ( int $option , mixed $value )
 bool ping ( void )
 public static int poll ( array &$read , array &$error , array &$reject , int $sec [, int $usec ] )
 mysqli_stmt prepare ( string $query )
-
 bool real_connect ([ string $host [, string $username [, string $passwd [, string $dbname [, int $port [, string $socket [, int $flags ]]]]]]] )
-string escape_string ( string $escapestr )
 bool real_query ( string $query )
 public mysqli_result reap_async_query ( void )
 public bool refresh ( int $options )
 int rpl_query_type ( string $query )
 bool select_db ( string $dbname )
-
 bool set_local_infile_handler ( mysqli $link , callable $read_func )
 bool ssl_set ( string $key , string $cert , string $ca , string $capath , string $cipher )
 string stat ( void )

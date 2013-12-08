@@ -15,9 +15,12 @@ namespace Lang.Php.Compiler.Translator
     
     property Principles TranslationInfo 
     	read only
+    
+    property PhpVersion Version 
+    	init new Version(5,3,0)
     smartClassEnd
     */
-
+    
     public partial class TranslationState : IExternalTranslationContext
     {
 		#region Methods 
@@ -47,6 +50,11 @@ namespace Lang.Php.Compiler.Translator
             return null;
         }
 		// Private Methods 
+
+        TranslationInfo IExternalTranslationContext.GetTranslationInfo()
+        {
+            return principles;
+        }
 
         IPhpValue IExternalTranslationContext.TranslateValue(Lang.Cs.Compiler.IValue srcValue)
         {
@@ -88,17 +96,11 @@ namespace Lang.Php.Compiler.Translator
         }
 
 		#endregion Properties 
-    
-
-        TranslationInfo IExternalTranslationContext.GetTranslationInfo()
-        {
-            return principles;
-        }
     }
 }
 
 
-// -----:::::##### smartClass embedded code begin #####:::::----- generated 2013-11-10 16:37
+// -----:::::##### smartClass embedded code begin #####:::::----- generated 2013-12-08 18:52
 // File generated automatically ver 2013-07-10 08:43
 // Smartclass.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0c4d5d36fb5eb4ac
 namespace Lang.Php.Compiler.Translator
@@ -112,17 +114,17 @@ namespace Lang.Php.Compiler.Translator
         public TranslationState()
         {
         }
+
         Przykłady użycia
+
         implement INotifyPropertyChanged
         implement INotifyPropertyChanged_Passive
-        implement ToString ##Principles##
-        implement ToString Principles=##Principles##
-        implement equals Principles
+        implement ToString ##Principles## ##PhpVersion##
+        implement ToString Principles=##Principles##, PhpVersion=##PhpVersion##
+        implement equals Principles, PhpVersion
         implement equals *
         implement equals *, ~exclude1, ~exclude2
         */
-
-
         #region Constructors
         /// <summary>
         /// Tworzy instancję obiektu
@@ -135,18 +137,19 @@ namespace Lang.Php.Compiler.Translator
 
         #endregion Constructors
 
-
         #region Constants
         /// <summary>
         /// Nazwa własności Principles; 
         /// </summary>
         public const string PROPERTYNAME_PRINCIPLES = "Principles";
+        /// <summary>
+        /// Nazwa własności PhpVersion; 
+        /// </summary>
+        public const string PROPERTYNAME_PHPVERSION = "PhpVersion";
         #endregion Constants
-
 
         #region Methods
         #endregion Methods
-
 
         #region Properties
         /// <summary>
@@ -160,6 +163,22 @@ namespace Lang.Php.Compiler.Translator
             }
         }
         private TranslationInfo principles;
+        /// <summary>
+        /// 
+        /// </summary>
+        public Version PhpVersion
+        {
+            get
+            {
+                return phpVersion;
+            }
+            set
+            {
+                phpVersion = value;
+            }
+        }
+        private Version phpVersion = new Version(5,4,0);
         #endregion Properties
+
     }
 }

@@ -57,12 +57,23 @@ namespace Lang.Php
             }
         }
 
-        [Obsolete("This will be removed")]
-        [DirectCall("->fetch_assoc")]
-        public T FetchAssoc<T>()
+
+        /// <summary>
+        /// Translated into fetch_assoc if T is class marked AsArray
+        /// Translation defined in Lang.Php.Compiler.Translator.Node.MysqliTranslator
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public bool Fetch<T>(out T value)
         {
             // array fetch_assoc ( void )
             throw new NotImplementedException();
+        }
+
+        [DirectCall("->free")]
+        public void Free()
+        {
+
         }
 
         #endregion Properties
@@ -78,6 +89,6 @@ namespace Lang.Php
         object fetch_object ([ string $class_name [, array $params ]] )
         mixed fetch_row ( void )
         bool field_seek ( int $fieldnr )
-        void free ( void ) */
+        */
     }
 }

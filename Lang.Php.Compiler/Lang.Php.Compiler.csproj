@@ -92,6 +92,7 @@
     <Compile Include="Translator\Node\FilterTranslator.cs" />
     <Compile Include="Translator\Node\Lang__Php__Html__Methods.cs" />
     <Compile Include="Translator\Node\Linq\EnumerableTranslator.cs" />
+    <Compile Include="Translator\Node\MysqliTranslator.cs" />
     <Compile Include="Translator\Node\MysqlMethods.cs" />
     <Compile Include="Translator\Node\PhpDirectoryEntryTranslator.cs" />
     <Compile Include="Translator\Node\ResponseHeaderTranslator.cs" />
