@@ -123,9 +123,11 @@
     <Compile Include="GlobalMethods.cs" />
     <Compile Include="HtmlEntitiesFlags.cs" />
     <Compile Include="_MySQLi\MySQLi.cs" />
+    <Compile Include="_MySQLi\MySQLiCharsetInfo.cs" />
     <Compile Include="_MySQLi\MySQLiResult.cs" />
     <Compile Include="_MySQLi\MySQLiResultMode.cs" />
     <Compile Include="_MySQLi\MySQLiStatement.cs" />
+    <Compile Include="_MySQLi\MySQLiWarning.cs" />
     <Compile Include="_MySql\MySQL.cs" />
     <Compile Include="_MySql\MySqlDateTime.cs" />
     <Compile Include="_MySql\MysqlResult.cs" />

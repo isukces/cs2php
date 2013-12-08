@@ -10,7 +10,7 @@ namespace Lang.Php
     [ScriptName("\\mysqli")]
     public class MySQLi
     {
-		#region Constructors 
+        #region Constructors
 
         /// <summary>
         /// 
@@ -32,11 +32,11 @@ namespace Lang.Php
 
         }
 
-		#endregion Constructors 
+        #endregion Constructors
 
-		#region Methods 
+        #region Methods
 
-		// Public Methods 
+        // Public Methods 
 
         [DirectCall("->autocommit")]
         public bool AutoCommit(bool mode)
@@ -69,6 +69,19 @@ namespace Lang.Php
         public string EscapeString(string escapestr)
         {
             throw new NotSupportedException();
+        }
+
+        [DirectCall("->get_charset")]
+        public MySQLiCharsetInfo GetCharset()
+        {
+            throw new NotImplementedException();
+        }
+
+        [DirectCall("->get_warnings")]
+        public MySQLiWarning GetWarnings()
+        {
+            //mysqli_warning get_warnings ( void )
+            return null;
         }
 
         // public mixed query ( string $query [, int $resultmode = MYSQLI_STORE_RESULT ] )
@@ -118,9 +131,9 @@ namespace Lang.Php
             throw new NotImplementedException();
         }
 
-		#endregion Methods 
+        #endregion Methods
 
-		#region Fields 
+        #region Fields
 
         /// <summary>
         /// ini_get("mysqli.default_host")
@@ -143,9 +156,9 @@ namespace Lang.Php
         /// </summary>
         public const string default_user = "*default*";
 
-		#endregion Fields 
+        #endregion Fields
 
-		#region Properties 
+        #region Properties
 
         [DirectCall("$->affected_rows")]
         public int AffectedRows
@@ -214,17 +227,15 @@ namespace Lang.Php
             }
         }
 
-		#endregion Properties 
+        #endregion Properties
 
         /* Methods 
 __construct ([ string $host = ini_get("mysqli.default_host") [, string $username = ini_get("mysqli.default_user") [, string $passwd = ini_get("mysqli.default_pw") [, string $dbname = "" [, int $port = ini_get("mysqli.default_port") [, string $socket = ini_get("mysqli.default_socket") ]]]]]] )
 bool change_user ( string $user , string $password , string $database )
 bool debug ( string $message )
 bool dump_debug_info ( void )
-object get_charset ( void )
 string get_client_info ( void )
 bool get_connection_stats ( void )
-mysqli_warning get_warnings ( void )
 mysqli init ( void )
 bool kill ( int $processid )
 bool more_results ( void )

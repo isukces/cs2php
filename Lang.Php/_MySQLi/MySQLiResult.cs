@@ -6,7 +6,7 @@ using System.Text;
 namespace Lang.Php
 {
     [Skip]
-    [ScriptName("mysqli_result")]
+    [ScriptName("\\mysqli_result")]
     public class MySQLiResult
     {
         #region Properties

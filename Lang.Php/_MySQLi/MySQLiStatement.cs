@@ -6,7 +6,7 @@ using System.Text;
 namespace Lang.Php 
 {
     [Skip]
-    [ScriptName("mysqli_stmt")]
+    [ScriptName("\\mysqli_stmt")]
     public class MySQLiStatement
     {
     }
