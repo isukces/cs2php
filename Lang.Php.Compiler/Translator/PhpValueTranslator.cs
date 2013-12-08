@@ -459,6 +459,12 @@ namespace Lang.Php.Compiler.Translator
 
 
             IPhpValue phpTargetObject = TransValue(src.TargetObject);
+            if (ownerInfo.IsArray)
+            {
+                var idx = new PhpConstValue(pri.FieldScriptName);
+                var arrayExpr = new PhpArrayAccessExpression(phpTargetObject, idx);
+                return arrayExpr;
+            }
             {
                 PropertyInfo propertyInfo = src.Member;
                 var classReplacer = state.FindOneClassReplacer(propertyInfo.DeclaringType);

@@ -143,7 +143,7 @@ namespace Lang.Php
 
         #region Properties
 
-        [ScriptName("affected_rows")]
+        [DirectCall("$->affected_rows")]
         public int AffectedRows
         {
             get
@@ -152,8 +152,8 @@ namespace Lang.Php
             }
         }
 
-        [ScriptName("connect_errno")]
-        public string connect_errno
+        [DirectCall("$->connect_errno")]
+        public string ConnectErrno
         {
             get
             {
@@ -161,8 +161,8 @@ namespace Lang.Php
             }
         }
 
-        [ScriptName("connect_error")]
-        public string connect_error
+        [DirectCall("->$connect_error")]
+        public string ConnectError
         {
             get
             {
@@ -170,7 +170,7 @@ namespace Lang.Php
             }
         }
 
-        [ScriptName("errno")]
+        [DirectCall("->$errno")]
         public int errno
         {
             get
@@ -179,7 +179,7 @@ namespace Lang.Php
             }
         }
 
-        [ScriptName("error")]
+        [DirectCall("->$error")]
         public string Error
         {
             get

@@ -36,8 +36,16 @@ namespace Lang.Php.Compiler
             result.isStatic = (propInfo.CanRead && propInfo.GetGetMethod().IsStatic)
                 || (propInfo.CanWrite && propInfo.GetSetMethod().IsStatic);
             var name = propInfo.Name;
-            result.FieldScriptName = name.Substring(0, 1).ToLower() + name.Substring(1);
             name = name.Substring(0, 1).ToUpper() + name.Substring(1);
+            result.FieldScriptName = name.Substring(0, 1).ToLower() + name.Substring(1);
+            {
+                var at = propInfo.GetCustomAttribute<ScriptNameAttribute>();
+                if (at != null)
+                {
+                    name = at.Name; // preserve case
+                    result.FieldScriptName = name;
+                }
+            }
             var AutoImplemented = IsAutoProperty(propInfo);
             if (AutoImplemented)
             {
