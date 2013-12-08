@@ -10,7 +10,7 @@ namespace Lang.Php
     [ScriptName("\\mysqli")]
     public class MySQLi
     {
-        #region Constructors
+		#region Constructors 
 
         /// <summary>
         /// 
@@ -32,11 +32,11 @@ namespace Lang.Php
 
         }
 
-        #endregion Constructors
+		#endregion Constructors 
 
-        #region Methods
+		#region Methods 
 
-        // Public Methods 
+		// Public Methods 
 
         [DirectCall("->autocommit")]
         public bool AutoCommit(bool mode)
@@ -131,9 +131,9 @@ namespace Lang.Php
             throw new NotImplementedException();
         }
 
-        #endregion Methods
+		#endregion Methods 
 
-        #region Fields
+		#region Fields 
 
         /// <summary>
         /// ini_get("mysqli.default_host")
@@ -156,9 +156,9 @@ namespace Lang.Php
         /// </summary>
         public const string default_user = "*default*";
 
-        #endregion Fields
+		#endregion Fields 
 
-        #region Properties
+		#region Properties 
 
         [DirectCall("$->affected_rows")]
         public int AffectedRows
@@ -205,6 +205,18 @@ namespace Lang.Php
             }
         }
 
+        [DirectCall("->$host_info")]
+        public string HostInfo { get;set;}
+
+        [DirectCall("->$protocol_version")]
+         public string ProtocolVersion { get;set;}
+
+        [DirectCall("->$server_info")]
+         public string ServerInfo { get;set;}
+
+        [DirectCall("->$server_version")]
+         public int ServerVersion { get;set;}
+
         /// <summary>
         /// Translated into !empty($mysqli->connect_error)
         /// </summary>
@@ -227,7 +239,7 @@ namespace Lang.Php
             }
         }
 
-        #endregion Properties
+		#endregion Properties 
 
         /* Methods 
 __construct ([ string $host = ini_get("mysqli.default_host") [, string $username = ini_get("mysqli.default_user") [, string $passwd = ini_get("mysqli.default_pw") [, string $dbname = "" [, int $port = ini_get("mysqli.default_port") [, string $socket = ini_get("mysqli.default_socket") ]]]]]] )
@@ -263,10 +275,6 @@ int $client_version;
         array $error_list;
 int $field_count;
 int $client_version;
-string $host_info;
-string $protocol_version;
-string $server_info;
-int $server_version;
 string $info;
 mixed $insert_id;
 string $sqlstate;
