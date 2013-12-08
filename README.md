@@ -7,7 +7,7 @@ C# to PHP compiler package
 
 Three scenarios have been prepared for translation process:
 
-1. If you like PHP programming philosophy you can derive C# classes from `PhpDummy` and use well known methods like
+1. If you like PHP programming philosophy you can derive C# classes from `PhpDummy` and use well-known methods like
 `echo`, `array_merge`, `empty`, `file_get_contents` and many more.
 
 2. If you're unwilling to use PHP (like me) and need substitute you're in right place. Use special designed classes i.e. 
@@ -22,13 +22,17 @@ and classes (i.e. `System.TimeSpan` into `DateInterval`).
 All scenarios allows to take advantages of static type checking. C# code is compiled into dll before it is translated to PHP, so 
 result code is more reliable. 
 
+Forget about mistyped variable or method names, forget about mistakes like = instead of ==.
+
 Enums are used willingly. In example well known round function can be used 
 
     var a = round(value, 2, RoundMode.Up);
  
 ### Test & debug C# code directly in IDE environment... ###
 
-...using dedicated web server that simulates APACHE+PHP.  Just call http://localhost:11000/somefile.php and C# method associated with this url will be invoked.
+...using dedicated web server that simulates APACHE+PHP.  
+Just call http://localhost:11000/somefile.php and C# method associated with this url will be invoked.
+See results directly in web browser.
 
 ### Modularisation support ###
 Divide your project into libraries, put them in preffered folder structure and forget about 'include' madness. Necessary files will be found and included behind the scenes.

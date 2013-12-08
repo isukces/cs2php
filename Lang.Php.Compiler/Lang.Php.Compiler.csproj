@@ -95,6 +95,7 @@
     <Compile Include="Translator\Node\MysqlMethods.cs" />
     <Compile Include="Translator\Node\PhpDirectoryEntryTranslator.cs" />
     <Compile Include="Translator\Node\ResponseHeaderTranslator.cs" />
+    <Compile Include="Translator\Node\StringBuilderTranslator.cs" />
     <Compile Include="Translator\Node\StringExtensionsTranslator.cs" />
     <Compile Include="Translator\Node\TimeSpanTranslator.cs" />
     <Compile Include="Translator\StatementSimplifier.cs" />
