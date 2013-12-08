@@ -72,6 +72,8 @@
     <Compile Include="_attributes\_assembly\RootPathAttribute.cs" />
     <Compile Include="_attributes\_assembly\ConfigModuleAttribute.cs" />
     <Compile Include="_DateTime\UnixTimestamp.cs" />
+    <Compile Include="_enums\ClassMembers.cs" />
+    <Compile Include="_enums\MethodCallStyles.cs" />
     <Compile Include="_Files\PhpDirectoryEntry.cs" />
     <Compile Include="_Files\PhpDirectory.cs" />
     <Compile Include="PhpMath.cs" />
@@ -119,6 +121,10 @@
     <Compile Include="_Files\PhpFiles.cs" />
     <Compile Include="GlobalMethods.cs" />
     <Compile Include="HtmlEntitiesFlags.cs" />
+    <Compile Include="_MySQLi\MySQLi.cs" />
+    <Compile Include="_MySQLi\MySQLiResult.cs" />
+    <Compile Include="_MySQLi\MySQLiResultMode.cs" />
+    <Compile Include="_MySQLi\MySQLiStatement.cs" />
     <Compile Include="_MySql\MySQL.cs" />
     <Compile Include="_MySql\MySqlDateTime.cs" />
     <Compile Include="_MySql\MysqlResult.cs" />
