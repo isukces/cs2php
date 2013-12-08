@@ -153,7 +153,7 @@ namespace Lang.Php.Compiler.Translator.Node
             var search = src.MethodInfo.ToString();
             var found = otherClass.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | flags).Where(i => i.ToString() == search).FirstOrDefault();
             if (found == null)
-                
+
                 throw new Exception(string.Format("Klasa {0} nie zawiera metody lustrzanej {1}\r\nDodaj\r\n{2}", otherClass, search, src.MethodInfo.GetMethodHeader()));
             src = new CsharpMethodCallExpression(found, src.TargetObject, src.Arguments, src.GenericTypes, false);
             return src;
@@ -170,6 +170,12 @@ namespace Lang.Php.Compiler.Translator.Node
             DirectCallAttribute directCallAttribute = GetDirectCallAttribute(src.MethodInfo);
             if (directCallAttribute == null)
                 return null;
+
+            if (directCallAttribute.CallType == MethodCallStyles.Static)
+                throw new NotSupportedException();
+            if (directCallAttribute.MemberToCall != ClassMembers.Method)
+                throw new NotSupportedException();
+
             if (string.IsNullOrEmpty(directCallAttribute.Name))
             {
                 var ma = directCallAttribute.MapArray;
@@ -185,7 +191,16 @@ namespace Lang.Php.Compiler.Translator.Node
                 else
                     return ctx.TranslateValue(src.Arguments[ma[0]].MyValue);
             }
-            var phpMethod = new PhpMethodCallExpression(directCallAttribute.Name);
+            var name = directCallAttribute.Name;
+
+
+            var phpMethod = new PhpMethodCallExpression(name);
+            if (directCallAttribute.CallType == MethodCallStyles.Instance)
+            {
+                if (src.TargetObject == null)
+                    throw new NotSupportedException("gray horse 3");
+                phpMethod.TargetObject = ctx.TranslateValue(src.TargetObject);
+            }
             CopyArguments(ctx, src.Arguments, phpMethod);
             #region Mapping
             if (directCallAttribute.HasMapping)
@@ -212,7 +227,7 @@ namespace Lang.Php.Compiler.Translator.Node
             {
                 var nr = directCallAttribute.OutNr;
                 var movedExpression = phpMethod.Arguments[nr].Expression;
-                phpMethod.Arguments.RemoveAt(nr);                          
+                phpMethod.Arguments.RemoveAt(nr);
                 var a = new PhpAssignExpression(movedExpression, phpMethod);
                 return a;
             }

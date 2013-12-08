@@ -6,7 +6,7 @@ namespace Lang.Php
     [AttributeUsage(AttributeTargets.Method | AttributeTargets.Property, AllowMultiple = false)]
     public class DirectCallAttribute : Attribute
     {
-		#region Constructors 
+        #region Constructors
 
         /// <summary>
         /// 
@@ -14,27 +14,53 @@ namespace Lang.Php
         /// <param name="name">Name in script</param>
         public DirectCallAttribute(string name)
         {
-            this.Name = name;
+            SetName(name);
             OutNr = int.MinValue;
         }
 
+        private void SetName(string name)
+        {
+            name = name
+                .Replace("->", " -> ")
+                .Replace("$", " $ ");
+            var tmp = name.Split(' ').Select(i => i.Trim()).Where(i => !string.IsNullOrEmpty(i)).ToArray();
+            this.Name = tmp.Any() ? tmp.Last() : null;
+            tmp = tmp.Take(tmp.Length - 1).Select(i => i.ToLower()).ToArray();
+            CallType = MethodCallStyles.Procedural;
+            if (tmp.Contains("->") || tmp.Contains("instance"))
+                CallType = MethodCallStyles.Instance;
+            else if (tmp.Contains("::") || tmp.Contains("static"))
+                CallType = MethodCallStyles.Static;
+
+            MemberToCall = ClassMembers.Method;
+            if (tmp.Contains("field") || tmp.Contains("$"))
+                MemberToCall = ClassMembers.Field;
+
+        }
+        public MethodCallStyles CallType { get; private set; }
+        public ClassMembers MemberToCall { get; private set; }
+
+
         public DirectCallAttribute(string name, string map, int outNr = int.MinValue)
         {
-            this.Name = name;
+            SetName(name);
             this.Map = (map ?? "").Trim();
             this.OutNr = outNr;
         }
 
-		#endregion Constructors 
+        #endregion Constructors
 
-		#region Fields 
+        #region Fields
 
         public const int THIS = int.MinValue;
 
-		#endregion Fields 
+        #endregion Fields
 
-		#region Properties 
-        
+        #region Properties
+
+
+
+
         public bool HasMapping
         {
             get
@@ -70,6 +96,6 @@ namespace Lang.Php
         /// </summary>
         public string Name { get; set; }
 
-		#endregion Properties 
+        #endregion Properties
     }
 }

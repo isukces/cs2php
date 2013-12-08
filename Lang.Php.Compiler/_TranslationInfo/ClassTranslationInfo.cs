@@ -61,6 +61,13 @@ namespace Lang.Php.Compiler
 
             #region ScriptName
             {
+                if (IgnoreNamespace)
+                    ScriptName = PhpQualifiedName.SanitizePhpName(type.Name); // only short name without namespace
+                else if (type.IsGenericType)
+                    ScriptName = DotNetNameToPhpName(type.FullName == null ? type.Name : type.FullName); // beware of generic types
+                else
+                    ScriptName = DotNetNameToPhpName(type.FullName == null ? type.Name : type.FullName);  
+
                 var _scriptName = ats.OfType<ScriptNameAttribute>().FirstOrDefault();
                 if (_scriptName != null)
                 {
@@ -73,12 +80,8 @@ namespace Lang.Php.Compiler
                 }
                 if (declaringTypeTI != null)
                     ScriptName = declaringTypeTI.ScriptName + "__" + type.Name; // parent clas followed by __ and short name
-                else if (IgnoreNamespace)
-                    ScriptName = PhpQualifiedName.SanitizePhpName(type.Name); // only short name without namespace
-                else if (type.IsGenericType)
-                    ScriptName = DotNetNameToPhpName(type.FullName == null ? type.Name : type.FullName); // beware of generic types
-                else
-                    ScriptName = DotNetNameToPhpName(type.FullName == null ? type.Name : type.FullName);  
+               
+            
             }
             #endregion
             #region Module name

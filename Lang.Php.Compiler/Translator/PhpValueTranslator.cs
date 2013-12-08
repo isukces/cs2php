@@ -450,6 +450,7 @@ namespace Lang.Php.Compiler.Translator
         protected override IPhpValue VisitInstancePropertyAccessExpression(CsharpInstancePropertyAccessExpression src)
         {
             var pri = PropertyTranslationInfo.FromPropertyInfo(src.Member);
+            var ownerInfo = this.state.Principles.GetOrMakeTranslationInfo(src.Member.DeclaringType);
             if (src.TargetObject == null)
                 throw new NotImplementedException("statyczny");
             var translatedByExternalNodeTranslator = state.Principles.NodeTranslators.Translate(state, src);
@@ -471,14 +472,54 @@ namespace Lang.Php.Compiler.Translator
                     propertyInfo = newPropertyInfo;
                 }
 
+
+
                 #region DirectCallAttribute
                 {
                     var ats = propertyInfo.GetCustomAttribute<DirectCallAttribute>(true);
                     if (ats != null)
                     {
-                        var method = new PhpMethodCallExpression(ats.Name);
-                        method.Arguments.Add(new PhpMethodInvokeValue(phpTargetObject));
-                        return method;
+                        if (string.IsNullOrEmpty(ats.Name))
+                        {
+                            if (ats.MapArray.Length > 1)
+                                throw new NotSupportedException();
+                            if (ats.MapArray.Length == 1)
+                                if (ats.MapArray[0] != DirectCallAttribute.THIS)
+                                    throw new NotSupportedException();
+                            return phpTargetObject;
+                        }
+                        switch (ats.MemberToCall)
+                        {
+                            case ClassMembers.Method:
+                                var method = new PhpMethodCallExpression(ats.Name);
+                                //switch (ats.CallType)
+                                //{
+                                //    case MethodCallStyles.Procedural:
+                                //        method.Arguments.Add(new PhpMethodInvokeValue(phpTargetObject));
+                                //        return method;
+                                //    case MethodCallStyles.:
+                                //        method.Arguments.Add(new PhpMethodInvokeValue(phpTargetObject));
+                                //        return method;
+                                //    default:
+                                //        throw new NotSupportedException();
+                                //}
+                                throw new NotImplementedException();
+                            case ClassMembers.Field:
+                                switch (ats.CallType)
+                                {
+                                    case MethodCallStyles.Instance:
+                                        var includeModule = ownerInfo.IncludeModule;
+                                        var field = new PhpInstanceFieldAccessExpression(ats.Name, phpTargetObject, includeModule);
+                                        return field;
+                                    default:
+                                        throw new NotSupportedException();
+                                }
+                            //var f = new PhpMethodCallExpression(ats.Name);
+                            //method.Arguments.Add(new PhpMethodInvokeValue(phpTargetObject));
+                            //return method;
+                            default:
+                                throw new NotSupportedException();
+                        }
                     }
                 }
                 #endregion
