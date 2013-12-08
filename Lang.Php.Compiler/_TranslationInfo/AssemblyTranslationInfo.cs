@@ -117,7 +117,7 @@ namespace Lang.Php.Compiler
                     pathElements.Add(new PhpConstValue(ati.RootPath));
             }
             #endregion
-            IPhpValue result = PhpBinaryOperatorExpression.ConcatStrings(pathElements);
+            IPhpValue result = PhpBinaryOperatorExpression.ConcatStrings(pathElements.ToArray());
             return result;
         }
 

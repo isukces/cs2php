@@ -51,6 +51,14 @@ namespace Lang.Php.Framework.Replacers
 
         #endregion Methods
 
+
+        [DirectCall("implode")]
+        [Since("4.3.0")]
+        public static string Join(string separatorparams, object[] values)
+        {
+            throw new MockMethodException();
+        }
+
         [DirectCall("mb_strtolower", "this")]
         string ToLower()
         {

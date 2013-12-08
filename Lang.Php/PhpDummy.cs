@@ -11,9 +11,9 @@ namespace Lang.Php
     [Skip]
     public class PhpDummy
     {
-        #region Static Methods
+		#region Static Methods 
 
-        // Public Methods 
+		// Public Methods 
 
         [DirectCall("_htmlspecialchars_")]
         public static string _htmlspecialchars_(string _string)
@@ -60,14 +60,14 @@ namespace Lang.Php
             return array;
         }
 
-        [DirectCall("base64_encode")]
-        public static string base64_encode(string data)
+        [DirectCall("base64_decode")]
+        public static string base64_decode(string data)
         {
             throw new NotSupportedException();
         }
 
-        [DirectCall("base64_decode")]
-        public static string base64_decode(string data)
+        [DirectCall("base64_encode")]
+        public static string base64_encode(string data)
         {
             throw new NotSupportedException();
         }
@@ -354,6 +354,19 @@ namespace Lang.Php
             return x != null;
         }
 
+        [DirectCall("json_decode")]
+        public static object json_decode ( string json , bool assoc = false , int depth = 512 , int options = 0  ) {
+            // mixed json_decode ( string $json [, bool $assoc = false [, int $depth = 512 [, int $options = 0 ]]] )
+            throw new MockMethodException();
+        }
+
+        [DirectCall("json_encode")]
+        public static string json_encode(object value, int options = 0)
+        {
+            // string json_encode ( mixed $value [, int $options = 0 [, int $depth = 512 ]] )
+            throw new MockMethodException();
+        }
+
         [DirectCall("ksort")]
         [Obsolete("Not finished")]
         public static bool ksort<TKey, TValue>(Dictionary<TKey, TValue> _array)
@@ -601,11 +614,11 @@ namespace Lang.Php
 
         }
 
-        #endregion Static Methods
+		#endregion Static Methods 
 
-        #region Methods
+		#region Methods 
 
-        // Public Methods 
+		// Public Methods 
 
         [DirectCall("preg_replace_callback")]
         public T preg_replace_callback<T>(string pattern, Func<string[], T> callback, string subject)
@@ -627,15 +640,15 @@ namespace Lang.Php
             return x.Length;
         }
 
-        #endregion Methods
+		#endregion Methods 
 
-        #region Fields
+		#region Fields 
 
         [AsDefinedConst]
         public const string __FILE__ = "????";
         [AsDefinedConst]
         public const string PHP_EOL = "\r\n";
 
-        #endregion Fields
+		#endregion Fields 
     }
 }

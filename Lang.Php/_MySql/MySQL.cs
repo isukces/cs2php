@@ -20,6 +20,23 @@ namespace Lang.Php
 
         #endregion Constructors
 
+        [DirectCall("@mysql_escape_string")]
+        public static string EscapeString(object o)
+        {
+            throw new NotImplementedException();
+        }
+        [DirectCall("@mysql_escape_string")]
+        public static string EscapeString(MySqlDateTime o)
+        {
+            throw new NotImplementedException();
+        }
+
+        [DirectCall("mysql_real_escape_string", "0,this")]
+        public string RealEscapeString(object o)
+        {
+            throw new NotImplementedException();
+        }
+
         #region Static Methods
 
         // Public Methods 

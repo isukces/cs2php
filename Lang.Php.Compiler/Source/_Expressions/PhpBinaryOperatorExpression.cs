@@ -39,13 +39,14 @@ namespace Lang.Php.Compiler.Source
         {
             return IPhpStatementBase.XXX(left, right);
         }
+   
 
         /// <summary>
         /// Helper method
         /// </summary>
         /// <param name="items"></param>
         /// <returns></returns>
-        public static IPhpValue ConcatStrings(IEnumerable<IPhpValue> items)
+        public static IPhpValue ConcatStrings(params IPhpValue[] items)
         {
             if (items == null) return null;
             IPhpValue result = null;
