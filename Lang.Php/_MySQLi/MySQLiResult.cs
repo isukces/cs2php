@@ -9,6 +9,30 @@ namespace Lang.Php
     [ScriptName("\\mysqli_result")]
     public class MySQLiResult
     {
+        #region Methods
+
+        // Public Methods 
+
+        /// <summary>
+        /// Translated into fetch_assoc if T is class marked AsArray
+        /// Translation defined in Lang.Php.Compiler.Translator.Node.MysqliTranslator
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public virtual bool Fetch<T>(out T value)
+        {
+            // array fetch_assoc ( void )
+            throw new NotImplementedException();
+        }
+
+        [DirectCall("->free")]
+        public virtual void Free()
+        {
+
+        }
+
+        #endregion Methods
+
         #region Properties
 
         /// <summary>
@@ -49,31 +73,12 @@ namespace Lang.Php
         /// Number of rows in the result set.
         /// </summary>
         [DirectCall("instance field num_rows")]
-        public int NumRows
+        public virtual int NumRows
         {
             get
             {
                 throw new NotImplementedException();
             }
-        }
-
-
-        /// <summary>
-        /// Translated into fetch_assoc if T is class marked AsArray
-        /// Translation defined in Lang.Php.Compiler.Translator.Node.MysqliTranslator
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
-        public bool Fetch<T>(out T value)
-        {
-            // array fetch_assoc ( void )
-            throw new NotImplementedException();
-        }
-
-        [DirectCall("->free")]
-        public void Free()
-        {
-
         }
 
         #endregion Properties
@@ -82,7 +87,6 @@ namespace Lang.Php
         bool data_seek ( int $offset )
         mixed fetch_all ([ int $resulttype = MYSQLI_NUM ] )
         mixed fetch_array ([ int $resulttype = MYSQLI_BOTH ] )
-      
         object fetch_field_direct ( int $fieldnr )
         object fetch_field ( void )
         array fetch_fields ( void )

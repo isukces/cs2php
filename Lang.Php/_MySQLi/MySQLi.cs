@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Lang.Php.Runtime;
+using MySql.Data.MySqlClient;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -22,17 +24,59 @@ namespace Lang.Php
         /// <param name="port"></param>
         /// <param name="socket"></param>
         public MySQLi(
-            string host = default_host,
-            string username = default_user,
-            string passwd = default_pw,
+            string host = TAKE_FROM_INI,
+            string username = TAKE_FROM_INI,
+            string passwd = TAKE_FROM_INI,
             string dbname = "",
             int port = default_port,
-            string socket = default_socket)
+            string socket = TAKE_FROM_INI)
         {
+            if (host == TAKE_FROM_INI)
+                PhpIni.TryGetValue("mysqli.default_host", out host);
+            if (username == TAKE_FROM_INI)
+                PhpIni.TryGetValue("mysqli.default_user", out username);
+            if (passwd == TAKE_FROM_INI)
+                PhpIni.TryGetValue("mysqli.default_pw", out passwd);
+            if (port == default_port)
+            {
+                string portStr;
+                if (PhpIni.TryGetValue("mysqli.default_port", out portStr))
+                    port = int.Parse(portStr);
+                else
+                    port = PhpIni.MYSQL_DEFAULT_PORT;
+            }
+            if (socket == TAKE_FROM_INI)
+                PhpIni.TryGetValue("mysqli.default_socket", out socket);
+            //  MySQL a = new MySQL();
+            MySqlConnectionStringBuilder b = new MySqlConnectionStringBuilder();
+            b.Server = host;
+            b.UserID = username;
+            b.Port = (uint)port;
+            if (!string.IsNullOrEmpty(passwd))
+                b.Password = passwd;
+            _connection = new MySqlConnection(b.ToString());
+            try
+            {
+                _connection.Open();
+                if (!string.IsNullOrEmpty(dbname))
+                    _connection.ChangeDatabase(dbname);
+            }
+            catch (MySqlException e)
+            {
+                connectError = e.Message;
+                connectErrno = e.Number;
+            }
+            catch (Exception e)
+            {
+                connectError = e.Message;
+            }
 
         }
 
 		#endregion Constructors 
+
+        public const int ERR_UNABLE_TO_CONNECT_TO_MYSQL_HOST = 1042;
+        public const int ERR_ACCESS_DENIED = 1044;
 
 		#region Methods 
 
@@ -55,6 +99,7 @@ namespace Lang.Php
         [DirectCall("->close")]
         public bool Close()
         {
+            _connection.Close();
             return true;
         }
 
@@ -68,7 +113,38 @@ namespace Lang.Php
         [DirectCall("->escape_string")]
         public string EscapeString(string escapestr)
         {
-            throw new NotSupportedException();
+            return escapestr
+                .Replace("\\", "\\\\")
+                .Replace("\r", "\\\r")
+                .Replace("\n", "\\\n")
+                .Replace("\t", "\\\t")
+                .Replace("\b", "\\\b")
+                .Replace("'", "''");
+
+/*
+ * mysql> SELECT 'hello', '"hello"', '""hello""', 'hel''lo', '\'hello';
++-------+---------+-----------+--------+--------+
+| hello | "hello" | ""hello"" | hel'lo | 'hello |
++-------+---------+-----------+--------+--------+
+
+mysql> SELECT "hello", "'hello'", "''hello''", "hel""lo", "\"hello";
++-------+---------+-----------+--------+--------+
+| hello | 'hello' | ''hello'' | hel"lo | "hello |
++-------+---------+-----------+--------+--------+
+
+mysql> SELECT 'This\nIs\nFour\nLines';
++--------------------+
+| This
+Is
+Four
+Lines |
++--------------------+
+
+mysql> SELECT 'disappearing\ backslash';
++------------------------+
+| disappearing backslash |
++------------------------+
+ */
         }
 
         [DirectCall("->get_charset")]
@@ -114,7 +190,9 @@ namespace Lang.Php
             // Returns FALSE on failure. For successful SELECT, SHOW, DESCRIBE or EXPLAIN queries mysqli_query() 
             // will return a mysqli_result object. 
             // For other successful queries mysqli_query() will return TRUE.
-            throw new NotImplementedException();
+            var q = new MySqlCommand(query, _connection);
+            using (MySqlDataReader reader = q.ExecuteReader())
+                return new RuntimeMySQLiResult(this, reader);
         }
 
         [DirectCall("->rollback")]
@@ -124,37 +202,38 @@ namespace Lang.Php
             return true;
         }
 
-        [DirectCall("->set_charset", "0")]
+        [DirectCall("->set_charset")]
         public bool SetCharset(string charset)
         {
             // http://www.php.net/manual/en/mysqli.set-charset.php
-            throw new NotImplementedException();
+            if (WasSuccessfulConnection)
+            {
+                var a = new MySqlCommand("set names " + charset, _connection);
+                a.ExecuteNonQuery();
+                _lastCharset = charset;
+                return true;
+            }
+            else
+                return false;
         }
 
 		#endregion Methods 
 
 		#region Fields 
 
-        /// <summary>
-        /// ini_get("mysqli.default_host")
-        /// </summary>
-        public const string default_host = "*default*";
+        MySqlConnection _connection;
+        string _lastCharset;
+        int connectErrno;
+        string connectError;
         /// <summary>
         /// ini_get("mysqli.default_port")
         /// </summary>
         public const int default_port = -1;
+        internal RuntimeMySQLiResult OpenResult;
         /// <summary>
-        /// ini_get("mysqli.default_pw")
+        /// It means "take value from INI"
         /// </summary>
-        public const string default_pw = "*default*";
-        /// <summary>
-        /// ini_get("mysqli.default_socket")
-        /// </summary>
-        public const string default_socket = "*default*";
-        /// <summary>
-        /// ini_get("mysqli.default_user")
-        /// </summary>
-        public const string default_user = "*default*";
+        public const string TAKE_FROM_INI = "\uf8ff";
 
 		#endregion Fields 
 
@@ -170,11 +249,11 @@ namespace Lang.Php
         }
 
         [DirectCall("$->connect_errno")]
-        public string ConnectErrno
+        public int ConnectErrno
         {
             get
             {
-                throw new NotImplementedException();
+                return connectErrno;
             }
         }
 
@@ -183,7 +262,7 @@ namespace Lang.Php
         {
             get
             {
-                throw new NotImplementedException();
+                return connectError;
             }
         }
 
@@ -206,16 +285,16 @@ namespace Lang.Php
         }
 
         [DirectCall("->$host_info")]
-        public string HostInfo { get;set;}
+        public string HostInfo { get; set; }
 
         [DirectCall("->$protocol_version")]
-         public string ProtocolVersion { get;set;}
+        public string ProtocolVersion { get; set; }
 
         [DirectCall("->$server_info")]
-         public string ServerInfo { get;set;}
+        public string ServerInfo { get; set; }
 
         [DirectCall("->$server_version")]
-         public int ServerVersion { get;set;}
+        public int ServerVersion { get; set; }
 
         /// <summary>
         /// Translated into !empty($mysqli->connect_error)
@@ -224,7 +303,7 @@ namespace Lang.Php
         {
             get
             {
-                throw new NotImplementedException();
+                return !WasSuccessfulConnection;
             }
         }
 
@@ -235,7 +314,7 @@ namespace Lang.Php
         {
             get
             {
-                throw new NotImplementedException();
+                return string.IsNullOrEmpty(connectError);
             }
         }
 

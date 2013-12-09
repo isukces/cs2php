@@ -66,7 +66,9 @@
     <Compile Include="Html.cs" />
     <Compile Include="Filters\FilterInput.cs" />
     <Compile Include="MbPhpString.cs" />
+    <Compile Include="PhpIni.cs" />
     <Compile Include="PhpVersions.cs" />
+    <Compile Include="Runtime\RuntimeMySQLiResult.cs" />
     <Compile Include="Runtime\RuntimePhpDirectory.cs" />
     <Compile Include="_attributes\_assembly\PhpPackageSourceAttribute.cs" />
     <Compile Include="_attributes\RequireOnceAttribute.cs" />
@@ -178,7 +180,7 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties BuildVersion_StartDate="2000/1/1" BuildVersion_UpdateFileVersion="True" BuildVersion_UpdateAssemblyVersion="True" BuildVersion_BuildVersioningStyle="None.None.DeltaBaseDateInDays.Increment" />
+      <UserProperties BuildVersion_BuildVersioningStyle="None.None.DeltaBaseDateInDays.Increment" BuildVersion_UpdateAssemblyVersion="True" BuildVersion_UpdateFileVersion="True" BuildVersion_StartDate="2000/1/1" />
     </VisualStudio>
   </ProjectExtensions>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

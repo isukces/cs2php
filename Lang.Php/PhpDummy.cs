@@ -11,9 +11,9 @@ namespace Lang.Php
     [Skip]
     public class PhpDummy
     {
-		#region Static Methods 
+        #region Static Methods
 
-		// Public Methods 
+        // Public Methods 
 
         [DirectCall("_htmlspecialchars_")]
         public static string _htmlspecialchars_(string _string)
@@ -318,6 +318,15 @@ namespace Lang.Php
 
         }
 
+        [DirectCall("ini_get")]
+        public static Falsable<string> ini_get(string name)
+        {
+            string a;
+            if (PhpIni.TryGetValue(name, out a))
+                return a;
+            return Falsable<string>.False;
+        }
+
         [DirectCall("intval")]
         public static int intval(object i, int @base = 10)
         {
@@ -355,7 +364,8 @@ namespace Lang.Php
         }
 
         [DirectCall("json_decode")]
-        public static object json_decode ( string json , bool assoc = false , int depth = 512 , int options = 0  ) {
+        public static object json_decode(string json, bool assoc = false, int depth = 512, int options = 0)
+        {
             // mixed json_decode ( string $json [, bool $assoc = false [, int $depth = 512 [, int $options = 0 ]]] )
             throw new MockMethodException();
         }
@@ -614,11 +624,11 @@ namespace Lang.Php
 
         }
 
-		#endregion Static Methods 
+        #endregion Static Methods
 
-		#region Methods 
+        #region Methods
 
-		// Public Methods 
+        // Public Methods 
 
         [DirectCall("preg_replace_callback")]
         public T preg_replace_callback<T>(string pattern, Func<string[], T> callback, string subject)
@@ -640,15 +650,15 @@ namespace Lang.Php
             return x.Length;
         }
 
-		#endregion Methods 
+        #endregion Methods
 
-		#region Fields 
+        #region Fields
 
         [AsDefinedConst]
         public const string __FILE__ = "????";
         [AsDefinedConst]
         public const string PHP_EOL = "\r\n";
 
-		#endregion Fields 
+        #endregion Fields
     }
 }

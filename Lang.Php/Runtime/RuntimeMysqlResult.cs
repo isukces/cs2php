@@ -9,9 +9,9 @@ namespace Lang.Php.Runtime
 {
     internal class RuntimeMysqlResult : MysqlResult
     {
-		#region Methods 
+        #region Methods
 
-		// Public Methods 
+        // Public Methods 
 
         public override bool FetchAssoc<T>(out T row)
         {
@@ -50,7 +50,7 @@ namespace Lang.Php.Runtime
             return true;
             // throw new NotSupportedException();
         }
-		// Protected Methods 
+        // Protected Methods 
 
         protected override int getNumRows()
         {
@@ -58,7 +58,7 @@ namespace Lang.Php.Runtime
                 return _results.Count;
             return 0;
         }
-		// Internal Methods 
+        // Internal Methods 
 
         internal void _SetFromDR(DbDataReader reader)
         {
@@ -75,15 +75,15 @@ namespace Lang.Php.Runtime
 
         }
 
-		#endregion Methods 
+        #endregion Methods
 
-		#region Fields 
+        #region Fields
 
         int _cursor = 0;
         private string[] _fieldNames;
         private List<object[]> _results = new List<object[]>();
         private string[] _types;
 
-		#endregion Fields 
+        #endregion Fields
     }
 }
