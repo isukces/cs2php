@@ -28,7 +28,11 @@ namespace Lang.Php.Webserver
             }
             {
                 ServerEngine e = ServerEngine.Instance;
-                e.DocumentRoot = @"E:\temp\#SharpLinguaFranca\phpCompiled";
+                e.DocumentRoot = System.IO.Path.Combine(
+                     Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                    "cs2php",
+                    "webserver");
+
                 e.OnLog += e_OnLog;
                 string[] args = Environment.GetCommandLineArgs();
                 foreach (var i in args.Skip(1))
