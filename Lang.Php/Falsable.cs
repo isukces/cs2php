@@ -55,7 +55,7 @@ namespace Lang.Php
         {
             get
             {
-                return isFalse;
+                return !isFalse;
             }
         }
 
@@ -148,7 +148,7 @@ namespace Lang.Php
 
         public static implicit operator Falsable<T>(T src)
         {
-            return new Falsable<T>() { _value = src };
+            return new Falsable<T>() { _value = src, isFalse = false };
         }
 
         #endregion Static Methods
