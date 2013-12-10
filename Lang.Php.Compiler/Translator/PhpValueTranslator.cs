@@ -260,7 +260,7 @@ namespace Lang.Php.Compiler.Translator
                 return SimplifyPhpExpression(tmp);
 
             bool isStatic = src.IsStatic;
-            var member = src.Member;
+            FieldInfo member = src.Member;
             var member_name = member.Name;
             var member_declaring_type = member.DeclaringType;
 
@@ -319,7 +319,8 @@ namespace Lang.Php.Compiler.Translator
                             }
                         }
                         {
-                            object v1 = ReadEnumValueAndProcessForPhp(member);
+                            // object v1 = ReadEnumValueAndProcessForPhp(member);
+                            object v1 = member.GetValue(null);
                             var g = new PhpConstValue(v1);
                             return SimplifyPhpExpression(g);
                         }
@@ -656,13 +657,7 @@ namespace Lang.Php.Compiler.Translator
             var a = new PhpUnaryOperatorExpression(v, src.Operator);
             return SimplifyPhpExpression(a);
         }
-        // Private Methods 
-
-        private object ReadEnumValueAndProcessForPhp(FieldInfo fi)
-        {
-            var enumValue = fi.GetValue(null);
-            return Lang.Php.Runtime.PhpValues.FromEnum(enumValue);
-        }
+        // Private Methods         
 
         IPhpValue SimplifyPhpExpression(IPhpValue v)
         {
