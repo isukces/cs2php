@@ -49,6 +49,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Data\FieldGroupAttribute.cs" />
     <Compile Include="Falsable.cs" />
     <Compile Include="Filters\FilterInputServer.cs" />
     <Compile Include="Filters\FilterVar.cs" />
@@ -126,12 +127,15 @@
     <Compile Include="HtmlEntitiesFlags.cs" />
     <Compile Include="_MySQLi\MySQLi.cs" />
     <Compile Include="_MySQLi\MySQLiCharsetInfo.cs" />
+    <Compile Include="_MySQLi\MySQLiFieldInfo.cs" />
     <Compile Include="_MySQLi\MySQLiResult.cs" />
     <Compile Include="_MySQLi\MySQLiResultMode.cs" />
     <Compile Include="_MySQLi\MySQLiStatement.cs" />
     <Compile Include="_MySQLi\MySQLiWarning.cs" />
     <Compile Include="_MySql\MySQL.cs" />
     <Compile Include="_MySql\MySqlDateTime.cs" />
+    <Compile Include="_MySql\MySQLFieldTypes.cs" />
+    <Compile Include="_MySql\MySQLFlags.cs" />
     <Compile Include="_MySql\MysqlResult.cs" />
     <Compile Include="OutputCallbackDelegates.cs" />
     <Compile Include="_enums\PathInfoOptions.cs" />
@@ -172,6 +176,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Data\_attributes\" />
     <Folder Include="_interfaces\" />
   </ItemGroup>
   <ItemGroup>
@@ -180,7 +185,7 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties BuildVersion_BuildVersioningStyle="None.None.DeltaBaseDateInDays.Increment" BuildVersion_UpdateAssemblyVersion="True" BuildVersion_UpdateFileVersion="True" BuildVersion_StartDate="2000/1/1" />
+      <UserProperties BuildVersion_StartDate="2000/1/1" BuildVersion_UpdateFileVersion="True" BuildVersion_UpdateAssemblyVersion="True" BuildVersion_BuildVersioningStyle="None.None.DeltaBaseDateInDays.Increment" />
     </VisualStudio>
   </ProjectExtensions>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
