@@ -498,6 +498,9 @@ namespace Lang.Php.Compiler.Translator
                         switch (ats.MemberToCall)
                         {
                             case ClassMembers.Method:
+                                if (ats.Name == "this")
+                                    return phpTargetObject;
+
                                 var method = new PhpMethodCallExpression(ats.Name);
                                 //switch (ats.CallType)
                                 //{
@@ -515,6 +518,8 @@ namespace Lang.Php.Compiler.Translator
                                 switch (ats.CallType)
                                 {
                                     case MethodCallStyles.Instance:
+                                        if (ats.Name == "this")
+                                            return phpTargetObject;
                                         var includeModule = ownerInfo.IncludeModule;
                                         var field = new PhpInstanceFieldAccessExpression(ats.Name, phpTargetObject, includeModule);
                                         return field;

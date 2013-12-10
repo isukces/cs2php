@@ -11,9 +11,9 @@ namespace Lang.Php.Compiler.Translator.Node
     public class MysqliTranslator : IPhpNodeTranslator<CsharpMethodCallExpression>,
         IPhpNodeTranslator<CsharpInstancePropertyAccessExpression>
     {
-		#region Methods 
+        #region Methods
 
-		// Public Methods 
+        // Public Methods 
 
         public int getPriority()
         {
@@ -48,6 +48,42 @@ namespace Lang.Php.Compiler.Translator.Node
                 }
                 // throw new NotSupportedException(fn);
             }
+            if (src.MethodInfo.DeclaringType == typeof(MySQLiStatement))
+            {
+                if (src.MethodInfo.Name == "BindParams") // all BindParams methods
+                {
+                    var a = src.MethodInfo.GetParameters();
+                    StringBuilder phptypes = new StringBuilder(a.Length);
+                    foreach (var i in a)
+                    {                      
+                        var j = i.ParameterType;
+                        var t = j.GetGenericArguments()[0];
+                        if (t == typeof(string))
+                            phptypes.Append("s");
+                        else if (t == typeof(System.Double)
+                                || t == typeof(System.Single)
+                                || t == typeof(System.Decimal))
+                            phptypes.Append("d");
+                        else if (t == typeof(System.Int64)
+                                || t == typeof(System.Int32)
+                                || t == typeof(System.Byte)
+                                || t == typeof(System.UInt64)
+                                || t == typeof(System.UInt32)
+                                || t == typeof(System.UInt16))
+                            phptypes.Append("i");
+                        else if (t == typeof(byte[]))
+                            phptypes.Append("b");
+                        else throw new NotSupportedException(string.Format("Type {0} is not supported by MySQLiStatement.BindParams", t));
+                    }
+                    List<IPhpValue> values = new List<IPhpValue>();
+                    values.Add(new PhpConstValue(phptypes.ToString()));
+                    foreach (var i in src.Arguments)
+                        values.Add(ctx.TranslateValue(i.MyValue));
+                    var result = new PhpMethodCallExpression("bind_param", values.ToArray());
+                    result.TargetObject = ctx.TranslateValue(src.TargetObject);
+                    return result;
+                }
+            }
             return null;
         }
 
@@ -75,6 +111,6 @@ namespace Lang.Php.Compiler.Translator.Node
             return null;
         }
 
-		#endregion Methods 
+        #endregion Methods
     }
 }
