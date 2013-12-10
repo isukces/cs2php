@@ -12,7 +12,7 @@ namespace Lang.Php
     [ScriptName("\\mysqli")]
     public class MySQLi
     {
-		#region Constructors 
+        #region Constructors
 
         /// <summary>
         /// 
@@ -73,14 +73,27 @@ namespace Lang.Php
 
         }
 
-		#endregion Constructors 
+        #endregion Constructors
 
         public const int ERR_UNABLE_TO_CONNECT_TO_MYSQL_HOST = 1042;
         public const int ERR_ACCESS_DENIED = 1044;
 
-		#region Methods 
+        #region Methods
 
-		// Public Methods 
+        /// <summary>
+        /// Prepares the SQL query, and returns a statement handle to be used for further 
+        /// operations on the statement. 
+        /// The query must consist of a single SQL statement. 
+        /// See http://www.php.net/manual/en/mysqli.prepare.php
+        /// </summary>
+        /// <param name="query"></param>
+        /// <returns></returns>
+        [DirectCall("->prepare")]
+        public Falsable<MySQLiStatement> Prepare(string query)
+        {
+            throw new NotImplementedException();
+        }
+        // Public Methods 
 
         [DirectCall("->autocommit")]
         public bool AutoCommit(bool mode)
@@ -121,30 +134,30 @@ namespace Lang.Php
                 .Replace("\b", "\\\b")
                 .Replace("'", "''");
 
-/*
- * mysql> SELECT 'hello', '"hello"', '""hello""', 'hel''lo', '\'hello';
-+-------+---------+-----------+--------+--------+
-| hello | "hello" | ""hello"" | hel'lo | 'hello |
-+-------+---------+-----------+--------+--------+
+            /*
+             * mysql> SELECT 'hello', '"hello"', '""hello""', 'hel''lo', '\'hello';
+            +-------+---------+-----------+--------+--------+
+            | hello | "hello" | ""hello"" | hel'lo | 'hello |
+            +-------+---------+-----------+--------+--------+
 
-mysql> SELECT "hello", "'hello'", "''hello''", "hel""lo", "\"hello";
-+-------+---------+-----------+--------+--------+
-| hello | 'hello' | ''hello'' | hel"lo | "hello |
-+-------+---------+-----------+--------+--------+
+            mysql> SELECT "hello", "'hello'", "''hello''", "hel""lo", "\"hello";
+            +-------+---------+-----------+--------+--------+
+            | hello | 'hello' | ''hello'' | hel"lo | "hello |
+            +-------+---------+-----------+--------+--------+
 
-mysql> SELECT 'This\nIs\nFour\nLines';
-+--------------------+
-| This
-Is
-Four
-Lines |
-+--------------------+
+            mysql> SELECT 'This\nIs\nFour\nLines';
+            +--------------------+
+            | This
+            Is
+            Four
+            Lines |
+            +--------------------+
 
-mysql> SELECT 'disappearing\ backslash';
-+------------------------+
-| disappearing backslash |
-+------------------------+
- */
+            mysql> SELECT 'disappearing\ backslash';
+            +------------------------+
+            | disappearing backslash |
+            +------------------------+
+             */
         }
 
         [DirectCall("->get_charset")]
@@ -217,9 +230,9 @@ mysql> SELECT 'disappearing\ backslash';
                 return false;
         }
 
-		#endregion Methods 
+        #endregion Methods
 
-		#region Fields 
+        #region Fields
 
         MySqlConnection _connection;
         string _lastCharset;
@@ -235,9 +248,9 @@ mysql> SELECT 'disappearing\ backslash';
         /// </summary>
         public const string TAKE_FROM_INI = "\uf8ff";
 
-		#endregion Fields 
+        #endregion Fields
 
-		#region Properties 
+        #region Properties
 
         [DirectCall("$->affected_rows")]
         public int AffectedRows
@@ -318,7 +331,7 @@ mysql> SELECT 'disappearing\ backslash';
             }
         }
 
-		#endregion Properties 
+        #endregion Properties
 
         /* Methods 
 __construct ([ string $host = ini_get("mysqli.default_host") [, string $username = ini_get("mysqli.default_user") [, string $passwd = ini_get("mysqli.default_pw") [, string $dbname = "" [, int $port = ini_get("mysqli.default_port") [, string $socket = ini_get("mysqli.default_socket") ]]]]]] )

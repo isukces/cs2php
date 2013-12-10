@@ -128,6 +128,7 @@
     <Compile Include="_MySQLi\MySQLi.cs" />
     <Compile Include="_MySQLi\MySQLiCharsetInfo.cs" />
     <Compile Include="_MySQLi\MySQLiFieldInfo.cs" />
+    <Compile Include="_MySQLi\MySQLiParam.cs" />
     <Compile Include="_MySQLi\MySQLiResult.cs" />
     <Compile Include="_MySQLi\MySQLiResultMode.cs" />
     <Compile Include="_MySQLi\MySQLiStatement.cs" />
