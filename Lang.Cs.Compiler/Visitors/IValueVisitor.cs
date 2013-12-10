@@ -45,7 +45,7 @@ namespace Lang.Cs.Compiler.Visitors
             return lv.Visit(node) as FunctionDeclarationParameter;
         }
 
-        protected IValue internalVisit_BinaryExpressionSyntax(BinaryExpressionSyntax node, string plus)
+        protected IValue internalVisit_BinaryExpressionSyntax(BinaryExpressionSyntax node, string _operator)
         {
 #if ROSLYN
             //FAQ 4
@@ -77,13 +77,13 @@ namespace Lang.Cs.Compiler.Visitors
             //var typeLeft = l.ValueType;
             //var typeRight = r.ValueType;
 
-            var tmp = new BinaryOperatorExpression(l, r, plus, roslynResultType, operatorMethod);
+            var tmp = new BinaryOperatorExpression(l, r, _operator, roslynResultType, operatorMethod);
             return Simplify(tmp);
         }
 
         protected override IValue VisitAddAssignExpression(BinaryExpressionSyntax node)
         {
-            return AAA(node, "+");
+            return internalVisit_AssignWithPrefix(node, "+");
         }
 
         protected override IValue VisitAddExpression(BinaryExpressionSyntax node)
@@ -119,6 +119,13 @@ namespace Lang.Cs.Compiler.Visitors
                 var b = new ArrayCreateExpression(type, initializers);
                 return Simplify(b);
             }
+            throw new NotSupportedException();
+        }
+
+        protected override IValue VisitArrayInitializerExpression(InitializerExpressionSyntax node)
+        {
+            var b = context.RoslynModel.GetSymbolInfo(node);
+            var a = context.RoslynModel.GetTypeInfo(node);
             throw new NotSupportedException();
         }
 
@@ -161,6 +168,11 @@ namespace Lang.Cs.Compiler.Visitors
             var rigth = Visit(node.Right);
             var a = new CsharpAssignExpression(left, rigth, "");
             return Simplify(a);
+        }
+
+        protected override IValue VisitBitwiseAndExpression(BinaryExpressionSyntax node)
+        {
+            return internalVisit_BinaryExpressionSyntax(node, "&");
         }
 
         protected override IValue VisitBitwiseOrExpression(BinaryExpressionSyntax node)
@@ -253,12 +265,7 @@ namespace Lang.Cs.Compiler.Visitors
         {
             return internalVisit_BinaryExpressionSyntax(node, "==");
         }
-        protected override IValue VisitArrayInitializerExpression(InitializerExpressionSyntax node)
-        {
-            var b = context.RoslynModel.GetSymbolInfo(node);
-            var a = context.RoslynModel.GetTypeInfo(node);
-            throw new NotSupportedException();
-        }
+
         protected override IValue VisitEqualsValueClause(EqualsValueClauseSyntax node)
         {
             // var a = context.RoslynModel.GetTypeInfo(node.va);
@@ -398,10 +405,10 @@ namespace Lang.Cs.Compiler.Visitors
                         var targetObject = new ThisExpression(state.CurrentType);
                         var result = new CsharpInstancePropertyAccessExpression(pi, targetObject);
                         return result;
-                        
+
                     }
-                   
-                default :
+
+                default:
                     throw new NotSupportedException();
             }
             //throw new NotSupportedException();
@@ -1007,7 +1014,7 @@ namespace Lang.Cs.Compiler.Visitors
 
         protected override IValue VisitSubtractAssignExpression(BinaryExpressionSyntax node)
         {
-            return AAA(node, "-");
+            return internalVisit_AssignWithPrefix(node, "-");
         }
 
         protected override IValue VisitSubtractExpression(BinaryExpressionSyntax node)
@@ -1095,22 +1102,6 @@ namespace Lang.Cs.Compiler.Visitors
             return a.ValueText;
         }
 
-        private IValue AAA(BinaryExpressionSyntax node, string _operator)
-        {
-            var symbolInfo = state.Context.RoslynModel.GetSymbolInfo(node);
-            if (symbolInfo.Symbol != null)
-                throw new NotSupportedException();
-            var ti = state.Context.RoslynModel.GetTypeInfo(node);
-            if (!ti.ImplicitConversion.IsIdentity)
-                throw new NotSupportedException();
-            //if (symbolInfo.Symbol.IsImplicitlyDeclared)
-            //    throw new Exception();
-            var l = Visit(node.Left);
-            var r = Visit(node.Right);
-            var a = new CsharpAssignExpression(l, r, _operator);
-            return Simplify(a);
-        }
-
         Type GT(TypeSyntax s)
         {
             if (s is IdentifierNameSyntax)
@@ -1139,6 +1130,22 @@ namespace Lang.Cs.Compiler.Visitors
                 );
             return a;
 
+        }
+
+        private IValue internalVisit_AssignWithPrefix(BinaryExpressionSyntax node, string _operator)
+        {
+            var symbolInfo = state.Context.RoslynModel.GetSymbolInfo(node);
+            if (symbolInfo.Symbol != null)
+                throw new NotSupportedException();
+            var ti = state.Context.RoslynModel.GetTypeInfo(node);
+            if (!ti.ImplicitConversion.IsIdentity)
+                throw new NotSupportedException();
+            //if (symbolInfo.Symbol.IsImplicitlyDeclared)
+            //    throw new Exception();
+            var l = Visit(node.Left);
+            var r = Visit(node.Right);
+            var a = new CsharpAssignExpression(l, r, _operator);
+            return Simplify(a);
         }
 
         //private IValue internalVisit_BoolBinaryExpression(BinaryExpressionSyntax node, string _operator)

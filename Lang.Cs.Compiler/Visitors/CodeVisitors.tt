@@ -237,7 +237,8 @@ string[] GetDirectives() {
 "NotEqualsExpression,BinaryExpressionSyntax",
 "ModuloExpression,BinaryExpressionSyntax",
 "BitwiseOrExpression,BinaryExpressionSyntax",
-"ArrayInitializerExpression,InitializerExpressionSyntax"
+"ArrayInitializerExpression,InitializerExpressionSyntax",
+"BitwiseAndExpression,BinaryExpressionSyntax"
 
 
 };

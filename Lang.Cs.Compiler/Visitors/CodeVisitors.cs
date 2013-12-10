@@ -350,6 +350,8 @@ namespace Lang.Cs.Compiler.Visitors
                       return VisitBitwiseOrExpression(node as BinaryExpressionSyntax);
                 case SyntaxKind.ArrayInitializerExpression:
                       return VisitArrayInitializerExpression(node as InitializerExpressionSyntax);
+                case SyntaxKind.BitwiseAndExpression:
+                      return VisitBitwiseAndExpression(node as BinaryExpressionSyntax);
                 case SyntaxKind.StringLiteralExpression:
                       return VisitStringLiteralExpression(node as LiteralExpressionSyntax);
                 case SyntaxKind.Parameter:
@@ -1537,6 +1539,13 @@ namespace Lang.Cs.Compiler.Visitors
         {
             if (ThrowNotImplementedException)
                 throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitArrayInitializerExpression", this.GetType().FullName));
+            return default(T);
+        }
+
+        protected virtual T VisitBitwiseAndExpression(BinaryExpressionSyntax node)
+        {
+            if (ThrowNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitBitwiseAndExpression", this.GetType().FullName));
             return default(T);
         }
 
