@@ -74,15 +74,17 @@ namespace Lang.Cs2Php
             Cs2PhpCompiler comp = new Cs2PhpCompiler();
             comp.VerboseToConsole = true;
             comp.ThrowExceptions = true;
-            comp.LoadProject(Path.Combine(SlnDir, csProject), configuration);
+            // Console.WriteLine("Try to load " + csProject);
+            comp.LoadProject(csProject, configuration);
 
             Console.WriteLine("Preparing before compilation");
             #region Remove Lang.Php reference
             {
                 // ... will be replaced by reference to dll from compiler base dir
                 // I know - compilation libraries should be loaded into separate application domain
-                var remove = comp.Project.MetadataReferences.Where(i => i.Display.EndsWith("Lang.Php.dll")).Single();
-                comp.RemoveMetadataReferences(remove);
+                var remove = comp.Project.MetadataReferences.Where(i => i.Display.EndsWith("Lang.Php.dll")).FirstOrDefault();
+                if (remove != null)
+                    comp.RemoveMetadataReferences(remove);
             }
             #endregion
             string[] filenames;
