@@ -32,5 +32,10 @@ namespace Lang.Php
         /// Name in script
         /// </summary>
         public string Name { get; private set; }
+
+        /// <summary>
+        /// Name is PHP ready value not name to encode
+        /// </summary>
+        public bool IsPhpValue { get; set; }
     }
 }
