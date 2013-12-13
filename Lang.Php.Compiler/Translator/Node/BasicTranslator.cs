@@ -11,9 +11,9 @@ namespace Lang.Php.Compiler.Translator.Node
     class BasicTranslator : IPhpNodeTranslator<ClassFieldAccessExpression>,
         IPhpNodeTranslator<CallConstructor>
     {
-		#region Methods 
+        #region Methods
 
-		// Public Methods 
+        // Public Methods 
 
         public int getPriority()
         {
@@ -49,15 +49,24 @@ namespace Lang.Php.Compiler.Translator.Node
                     throw new NotSupportedException();
                 return new PhpArrayCreateExpression();
             }
+            {
+                var directCallAttribute = src.Info.GetCustomAttributes(false).OfType<DirectCallAttribute>().FirstOrDefault();
+                if (directCallAttribute != null)
+                {
+                    var result = DotnetMethodCallTranslator.CreateExpressionFromDirectCallAttribute(
+                        ctx, directCallAttribute, null, src.Arguments);
+                    return result;
+                }
+            }
             return null;
         }
 
-		#endregion Methods 
+        #endregion Methods
 
-		#region Fields 
+        #region Fields
 
         Dictionary<string, IPhpValue> cache;
 
-		#endregion Fields 
+        #endregion Fields
     }
 }

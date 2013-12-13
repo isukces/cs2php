@@ -52,10 +52,11 @@ namespace Lang.Php.Compiler.Translator.Node
             {
                 if (src.MethodInfo.Name == "BindParams") // all BindParams methods
                 {
+                    #region BindParams
                     var a = src.MethodInfo.GetParameters();
                     StringBuilder phptypes = new StringBuilder(a.Length);
                     foreach (var i in a)
-                    {                      
+                    {
                         var j = i.ParameterType;
                         var t = j.GetGenericArguments()[0];
                         if (t == typeof(string))
@@ -81,7 +82,20 @@ namespace Lang.Php.Compiler.Translator.Node
                         values.Add(ctx.TranslateValue(i.MyValue));
                     var result = new PhpMethodCallExpression("bind_param", values.ToArray());
                     result.TargetObject = ctx.TranslateValue(src.TargetObject);
+                    return result; 
+                    #endregion
+                }
+                if (src.MethodInfo.Name == "BindResult") // all BindResult methods
+                {
+                    #region BindResult
+                    var a = src.MethodInfo.GetParameters();                     
+                    List<IPhpValue> values = new List<IPhpValue>();
+                    foreach (var i in src.Arguments)
+                        values.Add(ctx.TranslateValue(i.MyValue));
+                    var result = new PhpMethodCallExpression("bind_result", values.ToArray());
+                    result.TargetObject = ctx.TranslateValue(src.TargetObject);
                     return result;
+                    #endregion
                 }
             }
             return null;

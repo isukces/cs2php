@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Lang.Php.Compiler.Source
@@ -24,12 +25,20 @@ namespace Lang.Php.Compiler.Source
 
     public partial class PhpConstValue : IPhpValueBase
     {
+		#region Static Methods 
 
+		// Public Methods 
 
-
-        #region Static Methods
-
-        // Public Methods 
+        public static PhpConstValue FromPhpValue(string code)
+        {
+            var m = Regex.Match(code, "^(-?\\d)+$");
+            if (m.Success)
+            {
+                int value = int.Parse(code);
+                return new PhpConstValue(value);
+            }
+            throw new NotImplementedException("Only integer values are supported. Sorry.");
+        }
 
         public static string PhpStringEmit(string txt, PhpEmitStyle style)
         {
@@ -73,7 +82,7 @@ namespace Lang.Php.Compiler.Source
             string join = style == null || style.Compression == EmitStyleCompression.Beauty ? " . " : ".";
             return string.Join(join, items);
         }
-        // Private Methods 
+		// Private Methods 
 
         private static int _DoubleQuoteEscapedCharsCount(string x)
         {
@@ -148,11 +157,11 @@ namespace Lang.Php.Compiler.Source
             return "'" + x.Replace("\\", "\\\\").Replace("'", "\\'") + "'";
         }
 
-        #endregion Static Methods
+		#endregion Static Methods 
 
-        #region Methods
+		#region Methods 
 
-        // Public Methods 
+		// Public Methods 
 
         public override IEnumerable<ICodeRequest> GetCodeRequests()
         {
@@ -218,19 +227,19 @@ namespace Lang.Php.Compiler.Source
             return _value.ToString();
         }
 
-        #endregion Methods
+		#endregion Methods 
 
-        #region Static Fields
+		#region Static Fields 
 
         static readonly string _ESC = ((char)27).ToString();
 
-        #endregion Static Fields
+		#endregion Static Fields 
 
-        #region Fields
+		#region Fields 
 
         const char _ESCc = ((char)27);
 
-        #endregion Fields
+		#endregion Fields 
     }
 }
 

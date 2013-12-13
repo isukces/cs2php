@@ -18,6 +18,9 @@ namespace Lang.Php.Compiler
     property ScriptName string 
     	access public protected protected
     
+    property IsScriptNamePhpEncoded bool 
+    	access public protected protected
+    
     property Destination FieldTranslationDestionations 
     	access public protected protected
     
@@ -30,7 +33,7 @@ namespace Lang.Php.Compiler
     property IsDefinedInNonincludableModule bool czy jest zdefiniowany w module, którego nie można includować
     smartClassEnd
     */
-
+    
     public partial class FieldTranslationInfo
     {
 
@@ -45,7 +48,10 @@ namespace Lang.Php.Compiler
                 {
                     var _sctiptName = fieldInfo.GetCustomAttribute<Lang.Php.ScriptNameAttribute>();
                     if (_sctiptName != null)
+                    {
                         fti.scriptName = _sctiptName.Name;
+                        fti.isScriptNamePhpEncoded = _sctiptName.IsPhpValue;
+                    }
                 }
             }
             {
@@ -109,12 +115,12 @@ namespace Lang.Php.Compiler
 }
 
 
-// -----:::::##### smartClass embedded code begin #####:::::----- generated 2013-12-06 10:16
+// -----:::::##### smartClass embedded code begin #####:::::----- generated 2013-12-13 18:02
 // File generated automatically ver 2013-07-10 08:43
 // Smartclass.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0c4d5d36fb5eb4ac
 namespace Lang.Php.Compiler
 {
-    public partial class FieldTranslationInfo
+    public partial class FieldTranslationInfo 
     {
         /*
         /// <summary>
@@ -128,9 +134,9 @@ namespace Lang.Php.Compiler
 
         implement INotifyPropertyChanged
         implement INotifyPropertyChanged_Passive
-        implement ToString ##ScriptName## ##Destination## ##UsGlueForValue## ##IncludeModule## ##IsDefinedInNonincludableModule##
-        implement ToString ScriptName=##ScriptName##, Destination=##Destination##, UsGlueForValue=##UsGlueForValue##, IncludeModule=##IncludeModule##, IsDefinedInNonincludableModule=##IsDefinedInNonincludableModule##
-        implement equals ScriptName, Destination, UsGlueForValue, IncludeModule, IsDefinedInNonincludableModule
+        implement ToString ##ScriptName## ##IsScriptNamePhpEncoded## ##Destination## ##UsGlueForValue## ##IncludeModule## ##IsDefinedInNonincludableModule##
+        implement ToString ScriptName=##ScriptName##, IsScriptNamePhpEncoded=##IsScriptNamePhpEncoded##, Destination=##Destination##, UsGlueForValue=##UsGlueForValue##, IncludeModule=##IncludeModule##, IsDefinedInNonincludableModule=##IsDefinedInNonincludableModule##
+        implement equals ScriptName, IsScriptNamePhpEncoded, Destination, UsGlueForValue, IncludeModule, IsDefinedInNonincludableModule
         implement equals *
         implement equals *, ~exclude1, ~exclude2
         */
@@ -139,6 +145,10 @@ namespace Lang.Php.Compiler
         /// Nazwa własności ScriptName; 
         /// </summary>
         public const string PROPERTYNAME_SCRIPTNAME = "ScriptName";
+        /// <summary>
+        /// Nazwa własności IsScriptNamePhpEncoded; 
+        /// </summary>
+        public const string PROPERTYNAME_ISSCRIPTNAMEPHPENCODED = "IsScriptNamePhpEncoded";
         /// <summary>
         /// Nazwa własności Destination; 
         /// </summary>
@@ -177,6 +187,21 @@ namespace Lang.Php.Compiler
             }
         }
         protected string scriptName = string.Empty;
+        /// <summary>
+        /// 
+        /// </summary>
+        public bool IsScriptNamePhpEncoded
+        {
+            get
+            {
+                return isScriptNamePhpEncoded;
+            }
+            protected set
+            {
+                isScriptNamePhpEncoded = value;
+            }
+        }
+        protected bool isScriptNamePhpEncoded;
         /// <summary>
         /// 
         /// </summary>

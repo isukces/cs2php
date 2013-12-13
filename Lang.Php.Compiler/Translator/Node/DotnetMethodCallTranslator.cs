@@ -126,7 +126,7 @@ namespace Lang.Php.Compiler.Translator.Node
         }
         // Private Methods 
 
-        private void CopyArguments(IExternalTranslationContext ctx, IEnumerable<FunctionArgument> srcParameters, PhpMethodCallExpression dstMethod)
+        private static void CopyArguments(IExternalTranslationContext ctx, IEnumerable<FunctionArgument> srcParameters, PhpMethodCallExpression dstMethod)
         {
             foreach (FunctionArgument functionArgument in srcParameters)
             {
@@ -170,6 +170,21 @@ namespace Lang.Php.Compiler.Translator.Node
             DirectCallAttribute directCallAttribute = GetDirectCallAttribute(src.MethodInfo);
             if (directCallAttribute == null)
                 return null;
+            return CreateExpressionFromDirectCallAttribute(ctx, directCallAttribute, src.TargetObject, src.Arguments);
+
+        }
+
+
+        /// <summary>
+        /// Creates expression based on DirectCallAttribute
+        /// </summary>
+        /// <param name="ctx"></param>
+        /// <param name="directCallAttribute"></param>
+        /// <param name="targetObject"></param>
+        /// <param name="arguments"></param>
+        /// <returns></returns>
+        public static IPhpValue CreateExpressionFromDirectCallAttribute(IExternalTranslationContext ctx, DirectCallAttribute directCallAttribute, IValue targetObject, FunctionArgument[] arguments)
+        {
 
             if (directCallAttribute.CallType == MethodCallStyles.Static)
                 throw new NotSupportedException();
@@ -183,13 +198,13 @@ namespace Lang.Php.Compiler.Translator.Node
                     throw new NotSupportedException("gray horse 1");
                 if (ma[0] == DirectCallAttribute.THIS)
                 {
-                    if (src.TargetObject == null)
+                    if (targetObject == null)
                         throw new NotSupportedException("gray horse 2");
-                    return ctx.TranslateValue(src.TargetObject);
+                    return ctx.TranslateValue(targetObject);
                 }
                 //  return phpMethod.Arguments[ma[0]].Expression
                 else
-                    return ctx.TranslateValue(src.Arguments[ma[0]].MyValue);
+                    return ctx.TranslateValue(arguments[ma[0]].MyValue);
             }
             var name = directCallAttribute.Name;
 
@@ -197,26 +212,29 @@ namespace Lang.Php.Compiler.Translator.Node
             var phpMethod = new PhpMethodCallExpression(name);
             if (directCallAttribute.CallType == MethodCallStyles.Instance)
             {
-                if (src.TargetObject == null)
+                if (targetObject == null)
                     throw new NotSupportedException("gray horse 3");
-                phpMethod.TargetObject = ctx.TranslateValue(src.TargetObject);
+                phpMethod.TargetObject = ctx.TranslateValue(targetObject);
             }
-            CopyArguments(ctx, src.Arguments, phpMethod);
+            CopyArguments(ctx, arguments, phpMethod);
             #region Mapping
             if (directCallAttribute.HasMapping)
             {
-                var arguments = phpMethod.Arguments.ToArray();
+                PhpMethodInvokeValue[] phpArguments = phpMethod.Arguments.ToArray();
                 phpMethod.Arguments.Clear();
                 foreach (var argNr in directCallAttribute.MapArray)
                 {
                     if (argNr == DirectCallAttribute.THIS)
                     {
-                        if (src.TargetObject == null)
+                        if (targetObject == null)
                             throw new NotSupportedException();
-                        phpMethod.Arguments.Add(new PhpMethodInvokeValue(ctx.TranslateValue(src.TargetObject)));
+                        phpMethod.Arguments.Add(new PhpMethodInvokeValue(ctx.TranslateValue(targetObject)));
                     }
                     else
-                        phpMethod.Arguments.Add(arguments[argNr]);
+                    {
+                        if (argNr < phpArguments.Length)
+                            phpMethod.Arguments.Add(phpArguments[argNr]);
+                    }
                 }
 
             }
@@ -234,7 +252,6 @@ namespace Lang.Php.Compiler.Translator.Node
 
             #endregion
             return phpMethod;
-
         }
 
         #endregion Methods

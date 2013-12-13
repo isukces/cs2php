@@ -334,11 +334,15 @@ namespace Lang.Php.Compiler.Translator
                     case FieldTranslationDestionations.DefinedConst:
                         if (!member.IsStatic)
                             throw new NotSupportedException("Unable to convert instance field into PHP defined const");
+                        if (tInfo.IsScriptNamePhpEncoded)
+                            throw new Exception("Encoded php values are not supported");
                         var definedExpression = new PhpDefinedConstExpression(tInfo.ScriptName, tInfo.IncludeModule);
                         return SimplifyPhpExpression(definedExpression);
                     case FieldTranslationDestionations.GlobalVariable:
                         if (!member.IsStatic)
                             throw new NotSupportedException("Unable to convert instance field into PHP global variable");
+                        if (tInfo.IsScriptNamePhpEncoded)
+                            throw new Exception("Encoded php values are not supported");
                         var globalVariable = PhpVariableExpression.MakeGlobal(tInfo.ScriptName);
                         return SimplifyPhpExpression(globalVariable);
                     case FieldTranslationDestionations.JustValue:
@@ -348,6 +352,8 @@ namespace Lang.Php.Compiler.Translator
                         var phpConstValue = new PhpConstValue(constValue, tInfo.UsGlueForValue);
                         return SimplifyPhpExpression(phpConstValue);
                     case FieldTranslationDestionations.NormalField:
+                        if (tInfo.IsScriptNamePhpEncoded)
+                            throw new Exception("Encoded php values are not supported");
                         var rr = new PhpClassFieldAccessExpression();
                         rr.FieldName = isStatic ? tInfo.ScriptName : PhpVariableExpression.AddDollar(tInfo.ScriptName);
                         rr.ClassName = state.Principles.GetPhpType(member_declaring_type, true);
@@ -417,7 +423,12 @@ namespace Lang.Php.Compiler.Translator
                 switch (fti.Destination)
                 {
                     case FieldTranslationDestionations.NormalField:
-                        var tmp = new PhpArrayAccessExpression(to, new PhpConstValue(fti.ScriptName));
+                        IPhpValue index;
+                        if (fti.IsScriptNamePhpEncoded)
+                            index = PhpConstValue.FromPhpValue(fti.ScriptName);
+                        else
+                            index = new PhpConstValue(fti.ScriptName);
+                        var tmp = new PhpArrayAccessExpression(to, index);
                         return SimplifyPhpExpression(tmp);
                     case FieldTranslationDestionations.DefinedConst:
                         break; // obsłużę to dalej jak dla zwykłej klasy
