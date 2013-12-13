@@ -11,6 +11,22 @@ namespace Lang.Php
     [Skip]
     public class PhpDummy
     {
+
+        [DirectCall("imagecreate")]
+        public static Graph.Image imagecreate(int width, int height)
+        {
+            return Graph.Image.Create(width, height);
+        }
+
+        [DirectCall("getimagesize")]
+        public static Graph.ImageInfo GetImageSize(string filename)
+        {
+            // array getimagesize ( string $filename [, array &$imageinfo ] )
+            throw new NotImplementedException();
+        }
+      
+
+
         #region Static Methods
 
         // Public Methods 

@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace Lang.Php
 {
-    [AttributeUsage(AttributeTargets.Method | AttributeTargets.Property, AllowMultiple = false)]
+    [AttributeUsage(AttributeTargets.Method | AttributeTargets.Property | AttributeTargets.Constructor, AllowMultiple = false)]
     public class DirectCallAttribute : Attribute
     {
         #region Constructors

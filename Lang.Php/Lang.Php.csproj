@@ -64,9 +64,15 @@
     <Compile Include="Filters\_flags\UrlFlags.cs" />
     <Compile Include="Filters\_options\RegExpOptions.cs" />
     <Compile Include="Filters\_options\UrlOptions.cs" />
+    <Compile Include="Graph\Color.cs" />
+    <Compile Include="Graph\Font.cs" />
+    <Compile Include="Graph\Image.cs" />
+    <Compile Include="Graph\ImageInfo.cs" />
+    <Compile Include="Graph\_enums\ImageTypes.cs" />
     <Compile Include="Html.cs" />
     <Compile Include="Filters\FilterInput.cs" />
     <Compile Include="MbPhpString.cs" />
+    <Compile Include="PhpErrorTable.cs" />
     <Compile Include="PhpIni.cs" />
     <Compile Include="PhpVersions.cs" />
     <Compile Include="Runtime\RuntimeMySQLiResult.cs" />
@@ -186,7 +192,7 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties BuildVersion_StartDate="2000/1/1" BuildVersion_UpdateFileVersion="True" BuildVersion_UpdateAssemblyVersion="True" BuildVersion_BuildVersioningStyle="None.None.DeltaBaseDateInDays.Increment" />
+      <UserProperties BuildVersion_BuildVersioningStyle="None.None.DeltaBaseDateInDays.Increment" BuildVersion_UpdateAssemblyVersion="True" BuildVersion_UpdateFileVersion="True" BuildVersion_StartDate="2000/1/1" />
     </VisualStudio>
   </ProjectExtensions>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
