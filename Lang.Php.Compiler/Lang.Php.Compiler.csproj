@@ -90,6 +90,7 @@
     <Compile Include="Translator\Node\DotnetMethodCallTranslator.cs" />
     <Compile Include="Translator\Node\EnumTranslator.cs" />
     <Compile Include="Translator\Node\FilterTranslator.cs" />
+    <Compile Include="Translator\Node\GraphTranslator.cs" />
     <Compile Include="Translator\Node\Lang__Php__Html__Methods.cs" />
     <Compile Include="Translator\Node\Linq\EnumerableTranslator.cs" />
     <Compile Include="Translator\Node\MysqliTranslator.cs" />
