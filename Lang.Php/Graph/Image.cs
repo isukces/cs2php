@@ -27,7 +27,7 @@ namespace Lang.Php.Graph
             throw new NotImplementedException();
         }
 
-        [UseBinaryExpression("!==", "false", "0")]
+        [UseBinaryExpression("!==", "false", "$0")]
         public static bool IsValid(Image image)
         {
             return image != null;

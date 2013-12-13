@@ -7,7 +7,7 @@ class IndexPage {
     public static function PhpMain() {
         header('Content-Type: image/png');
         $myImage = imagecreate(200, 100);
-        if (false !== 0)
+        if (false !== $myImage)
             {
                 $color = imagecolorallocate($myImage, 0, 0, 0);
                 $color = imagecolorallocate($myImage, 255, 0, 0);

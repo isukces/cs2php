@@ -13,12 +13,7 @@ namespace E04_Graphics
     {
         public static void PhpMain()
         {
-            //var a = GetImageSize(@"e:\Media\zdjecia\2013\236 24 sie\130824_140502.JPG");
-            //echo("Width=" + a.Width + ", height=" + a.Height);
-            //if (a.ImageType == Lang.Php.Graph.ImageTypes.Jpeg)
-            //    echo("Format = JPEG");
-            //var_dump(a);
-
+           
             header("Content-Type: image/png");
             var myImage = Image.Create(200, 100);
             if (Image.IsValid(myImage))
