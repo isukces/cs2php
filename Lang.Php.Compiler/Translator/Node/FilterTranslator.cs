@@ -20,7 +20,7 @@ namespace Lang.Php.Compiler.Translator.Node
         {
             var mn = src.MethodInfo.Name;
             var fn = src.MethodInfo.ToString();
-            if (fn == "System.String ValidateInt(Type, System.String, Lang.Php.Filters.IntFlags, Lang.Php.Filters.IntOptions)")
+            if (fn == "System.Nullable`1[System.Int32] ValidateInt(Type, System.String, Lang.Php.Filters.IntFlags, Lang.Php.Filters.IntOptions)")
                 return Make_FilterInput(
                     ctx.TranslateValue(src.Arguments[0]), ctx.TranslateValue(src.Arguments[1]),
                     FILTER_VALIDATE_INT,

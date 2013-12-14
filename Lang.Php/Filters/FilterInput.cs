@@ -43,7 +43,7 @@ namespace Lang.Php.Filters
         {
             throw new NotImplementedException();
         }
-        public static string ValidateInt(Type type, string variable_name, IntFlags flags, IntOptions options = null)
+        public static int? ValidateInt(Type type, string variable_name, IntFlags flags, IntOptions options = null)
         {
             throw new NotImplementedException();
         }
