@@ -18,17 +18,17 @@ namespace Lang.Php.Graph
   'channels' => int 3
   'mime' => string 'image/jpeg' (length=10)
          */
-        [ScriptName("0", IsPhpValue = true)]
+        [ScriptName("0")]
         public int Width;
-        [ScriptName("1", IsPhpValue = true)]
+        [ScriptName("1")]
         public int Height;
-        [ScriptName("2", IsPhpValue = true)]
+        [ScriptName("2")]
         public ImageTypes ImageType;
 
         /// <summary>
         /// i.e. 'width="3456" height="2592"'
         /// </summary>
-        [ScriptName("3", IsPhpValue = true)]
+        [ScriptName("3")]
         public string HtmlWidthHeight;
 
         [ScriptName("bits")]

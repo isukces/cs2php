@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace Lang.Php
 {
@@ -13,6 +14,8 @@ namespace Lang.Php
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method | AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false)]
     public class ScriptNameAttribute : Attribute
     {
+		#region Constructors 
+
         /// <summary>
         /// Creates instance of attribute
         /// </summary>
@@ -20,6 +23,7 @@ namespace Lang.Php
         {
 
         }
+
         /// <summary>
         /// Creates instance of attribute
         /// </summary>
@@ -28,14 +32,37 @@ namespace Lang.Php
         {
             this.Name = name;
         }
+
+		#endregion Constructors 
+
+		#region Enums 
+
+        public enum Kinds
+        {
+            Identifier,
+            IntIndex
+        }
+
+		#endregion Enums 
+
+		#region Properties 
+
+        public Kinds Kind
+        {
+            get
+            {
+                var m = Regex.Match("^-?\\d+$", Name);
+                if (m.Success)
+                    return Kinds.IntIndex;
+                return Kinds.Identifier;
+            }
+        }
+
         /// <summary>
         /// Name in script
         /// </summary>
         public string Name { get; private set; }
 
-        /// <summary>
-        /// Name is PHP ready value not name to encode
-        /// </summary>
-        public bool IsPhpValue { get; set; }
+		#endregion Properties 
     }
 }
