@@ -23,6 +23,18 @@ namespace Lang.Php.Wp
             throw new MockMethodException();
         }
 
+
+        /// <summary>
+        /// Gets the filesystem directory path (with trailing slash) for the file passed in. It is a wrapper for trailingslashit( dirname( $file ) );. Despite the "plugin" in its name, it can currently be used for any file. 
+        /// http://codex.wordpress.org/Function_Reference/plugin_dir_path 
+        /// </summary>
+        /// <returns></returns>
+        [DirectCall("plugin_dir_path")]
+        public static string PluginDirPath(string file)
+        {
+            throw new MockMethodException();
+        }
+
         [DirectCall("add_action")]
         public static bool add_action(Hooks hook, Func<string, string> function_to_add, int priority = 10, int accepted_args = 1)
         {
@@ -71,6 +83,18 @@ namespace Lang.Php.Wp
         {
             // http://codex.wordpress.org/Function_Reference/add_meta_box
             throw new MockMethodException();
+        }
+
+        [DirectCall("__")]
+        public static string __(string text, string domain = "default")
+        {
+            return translate(text, domain);
+        }
+
+        [DirectCall("translate")]
+        public static string translate(string text, string domain = "default")
+        {
+            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -123,7 +147,7 @@ namespace Lang.Php.Wp
         }
 
 
-     
+
 
 
         [DirectCall("get_bloginfo")]
@@ -284,7 +308,7 @@ namespace Lang.Php.Wp
         /// <param name="_default">The default value to return if no value is returned (ie. the option is not in the database)</param>
         /// <returns></returns>
         [DirectCall("get_option")]
-        public static Falsable<T> get_option<T>(string option, T _default = default(T))
+        public static Falsable<T> GetOption<T>(string option, T _default = default(T))
         {
             throw new MockMethodException();
             // return _default;
