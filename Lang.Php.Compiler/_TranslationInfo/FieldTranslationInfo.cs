@@ -33,7 +33,7 @@ namespace Lang.Php.Compiler
     property IsDefinedInNonincludableModule bool czy jest zdefiniowany w module, którego nie można includować
     smartClassEnd
     */
-    
+
     public partial class FieldTranslationInfo
     {
 
@@ -50,7 +50,7 @@ namespace Lang.Php.Compiler
                     if (_sctiptName != null)
                     {
                         fti.scriptName = _sctiptName.Name;
-                        fti.isScriptNamePhpEncoded = _sctiptName.IsPhpValue;
+                        fti.isScriptNamePhpEncoded = _sctiptName.Kind == ScriptNameAttribute.Kinds.IntIndex;
                     }
                 }
             }
@@ -98,7 +98,7 @@ namespace Lang.Php.Compiler
                         if (cti.Skip)
                             fti.IncludeModule = null;
                     }
-                  
+
                     break;
 
             }
@@ -110,7 +110,7 @@ namespace Lang.Php.Compiler
             if (fti.Destination != FieldTranslationDestionations.NormalField)
                 throw new Exception(string.Format("Unable to find right way to convert field {0}.{1}", fieldInfo.DeclaringType.FullName, fieldInfo.Name));
         }
-      
+
     }
 }
 
@@ -120,7 +120,7 @@ namespace Lang.Php.Compiler
 // Smartclass.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0c4d5d36fb5eb4ac
 namespace Lang.Php.Compiler
 {
-    public partial class FieldTranslationInfo 
+    public partial class FieldTranslationInfo
     {
         /*
         /// <summary>

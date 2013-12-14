@@ -14,7 +14,7 @@ namespace Lang.Php
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method | AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false)]
     public class ScriptNameAttribute : Attribute
     {
-		#region Constructors 
+        #region Constructors
 
         /// <summary>
         /// Creates instance of attribute
@@ -33,9 +33,9 @@ namespace Lang.Php
             this.Name = name;
         }
 
-		#endregion Constructors 
+        #endregion Constructors
 
-		#region Enums 
+        #region Enums
 
         public enum Kinds
         {
@@ -43,15 +43,15 @@ namespace Lang.Php
             IntIndex
         }
 
-		#endregion Enums 
+        #endregion Enums
 
-		#region Properties 
+        #region Properties
 
         public Kinds Kind
         {
             get
             {
-                var m = Regex.Match("^-?\\d+$", Name);
+                var m = Regex.Match(Name, "^-?\\d+$");
                 if (m.Success)
                     return Kinds.IntIndex;
                 return Kinds.Identifier;
@@ -63,6 +63,6 @@ namespace Lang.Php
         /// </summary>
         public string Name { get; private set; }
 
-		#endregion Properties 
+        #endregion Properties
     }
 }
