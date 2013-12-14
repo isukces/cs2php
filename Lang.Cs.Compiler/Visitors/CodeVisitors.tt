@@ -238,7 +238,8 @@ string[] GetDirectives() {
 "ModuloExpression,BinaryExpressionSyntax",
 "BitwiseOrExpression,BinaryExpressionSyntax",
 "ArrayInitializerExpression,InitializerExpressionSyntax",
-"BitwiseAndExpression,BinaryExpressionSyntax"
+"BitwiseAndExpression,BinaryExpressionSyntax",
+"MultiplyAssignExpression,BinaryExpressionSyntax"
 
 
 };
