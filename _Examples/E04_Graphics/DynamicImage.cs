@@ -45,9 +45,11 @@ namespace E04_Graphics
                 for (int i = 0; i < WIDTH; i++)
                 {
                     color = myImage.ColorAllocate(i, 255 - i, 0);
-                    myImage.DrawLine(0, HEIGHT - 1, i, 0, color);
+                    if (Color.IsValid(color))
+                        myImage.DrawLine(0, HEIGHT - 1, i, 0, color);
                     color = myImage.ColorAllocate(i, 0, 255 - i);
-                    myImage.DrawLine(WIDTH - 1, 0, WIDTH - 1 - i, HEIGHT - 1, color);
+                    if (Color.IsValid(color))
+                        myImage.DrawLine(WIDTH - 1, 0, WIDTH - 1 - i, HEIGHT - 1, color);
                 }
                 color = myImage.ColorAllocate(0, 0, 255);
                 myImage.DrawString(Font.Font4, 10, 30, "Hello", color);

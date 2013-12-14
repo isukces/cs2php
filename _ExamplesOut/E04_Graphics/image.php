@@ -30,9 +30,11 @@ class DynamicImage {
                 for($i = 0; $i < self::WIDTH; $i++)
                     {
                         $color = imagecolorallocate($myImage, $i, 255 - $i, 0);
-                        imageline($myImage, 0, self::HEIGHT - 1, $i, 0, $color);
+                        if (false !== $color)
+                            imageline($myImage, 0, self::HEIGHT - 1, $i, 0, $color);
                         $color = imagecolorallocate($myImage, $i, 0, 255 - $i);
-                        imageline($myImage, self::WIDTH - 1, 0, self::WIDTH - 1 - $i, self::HEIGHT - 1, $color);
+                        if (false !== $color)
+                            imageline($myImage, self::WIDTH - 1, 0, self::WIDTH - 1 - $i, self::HEIGHT - 1, $color);
                     }
                 $color = imagecolorallocate($myImage, 0, 0, 255);
                 imagestring($myImage, 4, 10, 30, 'Hello', $color);
