@@ -12,7 +12,6 @@ namespace Lang.Cs2Php
 
         static void Usage()
         {
-
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Usage:");
             Console.ResetColor();
@@ -42,7 +41,7 @@ namespace Lang.Cs2Php
 #if DEBUG
                 engine.Configuration = "DEBUG";
 #else
-                engine.Configuration = "RELEASE";                
+                engine.Configuration = "RELEASE";
 #endif
 
                 foreach (var arg in args)
@@ -121,6 +120,7 @@ namespace Lang.Cs2Php
                 Console.WriteLine("Error:");
                 Console.ResetColor();
                 Console.WriteLine("   " + ex.Message + "\r\n");
+                Console.WriteLine("   " + ex.StackTrace + "\r\n");
                 if (showUsage)
                     Usage();
 
