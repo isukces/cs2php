@@ -13,20 +13,41 @@ namespace E04_Graphics
     {
         public static void PhpMain()
         {
-           
-            header("Content-Type: image/png");
-            var myImage = Image.Create(200, 100);
-            if (Image.IsValid(myImage))
+            echo(Doctypes.XHTML_Transitional + PHP_EOL);
+            Html.EchoTagOpen(Tags.Html);
             {
-                Color color = myImage.ColorAllocate(0, 0, 0); // first call is background
-                color = myImage.ColorAllocate(255, 0, 0);
-                myImage.DrawString(Font.Font2, 10, 10, "Hello", color);
-                myImage.Png();
-                //myImage.Jpeg();
-                //myImage.Jpeg(null);
-                //myImage.Jpeg(null, 40);
-                //myImage.Destroy();
+                Html.EchoTagOpen(Tags.Head);
+                {
+                    Html.EchoTagBound(Tags.Title, "Dynamic image");
+                }
+                Html.EchoTagClose(Tags.Head);
             }
+            {
+                Html.EchoTagOpen(Tags.Body);
+                {
+                    var examples = new int[] { -1, 10, 50, 100 };
+                    foreach (var i in examples)
+                    {
+                        var type = i < 0 ? "png" : "jpg";
+                        if (i < 0)
+                            Html.EchoTagBound(Tags.P, "PNG");
+                        else
+                            Html.EchoTagBound(Tags.P, "JPG, compression " + i);
+                        echo(PHP_EOL);
+                        Html.EchoTagBound(Tags.P,
+                            Html.TagSingle(Tags.Img,
+                            Attr.Src, "image.php?format=" + type + (i > 0 ? "&compression=" + i : ""),
+                            Attr.Alt, "Demo " + (i > 0 ? "jpg" : "png") + " image"
+                                )
+                        );
+                        echo(PHP_EOL);
+                    }
+                }
+                Html.EchoTagClose(Tags.Body);
+                echo(PHP_EOL);
+            }
+            Html.EchoTagClose(Tags.Html);
+            echo(PHP_EOL);
         }
     }
 }
