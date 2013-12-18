@@ -179,8 +179,6 @@ namespace Lang.Php.Compiler
                 Console.WriteLine("Create Php output files");
             #region Tworzenie plików php
             {
-
-
                 EmitContext ec = new EmitContext();
                 PhpEmitStyle style = new PhpEmitStyle();
 

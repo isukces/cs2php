@@ -495,6 +495,14 @@ namespace Lang.Php.Compiler.Translator
                         Tranlate_MethodOrProperty(phpClass, pi.GetSetMethod(), m.Statement, pti.SetMethodName);
                 }
             }
+            else
+            {
+                phpClass.Fields.Add(new PhpClassFieldDefinition()
+                {
+                    Name = pti.FieldScriptName,
+                    IsStatic = pti.IsStatic
+                });
+            }
         }
 
         #endregion Methods

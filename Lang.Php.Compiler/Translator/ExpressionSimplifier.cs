@@ -90,7 +90,14 @@ namespace Lang.Php.Compiler.Translator
                             i--;
                             continue;
                         }
-                        throw new NotImplementedException();
+#if DEBUG
+                        throw new NotImplementedException(string.Format("left={0}, right={1} '{2}+{3}'", LV, RV, LV == null ? null : LV.GetType().FullName, RV == null ? null : RV.GetType().FullName));
+#else
+                        Console.WriteLine(string.Format(" Unable to join left={0}, right={1} '{2}+{3}'", LV, RV, LV == null ? null : LV.GetType().FullName, RV == null ? null : RV.GetType().FullName));
+                        Console.WriteLine(L.GetPhpCode(null));
+                        Console.WriteLine(R.GetPhpCode(null));
+                        continue;
+#endif
                     }
                 }
                 IPhpValue result = c[0];
@@ -216,7 +223,7 @@ namespace Lang.Php.Compiler.Translator
         protected override IPhpValue VisitPhpConditionalExpression(PhpConditionalExpression node)
         {
             return node.Simplify(this);
-          
+
         }
 
         protected override IPhpValue VisitPhpParenthesizedExpression(PhpParenthesizedExpression node)

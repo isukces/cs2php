@@ -35,18 +35,19 @@ namespace Lang.Php.Compiler
             var result = new PropertyTranslationInfo();
             result.isStatic = (propInfo.CanRead && propInfo.GetGetMethod().IsStatic)
                 || (propInfo.CanWrite && propInfo.GetSetMethod().IsStatic);
-            var name = propInfo.Name;
-            name = name.Substring(0, 1).ToUpper() + name.Substring(1);
-            result.FieldScriptName = name.Substring(0, 1).ToLower() + name.Substring(1);
+            var AutoImplemented = IsAutoProperty(propInfo);
+            if (AutoImplemented)
+                result.FieldScriptName = propInfo.Name; // just field with the same name 
+            else
+            {
+                var name = propInfo.Name;
+                result.FieldScriptName = name.Substring(0, 1).ToLower() + name.Substring(1); // lowecase field name
+            }
             {
                 var at = propInfo.GetCustomAttribute<ScriptNameAttribute>();
                 if (at != null)
-                {
-                    name = at.Name; // preserve case
-                    result.FieldScriptName = name;
-                }
+                    result.FieldScriptName = at.Name;// preserve case
             }
-            var AutoImplemented = IsAutoProperty(propInfo);
             if (AutoImplemented)
             {
                 result.getSetByMethod = false;
