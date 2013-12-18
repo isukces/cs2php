@@ -16,6 +16,7 @@ namespace Lang.Php
     smartClassEnd
     */
 
+    [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
     public partial class ReplaceAttribute : Attribute
     {
     }
