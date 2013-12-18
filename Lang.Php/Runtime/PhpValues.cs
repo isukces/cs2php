@@ -8,6 +8,9 @@ namespace Lang.Php.Runtime
 {
     public class PhpValues
     {
+        #region Static Methods
+
+        // Public Methods 
 
         public static string ConvertX(string strToConvert, string separator)
         {
@@ -70,7 +73,23 @@ namespace Lang.Php.Runtime
                         throw new NotSupportedException();
                 }
             }
-            return enumValue.ToString();
+            return EscapeSingleQuote(enumValue.ToString());
+        }
+
+        /// <summary>
+        /// Zamienia wartość .NET na wartość tekstową PHP
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static string ToPhpString(object value)
+        {
+            if (value == null) return "";
+            if (value is string) return value as string;
+            if (value is int) return value.ToString();
+            var t = value.GetType();
+            if (t.IsEnum)
+                return FromEnum(value).ToString();
+            throw new NotSupportedException();
         }
 
         public static bool TryGetPhpStringValue(string a, out string x)
@@ -104,25 +123,13 @@ namespace Lang.Php.Runtime
             x = null;
             return false;
         }
+        // Private Methods 
 
-
-
-        /// <summary>
-        /// Zamienia wartość .NET na wartość tekstową PHP
-        /// </summary>
-        /// <param name="value"></param>
-        /// <returns></returns>
-        public static string ToPhpString(object value)
+        private static string EscapeSingleQuote(string x)
         {
-            if (value == null) return "";
-            if (value is string) return value as string;
-            if (value is int) return value.ToString();
-            var t = value.GetType();
-            if (t.IsEnum)
-                return FromEnum(value).ToString();
-            throw new NotSupportedException();
+            return "'" + x.Replace("\\", "\\\\").Replace("'", "\\'") + "'";
         }
 
-
+        #endregion Static Methods
     }
 }
