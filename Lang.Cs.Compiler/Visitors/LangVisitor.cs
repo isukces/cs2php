@@ -40,10 +40,16 @@ namespace Lang.Cs.Compiler.Visitors
         #region Methods
 
         // Public Methods 
-
-        [Obsolete]
+        
         public LangType _ResolveLangType(SyntaxNode name)
         {
+            //if (name is ExpressionSyntax)
+            //{
+            //    var info = context.RoslynModel.GetSymbolInfo(name as ExpressionSyntax);
+            //    var symbol = info.Symbol as TypeSymbol;
+            //    if (symbol == null)
+            //        throw new NotSupportedException();
+            //}
             var a = _ResolveTypeX(name);
             return new LangType(a);
         }
@@ -421,6 +427,12 @@ namespace Lang.Cs.Compiler.Visitors
 #endif
         }
 
+        protected override object VisitMultiplyAssignExpression(BinaryExpressionSyntax node)
+        {
+            var g = _VisitExpression(node);
+            return g;
+        }
+
         protected override object VisitNamespaceDeclaration(NamespaceDeclarationSyntax node)
         {
             var name = _Name(node.Name).GetNonGeneric();
@@ -490,6 +502,12 @@ namespace Lang.Cs.Compiler.Visitors
 
         protected override object VisitPropertyDeclaration(PropertyDeclarationSyntax node)
         {
+            var info = context.RoslynModel.GetSymbolInfo(node.Type);
+            var symbol = info.Symbol as TypeSymbol;
+            if (symbol == null)
+                throw new NotSupportedException();
+            var tt = context.Roslyn_ResolveType(symbol);
+
             var propertyName = _Name(node.Identifier);
             var mod = VisitModifiers(node.Modifiers);
             var accessors = node.AccessorList.Accessors.Select(i => Visit(i) as CsharpPropertyDeclarationAccessor).ToArray();
@@ -515,6 +533,11 @@ namespace Lang.Cs.Compiler.Visitors
         protected override object VisitStringLiteralExpression(LiteralExpressionSyntax node)
         {
             return new ConstValue(_Name(node.Token));
+        }
+
+        protected override object VisitThrowStatement(ThrowStatementSyntax node)
+        {
+            return base.VisitThrowStatement(node);
         }
 
         protected override object VisitUsingDirective(UsingDirectiveSyntax node)
@@ -592,13 +615,12 @@ namespace Lang.Cs.Compiler.Visitors
             return a.FullName;
 
         }
-
+      
         private Type _ResolveTypeX(SyntaxNode name)
         {
+            // We can do this directly 
             TypeVisitor v = new TypeVisitor(state);
             return v.Visit(name);
-
-
         }
 
         IValue _VisitExpression(SyntaxNode n)

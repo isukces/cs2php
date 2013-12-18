@@ -9,7 +9,7 @@ namespace Lang.Cs.Compiler.Visitors
 {
     public class TypeVisitor : CodeVisitor<Type>
     {
-		#region Constructors 
+        #region Constructors
 
         public TypeVisitor(CompileState ts)
         {
@@ -19,11 +19,11 @@ namespace Lang.Cs.Compiler.Visitors
             context = ts.Context;
         }
 
-		#endregion Constructors 
+        #endregion Constructors
 
-		#region Methods 
+        #region Methods
 
-		// Protected Methods 
+        // Protected Methods 
 
         protected override Type VisitArrayType(ArrayTypeSyntax node)
         {
@@ -36,13 +36,20 @@ namespace Lang.Cs.Compiler.Visitors
 
         protected override Type VisitGenericName(GenericNameSyntax node)
         {
-            // if (ThrowNotImplementedException)
-            var types = node.TypeArgumentList.Arguments.Select(i => Visit(i)).ToArray();
-            var gt = _GetType(node.Identifier, types.Length);
-            var a = gt.MakeGenericType(types);
-            return a;
-            // throw new NotImplementedException(string.Format("Method {0} is not supported", "VisitGenericName"));
-            // return default(T);
+            var symbolInfo = context.RoslynModel.GetSymbolInfo(node);
+            if (symbolInfo.Symbol is TypeSymbol)
+            {
+                var type = context.Roslyn_ResolveType(symbolInfo.Symbol as TypeSymbol);
+                return type;
+            }
+            throw new NotSupportedException();
+
+            //var types = node.TypeArgumentList.Arguments.Select(i => Visit(i)).ToArray();
+            //var gt = _GetType(node.Identifier, types.Length);
+            //var a = gt.MakeGenericType(types);
+            //return a;
+            //// throw new NotImplementedException(string.Format("Method {0} is not supported", "VisitGenericName"));
+            //// return default(T);
         }
 
         protected override Type VisitIdentifierName(IdentifierNameSyntax node)
@@ -50,14 +57,14 @@ namespace Lang.Cs.Compiler.Visitors
             var id = node.Identifier;
 
 #if ROSLYN
-                // wzięte z [FAQ(1)]
-                var model = state.Context.RoslynModel;
-                var i1 = model.GetTypeInfo(node);
-                TypeSymbol type = i1.Type;
-                var _netType = state.Context.Roslyn_ResolveType(type);
-                //var i2 = model.GetSymbolInfo(node); // alternatywnie
-                //type = (TypeSymbol)i2.Symbol;
-                return _netType;
+            // wzięte z [FAQ(1)]
+            var model = state.Context.RoslynModel;
+            var i1 = model.GetTypeInfo(node);
+            TypeSymbol type = i1.Type;
+            var _netType = state.Context.Roslyn_ResolveType(type);
+            //var i2 = model.GetSymbolInfo(node); // alternatywnie
+            //type = (TypeSymbol)i2.Symbol;
+            return _netType;
 #else           
             return _GetType(id, 0);
 #endif
@@ -75,25 +82,27 @@ namespace Lang.Cs.Compiler.Visitors
         {
             return TypesUtil.PRIMITIVE_TYPES[node.Keyword.ValueText];
         }
-		// Private Methods 
+        // Private Methods 
 
-        private Type _GetType(SyntaxToken id, int gen)
-        {
-            var name = id.ValueText;
-            if (name == "var")
-                return null;
-            var types = context.MatchTypes(name, gen);
-            if (types.Length != 1)
-                throw new Exception("Unable to resolve type " + name);
-            return types.First();
-        }
+        //[Obsolete]
+        //private Type _GetType(SyntaxToken id, int gen)
+        //{
+        //    var name = id.ValueText;
+        //    if (name == "var")
+        //        return null;
+        //    // var a = context.RoslynModel.GetTypeInfo()
+        //    var types = context.MatchTypes(name, gen);
+        //    if (types.Length != 1)
+        //        throw new Exception("Unable to resolve type " + name);
+        //    return types.First();
+        //}
 
-		#endregion Methods 
+        #endregion Methods
 
-		#region Fields 
+        #region Fields
 
         CompileState state;
 
-		#endregion Fields 
+        #endregion Fields
     }
 }
