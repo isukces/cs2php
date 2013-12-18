@@ -11,6 +11,8 @@ using System.Threading.Tasks;
 namespace Lang.Php.Framework.Replacers
 {
     [Replace(typeof(List<>))]
+    [Replace(typeof(IList<>))]
+    [Replace(typeof(ICollection<>))]
     class ListReplacer<TValue>
     {
 
