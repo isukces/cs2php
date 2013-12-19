@@ -357,7 +357,6 @@ namespace Lang.Cs.Compiler.Visitors
             var v = Visit(node.Declaration) as VariableDeclaration;
             foreach (var i in v.Declarators)
             {
-                //var ti = context.RoslynModel.GetTypeInfo(i);
                 context.LocalVariables.Add(new NameType(i.Name, v.Type));
             }
             return new LocalDeclarationStatement(isConst, isFixed, v);
@@ -675,6 +674,40 @@ namespace Lang.Cs.Compiler.Visitors
 
             var a = new FunctionDeclarationParameter(name, m, new LangType(type), initial);
             return a;
+        }
+
+        protected override object VisitOperatorDeclaration(OperatorDeclarationSyntax node)
+        {
+            var doc = DeclarationItemDescription.Parse(node);
+            var methodSymbol = (MethodSymbol)context.RoslynModel.GetDeclaredSymbol(node);
+
+
+            var mi = context.Roslyn_ResolveMethod(methodSymbol) as MethodInfo;
+            if (mi == null)
+                throw new NotSupportedException();
+
+#warning 'Zarejestrować nazwy parametrów'
+            var body = Visit(node.Body) as IStatement;
+
+
+            return new MethodDeclaration(mi, body);
+ 
+        }
+        protected override object VisitConversionOperatorDeclaration(ConversionOperatorDeclarationSyntax node)
+        {
+            var doc = DeclarationItemDescription.Parse(node);
+            var methodSymbol = (MethodSymbol)context.RoslynModel.GetDeclaredSymbol(node);
+
+
+            var mi = context.Roslyn_ResolveMethod(methodSymbol) as MethodInfo;
+            if (mi == null)
+                throw new NotSupportedException();
+
+#warning 'Zarejestrować nazwy parametrów'
+            var body = Visit(node.Body) as IStatement;
+
+
+            return new MethodDeclaration(mi, body);
         }
 
         object[] Visit(IEnumerable<MemberDeclarationSyntax> i)

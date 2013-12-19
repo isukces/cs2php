@@ -880,8 +880,10 @@ namespace Lang.Cs.Compiler.Visitors
 
         protected override IValue VisitNumericLiteralExpression(LiteralExpressionSyntax node)
         {
-            var a = _Name(node.Token);
-            return new ConstValue(node.Token.Value);
+            var typeInfo = context.RoslynModel.GetTypeInfo(node);
+            IValue value = new ConstValue(node.Token.Value);
+            value = ImplicitConvert(value, typeInfo);
+            return value;
         }
 
         protected override IValue VisitObjectCreationExpression(ObjectCreationExpressionSyntax node)
@@ -1009,7 +1011,9 @@ namespace Lang.Cs.Compiler.Visitors
 
         protected override IValue VisitStringLiteralExpression(LiteralExpressionSyntax node)
         {
-            return new ConstValue(_Name(node.Token));
+            IValue value = new ConstValue(node.Token.Value);
+            value = ImplicitConvert(value, context.RoslynModel.GetTypeInfo(node));
+            return value;
         }
 
         protected override IValue VisitSubtractAssignExpression(BinaryExpressionSyntax node)
