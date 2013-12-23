@@ -123,6 +123,11 @@ namespace Lang.Php.Compiler.Translator
             return node;
         }
 
+        protected override IPhpStatement VisitPhpSwitchStatement(PhpSwitchStatement node)
+        {
+            return node.Simplify(this);
+        }
+
         public IPhpValue Simplify(IPhpValue x)
         {
             var a = new ExpressionSimplifier(op);

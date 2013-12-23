@@ -76,6 +76,27 @@ namespace Lang.Php.Compiler.Translator
             return trans.TranslateStatement(x);
         }
 
+        protected override IPhpStatement[] VisitSwitchStatement(CsharpSwitchStatement src)
+        {
+            var switchStatement = new PhpSwitchStatement();
+            switchStatement.Expression = TransValue(src.Expression);
+            foreach (var sec in src.Sections)
+            {
+                var section = new PhpSwitchSection();
+                section.Labels = sec.Labels.Select(q => new PhpSwitchLabel()
+                {
+                    Value = q.Expression == null ? null : TransValue(q.Expression),
+                    IsDefault = q.IsDefault
+                }).ToArray();
+                var statements = TranslateStatements(sec.Statements);
+                var block = new PhpCodeBlock();
+                block.Statements.AddRange(statements);
+                section.Statement = PhpCodeBlock.Reduce(block);
+                switchStatement.Sections.Add(section);
+            }
+            return MkArray(switchStatement);
+        }
+
         protected override IPhpStatement[] VisitBreakStatement(BreakStatement src)
         {
             return MkArray(new PhpBreakStatement());

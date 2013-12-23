@@ -77,6 +77,8 @@ namespace Lang.Php.Compiler.Translator
                     return VisitPhpVariableExpression(node as PhpVariableExpression);
                 case PhpSourceItems.PhpWhileStatement:
                     return VisitPhpWhileStatement(node as PhpWhileStatement);
+                case PhpSourceItems.PhpSwitchStatement:
+                    return VisitPhpSwitchStatement(node as PhpSwitchStatement);
                 default: throw new NotSupportedException(node.Kind.ToString() + "," + node.GetType().Name);
             }
         }
@@ -291,6 +293,13 @@ namespace Lang.Php.Compiler.Translator
                 throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitPhpWhileStatement", this.GetType().FullName));
             return default(T);
         }
+
+        protected virtual T VisitPhpSwitchStatement(PhpSwitchStatement node)
+        {
+            if (ThrowNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitPhpSwitchStatement", this.GetType().FullName));
+            return default(T);
+        }
 		public static PhpSourceItems GetKind(PhpSourceBase x) {
 			if (x == null) throw new ArgumentNullException();           
 			if (x.GetType() == typeof(PhpCodeBlock)) return PhpSourceItems.PhpCodeBlock;
@@ -322,6 +331,7 @@ namespace Lang.Php.Compiler.Translator
 			if (x.GetType() == typeof(PhpUnaryOperatorExpression)) return PhpSourceItems.PhpUnaryOperatorExpression;
 			if (x.GetType() == typeof(PhpVariableExpression)) return PhpSourceItems.PhpVariableExpression;
 			if (x.GetType() == typeof(PhpWhileStatement)) return PhpSourceItems.PhpWhileStatement;
+			if (x.GetType() == typeof(PhpSwitchStatement)) return PhpSourceItems.PhpSwitchStatement;
             throw new NotSupportedException(x.GetType().FullName);
 		}
     }
@@ -356,5 +366,6 @@ PhpThisExpression,
 PhpUnaryOperatorExpression,
 PhpVariableExpression,
 PhpWhileStatement,
+PhpSwitchStatement,
 	}
 }
