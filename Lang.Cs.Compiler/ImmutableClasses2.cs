@@ -485,4 +485,22 @@ namespace Lang.Cs.Compiler
             return targetObject.ToString() + "." + member.Name;
         }
     }
+
+    public partial class CsharpSwichLabel : IValue
+    {
+
+        public Type ValueType
+        {
+            get
+            {
+                throw new NotSupportedException();
+            }
+        }
+        public override string ToString()
+        {
+            if (isDefault)
+                return "default";
+            return this.expression.ToString();
+        }
+    }
 }

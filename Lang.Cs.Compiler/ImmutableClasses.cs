@@ -1185,6 +1185,60 @@ namespace Lang.Cs.Compiler
       }
       private IStatement body;
     } // end of LambdaExpression
+    public partial class CsharpSwitchStatement : CSharpBase, IStatement {
+      public CsharpSwitchStatement(IValue Expression, CsharpSwichSection[] Sections){
+        this.expression = Expression;
+        this.sections = Sections;
+      }
+      public IValue Expression {
+        get {
+          return expression;
+        }
+      }
+      private IValue expression;
+      public CsharpSwichSection[] Sections {
+        get {
+          return sections;
+        }
+      }
+      private CsharpSwichSection[] sections;
+    } // end of CsharpSwitchStatement
+    public partial class CsharpSwichSection : CSharpBase {
+      public CsharpSwichSection(CsharpSwichLabel[] Labels, IStatement[] Statements){
+        this.labels = Labels;
+        this.statements = Statements;
+      }
+      public CsharpSwichLabel[] Labels {
+        get {
+          return labels;
+        }
+      }
+      private CsharpSwichLabel[] labels;
+      public IStatement[] Statements {
+        get {
+          return statements;
+        }
+      }
+      private IStatement[] statements;
+    } // end of CsharpSwichSection
+    public partial class CsharpSwichLabel : CSharpBase, IValue {
+      public CsharpSwichLabel(IValue Expression, bool IsDefault){
+        this.expression = Expression;
+        this.isDefault = IsDefault;
+      }
+      public IValue Expression {
+        get {
+          return expression;
+        }
+      }
+      private IValue expression;
+      public bool IsDefault {
+        get {
+          return isDefault;
+        }
+      }
+      private bool isDefault;
+    } // end of CsharpSwichLabel
 public class CSharpBase {
     public CSharpBaseKinds TokenKind
     {
@@ -1249,6 +1303,9 @@ public class CSharpBase {
             if (this is IValueTable2_PseudoValue) return CSharpBaseKinds.IValueTable2_PseudoValueKind;
             if (this is MethodExpression) return CSharpBaseKinds.MethodExpressionKind;
             if (this is LambdaExpression) return CSharpBaseKinds.LambdaExpressionKind;
+            if (this is CsharpSwitchStatement) return CSharpBaseKinds.SwitchStatementKind;
+            if (this is CsharpSwichSection) return CSharpBaseKinds.SwichSectionKind;
+            if (this is CsharpSwichLabel) return CSharpBaseKinds.SwichLabelKind;
         throw new NotSupportedException();
         }
     }
@@ -1313,6 +1370,9 @@ public enum CSharpBaseKinds {
     IValueTable2_PseudoValueKind,
     MethodExpressionKind,
     LambdaExpressionKind,
+    SwitchStatementKind,
+    SwichSectionKind,
+    SwichLabelKind,
 }
 public class CSharpBaseVisitor<T> {
         public T Visit(CSharpBase a)
@@ -1437,6 +1497,12 @@ public class CSharpBaseVisitor<T> {
                     return VisitMethodExpression(a as MethodExpression);
                 case CSharpBaseKinds.LambdaExpressionKind:
                     return VisitLambdaExpression(a as LambdaExpression);
+                case CSharpBaseKinds.SwitchStatementKind:
+                    return VisitSwitchStatement(a as CsharpSwitchStatement);
+                case CSharpBaseKinds.SwichSectionKind:
+                    return VisitSwichSection(a as CsharpSwichSection);
+                case CSharpBaseKinds.SwichLabelKind:
+                    return VisitSwichLabel(a as CsharpSwichLabel);
             }
             throw new NotSupportedException();
         }
@@ -1615,6 +1681,15 @@ public class CSharpBaseVisitor<T> {
         throw new NotSupportedException();
     }
     protected virtual T VisitLambdaExpression(LambdaExpression src) {
+        throw new NotSupportedException();
+    }
+    protected virtual T VisitSwitchStatement(CsharpSwitchStatement src) {
+        throw new NotSupportedException();
+    }
+    protected virtual T VisitSwichSection(CsharpSwichSection src) {
+        throw new NotSupportedException();
+    }
+    protected virtual T VisitSwichLabel(CsharpSwichLabel src) {
         throw new NotSupportedException();
     }
 }

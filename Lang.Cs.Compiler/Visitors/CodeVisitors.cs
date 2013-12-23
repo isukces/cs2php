@@ -354,6 +354,10 @@ namespace Lang.Cs.Compiler.Visitors
                       return VisitBitwiseAndExpression(node as BinaryExpressionSyntax);
                 case SyntaxKind.MultiplyAssignExpression:
                       return VisitMultiplyAssignExpression(node as BinaryExpressionSyntax);
+                case SyntaxKind.CaseSwitchLabel:
+                      return VisitCaseSwitchLabel(node as SwitchLabelSyntax);
+                case SyntaxKind.DefaultSwitchLabel:
+                      return VisitDefaultSwitchLabel(node as SwitchLabelSyntax);
                 case SyntaxKind.StringLiteralExpression:
                       return VisitStringLiteralExpression(node as LiteralExpressionSyntax);
                 case SyntaxKind.Parameter:
@@ -1555,6 +1559,20 @@ namespace Lang.Cs.Compiler.Visitors
         {
             if (ThrowNotImplementedException)
                 throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitMultiplyAssignExpression", this.GetType().FullName));
+            return default(T);
+        }
+
+        protected virtual T VisitCaseSwitchLabel(SwitchLabelSyntax node)
+        {
+            if (ThrowNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitCaseSwitchLabel", this.GetType().FullName));
+            return default(T);
+        }
+
+        protected virtual T VisitDefaultSwitchLabel(SwitchLabelSyntax node)
+        {
+            if (ThrowNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitDefaultSwitchLabel", this.GetType().FullName));
             return default(T);
         }
 

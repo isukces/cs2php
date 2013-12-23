@@ -12,7 +12,7 @@ namespace Lang.Cs.Compiler.Visitors
 {
     public class IValueVisitor : CodeVisitor<IValue>
     {
-		#region Constructors 
+        #region Constructors
 
         public IValueVisitor(CompileState ts)
         {
@@ -22,22 +22,31 @@ namespace Lang.Cs.Compiler.Visitors
             context = ts.Context;
         }
 
-		#endregion Constructors 
+        #endregion Constructors
 
-		#region Static Methods 
+        #region Static Methods
 
-		// Private Methods 
+        // Private Methods 
 
         private static QualifiedNameVisitor.R _Name(NameSyntax node)
         {
             return new QualifiedNameVisitor().Visit(node);
         }
+        protected override IValue VisitCaseSwitchLabel(SwitchLabelSyntax node)
+        {
+            var value = Visit(node.Value);
+            return new CsharpSwichLabel(value, false);
+        }
+        protected override IValue VisitDefaultSwitchLabel(SwitchLabelSyntax node)
+        {
+            return new CsharpSwichLabel(null, true);
+        }
 
-		#endregion Static Methods 
+        #endregion Static Methods
 
-		#region Methods 
+        #region Methods
 
-		// Protected Methods 
+        // Protected Methods 
 
         protected FunctionDeclarationParameter _VisitParameter(SyntaxNode node)
         {
@@ -1046,7 +1055,7 @@ namespace Lang.Cs.Compiler.Visitors
             t = context.Roslyn_ResolveType(g.Type);
             return new TypeOfExpression(t);
         }
-		// Private Methods 
+        // Private Methods 
 
         FunctionArgument[] _internalVisitArgumentList(BaseArgumentListSyntax list)
         {
@@ -1215,15 +1224,15 @@ namespace Lang.Cs.Compiler.Visitors
             return ExpressionConverterVisitor.Visit(src);
         }
 
-		#endregion Methods 
+        #endregion Methods
 
-		#region Fields 
+        #region Fields
 
         private CompileState state;
 
-		#endregion Fields 
+        #endregion Fields
 
-		#region Properties 
+        #region Properties
 
         private SemanticModel model
         {
@@ -1233,6 +1242,6 @@ namespace Lang.Cs.Compiler.Visitors
             }
         }
 
-		#endregion Properties 
+        #endregion Properties
     }
 }

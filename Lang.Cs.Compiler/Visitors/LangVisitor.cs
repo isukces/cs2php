@@ -40,7 +40,7 @@ namespace Lang.Cs.Compiler.Visitors
         #region Methods
 
         // Public Methods 
-        
+
         public LangType _ResolveLangType(SyntaxNode name)
         {
             //if (name is ExpressionSyntax)
@@ -114,7 +114,19 @@ namespace Lang.Cs.Compiler.Visitors
                     return new CodeBlock(a);
                 });
         }
-
+        protected override object VisitSwitchStatement(SwitchStatementSyntax node)
+        {
+            var expression = _VisitExpression(node.Expression);
+            List<CsharpSwichSection> sections = new List<CsharpSwichSection>(node.Sections.Count);
+            foreach (var csSection in node.Sections)
+            {
+                CsharpSwichLabel[] labels = csSection.Labels.Select(a => _VisitExpression(a)).Cast<CsharpSwichLabel>().ToArray();
+                IStatement[] statements = csSection.Statements.Select(a => Visit(a)).Cast<IStatement>().ToArray();
+                CsharpSwichSection section = new CsharpSwichSection(labels, statements);
+                sections.Add(section);
+            }
+            return new CsharpSwitchStatement(expression, sections.ToArray());
+        }
         protected override object VisitBreakStatement(BreakStatementSyntax node)
         {
             return new BreakStatement();
@@ -614,7 +626,7 @@ namespace Lang.Cs.Compiler.Visitors
             return a.FullName;
 
         }
-      
+
         private Type _ResolveTypeX(SyntaxNode name)
         {
             // We can do this directly 
@@ -691,7 +703,7 @@ namespace Lang.Cs.Compiler.Visitors
 
 
             return new MethodDeclaration(mi, body);
- 
+
         }
         protected override object VisitConversionOperatorDeclaration(ConversionOperatorDeclarationSyntax node)
         {

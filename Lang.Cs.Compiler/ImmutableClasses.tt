@@ -112,6 +112,10 @@ namespace Lang.Cs.Compiler
 	MakeClass("MethodExpression", "IValue", "MethodInfo Method");
 	MakeClass("LambdaExpression", "IValue", "Type DotnetType", "FunctionDeclarationParameter[] Parameters", "IStatement Body");
 
+	MakeClass("CsharpSwitchStatement", "IStatement", "IValue Expression", "CsharpSwichSection[] Sections"); 
+	MakeClass("CsharpSwichSection", "", "CsharpSwichLabel[] Labels", "IStatement[] Statements"); 
+	MakeClass("CsharpSwichLabel", "IValue", "IValue Expression", "bool IsDefault"); 
+
 	MakeClassBase();
 	 
 #>

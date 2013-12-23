@@ -239,7 +239,9 @@ string[] GetDirectives() {
 "BitwiseOrExpression,BinaryExpressionSyntax",
 "ArrayInitializerExpression,InitializerExpressionSyntax",
 "BitwiseAndExpression,BinaryExpressionSyntax",
-"MultiplyAssignExpression,BinaryExpressionSyntax"
+"MultiplyAssignExpression,BinaryExpressionSyntax",
+"CaseSwitchLabel,SwitchLabelSyntax",
+"DefaultSwitchLabel,SwitchLabelSyntax"
 
 
 };
