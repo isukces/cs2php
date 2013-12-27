@@ -24,6 +24,8 @@ namespace Lang.Php.Compiler.Source
     	preprocess value = value.Replace("\\", "/");
     	OnChange UpdateIncludePathExpression();
     
+    property OptionalIncludePathPrefix string[] defined const or variables to include before module name
+    
     property Extension string rozszerzenie nazwy pliku
     	init ".php"
     
@@ -48,9 +50,9 @@ namespace Lang.Php.Compiler.Source
         {
             if (assemblyInfo == null)
                 throw new ArgumentNullException("assemblyInfo");
-            if (name == null)
-                throw new ArgumentNullException("name");
- 
+            if (name == null)
+                throw new ArgumentNullException("name");
+
             this.assemblyInfo = assemblyInfo;
             this.Name = name;
         }
@@ -79,7 +81,10 @@ namespace Lang.Php.Compiler.Source
                 {
                     ModuleAttribute _module = ats.OfType<ModuleAttribute>().FirstOrDefault();
                     if (_module != null)
+                    {
                         Name = _module.ModuleShortName;
+                        OptionalIncludePathPrefix = _module.IncludePathPrefix;
+                    }
                 }
                 #endregion
                 #region PageAttribute
@@ -100,17 +105,34 @@ namespace Lang.Php.Compiler.Source
                 PhpIncludePathExpression = null;
                 return;
             }
-            IPhpValue assemblyPath = assemblyInfo.PhpIncludePathExpression;
-            if (assemblyPath != null)
+            List<IPhpValue> pathItems = new List<IPhpValue>();
             {
-                var pathItems = new IPhpValue[]{
-                    assemblyPath,
-                    new PhpConstValue(name + Extension)
-                };
-                PhpIncludePathExpression = PhpBinaryOperatorExpression.ConcatStrings(pathItems);
+                IPhpValue assemblyPath = assemblyInfo.PhpIncludePathExpression;
+                if (assemblyPath != null)
+                    pathItems.Add(assemblyPath);
             }
-            else
-                PhpIncludePathExpression = new PhpConstValue(name + Extension);
+            if (optionalIncludePathPrefix != null && optionalIncludePathPrefix.Any())
+                foreach (var n in optionalIncludePathPrefix)
+                {
+                    if (n.StartsWith("$"))
+                        pathItems.Add(new PhpVariableExpression(n, PhpVariableKind.Global));
+                    else
+                        pathItems.Add(new PhpDefinedConstExpression(n, null));
+                }
+            pathItems.Add(new PhpConstValue(name + Extension));
+            PhpIncludePathExpression = PhpBinaryOperatorExpression.ConcatStrings(pathItems.ToArray());
+
+
+            //if (assemblyPath != null)
+            //{
+            //    var pathItems = new IPhpValue[]{
+            //        assemblyPath,
+            //        new PhpConstValue(name + Extension)
+            //    };
+            //    PhpIncludePathExpression = PhpBinaryOperatorExpression.ConcatStrings(pathItems);
+            //}
+            //else
+            //    PhpIncludePathExpression = new PhpConstValue(name + Extension);
         }
 
         #endregion Constructors
@@ -258,7 +280,7 @@ namespace Lang.Php.Compiler.Source
 }
 
 
-// -----:::::##### smartClass embedded code begin #####:::::----- generated 2013-12-06 14:00
+// -----:::::##### smartClass embedded code begin #####:::::----- generated 2013-12-25 13:50
 // File generated automatically ver 2013-07-10 08:43
 // Smartclass.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0c4d5d36fb5eb4ac
 namespace Lang.Php.Compiler.Source
@@ -277,9 +299,9 @@ namespace Lang.Php.Compiler.Source
 
         implement INotifyPropertyChanged
         implement INotifyPropertyChanged_Passive
-        implement ToString ##AssemblyInfo## ##Library## ##Name## ##Extension## ##PhpIncludePathExpression##
-        implement ToString AssemblyInfo=##AssemblyInfo##, Library=##Library##, Name=##Name##, Extension=##Extension##, PhpIncludePathExpression=##PhpIncludePathExpression##
-        implement equals AssemblyInfo, Library, Name, Extension, PhpIncludePathExpression
+        implement ToString ##AssemblyInfo## ##Library## ##Name## ##OptionalIncludePathPrefix## ##Extension## ##PhpIncludePathExpression##
+        implement ToString AssemblyInfo=##AssemblyInfo##, Library=##Library##, Name=##Name##, OptionalIncludePathPrefix=##OptionalIncludePathPrefix##, Extension=##Extension##, PhpIncludePathExpression=##PhpIncludePathExpression##
+        implement equals AssemblyInfo, Library, Name, OptionalIncludePathPrefix, Extension, PhpIncludePathExpression
         implement equals *
         implement equals *, ~exclude1, ~exclude2
         */
@@ -296,6 +318,10 @@ namespace Lang.Php.Compiler.Source
         /// Nazwa własności Name; Module name without library prefix
         /// </summary>
         public const string PROPERTYNAME_NAME = "Name";
+        /// <summary>
+        /// Nazwa własności OptionalIncludePathPrefix; defined const or variables to include before module name
+        /// </summary>
+        public const string PROPERTYNAME_OPTIONALINCLUDEPATHPREFIX = "OptionalIncludePathPrefix";
         /// <summary>
         /// Nazwa własności Extension; rozszerzenie nazwy pliku
         /// </summary>
@@ -413,6 +439,21 @@ namespace Lang.Php.Compiler.Source
             }
         }
         private string name = string.Empty;
+        /// <summary>
+        /// defined const or variables to include before module name
+        /// </summary>
+        public string[] OptionalIncludePathPrefix
+        {
+            get
+            {
+                return optionalIncludePathPrefix;
+            }
+            set
+            {
+                optionalIncludePathPrefix = value;
+            }
+        }
+        private string[] optionalIncludePathPrefix;
         /// <summary>
         /// rozszerzenie nazwy pliku
         /// </summary>

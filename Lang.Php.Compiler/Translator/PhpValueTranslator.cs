@@ -513,17 +513,17 @@ namespace Lang.Php.Compiler.Translator
                                     return phpTargetObject;
 
                                 var method = new PhpMethodCallExpression(ats.Name);
-                                //switch (ats.CallType)
-                                //{
-                                //    case MethodCallStyles.Procedural:
-                                //        method.Arguments.Add(new PhpMethodInvokeValue(phpTargetObject));
-                                //        return method;
-                                //    case MethodCallStyles.:
-                                //        method.Arguments.Add(new PhpMethodInvokeValue(phpTargetObject));
-                                //        return method;
-                                //    default:
-                                //        throw new NotSupportedException();
-                                //}
+                                switch (ats.CallType)
+                                {
+                                    case MethodCallStyles.Procedural:
+                                        method.Arguments.Add(new PhpMethodInvokeValue(phpTargetObject));
+                                        return method;
+                                    //    case MethodCallStyles.:
+                                    //        method.Arguments.Add(new PhpMethodInvokeValue(phpTargetObject));
+                                    //        return method;
+                                    //    default:
+                                    //        throw new NotSupportedException();
+                                }
                                 throw new NotImplementedException();
                             case ClassMembers.Field:
                                 switch (ats.CallType)
@@ -602,7 +602,7 @@ namespace Lang.Php.Compiler.Translator
             var x = state.Principles.NodeTranslators.Translate(state, src);
             if (x != null)
                 return this.SimplifyPhpExpression(x);
-            throw new NotSupportedException();
+            throw new NotSupportedException(src.ToString());
         }
 
         protected override IPhpValue VisitMethodExpression(MethodExpression src)

@@ -1,0 +1,5 @@
+public static function BasicMath1() {
+    $a = 1;
+    $b = 2;
+    $d = ($a + $b) / M_PI;
+}

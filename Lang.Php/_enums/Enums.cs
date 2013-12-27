@@ -5,8 +5,8 @@ using System.Text;
 
 namespace Lang.Php
 {
-    [EnumRender(EnumRenderOptions.MinusLowercase)]
-	 public enum Tags
+    [EnumRender(EnumRenderOptions.MinusLowercase, false)]
+	public enum Tags
     {
 	    [RenderValue("'html'")]
     Html,
@@ -208,7 +208,7 @@ namespace Lang.Php
      
     }
 
-	[EnumRender(EnumRenderOptions.MinusLowercase)]
+	[EnumRender(EnumRenderOptions.MinusLowercase, false)]
 	public enum CssColors
     {
 	    [RenderValue("'yellow'")]
@@ -241,7 +241,7 @@ namespace Lang.Php
     Stylesheet,
      
     }
-	[EnumRender(EnumRenderOptions.MinusLowercase)]
+	[EnumRender(EnumRenderOptions.MinusLowercase, false)]
 	public enum CssFontSizes
     {
 	    XxSmall,
@@ -257,7 +257,7 @@ namespace Lang.Php
      
     
 	}
-	[EnumRender(EnumRenderOptions.MinusLowercase)]
+	[EnumRender(EnumRenderOptions.MinusLowercase, false)]
 	public enum CssBorderStyles
     {
 	    None,

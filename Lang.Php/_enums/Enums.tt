@@ -11,8 +11,8 @@ using System.Text;
 
 namespace Lang.Php
 {
-    [EnumRender(EnumRenderOptions.MinusLowercase)]
-	 public enum Tags
+    [EnumRender(EnumRenderOptions.MinusLowercase, false)]
+	public enum Tags
     {
 	<#
 		X("Html Body Head Meta Script Div Form Input A Button Table Tr Td Th Label Select Option Textarea P Link Br Style Title Img B");
@@ -94,7 +94,7 @@ namespace Lang.Php
 	#>     
     }
 
-	[EnumRender(EnumRenderOptions.MinusLowercase)]
+	[EnumRender(EnumRenderOptions.MinusLowercase, false)]
 	public enum CssColors
     {
 	<#
@@ -115,7 +115,7 @@ namespace Lang.Php
 		X("Stylesheet");
 	#>     
     }
-	[EnumRender(EnumRenderOptions.MinusLowercase)]
+	[EnumRender(EnumRenderOptions.MinusLowercase, false)]
 	public enum CssFontSizes
     {
 	<#
@@ -123,7 +123,7 @@ namespace Lang.Php
 	#>     
     
 	}
-	[EnumRender(EnumRenderOptions.MinusLowercase)]
+	[EnumRender(EnumRenderOptions.MinusLowercase, false)]
 	public enum CssBorderStyles
     {
 	<#

@@ -11,6 +11,7 @@ namespace Lang.Php
         UnderscoreLowercase,
         UnderscoreUppercase,
         MinusLowercase,
-        Numbers
+        Numbers,
+        OctalNumbers
     }
 }

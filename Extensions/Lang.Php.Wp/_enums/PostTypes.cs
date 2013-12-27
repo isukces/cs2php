@@ -5,12 +5,12 @@ using System.Text;
 
 namespace Lang.Php.Wp
 {
-    [EnumRender(EnumRenderOptions.UnderscoreLowercase)]
+    [EnumRender(EnumRenderOptions.UnderscoreLowercase, false)]
     public enum PostTypes
     {
         Post,
         Page,
-        Sashboard,
+        Dashboard,
         Link,
         Attachment,
         CustomPostType

@@ -7,9 +7,11 @@ namespace Lang.Php.Wp
 {
     [IgnoreNamespace]
     [Skip]
+    [Module("class-http", "ABSPATH", "WPINC")]
+    //  include_once( ABSPATH  +  WPINC +  "/class-http + php" );
     public class WP_Http
     {
-    
+
         public Request_Object request(string url, Dictionary<string, object> pp)
         {
             throw new NotSupportedException();
@@ -18,11 +20,10 @@ namespace Lang.Php.Wp
 
         [AsArray]
         public class Request_Array
-        {         
+        {
             public Response response;
             public string body;
             public Dictionary<string, string> headers;
-            // public Dictionary<string, string> response;
             public Dictionary<string, string> cookies;
             public string filename;
         }

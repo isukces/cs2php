@@ -55,6 +55,8 @@ namespace Lang.Php.Compiler
             var concat = new PhpBinaryOperatorExpression(".", dirinfo, a2);
             return concat;
         }
+
+       
         public static string MakeRelativePath(string path, string relTo)
         {
             Uri fromUri = new Uri(new DirectoryInfo(relTo + WIN_SEP).FullName);

@@ -6,7 +6,7 @@ using Lang.Php;
 
 namespace Lang.Php.Wp
 {
-    [EnumRender(EnumRenderOptions.UnderscoreLowercase)]
+    [EnumRender(EnumRenderOptions.UnderscoreLowercase, false)]
     public enum BlogInfoFilters
     {
         Display,

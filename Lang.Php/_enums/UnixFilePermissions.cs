@@ -6,6 +6,7 @@ using System.Text;
 namespace Lang.Php
 {
     [Flags]
+    [EnumRender(EnumRenderOptions.OctalNumbers, false)]
     public enum UnixFilePermissions
     {
         OtherRead = 1,

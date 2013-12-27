@@ -1,4 +1,5 @@
 ﻿using Lang.Php.Compiler.Source;
+using Lang.Php.Runtime;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -64,6 +65,8 @@ namespace Lang.Php.Compiler.Translator
             return @new;
         }
 
+
+
         protected override IPhpValue VisitPhpBinaryOperatorExpression(PhpBinaryOperatorExpression node)
         {
             if (node.Operator == ".")
@@ -81,19 +84,32 @@ namespace Lang.Php.Compiler.Translator
                     var R = c[i];
                     if (L is PhpConstValue && R is PhpConstValue)
                     {
-                        var LV = (L as PhpConstValue).Value;
-                        var RV = (R as PhpConstValue).Value;
-                        if (LV is string && RV is string)
+                        var LValue = (L as PhpConstValue).Value;
+                        var RValue = (R as PhpConstValue).Value;
+                        if (LValue is string && RValue is string)
                         {
-                            c[i - 1] = new PhpConstValue((string)LV + (string)RV);
+                            c[i - 1] = new PhpConstValue((string)LValue + (string)RValue);
                             c.RemoveAt(i);
                             i--;
                             continue;
                         }
+                        var LCode = PhpValues.ToPhpCodeValue(LValue);
+                        var RCode = PhpValues.ToPhpCodeValue(RValue);
+                        string left, right;
+                        if (LCode.TryGetPhpString(out left) && RCode.TryGetPhpString(out right))
+                        {
+                            c[i - 1] = new PhpConstValue(left + right);
+                            c.RemoveAt(i);
+                            i--;
+                            continue;
+                        }
+
+                        var msg = string.Format("left={0}, right={1} '{2}+{3}'", LValue, RValue, LValue == null ? null : LValue.GetType().FullName, RValue == null ? null : RValue.GetType().FullName);
+
 #if DEBUG
-                        throw new NotImplementedException(string.Format("left={0}, right={1} '{2}+{3}'", LV, RV, LV == null ? null : LV.GetType().FullName, RV == null ? null : RV.GetType().FullName));
+                        throw new NotImplementedException(msg);
 #else
-                        Console.WriteLine(string.Format(" Unable to join left={0}, right={1} '{2}+{3}'", LV, RV, LV == null ? null : LV.GetType().FullName, RV == null ? null : RV.GetType().FullName));
+                        Console.WriteLine(msg);
                         Console.WriteLine(L.GetPhpCode(null));
                         Console.WriteLine(R.GetPhpCode(null));
                         continue;

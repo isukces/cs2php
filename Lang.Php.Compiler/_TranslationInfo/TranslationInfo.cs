@@ -56,9 +56,9 @@ namespace Lang.Php.Compiler
 
     public partial class TranslationInfo
     {
-		#region Methods 
+        #region Methods
 
-		// Public Methods 
+        // Public Methods 
 
         public void CheckAccesibility(CsharpMethodCallExpression m)
         {
@@ -261,10 +261,9 @@ namespace Lang.Php.Compiler
         /// </summary>
         public void Prepare()
         {
-
             var allTypes = (from a in translationAssemblies
                             from t in a.GetTypes()
-                            select t).ToArray();
+                            select t).ToArray();           
             foreach (var type in allTypes)
             {
                 var interfaces = type.GetInterfaces();
@@ -300,22 +299,22 @@ namespace Lang.Php.Compiler
             return string.Format("Conversion {0} => {1}", currentType, currentMethod.ToString());
         }
 
-		#endregion Methods 
+        #endregion Methods
 
-		#region Delegates and Events 
+        #region Delegates and Events
 
-		// Events 
+        // Events 
 
         public event EventHandler<TranslationInfoCreatedEventArgs> OnTranslationInfoCreated;
 
-		#endregion Delegates and Events 
+        #endregion Delegates and Events
 
-		#region Nested Classes 
+        #region Nested Classes
 
 
         public class TranslationInfoCreatedEventArgs : EventArgs
         {
-		#region Properties 
+            #region Properties
 
             public AssemblyTranslationInfo AssemblyTranslation { get; set; }
 
@@ -323,9 +322,9 @@ namespace Lang.Php.Compiler
 
             public FieldTranslationInfo FieldTranslation { get; set; }
 
-		#endregion Properties 
+            #endregion Properties
         }
-		#endregion Nested Classes 
+        #endregion Nested Classes
     }
 }
 

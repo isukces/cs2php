@@ -30,8 +30,8 @@ namespace Lang.Php
             StringBuilder sb = new StringBuilder();
             for (int i = 1; i < atts.Length; i += 2)
             {
-                var k = PhpValues.ToPhpString(atts[i - 1]);
-                var v = PhpValues.ToPhpString(atts[i]);
+                var k = PhpValues.ToPhpCodeValue(atts[i - 1]);
+                var v = PhpValues.ToPhpCodeValue(atts[i]);
                 sb.AppendFormat("{0}: {1};", k, v);
             }
             return sb.ToString();
@@ -39,15 +39,15 @@ namespace Lang.Php
 
         public static string CssBorder(object width, object style, object color)
         {
-            width = PhpValues.ToPhpString(width);
-            style = PhpValues.ToPhpString(style);
-            color = PhpValues.ToPhpString(color);
+            width = PhpValues.ToPhpCodeValue(width,true);
+            style = PhpValues.ToPhpCodeValue(style, true);
+            color = PhpValues.ToPhpCodeValue(color, true);
             return string.Format("{0} {1} {2}", width, style, color);
         }
         public static string TagOpen(object tagname, params object[] atts)
         {
             PhpStringBuilder sb = new PhpStringBuilder();
-            sb.Add("<" + PhpValues.ToPhpString(tagname));
+            sb.Add("<" + PhpValues.ToPhpCodeValue(tagname));
             for (int i = 1; i < atts.Length; i += 2)
                 sb.AddFormat(" {0}=\"{1}\"", atts[i - 1], atts[i]);
             sb.Add(">");
@@ -55,7 +55,7 @@ namespace Lang.Php
         }
         public static string TagBound(object tagname, object inside, params object[] atts)
         {
-            return TagOpen(tagname, atts) + PhpValues.ToPhpString(inside) + TagClose(tagname);
+            return TagOpen(tagname, atts) + PhpValues.ToPhpCodeValue(inside) + TagClose(tagname);
         }
         public static void EchoTagBound(object tagname, object inside, params object[] atts)
         {
@@ -71,7 +71,7 @@ namespace Lang.Php
         public static string TagOpenOpen(object tagname, params object[] atts)
         {
             PhpStringBuilder sb = new PhpStringBuilder();
-            sb.Add("<" + PhpValues.ToPhpString(tagname));
+            sb.Add("<" + PhpValues.ToPhpCodeValue(tagname));
             for (int i = 1; i < atts.Length; i += 2)
                 sb.AddFormat(" {0}=\"{1}\"", atts[i - 1], atts[i]);
             // sb.Add(">");
@@ -100,7 +100,7 @@ namespace Lang.Php
         }
         public static string TagClose(object tagname)
         {
-            return string.Format("</{0}>", PhpValues.ToPhpString(tagname));
+            return string.Format("</{0}>", PhpValues.ToPhpCodeValue(tagname));
         }
 
         public static void EchoComment(object comment)
@@ -133,7 +133,7 @@ namespace Lang.Php
         public static string TagSingle(object tagname, params object[] atts)
         {
             PhpStringBuilder sb = new PhpStringBuilder();
-            sb.Add("<" + PhpValues.ToPhpString(tagname));
+            sb.Add("<" + PhpValues.ToPhpCodeValue(tagname));
             for (int i = 1; i < atts.Length; i += 2)
                 sb.AddFormat(" {0}=\"{1}\"", atts[i - 1], atts[i]);
             sb.Add(" />");

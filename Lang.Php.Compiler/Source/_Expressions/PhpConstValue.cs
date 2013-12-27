@@ -40,117 +40,9 @@ namespace Lang.Php.Compiler.Source
             throw new NotImplementedException("Only integer values are supported. Sorry.");
         }
 
-        public static string PhpStringEmit(string txt, PhpEmitStyle style)
-        {
-            if (txt == null)
-                return "null";
-            if (txt.Length == 0)
-                return "''";
-            {
-                var a1 = _InvisibleCharsCount(txt);
-                if (a1 > 0)
-                    return EscapeDoubleQuote(txt);
-                //if (txt.IndexOf("'")>0)
-                //    return EscapeDoubleQuote(txt);
-                var a2 = _SingleQuoteEscapedCharsCount(txt);
-                var a3 = _DoubleQuoteEscapedCharsCount(txt);
-                if (a2 <= a3)
-                    return EscapeSingleQuote(txt);
-                return EscapeDoubleQuote(txt);
-            }
 
-            // http://www.php.net/manual/en/language.types.string.php#language.types.string.syntax.single
 
-            List<string> items = new List<string>();
-            while (txt.Length > 0)
-            {
-                var i = txt.IndexOf("\r\n");
-                //i = -1;
-                if (i < 0)
-                {
-                    items.Add(EscapeSingleQuote(txt));
-                    break;
-                }
-                else
-                {
-                    if (i > 0)
-                        items.Add(EscapeSingleQuote(txt.Substring(0, i)));
-                    items.Add("PHP_EOL");
-                    txt = txt.Substring(i + 2);
-                }
-            }
-            string join = style == null || style.Compression == EmitStyleCompression.Beauty ? " . " : ".";
-            return string.Join(join, items);
-        }
-        // Private Methods 
 
-        private static int _DoubleQuoteEscapedCharsCount(string x)
-        {
-            int i = 0;
-            foreach (var c in x)
-            {
-                if (c == '\\' || c == '"' || c == '\n' || c == '\r' || c == '\t' || c == '\v' || c == _ESCc || c == '\f' || c == '$')
-                    i++;
-            }
-            return i;
-        }
-
-        private static int _InvisibleCharsCount(string x)
-        {
-            return x.Where(i => i < ' ').Count();
-        }
-
-        private static int _SingleQuoteEscapedCharsCount(string x)
-        {
-            int i = 0;
-            foreach (var c in x)
-                if (c == '\\' || c == '\'')
-                    i++;
-            return i;
-        }
-
-        static string Dec2Oct(int a)
-        {
-            string o = "";
-            while (a != 0)
-            {
-                var b = a % 8;
-                o = b.ToString() + o;
-                a = a / 8;
-            }
-            return "0" + o;
-        }
-
-        private static string EscapeDoubleQuote(string x)
-        {
-            if (x == null)
-                return "null";
-            if (x.Length == 0)
-                return "\"\"";
-            /*
-             * \n 	linefeed (LF or 0x0A (10) in ASCII)
-\r 	carriage return (CR or 0x0D (13) in ASCII)
-\t 	horizontal tab (HT or 0x09 (9) in ASCII)
-\v 	vertical tab (VT or 0x0B (11) in ASCII) (since PHP 5.2.5)
-\e 	escape (ESC or 0x1B (27) in ASCII) (since PHP 5.4.0)
-\f 	form feed (FF or 0x0C (12) in ASCII) (since PHP 5.2.5)
-\\ 	backslash
-\$ 	dollar sign
-\" 	double-quote
-\[0-7]{1,3} 	the sequence of characters matching the regular expression is a character in octal notation
-\x[0-9A-Fa-f]{1,2} 	the sequence of characters matching the regular expression is a character in hexadecimal notation 
-             */
-            x = x.Replace("\\", "\\\\")
-                .Replace("\"", "\\\"")
-                .Replace("\n", "\\n")
-                .Replace("\r", "\\r")
-                .Replace("\t", "\\t")
-                .Replace("\v", "\\v")
-                .Replace(_ESC, "\\e")
-                .Replace("\f", "\\f")
-                .Replace("$", "\\$");
-            return "\"" + x + "\"";
-        }
 
         private static string EscapeSingleQuote(string x)
         {
@@ -170,74 +62,38 @@ namespace Lang.Php.Compiler.Source
 
         public override string GetPhpCode(PhpEmitStyle style)
         {
-            if (_value == null)
-                return "null";
-            var tt = _value.GetType();
-            if (_value is string)
-                return PhpStringEmit(_value as string, style);
-            if (_value is double)
-                return ((double)_value).ToString(System.Globalization.CultureInfo.InvariantCulture);
-            if (_value is bool)
-                return ((bool)_value) ? "true" : "false";
-            if (Value is UnixFilePermissions)
-            {
-                var g = (int)(UnixFilePermissions)_value;
-                return Dec2Oct(g);
-            }
-            if (Value is UnixFileGroupPermissions)
-            {
-                var g = (int)(UnixFileGroupPermissions)_value;
-                return Dec2Oct(g);
-            }
-            if (tt.IsEnum)
-            {
-                var a = Enum.GetValues(tt);
-                var n = Enum.GetNames(tt);
-                var f = tt.GetFields(BindingFlags.Static | BindingFlags.Public);
-                var txt = _value.ToString().Split('|').Select(i => i.Trim()).ToArray();
-                var dict = f.ToDictionary(i => i, i => i.GetValue(null));
-                for (int i = 0; i < txt.Length; i++)
-                {
-                    var fieldInfo = dict.Where(ii => ii.Value.ToString() == txt[i]).Select(ii => ii.Key).FirstOrDefault();
-                    if (fieldInfo == null) continue;
-                    var fieldValue = fieldInfo.GetValue(null);
-                    var tmp = PhpValues.FromEnum(fieldValue);
-                    if (tmp is string)
-                    {
-                        //string str;
-                        //if (PhpValues.TryGetPhpStringValue(tmp as string, out str))
-                        //    tmp = str;
-                        //else
-                        //    throw new NotSupportedException();
-                        txt[i] = tmp as string;
-                    }
-                    else
-                    {
-                        throw new NotSupportedException();
-                        var tmp1 = new PhpConstValue(tmp);
-                        string phpValue = tmp1.GetPhpCode(style);
-                        //var at = fieldInfo.GetCustomAttributes<RenderValueAttribute>(true).FirstOrDefault();
-                        //if (at == null) continue;
-                        txt[i] = phpValue;
-                    }
-                }
-                var b = style == null || style.Compression == EmitStyleCompression.Beauty;
-                return string.Join(b ? " | " : "|", txt);
-            }
-            return _value.ToString();
+            bool b = style != null && style.Compression != EmitStyleCompression.Beauty;
+            var a = PhpValues.ToPhpCodeValue(_value, b);
+            return a.PhpValue;
+            //if (_value == null)
+            //    return "null";
+            //var tt = _value.GetType();
+            //if (_value is string)
+            //    return PhpStringEmit(_value as string, style);
+            //if (_value is double)
+            //    return ((double)_value).ToString(System.Globalization.CultureInfo.InvariantCulture);
+            //if (_value is bool)
+            //    return ((bool)_value) ? "true" : "false";
+            //if (tt.IsEnum)
+            //{
+            //    var tmp = PhpValues.EnumToPhpCode(_value, );
+            //    return tmp.Value;
+
+            //}
+            //return _value.ToString();
         }
 
         #endregion Methods
 
         #region Static Fields
 
-        static readonly string _ESC = ((char)27).ToString();
+
 
         #endregion Static Fields
 
         #region Fields
 
-        const char _ESCc = ((char)27);
+   
 
         #endregion Fields
     }

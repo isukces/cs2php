@@ -8,7 +8,7 @@ namespace Lang.Php
     /// <summary>
     /// Css media types from http://www.w3.org/TR/CSS2/media.html#media-types
     /// </summary>
-    [EnumRender(EnumRenderOptions.UnderscoreLowercase)]
+    [EnumRender(EnumRenderOptions.UnderscoreLowercase, false)]
     public enum CssMediaTypes
     {
         /// <summary>

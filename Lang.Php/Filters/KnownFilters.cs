@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Lang.Php.Filters
 {
-    [EnumRender(EnumRenderOptions.UnderscoreUppercase)]
+    [EnumRender(EnumRenderOptions.UnderscoreUppercase, true)]
     public enum KnownFilters
     {
         FilterValidateBoolean,

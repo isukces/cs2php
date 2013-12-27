@@ -229,14 +229,30 @@ namespace Lang.Cs.Compiler.Visitors
                 }
                 var arity = typeArguments.Length;
                 var am = hostType.GetMethods(reflectionFlags);
-                MethodInfo[] a = (from i in am
-                                  where i.Name == method.Name
-                                  && i.IsGenericMethodDefinition
-                                  && i.GetGenericArguments().Length == arity
-                                  let aa = i.MakeGenericMethod(typeArguments)
-                                  where aa.ReturnType == rt
-                                  select i
-                                      ).ToArray();
+                var am1 = (from i in am
+                           where
+                           i.Name == method.Name
+                           && i.IsGenericMethodDefinition
+                           && i.GetGenericArguments().Length == arity
+                           let aa = i.MakeGenericMethod(typeArguments)
+                           // where aa.ReturnType == rt
+                           select new
+                           {
+                               Method = i,
+                               GMethod = aa,
+                               Rt = aa.ReturnType
+                           }
+                               ).ToArray();
+                MethodInfo[] a = (from i in am1 where CompareTypes(i.Rt, rt, true) select i.Method).ToArray();
+                //var am1 = am.Where(i => i.Name == method.Name && i.IsGenericMethodDefinition)
+                //    .Select(i => new { Method = i, GA = i.GetGenericArguments() })
+                //    .ToArray();
+                //MethodInfo[] a = (from i in am1
+                //                  where i.GA.Length == arity
+                //                  let aa = i.Method.MakeGenericMethod(typeArguments)
+                //                  where aa.ReturnType == rt
+                //                  select i.Method
+                //                      ).ToArray();
                 if (a.Length == 0)
                     throw new Exception(string.Format("Unable to find method {2}.{0} with arity {1}", method.Name, arity, hostType.FullName));
                 if (a.Length == 1)
@@ -276,6 +292,22 @@ namespace Lang.Cs.Compiler.Visitors
         {
             roslyn_allNamedTypeSymbols = null;
             cache_Roslyn_ResolveType.Clear();
+        }
+
+        /// <summary>
+        /// it is only workaround method
+        /// </summary>
+        /// <param name="a"></param>
+        /// <param name="b"></param>
+        /// <param name="ignoreAssemblyVersion"></param>
+        /// <returns></returns>
+        private static bool CompareTypes(Type a, Type b, bool ignoreAssemblyVersion)
+        {
+            if (a == b)
+                return true;
+            if (!ignoreAssemblyVersion)
+                return false;
+            return a.FullName == b.FullName;
         }
 
         private bool CompareArrayTypes(ParameterInfo[] a, Type[] b)

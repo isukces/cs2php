@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Lang.Php
 {
-    [EnumRender(EnumRenderOptions.MinusLowercase)]
+    [EnumRender(EnumRenderOptions.MinusLowercase, false)]
     public enum Css
     {
         Color,

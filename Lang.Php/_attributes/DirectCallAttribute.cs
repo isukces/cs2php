@@ -18,11 +18,24 @@ namespace Lang.Php
             OutNr = int.MinValue;
         }
 
+        public DirectCallAttribute(string name, string map, int outNr = int.MinValue)
+        {
+            SetName(name);
+            this.Map = (map ?? "").Trim();
+            this.OutNr = outNr;
+        }
+
+        #endregion Constructors
+
+        #region Methods
+
+        // Private Methods 
+
         private void SetName(string name)
         {
-            name = name
-                .Replace("->", " -> ")
-                .Replace("$", " $ ");
+            name = (name ?? "")
+                 .Replace("->", " -> ")
+                 .Replace("$", " $ ");
             var tmp = name.Split(' ').Select(i => i.Trim()).Where(i => !string.IsNullOrEmpty(i)).ToArray();
             this.Name = tmp.Any() ? tmp.Last() : null;
             tmp = tmp.Take(tmp.Length - 1).Select(i => i.ToLower()).ToArray();
@@ -37,18 +50,8 @@ namespace Lang.Php
                 MemberToCall = ClassMembers.Field;
 
         }
-        public MethodCallStyles CallType { get; private set; }
-        public ClassMembers MemberToCall { get; private set; }
 
-
-        public DirectCallAttribute(string name, string map, int outNr = int.MinValue)
-        {
-            SetName(name);
-            this.Map = (map ?? "").Trim();
-            this.OutNr = outNr;
-        }
-
-        #endregion Constructors
+        #endregion Methods
 
         #region Fields
 
@@ -58,8 +61,7 @@ namespace Lang.Php
 
         #region Properties
 
-
-
+        public MethodCallStyles CallType { get; private set; }
 
         public bool HasMapping
         {
@@ -73,8 +75,6 @@ namespace Lang.Php
         /// Argument map i.e.   0,1,3,this
         /// </summary>
         public string Map { get; private set; }
-
-        public int OutNr { get; private set; }
 
         public int[] MapArray
         {
@@ -91,10 +91,14 @@ namespace Lang.Php
 
         }
 
+        public ClassMembers MemberToCall { get; private set; }
+
         /// <summary>
         /// Name in script
         /// </summary>
         public string Name { get; set; }
+
+        public int OutNr { get; private set; }
 
         #endregion Properties
     }

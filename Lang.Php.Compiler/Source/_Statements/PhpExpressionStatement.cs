@@ -146,11 +146,14 @@ namespace Lang.Php.Compiler.Source
                     {
                         var b1 = (a1 as PhpConstValue).Value;
                         var b2 = (a2 as PhpConstValue).Value;
-                        var c1 = PhpValues.ToPhpString(b1);
-                        var c2 = PhpValues.ToPhpString(b2);
-                        Values[i - 1] = new PhpConstValue(c1 + c2);
-                        Values.RemoveAt(i);
-                        i--;
+                        var c1 = PhpValues.ToPhpCodeValue(b1);
+                        var c2 = PhpValues.ToPhpCodeValue(b2);
+                        if (c1.Kind == PhpCodeValue.Kinds.StringConstant && c1.Kind == PhpCodeValue.Kinds.StringConstant)
+                        {                            
+                            Values[i - 1] = new PhpConstValue((string)c1.SourceValue + (string)c2.SourceValue);
+                            Values.RemoveAt(i);
+                            i--;
+                        }
                     }
                 }
                 #endregion
@@ -189,9 +192,9 @@ namespace Lang.Php.Compiler.Source
                                 else
                                     vv(new PhpConstValue(i));
                             }
-                            continue; 
+                            continue;
                             #endregion
-                        }                       
+                        }
                     }
                     vv(value);
                 }
@@ -207,7 +210,7 @@ namespace Lang.Php.Compiler.Source
                 {
                     bool plainHtml = false;
                     var code = value.GetPhpCode(style);
-                    #region Przygotowanie kodu
+                #region Przygotowanie kodu
                     if (value is PhpConstValue)
                     {
                         var constValue = (value as PhpConstValue).Value;

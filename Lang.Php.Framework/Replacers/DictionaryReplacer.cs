@@ -13,6 +13,9 @@ namespace Lang.Php.Framework.Replacers
     [Replace(typeof(Dictionary<,>))]
     class DictionaryReplacer<TKey, TValue>
     {
+		#region Static Methods 
+
+		// Public Methods 
 
         [Translator]
         public static object __Translate(IExternalTranslationContext ctx, object src)
@@ -38,16 +41,17 @@ namespace Lang.Php.Framework.Replacers
             return g;            
         }
 
+		#endregion Static Methods 
+
+		#region Methods 
+
+		// Public Methods 
 
         [DirectCall("array_key_exists", "0,this")]
         public bool ContainsKey(TKey key)
         {
             throw new MockMethodException();
         }
-
-        #region Methods
-
-        // Public Methods 
 
         [DirectCall("array_key_exists", "0,this")]
         public bool ContainsKey(object key)
@@ -56,9 +60,9 @@ namespace Lang.Php.Framework.Replacers
             throw new MockMethodException();
         }
 
-        #endregion Methods
+		#endregion Methods 
 
-        #region Properties
+		#region Properties 
 
         [DirectCall("count", "this")]
         public int Count
@@ -67,6 +71,15 @@ namespace Lang.Php.Framework.Replacers
             set;
         }
 
-        #endregion Properties
+		#endregion Properties 
+
+        [DirectCall("array_values", "this")]
+        public Dictionary<TKey, TValue>.ValueCollection Values
+        {
+            get
+            {
+                throw new MockMethodException();
+            }
+        }
     }
 }

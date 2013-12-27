@@ -14,11 +14,11 @@ namespace Lang.Php.Runtime
         }
         public void Add(object o)
         {
-            s.Append(PhpValues.ToPhpString(o));
+            s.Append(PhpValues.ToPhpCodeValue(o));
         }
         public void AddFormat(string f, params object[] o)
         {
-            var oo = o.Select(i => PhpValues.ToPhpString(i)).ToArray();
+            var oo = o.Select(i => PhpValues.ToPhpCodeValue(i)).ToArray();
             s.AppendFormat(f, oo);
         }
     }

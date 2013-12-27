@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Lang.Php
 {
-    [EnumRender(EnumRenderOptions.UnderscoreLowercase)]
+    [EnumRender(EnumRenderOptions.UnderscoreLowercase, false)]
     public enum FormMethods
     {
         Post,

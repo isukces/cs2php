@@ -6,19 +6,35 @@ namespace Lang.Php
     /*
     smartClass
     option NoAdditionalFile
-    implement Constructor *
+    implement Constructor ModuleShortName
     
     property ModuleShortName string Module short name i.e "hello-page" or "mynamespace/hello-class"
+    
+    property IncludePathPrefix string[] 
     smartClassEnd
     */
     
     public partial class ModuleAttribute : Attribute
     {
+		#region Constructors 
+
+        /// <summary>
+        /// Tworzy instancję obiektu
+        /// <param name="ModuleShortName">Module short name i.e "hello-page" or "mynamespace/hello-class"</param>
+        /// <param name="IncludePathPrefix"></param>
+        /// </summary>
+        public ModuleAttribute(string ModuleShortName, params string[] IncludePathPrefix)
+        {
+            this.ModuleShortName = ModuleShortName;
+            this.IncludePathPrefix = IncludePathPrefix;
+        }
+
+		#endregion Constructors 
     }
 }
 
 
-// -----:::::##### smartClass embedded code begin #####:::::----- generated 2013-11-11 18:48
+// -----:::::##### smartClass embedded code begin #####:::::----- generated 2013-12-26 10:23
 // File generated automatically ver 2013-07-10 08:43
 // Smartclass.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0c4d5d36fb5eb4ac
 namespace Lang.Php
@@ -37,9 +53,9 @@ namespace Lang.Php
 
         implement INotifyPropertyChanged
         implement INotifyPropertyChanged_Passive
-        implement ToString ##ModuleShortName##
-        implement ToString ModuleShortName=##ModuleShortName##
-        implement equals ModuleShortName
+        implement ToString ##ModuleShortName## ##IncludePathPrefix##
+        implement ToString ModuleShortName=##ModuleShortName##, IncludePathPrefix=##IncludePathPrefix##
+        implement equals ModuleShortName, IncludePathPrefix
         implement equals *
         implement equals *, ~exclude1, ~exclude2
         */
@@ -60,6 +76,10 @@ namespace Lang.Php
         /// Nazwa własności ModuleShortName; Module short name i.e "hello-page" or "mynamespace/hello-class"
         /// </summary>
         public const string PROPERTYNAME_MODULESHORTNAME = "ModuleShortName";
+        /// <summary>
+        /// Nazwa własności IncludePathPrefix; 
+        /// </summary>
+        public const string PROPERTYNAME_INCLUDEPATHPREFIX = "IncludePathPrefix";
         #endregion Constants
 
         #region Methods
@@ -82,6 +102,21 @@ namespace Lang.Php
             }
         }
         private string moduleShortName = string.Empty;
+        /// <summary>
+        /// 
+        /// </summary>
+        public string[] IncludePathPrefix
+        {
+            get
+            {
+                return includePathPrefix;
+            }
+            set
+            {
+                includePathPrefix = value;
+            }
+        }
+        private string[] includePathPrefix;
         #endregion Properties
 
     }

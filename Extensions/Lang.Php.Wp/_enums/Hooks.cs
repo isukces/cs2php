@@ -6,6 +6,7 @@ using Lang.Php;
 
 namespace Lang.Php.Wp 
 {
+
     public enum Hooks
     {
         /// <summary>

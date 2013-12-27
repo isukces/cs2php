@@ -107,9 +107,16 @@ namespace Lang.Php.Compiler
             var w = Workspace.LoadStandAloneProject(csProj, configuration);
             solution = w.CurrentSolution;
             project = solution.Projects.Single();
-            UpdateCompilationOptions(new CompilationOptions(OutputKind.DynamicallyLinkedLibrary));
-
-            // UpdateCompilationOptions(new Comp)
+            var parseOptions = (Roslyn.Compilers.CSharp.ParseOptions)project.ParseOptions;
+            {
+                var s = parseOptions.PreprocessorSymbolNames.Union(new string[] { "CS2PHP" }).ToArray();
+                parseOptions = parseOptions.WithPreprocessorSymbols(s);
+                solution = solution.UpdateParseOptions(project.Id, parseOptions);
+                project = solution.Projects.Single();
+            }
+            var co = new CompilationOptions(OutputKind.DynamicallyLinkedLibrary);
+            var aa = project.ParseOptions.PreprocessorSymbolNames.ToArray();
+            //  UpdateCompilationOptions(new Comp)
             // DisplayRef(" just after loaded");
 
             GreenOk();
@@ -168,13 +175,16 @@ namespace Lang.Php.Compiler
             if (!string.IsNullOrEmpty(assemblyTI.PhpPackageSourceUri))
             {
                 DownloadAndUnzip(assemblyTI.PhpPackageSourceUri, ec_BaseDir, assemblyTI.PhpPackagePathStrip);
-                return;
+                //      return;
             }
             TranslationState translationState = new TranslationState(translationInfo);
             Lang.Php.Compiler.Translator.Translator translator = new Lang.Php.Compiler.Translator.Translator(translationState);
-            var libName = assemblyTI.LibraryName;
 
             translator.Translate();
+
+            var libName = assemblyTI.LibraryName;
+
+
             if (verboseToConsole)
                 Console.WriteLine("Create Php output files");
             #region Tworzenie plików php
