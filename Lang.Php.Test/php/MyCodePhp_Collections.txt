@@ -11,4 +11,10 @@ public static function Collections() {
     foreach(array_keys($dict) as $i)
         echo $i;
     $count = count($dict);
+    $stack = array();
+    array_push($stack, 'X');
+    array_push($stack, 'Y');
+    $s1 = $stack[count($stack) - 1];
+    $s2 = array_pop($stack);
+    $count = count($stack);
 }
