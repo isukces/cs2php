@@ -81,5 +81,13 @@ namespace Lang.Php.Framework.Replacers
                 throw new MockMethodException();
             }
         }
+        [DirectCall("array_keys", "this")]
+        public Dictionary<TKey, TValue>.KeyCollection Keys
+        {
+            get
+            {
+                throw new MockMethodException();
+            }
+        }
     }
 }
