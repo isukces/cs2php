@@ -1,0 +1,14 @@
+public static function Collections() {
+    $list = array();
+    foreach($list as $i)
+        echo $i;
+    $count = count($list);
+    $dict = array();
+    foreach($dict as $i__Key => $i__Value)
+        echo $i__Key . ' ' . $i__Value;
+    foreach(array_values($dict) as $i)
+        echo $i;
+    foreach(array_keys($dict) as $i)
+        echo $i;
+    $count = count($dict);
+}

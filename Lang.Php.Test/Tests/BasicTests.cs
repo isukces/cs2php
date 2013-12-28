@@ -21,11 +21,7 @@ namespace Lang.Php.Test.Tests
 
         // Public Methods 
 
-        [Fact]
-        public static void BasicMath1()
-        {
-            MethodTranslation(MODULE_MYCODE, CLASS_MYCODE, "BasicMath1");
-        }
+       
 
         [Fact]
         public static void Compile()
@@ -33,6 +29,9 @@ namespace Lang.Php.Test.Tests
             var translator = Base.PrepareTranslator();
             var m = string.Join(", ", translator.Modules.Select(i => i.Name.Name).OrderBy(i => i));
             Assert.True(m == "Lang_Php_Test_Code_MyCode", m);
+
+            MethodTranslation(MODULE_MYCODE, CLASS_MYCODE, "BasicMath1");
+            MethodTranslation(MODULE_MYCODE, CLASS_MYCODE, "Collections");
         }
 
         [Fact]

@@ -17,9 +17,9 @@ namespace Lang.Php.Test.Tests
 #if !CS2PHP
     public class Base
     {
-		#region Static Methods 
+        #region Static Methods
 
-		// Protected Methods 
+        // Protected Methods 
 
         protected static string GetCode(PhpClassMethodDefinition method)
         {
@@ -70,7 +70,7 @@ namespace Lang.Php.Test.Tests
 
             Assert.True(ExpectedCode == translatedCode, "Invalid translation");
         }
-		// Private Methods 
+        // Private Methods 
 
         private static void Save(string translatedCode, string shortFilename)
         {
@@ -80,7 +80,7 @@ namespace Lang.Php.Test.Tests
             System.IO.File.WriteAllText(fi.FullName, translatedCode);
 #endif
         }
-		// Internal Methods 
+        // Internal Methods 
 
         internal static Translator PrepareTranslator()
         {
@@ -98,15 +98,25 @@ namespace Lang.Php.Test.Tests
             comp.LoadProject(csProject, "RELEASE");
 #endif
 
+            /*
+   linked with C:\programs\_CS2PHP\PUBLIC\Lang.Php.Compiler\bin\Debug\Lang.Php.Compiler.dll
+   linked with C:\programs\_CS2PHP\PUBLIC\Lang.Php.Framework\bin\Debug\Lang.Php.Framework.dll
+   linked with C:\programs\_CS2PHP\PUBLIC\Lang.Php.Test\bin\Debug\Lang.Php.dll
+             */
+
 
             Console.WriteLine("Preparing before compilation");
+            string[] removeL = "Lang.Php.Compiler,Lang.Php.Framework,Lang.Php".Split(',');
             #region Remove Lang.Php reference
             {
-                // ... will be replaced by reference to dll from compiler base dir
-                // I know - compilation libraries should be loaded into separate application domain
-                var remove = comp.Project.MetadataReferences.Where(i => i.Display.EndsWith("Lang.Php.dll")).FirstOrDefault();
-                if (remove != null)
-                    comp.RemoveMetadataReferences(remove);
+                foreach (var r in removeL)
+                {
+                    // ... will be replaced by reference to dll from compiler base dir
+                    // I know - compilation libraries should be loaded into separate application domain
+                    var remove = comp.Project.MetadataReferences.Where(i => i.Display.EndsWith(r + ".dll")).FirstOrDefault();
+                    if (remove != null)
+                        comp.RemoveMetadataReferences(remove);
+                }
             }
             #endregion
             string[] filenames;
@@ -117,7 +127,11 @@ namespace Lang.Php.Test.Tests
                 foreach (var i in refToRemove)
                     comp.RemoveMetadataReferences(i);
                 var ref1 = refToRemove.Select(i => i.FullPath).ToList();
-                ref1.Add(Path.Combine(Directory.GetCurrentDirectory(), "Lang.Php.dll"));
+                // foreach (var r in removeL)
+                //     ref1.Add(Path.Combine(Directory.GetCurrentDirectory(), r + ".dll"));
+                ref1.Add(typeof(Lang.Php.DirectCallAttribute).Assembly.Location);
+                ref1.Add(typeof(Lang.Php.Compiler.EmitContext).Assembly.Location);
+                ref1.Add(typeof(Lang.Php.Framework.Extension).Assembly.Location);
                 filenames = ref1.Distinct().ToArray();
             }
             #endregion
@@ -161,15 +175,15 @@ namespace Lang.Php.Test.Tests
             return translator;
         }
 
-		#endregion Static Methods 
+        #endregion Static Methods
 
-		#region Static Fields 
+        #region Static Fields
 
         static Translator translator;
 
-		#endregion Static Fields 
+        #endregion Static Fields
 
-		#region Static Properties 
+        #region Static Properties
 
         public static string CsProj
         {
@@ -182,7 +196,7 @@ namespace Lang.Php.Test.Tests
             }
         }
 
-		#endregion Static Properties 
+        #endregion Static Properties
     }
 #endif
 }
