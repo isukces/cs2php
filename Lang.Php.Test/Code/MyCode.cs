@@ -29,7 +29,7 @@ namespace Lang.Php.Test.Code
             // Dictionary
             Dictionary<string, string> dict = new Dictionary<string, string>();
             foreach (var i in dict)
-                PhpDummy.echo(i.Key + " " + i.Value);           
+                PhpDummy.echo(i.Key + " " + i.Value);
             foreach (var i in dict.Values)
                 PhpDummy.echo(i);
             foreach (var i in dict.Keys)
@@ -37,6 +37,14 @@ namespace Lang.Php.Test.Code
             // var values = dict.Values;
             // var keys = dict.Keys;
             count = dict.Count;
+
+            // Stack
+            Stack<string> stack = new Stack<string>();
+            stack.Push("X");
+            stack.Push("Y");
+            var s1 = stack.Peek();
+            var s2 = stack.Pop();
+            count = stack.Count;
         }
     }
 }

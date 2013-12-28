@@ -60,6 +60,7 @@
     <Compile Include="Replacers\KeyValuePairReplacer.cs" />
     <Compile Include="Replacers\ListReplacer.cs" />
     <Compile Include="Replacers\ObjectReplacer.cs" />
+    <Compile Include="Replacers\StackReplacer.cs" />
     <Compile Include="Replacers\StringReplacer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

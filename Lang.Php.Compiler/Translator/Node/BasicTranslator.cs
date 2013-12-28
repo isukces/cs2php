@@ -55,6 +55,12 @@ namespace Lang.Php.Compiler.Translator.Node
                     throw new NotSupportedException();
                 return new PhpArrayCreateExpression();
             }
+            if (cType == typeof(Stack<>))
+            {
+                if (src.Initializers != null && src.Initializers.Any())
+                    throw new NotSupportedException();
+                return new PhpArrayCreateExpression();
+            }
             {
                 var directCallAttribute = src.Info.GetCustomAttributes(false).OfType<DirectCallAttribute>().FirstOrDefault();
                 if (directCallAttribute != null)

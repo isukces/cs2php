@@ -127,3 +127,5 @@ UpgradeLog*.XML
 /_ExamplesOut/CommonLib/lib/mpdf
 /Lang.Php.Compiler/Common.txt
 /Lang.Cs.Compiler/Common.txt
+
+/Lang.Php.Test/php/new
