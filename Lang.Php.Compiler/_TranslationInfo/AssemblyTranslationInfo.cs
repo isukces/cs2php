@@ -111,12 +111,12 @@ namespace Lang.Php.Compiler
             }
             #endregion
 
-            #region RootPathAttribute
-            {
-                if (!string.IsNullOrEmpty(ati.RootPath) && ati.RootPath != "/")
-                    pathElements.Add(new PhpConstValue(ati.RootPath));
-            }
-            #endregion
+            //#region RootPathAttribute
+            //{
+            //    if (!string.IsNullOrEmpty(ati.RootPath) && ati.RootPath != "/")
+            //        pathElements.Add(new PhpConstValue(ati.RootPath));
+            //}
+            //#endregion
             IPhpValue result = PhpBinaryOperatorExpression.ConcatStrings(pathElements.ToArray());
             return result;
         }

@@ -59,7 +59,7 @@ namespace Lang.Php.Compiler
             project = solution.Projects.Single();
         }
 
-        public EmitResult Compile2PhpAndEmit(string OutDir, Dictionary<string, KnownConstInfo> referencedLibsPaths)
+        public EmitResult Compile2PhpAndEmit(string OutDir, IEnumerable<Assembly> assToScan, Dictionary<string, string> referencedPhpLibsLocations)
         {
             EmitResult result;
             if (verboseToConsole)
@@ -71,13 +71,57 @@ namespace Lang.Php.Compiler
                 if (verboseToConsole)
                     Console.WriteLine("Analize C# source");
                 TranslationInfo info = ParseCsSource();
-                foreach (var i in referencedLibsPaths)
-                    info.KnownConstsValues[i.Key] = i.Value;
+                {
+                    var realOutputDir = Path.Combine(OutDir, GetRootPath(CompiledAssembly));
+
+
+                    var ggg = (from assembly in assToScan
+                               let _ModuleIncludeConst = assembly.GetCustomAttribute<ModuleIncludeConstAttribute>()
+                               where _ModuleIncludeConst != null
+                               let AssemblyName = assembly.GetName().Name
+                               select new
+                               {
+                                   DefinedConstName = _ModuleIncludeConst.ConstOrVarName,
+                                   AssemblyName,
+                                   RootPath = GetRootPath(assembly)
+                               }).ToArray();
+
+                    foreach (var x in ggg)
+                    {
+
+                        var definedConstName = x.DefinedConstName;
+                        if (definedConstName.StartsWith("$"))
+                            throw new NotSupportedException();
+                        if (!definedConstName.StartsWith("\\"))
+                            definedConstName = "\\" + definedConstName;
+                        string path;
+                        if (referencedPhpLibsLocations.TryGetValue(x.AssemblyName, out path))
+                        {
+                            path = Path.Combine(path, x.RootPath);
+                            String relativePath = PathUtil.MakeRelativePath(path, realOutputDir);
+                            info.KnownConstsValues[definedConstName] = new KnownConstInfo(definedConstName, relativePath, false);                            //   referencedLibsPaths[definedConstName] = new KnownConstInfo(definedConstName, relativePath, false);
+                        }
+
+                    }
+                }
+
                 GreenOk();
                 TranslateAndCreatePHPFiles(info, OutDir);
             }
             return result;
         }
+
+        private string GetRootPath(Assembly CompiledAssembly)
+        {
+            var tmp = CompiledAssembly.GetCustomAttribute<Lang.Php.RootPathAttribute>();
+            if (tmp == null)
+                return "";
+            var realOutputDir = (tmp.Path ?? "").Replace("/", "\\");
+            while (realOutputDir.StartsWith("\\"))
+                realOutputDir = realOutputDir.Substring(1);
+            return realOutputDir;
+        }
+
 
         public void DisplayRef(string title)
         {

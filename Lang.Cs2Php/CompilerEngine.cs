@@ -24,51 +24,52 @@ namespace Lang.Cs2Php
     property TranlationHelpers List<string> 
     	init #
     
-    property LibraryPath Dictionary<string,string> Location of referenced libraries in PHP
+    property ReferencedPhpLibsLocations Dictionary<string,string> Location of referenced libraries in PHP, taken from compiler commandline option
     	init new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase)
     
     property Configuration string i.e. DEBUG, RELEASE
     	init "RELEASE"
     smartClassEnd
     */
-
+    
     public partial class CompilerEngine
     {
+        #region Static Methods
+
+        // Public Methods 
+
+        public static void WriteCompileError(Roslyn.Compilers.CSharp.Diagnostic diag)
+        {
+            var info = diag.Info;
+            switch (info.Severity)
+            {
+                case DiagnosticSeverity.Warning:
+                    Console.ForegroundColor = ConsoleColor.DarkYellow;
+                    Console.Write("Warning");
+                    break;
+                case DiagnosticSeverity.Error:
+                    Console.ForegroundColor = ConsoleColor.DarkRed;
+                    Console.Write("Error");
+                    break;
+                default:
+                    return;
+            }
+            Console.ResetColor();
+            Console.WriteLine(": " + info.GetMessage());
+        }
+
+        #endregion Static Methods
+
         #region Methods
 
         // Public Methods 
+
         public void Check()
         {
             if (!File.Exists(CsProject))
                 throw new Exception(string.Format("File {0} doesn't exist", csProject));
         }
 
-
-        /// <summary>
-        /// Zamienia deklarowane referencje na te, które są w katalogu aplikacji
-        /// </summary>
-        /// <param name="comp"></param>
-        private void Swap(Cs2PhpCompiler comp)
-        {
-            var aaa = typeof(Program).Assembly.GetReferencedAssemblies();
-            var bbb = new DirectoryInfo(ExeDir).GetFiles("*.*");
-            var h = comp.Project.MetadataReferences.OfType<MetadataFileReference>().Select(i => new { REF = i, fn = new FileInfo(i.FullPath).Name.ToLower() }).ToArray();
-
-            foreach (var hh in h)
-            {
-                var o = bbb.Where(i => i.Name.ToLower() == hh.fn).FirstOrDefault();
-                if (o != null)
-                {
-                    var remove = hh.REF;
-                    var add = new MetadataFileReference(o.FullName, MetadataReferenceProperties.Assembly);
-                    if (remove.Display == add.Display)
-                        continue;
-                    comp.RemoveMetadataReferences(remove);
-                    comp.AddMetadataReferences(add);
-                    Console.WriteLine("Swap\r\n    {0}\r\n    {1}", remove.Display, add.Display);
-                }
-            }
-        }
         public void Compile()
         {
             Cs2PhpCompiler comp = new Cs2PhpCompiler();
@@ -108,24 +109,13 @@ namespace Lang.Cs2Php
             Swap(comp);
 
             Dictionary<string, KnownConstInfo> referencedLibsPaths = new Dictionary<string, KnownConstInfo>();
+
+            List<Assembly> loadedAssemblies = new List<Assembly>();
+
             foreach (var @ref in comp.Project.MetadataReferences)
             {
                 var assembly = Assembly.LoadFrom(@ref.Display);
-                var _ModuleIncludeConst = assembly.GetCustomAttribute<Lang.Php.ModuleIncludeConstAttribute>();
-                if (_ModuleIncludeConst != null)
-                {
-                    var definedConstName = _ModuleIncludeConst.ConstOrVarName;
-                    if (definedConstName.StartsWith("$"))
-                        throw new NotSupportedException();
-                    if (!definedConstName.StartsWith("\\"))
-                        definedConstName = "\\" + definedConstName;
-                    string path;
-                    if (libraryPath.TryGetValue(assembly.GetName().Name, out path))
-                    {
-                        String relativePath = PathUtil.MakeRelativePath(path, outDir);
-                        referencedLibsPaths[definedConstName] = new KnownConstInfo(definedConstName, relativePath, false);
-                    }
-                }
+                loadedAssemblies.Add(assembly);
             }
 
             {
@@ -143,35 +133,43 @@ namespace Lang.Cs2Php
             //  comp.TranslationAssemblies.Add(typeof(Lang.Php.Wp.Compile.ModuleProcessor).Assembly);
 
             /// DebugDisplayReferences(comp);
-            var e = comp.Compile2PhpAndEmit(outDir, referencedLibsPaths);
-            if (!e.Success)
+            var emitResult = comp.Compile2PhpAndEmit(outDir, loadedAssemblies, referencedPhpLibsLocations);
+            if (!emitResult.Success)
             {
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine("Compilation errors:");
                 Console.ResetColor();
-                foreach (var i in e.Diagnostics)
+                foreach (var i in emitResult.Diagnostics)
                     WriteCompileError(i);
             }
-        }
 
-        public static void WriteCompileError(Roslyn.Compilers.CSharp.Diagnostic diag)
+        }
+        // Private Methods 
+
+        /// <summary>
+        /// Zamienia deklarowane referencje na te, które są w katalogu aplikacji
+        /// </summary>
+        /// <param name="comp"></param>
+        private void Swap(Cs2PhpCompiler comp)
         {
-            var info = diag.Info;
-            switch (info.Severity)
+            var aaa = typeof(Program).Assembly.GetReferencedAssemblies();
+            var bbb = new DirectoryInfo(ExeDir).GetFiles("*.*");
+            var h = comp.Project.MetadataReferences.OfType<MetadataFileReference>().Select(i => new { REF = i, fn = new FileInfo(i.FullPath).Name.ToLower() }).ToArray();
+
+            foreach (var hh in h)
             {
-                case DiagnosticSeverity.Warning:
-                    Console.ForegroundColor = ConsoleColor.DarkYellow;
-                    Console.Write("Warning");
-                    break;
-                case DiagnosticSeverity.Error:
-                    Console.ForegroundColor = ConsoleColor.DarkRed;
-                    Console.Write("Error");
-                    break;
-                default:
-                    return;
+                var o = bbb.Where(i => i.Name.ToLower() == hh.fn).FirstOrDefault();
+                if (o != null)
+                {
+                    var remove = hh.REF;
+                    var add = new MetadataFileReference(o.FullName, MetadataReferenceProperties.Assembly);
+                    if (remove.Display == add.Display)
+                        continue;
+                    comp.RemoveMetadataReferences(remove);
+                    comp.AddMetadataReferences(add);
+                    Console.WriteLine("Swap\r\n    {0}\r\n    {1}", remove.Display, add.Display);
+                }
             }
-            Console.ResetColor();
-            Console.WriteLine(": " + info.GetMessage());
         }
 
         #endregion Methods
@@ -202,12 +200,12 @@ namespace Lang.Cs2Php
 }
 
 
-// -----:::::##### smartClass embedded code begin #####:::::----- generated 2013-12-07 09:42
+// -----:::::##### smartClass embedded code begin #####:::::----- generated 2014-01-01 18:39
 // File generated automatically ver 2013-07-10 08:43
 // Smartclass.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0c4d5d36fb5eb4ac
 namespace Lang.Cs2Php
 {
-    public partial class CompilerEngine
+    public partial class CompilerEngine 
     {
         /*
         /// <summary>
@@ -221,9 +219,9 @@ namespace Lang.Cs2Php
 
         implement INotifyPropertyChanged
         implement INotifyPropertyChanged_Passive
-        implement ToString ##CsProject## ##OutDir## ##Referenced## ##TranlationHelpers## ##LibraryPath## ##Configuration##
-        implement ToString CsProject=##CsProject##, OutDir=##OutDir##, Referenced=##Referenced##, TranlationHelpers=##TranlationHelpers##, LibraryPath=##LibraryPath##, Configuration=##Configuration##
-        implement equals CsProject, OutDir, Referenced, TranlationHelpers, LibraryPath, Configuration
+        implement ToString ##CsProject## ##OutDir## ##Referenced## ##TranlationHelpers## ##ReferencedPhpLibsLocations## ##Configuration##
+        implement ToString CsProject=##CsProject##, OutDir=##OutDir##, Referenced=##Referenced##, TranlationHelpers=##TranlationHelpers##, ReferencedPhpLibsLocations=##ReferencedPhpLibsLocations##, Configuration=##Configuration##
+        implement equals CsProject, OutDir, Referenced, TranlationHelpers, ReferencedPhpLibsLocations, Configuration
         implement equals *
         implement equals *, ~exclude1, ~exclude2
         */
@@ -245,9 +243,9 @@ namespace Lang.Cs2Php
         /// </summary>
         public const string PROPERTYNAME_TRANLATIONHELPERS = "TranlationHelpers";
         /// <summary>
-        /// Nazwa własności LibraryPath; Location of referenced libraries in PHP
+        /// Nazwa własności ReferencedPhpLibsLocations; Location of referenced libraries in PHP, taken from compiler commandline option
         /// </summary>
-        public const string PROPERTYNAME_LIBRARYPATH = "LibraryPath";
+        public const string PROPERTYNAME_REFERENCEDPHPLIBSLOCATIONS = "ReferencedPhpLibsLocations";
         /// <summary>
         /// Nazwa własności Configuration; i.e. DEBUG, RELEASE
         /// </summary>
@@ -321,20 +319,20 @@ namespace Lang.Cs2Php
         }
         private List<string> tranlationHelpers = new List<string>();
         /// <summary>
-        /// Location of referenced libraries in PHP
+        /// Location of referenced libraries in PHP, taken from compiler commandline option
         /// </summary>
-        public Dictionary<string, string> LibraryPath
+        public Dictionary<string,string> ReferencedPhpLibsLocations
         {
             get
             {
-                return libraryPath;
+                return referencedPhpLibsLocations;
             }
             set
             {
-                libraryPath = value;
+                referencedPhpLibsLocations = value;
             }
         }
-        private Dictionary<string, string> libraryPath = new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
+        private Dictionary<string,string> referencedPhpLibsLocations = new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
         /// <summary>
         /// i.e. DEBUG, RELEASE
         /// </summary>

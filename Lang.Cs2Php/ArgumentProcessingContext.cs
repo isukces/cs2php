@@ -96,7 +96,7 @@ namespace Lang.Cs2Php
                             throw new Exception("Invalid data for 'lib' option. Use 'lib libraryname=path'.");
                         var lib = arg.Substring(0, a).Trim();
                         var path = arg.Substring(a + 1).Trim();
-                        engine.LibraryPath[lib] = ResolveFilename(path);
+                        engine.ReferencedPhpLibsLocations[lib] = ResolveFilename(path);
                     }
                     command = null;
                     break;

@@ -207,30 +207,34 @@ namespace Lang.Php.Compiler.Translator
 
             if (req.AssemblyInfo != null && !string.IsNullOrEmpty(req.AssemblyInfo.IncludePathConstOrVarName))
             {
-                var tmp = req.AssemblyInfo.IncludePathConstOrVarName;
-                if (tmp.StartsWith("$"))
-                    throw new NotSupportedException();
-                if (!tmp.StartsWith("\\")) tmp = "\\" + tmp;
-                // leading slash is not necessary -> config is in global namespace
-                PhpCodeModule phpModule = CurrentConfigModule();
-                if (!phpModule.DefinedConsts.Where(i => i.Key == tmp).Any())
+                var isCurrentAssembly = info.CurrentAssembly == req.AssemblyInfo.Assembly;
+                if (!isCurrentAssembly)
                 {
-                    KnownConstInfo value;
-                    if (info.KnownConstsValues.TryGetValue(tmp, out value))
+                    var tmp = req.AssemblyInfo.IncludePathConstOrVarName;
+                    if (tmp.StartsWith("$"))
+                        throw new NotSupportedException();
+                    if (!tmp.StartsWith("\\")) tmp = "\\" + tmp;
+                    // leading slash is not necessary -> config is in global namespace
+                    PhpCodeModule phpModule = CurrentConfigModule();
+                    if (!phpModule.DefinedConsts.Where(i => i.Key == tmp).Any())
                     {
-                        if (!value.UseFixedValue)
+                        KnownConstInfo value;
+                        if (info.KnownConstsValues.TryGetValue(tmp, out value))
                         {
-                            var expression = PathUtil.MakePathValueRelatedToFile(value, info);
-                            phpModule.DefinedConsts.Add(new KeyValuePair<string, IPhpValue>(tmp, expression));
+                            if (!value.UseFixedValue)
+                            {
+                                var expression = PathUtil.MakePathValueRelatedToFile(value, info);
+                                phpModule.DefinedConsts.Add(new KeyValuePair<string, IPhpValue>(tmp, expression));
+                            }
+                            else
+                                throw new NotImplementedException();
                         }
                         else
-                            throw new NotImplementedException();
-                    }
-                    else
-                    {
-                        info.Log(MessageLevels.Error,
-                            string.Format("const {0} defined in {1} has no known value", tmp, phpModule.Name));
-                        phpModule.DefinedConsts.Add(new KeyValuePair<string, IPhpValue>(tmp, new PhpConstValue("UNKNOWN")));
+                        {
+                            info.Log(MessageLevels.Error,
+                                string.Format("const {0} defined in {1} has no known value", tmp, phpModule.Name));
+                            phpModule.DefinedConsts.Add(new KeyValuePair<string, IPhpValue>(tmp, new PhpConstValue("UNKNOWN")));
+                        }
                     }
                 }
             }
