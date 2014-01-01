@@ -16,7 +16,7 @@ namespace Lang.Php.Mpdf
     {
         #region Constructors
 
-        public Mpdf(string mode, string format, double fontSize, string fontFamily, double mLeft, double mRight, double mTop, double mBottom, double mHeader, double mFooter, string orientation)
+        public Mpdf(string mode, string format, double fontSize, string fontFamily, double mLeft, double mRight, double mTop, double mBottom, double mHeader, double mFooter, PageOrientation orientation)
         {
 
         }
@@ -49,11 +49,7 @@ namespace Lang.Php.Mpdf
 
         public string author;
         [AsValue]
-        public const string htmlpagefooter = "htmlpagefooter";
-        [AsValue]
-        public const string LANDSCAPE = "L";
-        [AsValue]
-        public const string PORTRAIT = "P";
+        public const string htmlpagefooter = "htmlpagefooter"; 
         [AsValue]
         public const string sethtmlpagefooter = "sethtmlpagefooter";
         public bool showWatermarkText;

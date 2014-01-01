@@ -19,7 +19,7 @@ namespace E03_ReferencedLibrary
         {
             var mpdf = new Mpdf("", "A4",
                BASE_SIZE, FONT,
-               MARGIN, MARGIN, MARGIN, MARGIN, MARGIN_HEADER, MARGIN_HEADER, Mpdf.PORTRAIT);
+               MARGIN, MARGIN, MARGIN, MARGIN, MARGIN_HEADER, MARGIN_HEADER, PageOrientation.Portrait);
             mpdf.author = "Mr Compiler";
             mpdf.title = "PDF title";
             mpdf.subject = "PDF subject";
