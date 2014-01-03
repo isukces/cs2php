@@ -144,6 +144,8 @@ namespace Lang.Php.Compiler.Translator.Node
                 var b = a as PhpMethodInvokeValue;
                 if (b == null)
                     throw new NotImplementedException();
+                if (b.Expression is PhpParenthesizedExpression)
+                    System.Diagnostics.Debug.Write("");
                 dstMethod.Arguments.Add(b);
             }
         }
@@ -238,7 +240,8 @@ namespace Lang.Php.Compiler.Translator.Node
                     {
                         if (targetObject == null)
                             throw new NotSupportedException();
-                        phpMethod.Arguments.Add(new PhpMethodInvokeValue(ctx.TranslateValue(targetObject)));
+                        var v = ctx.TranslateValue(targetObject);
+                        phpMethod.Arguments.Add(new PhpMethodInvokeValue(v));
                     }
                     else
                     {

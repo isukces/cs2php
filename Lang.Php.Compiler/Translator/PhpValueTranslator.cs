@@ -489,10 +489,7 @@ namespace Lang.Php.Compiler.Translator
                         throw new NotSupportedException("energetic gecko, Property with index");
                     propertyInfo = newPropertyInfo;
                 }
-
-
-
-                #region DirectCallAttribute
+                #region DirectCallAttribute for property
                 {
                     var ats = propertyInfo.GetCustomAttribute<DirectCallAttribute>(true);
                     if (ats != null)

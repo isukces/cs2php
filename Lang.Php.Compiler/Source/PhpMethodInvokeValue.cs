@@ -17,12 +17,15 @@ namespace Lang.Php.Compiler.Source
     property ByRef bool 
     smartClassEnd
     */
-    
+
     public partial class PhpMethodInvokeValue : IPhpValueBase
     {
-       
+
         public override string GetPhpCode(PhpEmitStyle style)
         {
+            if (expression == (object)null)
+                throw new Exception("Unable to get code from empty expression");
+            var ex = PhpParenthesizedExpression.Strip(expression);
             var a = expression.GetPhpCode(style);
             if (byRef)
                 a = "&" + a;
@@ -42,7 +45,7 @@ namespace Lang.Php.Compiler.Source
 // Smartclass.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0c4d5d36fb5eb4ac
 namespace Lang.Php.Compiler.Source
 {
-    public partial class PhpMethodInvokeValue 
+    public partial class PhpMethodInvokeValue
     {
         /*
         /// <summary>

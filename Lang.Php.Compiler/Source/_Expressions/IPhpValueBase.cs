@@ -8,13 +8,24 @@ namespace Lang.Php.Compiler.Source
 {
     public abstract class IPhpValueBase : PhpSourceBase, IPhpValue, ICodeRelated
     {
-        protected IPhpValue StripBracketsAndSimplify(IPhpValue v, IPhpExpressionSimplifier s)
+        #region Methods
+
+        // Public Methods 
+
+        public abstract IEnumerable<ICodeRequest> GetCodeRequests();
+
+        public abstract string GetPhpCode(PhpEmitStyle style);
+
+        public virtual IPhpValue Simplify(IPhpExpressionSimplifier s)
         {
-            while (v is PhpParenthesizedExpression)
-                v = (v as PhpParenthesizedExpression).Expression;
-            v = s.Simplify(v);
-            return v;
+            return this;
         }
+
+        public override string ToString()
+        {
+            return GetPhpCode(null);
+        }
+        // Protected Methods 
 
         protected IPhpValue SimplifyForFieldAcces(IPhpValue src, IPhpExpressionSimplifier s)
         {
@@ -38,18 +49,13 @@ namespace Lang.Php.Compiler.Source
             return src;
         }
 
-
-        public virtual IPhpValue Simplify(IPhpExpressionSimplifier s)
+        protected IPhpValue StripBracketsAndSimplify(IPhpValue value, IPhpExpressionSimplifier s)
         {
-            return this;
+            value = PhpParenthesizedExpression.Strip(value);
+            value = s.Simplify(value);
+            return value;
         }
 
-        public abstract string GetPhpCode(PhpEmitStyle style);
-        public override string ToString()
-        {
-            return GetPhpCode(null);
-        }
-
-        public abstract IEnumerable<ICodeRequest> GetCodeRequests();
+        #endregion Methods
     }
 }

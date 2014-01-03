@@ -18,9 +18,27 @@ namespace Lang.Php.Compiler.Source
 
     public partial class PhpParenthesizedExpression : IPhpValueBase
     {
+		#region Static Methods 
+
+		// Public Methods 
+
+        public static IPhpValue Strip(IPhpValue x)
+        {
+            if (x is PhpParenthesizedExpression)
+                return Strip((x as PhpParenthesizedExpression).expression);
+            return x;
+        }
+
+		#endregion Static Methods 
+
 		#region Methods 
 
 		// Public Methods 
+
+        public override IEnumerable<ICodeRequest> GetCodeRequests()
+        {
+            return expression == null ? new ICodeRequest[0] : expression.GetCodeRequests();
+        }
 
         public override string GetPhpCode(PhpEmitStyle style)
         {
@@ -28,11 +46,6 @@ namespace Lang.Php.Compiler.Source
         }
 
 		#endregion Methods 
-    
-        public override IEnumerable<ICodeRequest> GetCodeRequests()
-        {
-            return expression == null ? new ICodeRequest[0] : expression.GetCodeRequests();
-       }
     }
 }
 
