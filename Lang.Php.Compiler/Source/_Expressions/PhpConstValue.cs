@@ -64,7 +64,13 @@ namespace Lang.Php.Compiler.Source
         {
             bool b = style != null && style.Compression != EmitStyleCompression.Beauty;
             var a = PhpValues.ToPhpCodeValue(_value, b);
-            return a.PhpValue;
+            switch (a.Kind)
+            {
+                case PhpCodeValue.Kinds.Null:
+                    return "null";
+                default:
+                    return a.PhpValue;
+            }
             //if (_value == null)
             //    return "null";
             //var tt = _value.GetType();

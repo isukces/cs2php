@@ -120,7 +120,8 @@ namespace Lang.Php.Runtime
         /// <returns></returns>
         public static PhpCodeValue ToPhpCodeValue(object value, bool beauty = true)
         {
-            if (value == null) return new PhpCodeValue("", PhpCodeValue.Kinds.Null);
+            if (value == null) 
+                return new PhpCodeValue("", PhpCodeValue.Kinds.Null);
             var type = value.GetType();
             if (type.IsEnum)
                 return _SingleEnumValueToPhpCode(value);
