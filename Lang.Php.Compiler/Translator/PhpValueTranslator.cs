@@ -499,11 +499,14 @@ namespace Lang.Php.Compiler.Translator
                     {
                         if (string.IsNullOrEmpty(ats.Name))
                         {
-                            if (ats.MapArray.Length > 1)
-                                throw new NotSupportedException();
-                            if (ats.MapArray.Length == 1)
-                                if (ats.MapArray[0] != DirectCallAttribute.THIS)
-                                    throw new NotSupportedException();
+                            #region Check map parameter
+                            var tmp = ats.MapArray;
+                            if (tmp != null && tmp.Length > 0)
+                            {
+                                if (tmp.Length > 1 || tmp[0] != DirectCallAttribute.THIS)
+                                    throw new NotSupportedException(string.Format("Property {1}.{0} has invalid 'Map' parameter in DirectCallAttribute", propertyInfo.Name, propertyInfo.DeclaringType));
+                            } 
+                            #endregion
                             return phpTargetObject;
                         }
                         switch (ats.MemberToCall)
