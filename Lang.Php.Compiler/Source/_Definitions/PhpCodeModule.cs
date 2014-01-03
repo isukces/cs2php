@@ -53,24 +53,14 @@ namespace Lang.Php.Compiler.Source
             var style_CurrentNamespace = style.CurrentNamespace;
             try
             {
-                style.CurrentNamespace = "";
+                var nsManager = new PhpModuleNamespaceManager();
+                style.CurrentNamespace = null;
                 if (!string.IsNullOrEmpty(this.topComments))
                     writer.WriteLn("/*\r\n" + topComments.Trim() + "\r\n*/");
-                // var noBracketStyle = PhpEmitStyle.xClone(style, ShowBracketsEnum.Never);
-                //_module = module;
-                //_context = context;
                 var module = this;
                 {
-                    var namespaces = module.classes.Select(a => a.Name.Namespace).Distinct().ToArray();
-                    var manyNamespaces = namespaces.Length > 1;
-                    {
-                        if (namespaces.Length == 1 && !string.IsNullOrEmpty(namespaces.First()))
-                        {
-                            style.CurrentNamespace = namespaces.First();
-                            writer.WriteLnF("namespace {0};", style.CurrentNamespace.Substring(1));
-                        }
-                    }
-                    var noBracketStyle = PhpEmitStyle.xClone(style, ShowBracketsEnum.Never);
+                    // var noBracketStyle = PhpEmitStyle.xClone(style, ShowBracketsEnum.Never);
+                    #region Top code
                     {
                         /// top code
                         PhpCodeBlock collectedTopCodeBlock = new PhpCodeBlock();
@@ -78,45 +68,27 @@ namespace Lang.Php.Compiler.Source
                         collectedTopCodeBlock.Statements.AddRange(ConvertDefinedConstToCode());
                         if (topCode != null)
                             collectedTopCodeBlock.Statements.AddRange(topCode.Statements);
-                        if (collectedTopCodeBlock.Statements.Any())
-                            collectedTopCodeBlock.Emit(emiter, writer, noBracketStyle);
-                    }
-                    #region Emit classes
-                    {
-                        if (manyNamespaces)
-                        {
-                            var classesGBNamespace = module.Classes.GroupBy(u => u.Name.Namespace);
-                            foreach (var classesInNamespace in classesGBNamespace)
-                            {
-                                style.CurrentNamespace = classesInNamespace.Key;
-                                try
-                                {
-                                    if (style.CurrentNamespace.Length > 0)
-                                        writer.OpenLnF("namespace {0} {{", style.CurrentNamespace.Substring(1));
-                                    else
-                                        writer.OpenLn("namespace {");
-                                    foreach (var cl in classesInNamespace)
-                                        cl.Emit(emiter, writer, style);
-                                    writer.CloseLn("}");
-                                }
-                                finally
-                                {
-                                    style.CurrentNamespace = "";
-                                }
-                            }
-                        }
-                        else
-                            foreach (var cl in module.Classes)
-                            {
-                                cl.Emit(emiter, writer, style);
-                            }
+                        nsManager.Add(collectedTopCodeBlock.Statements);
                     }
                     #endregion
+                    {
+                        var classesGBNamespace = module.Classes.GroupBy(u => u.Name.Namespace);
+                        foreach (var classesInNamespace in classesGBNamespace.OrderBy(i => !i.Key.IsRoot))
+                            foreach (var c in classesInNamespace)
+                                nsManager.Add(c);
+                    }
                     if (bottomCode != null)
-                        bottomCode.Emit(emiter, writer, noBracketStyle);
+                        nsManager.Add(bottomCode);
+                    if (nsManager.Container.Any())
+                    {
+                        if (nsManager.OnlyOneRootStatement)
+                            foreach (var cl in nsManager.Container[0].Items)
+                                cl.Emit(emiter, writer, style);
+                        else
+                            foreach (var ns in nsManager.Container)
+                                EmitWithNamespace(ns.Name, emiter, writer, style, ns.Items);
+                    }
                 }
-
-
                 #region Save to file
                 {
                     FileInfo fi = new FileInfo(filename);
@@ -130,6 +102,27 @@ namespace Lang.Php.Compiler.Source
             finally
             {
                 style.CurrentNamespace = style_CurrentNamespace;
+            }
+        }
+
+        private static void EmitWithNamespace(PhpNamespace ns, PhpSourceCodeEmiter emiter, PhpSourceCodeWriter writer, PhpEmitStyle style, IEnumerable<IEmitable> classesInNamespace)
+        {
+            if (classesInNamespace == null || !classesInNamespace.Any())
+                return;
+            style.CurrentNamespace = ns;
+            try
+            {
+                if (ns.IsRoot)
+                    writer.OpenLn("namespace {");
+                else
+                    writer.OpenLnF("namespace {0} {{", ns.Name.Substring(1));
+                foreach (var cl in classesInNamespace)
+                    cl.Emit(emiter, writer, style);
+                writer.CloseLn("}");
+            }
+            finally
+            {
+                style.CurrentNamespace = null;
             }
         }
 
@@ -167,7 +160,7 @@ namespace Lang.Php.Compiler.Source
                     List<IPhpStatement> container;
                     if (useNamespaces)
                     {
-                        var ns1 = new PhpNamespaceStatement(group.Key);
+                        var ns1 = new PhpNamespaceStatement((PhpNamespace)group.Key);
                         container = ns1.Code.Statements;
                         result.Add(ns1);
                     }

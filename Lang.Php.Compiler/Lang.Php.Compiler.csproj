@@ -74,6 +74,9 @@
     <Compile Include="EmitContext.cs" />
     <Compile Include="PathUtil.cs" />
     <Compile Include="OptimizeOptions.cs" />
+    <Compile Include="PhpModuleNamespaceManager.cs" />
+    <Compile Include="PhpNamespace.cs" />
+    <Compile Include="ReflectionUtil.cs" />
     <Compile Include="Source\PhpSourceBase.cs" />
     <Compile Include="Source\_Expressions\PhpArrayCreateExpression.cs" />
     <Compile Include="Source\_Expressions\PhpDefinedConstExpression.cs" />
@@ -116,6 +119,7 @@
     <Compile Include="_enum\StatementEmitInfo.cs" />
     <Compile Include="_interfaces\ICodeRelated.cs" />
     <Compile Include="_interfaces\ICodeRequest.cs" />
+    <Compile Include="_interfaces\IEmitable.cs" />
     <Compile Include="_interfaces\IExternalTranslationContext.cs" />
     <Compile Include="_interfaces\IModuleProcessor.cs" />
     <Compile Include="_interfaces\IPhpExpressionSimplifier.cs" />

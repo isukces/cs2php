@@ -21,7 +21,7 @@ namespace Lang.Php.Compiler
     
     property UseBracketsEvenIfNotNecessary bool 
     
-    property CurrentNamespace string 
+    property CurrentNamespace PhpNamespace 
     
     property CurrentClass PhpQualifiedName Name of current class
     smartClassEnd
@@ -46,7 +46,7 @@ namespace Lang.Php.Compiler
 }
 
 
-// -----:::::##### smartClass embedded code begin #####:::::----- generated 2013-12-03 10:25
+// -----:::::##### smartClass embedded code begin #####:::::----- generated 2014-01-03 12:46
 // File generated automatically ver 2013-07-10 08:43
 // Smartclass.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0c4d5d36fb5eb4ac
 namespace Lang.Php.Compiler
@@ -183,7 +183,7 @@ namespace Lang.Php.Compiler
         /// <summary>
         /// 
         /// </summary>
-        public string CurrentNamespace
+        public PhpNamespace CurrentNamespace
         {
             get
             {
@@ -191,11 +191,10 @@ namespace Lang.Php.Compiler
             }
             set
             {
-                value = (value ?? String.Empty).Trim();
                 currentNamespace = value;
             }
         }
-        private string currentNamespace = string.Empty;
+        private PhpNamespace currentNamespace;
         /// <summary>
         /// Name of current class
         /// </summary>

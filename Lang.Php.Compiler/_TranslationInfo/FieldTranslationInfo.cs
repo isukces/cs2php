@@ -43,10 +43,12 @@ namespace Lang.Php.Compiler
             if (fieldInfo == null)
                 return null;
             FieldTranslationInfo fti = new FieldTranslationInfo();
+            if (fieldInfo.IsLiteral)
+                fti.destination = FieldTranslationDestionations.ClassConst;
             {
                 fti.ScriptName = fieldInfo.Name;
                 {
-                    var _sctiptName = fieldInfo.GetCustomAttribute<Lang.Php.ScriptNameAttribute>();
+                    var _sctiptName = ReflectionUtil.GetAttribute<ScriptNameAttribute>(fieldInfo);
                     if (_sctiptName != null)
                     {
                         fti.scriptName = _sctiptName.Name;
@@ -55,7 +57,7 @@ namespace Lang.Php.Compiler
                 }
             }
             {
-                var _definedConst = fieldInfo.GetCustomAttribute<Lang.Php.AsDefinedConst>();
+                var _definedConst = ReflectionUtil.GetAttribute<AsDefinedConst>(fieldInfo);
                 if (_definedConst != null)
                 {
                     fti.Destination = FieldTranslationDestionations.DefinedConst;
@@ -64,7 +66,7 @@ namespace Lang.Php.Compiler
                 }
             }
             {
-                var _globalVariable = fieldInfo.GetCustomAttribute<Lang.Php.GlobalVariableAttribute>();
+                var _globalVariable = ReflectionUtil.GetAttribute<GlobalVariableAttribute>(fieldInfo);
                 if (_globalVariable != null)
                 {
                     Check(fieldInfo, fti);
@@ -74,7 +76,7 @@ namespace Lang.Php.Compiler
                 }
             }
             {
-                var _asValue = fieldInfo.GetCustomAttribute<Lang.Php.AsValue>();
+                var _asValue = ReflectionUtil.GetAttribute<AsValueAttribute>(fieldInfo);
                 if (_asValue != null)
                 {
                     Check(fieldInfo, fti);
@@ -88,6 +90,7 @@ namespace Lang.Php.Compiler
                 case FieldTranslationDestionations.GlobalVariable:
                     break;
                 case FieldTranslationDestionations.DefinedConst:
+                case FieldTranslationDestionations.ClassConst:
                 case FieldTranslationDestionations.NormalField:
                     var cti = info.GetOrMakeTranslationInfo(fieldInfo.DeclaringType);
                     fti.IncludeModule = cti.ModuleName;
@@ -107,7 +110,7 @@ namespace Lang.Php.Compiler
 
         private static void Check(FieldInfo fieldInfo, FieldTranslationInfo fti)
         {
-            if (fti.Destination != FieldTranslationDestionations.NormalField)
+            if (fti.Destination != FieldTranslationDestionations.NormalField && fti.Destination != FieldTranslationDestionations.ClassConst)
                 throw new Exception(string.Format("Unable to find right way to convert field {0}.{1}", fieldInfo.DeclaringType.FullName, fieldInfo.Name));
         }
 

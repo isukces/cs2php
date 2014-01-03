@@ -407,45 +407,45 @@ namespace Lang.Php.Compiler.Translator
                             module.DefinedConsts.Add(new KeyValuePair<string, IPhpValue>(fti.ScriptName, definedValue));
                             break;
                         case FieldTranslationDestionations.GlobalVariable:
-                            IPhpValue value;
-                            // muszę na chwilę wyłączyć current type, bo to jes poza klasą generowane
+                            if (item.Value != null)
                             {
-                                var saveCurrentType = state.Principles.CurrentType;
-                                state.Principles.CurrentType = null;
-                                try
-                                {
 
-                                    if (item.Value == null)
-                                    {
-                                        value = new PhpConstValue(null);
-                                    }
-                                    else
+                                IPhpValue value;
+                                // muszę na chwilę wyłączyć current type, bo to jes poza klasą generowane
+                                {
+                                    var saveCurrentType = state.Principles.CurrentType;
+                                    state.Principles.CurrentType = null;
+                                    try
                                     {
                                         if (phpValueTranslator == null)
                                             phpValueTranslator = new PhpValueTranslator(state);
                                         value = phpValueTranslator.TransValue(item.Value);
                                     }
+                                    finally
+                                    {
+                                        state.Principles.CurrentType = saveCurrentType;
+                                    }
                                 }
-                                finally
-                                {
-                                    state.Principles.CurrentType = saveCurrentType;
-                                }
-                            }
 
-                            #region Tworzenie kodu
-                            var assign = new PhpAssignExpression(PhpVariableExpression.MakeGlobal(fti.ScriptName), value);
-                            module.TopCode.Statements.Add(new PhpExpressionStatement(assign));
-                            #endregion
+                                #region Tworzenie kodu
+                                var assign = new PhpAssignExpression(PhpVariableExpression.MakeGlobal(fti.ScriptName), value);
+                                module.TopCode.Statements.Add(new PhpExpressionStatement(assign));
+                                #endregion
+                            }
                             break;
                         case FieldTranslationDestionations.JustValue:
                             continue; // don't define
                         case FieldTranslationDestionations.NormalField:
+                        case FieldTranslationDestionations.ClassConst:
                             {
                                 var def = new PhpClassFieldDefinition();
                                 var cti = state.Principles.GetTI(state.Principles.CurrentType);
                                 if (cti.IsArray)
                                     continue;
-                                def.IsConst = field.Modifiers.Has("const");
+                                if (field.Modifiers.Has("const") ^ fti.Destination == FieldTranslationDestionations.ClassConst)
+                                    throw new Exception("beige lion");
+
+                                def.IsConst = fti.Destination == FieldTranslationDestionations.ClassConst;// field.Modifiers.Has("const");
                                 def.Name = PhpVariableExpression.AddDollar(fti.ScriptName, !def.IsConst);
 
                                 def.IsStatic = def.IsConst || field.Modifiers.Has("static");

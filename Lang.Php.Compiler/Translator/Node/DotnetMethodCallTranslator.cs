@@ -35,17 +35,7 @@ namespace Lang.Php.Compiler.Translator.Node
         {
             if (methodInfo == null)
                 throw new ArgumentNullException("methodInfo");
-            var attribute = methodInfo.GetCustomAttributes(true).OfType<DirectCallAttribute>().FirstOrDefault();
-            if (attribute != null)
-                return attribute;
-
-            var checkAttribute = methodInfo.GetCustomAttributes(true).Where(a => a.GetType().FullName == "Lang.Php.DirectCallAttribute").FirstOrDefault();
-            if (checkAttribute == null)
-                return null;
-            var loadedAssembly = checkAttribute.GetType().Assembly.Location;
-            var expectedAssembly = typeof(DirectCallAttribute).Assembly.Location;
-            throw new Exception(string.Format("Assembly Lang.Php {0} was loaded instead of {1}",
-                loadedAssembly, expectedAssembly));
+            return ReflectionUtil.GetAttribute<DirectCallAttribute>(methodInfo);
         }
 
         #endregion Static Methods

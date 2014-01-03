@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace Lang.Php.Compiler
 {
-    public interface IPhpStatement: ICodeRelated, IEmitable
-    {    
-        StatementEmitInfo GetStatementEmitInfo(PhpEmitStyle style);
+    public interface IEmitable
+    {
+        void Emit(PhpSourceCodeEmiter emiter, PhpSourceCodeWriter writer, PhpEmitStyle style);
     }
 }

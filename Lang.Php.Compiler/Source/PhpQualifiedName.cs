@@ -16,7 +16,7 @@ namespace Lang.Php.Compiler.Source
     
     property FullName string pełna nazwa
     
-    property Namespace string Przestrzeń nazw
+    property Namespace PhpNamespace Przestrzeń nazw
     	read only getNamespace()
     
     property ShortName string nazwa krótka
@@ -32,9 +32,9 @@ namespace Lang.Php.Compiler.Source
 
     public partial class PhpQualifiedName
     {
-        #region Static Methods
+		#region Static Methods 
 
-        // Public Methods 
+		// Public Methods 
 
         public static bool IsEmpty(PhpQualifiedName x)
         {
@@ -69,11 +69,11 @@ namespace Lang.Php.Compiler.Source
             return x.fullName;
         }
 
-        #endregion Static Methods
+		#endregion Static Methods 
 
-        #region Methods
+		#region Methods 
 
-        // Public Methods 
+		// Public Methods 
 
         public string GetNameRelatedTo(PhpQualifiedName other)
         {
@@ -95,6 +95,29 @@ namespace Lang.Php.Compiler.Source
             return clone;
         }
 
+        public string NameForEmit(PhpEmitStyle style)
+        {
+            if (style == null)
+                return EmitName;
+            if (this == style.CurrentClass)
+                return SELF;
+            if (style.CurrentNamespace == null)
+                return fullName;
+            {
+                if ((fullName + T_NS_SEPARATOR).StartsWith(style.CurrentNamespace.Name + T_NS_SEPARATOR))
+                    return fullName.Substring(style.CurrentNamespace.Name.Length + 1);
+            }
+            if (style.CurrentNamespace == Namespace)
+                return ShortName;
+            if (style.CurrentNamespace != null)
+            {
+                if (Namespace == null && !fullName.StartsWith(T_NS_SEPARATOR.ToString()))
+                    return T_NS_SEPARATOR + fullName;
+            }
+
+            return EmitName;
+        }
+
         public void SetEffectiveNameRelatedTo(PhpQualifiedName other)
         {
             var effectiveNameCandidate = GetNameRelatedTo(other);
@@ -108,13 +131,13 @@ namespace Lang.Php.Compiler.Source
         {
             return (PhpQualifiedName)((this as ICloneable).Clone());
         }
-        // Private Methods 
-        public const char T_NS_SEPARATOR = '\\';
-        string getNamespace()
+		// Private Methods 
+
+        PhpNamespace getNamespace()
         {
             var a = fullName.LastIndexOf(T_NS_SEPARATOR);
-            if (a < 0) return string.Empty;
-            return fullName.Substring(0, a);
+            if (a < 0) return PhpNamespace.Root;
+            return (PhpNamespace)fullName.Substring(0, a);
         }
 
         string getShortName()
@@ -124,40 +147,20 @@ namespace Lang.Php.Compiler.Source
             return fullName.Substring(a + 1);
         }
 
-        #endregion Methods
+		#endregion Methods 
 
-        #region Fields
+		#region Fields 
 
         public const string PARENT = "parent";
         public const string SELF = "self";
+        public const char T_NS_SEPARATOR = '\\';
 
-        #endregion Fields
-
-        public string NameForEmit(PhpEmitStyle style)
-        {
-            if (style == null)
-                return EmitName;
-            if (this == style.CurrentClass)
-                return SELF;
-            {
-                if ((fullName + T_NS_SEPARATOR).StartsWith(style.CurrentNamespace + T_NS_SEPARATOR))
-                    return fullName.Substring(style.CurrentNamespace.Length + 1);
-            }
-            if (style.CurrentNamespace == Namespace)
-                return ShortName;
-            if (!string.IsNullOrEmpty(style.CurrentNamespace))
-            {
-                if (string.IsNullOrEmpty(Namespace) && !fullName.StartsWith(T_NS_SEPARATOR.ToString()))
-                    return T_NS_SEPARATOR + fullName;
-            }
-
-            return EmitName;
-        }
+		#endregion Fields 
     }
 }
 
 
-// -----:::::##### smartClass embedded code begin #####:::::----- generated 2013-12-03 09:16
+// -----:::::##### smartClass embedded code begin #####:::::----- generated 2014-01-03 12:58
 // File generated automatically ver 2013-07-10 08:43
 // Smartclass.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0c4d5d36fb5eb4ac
 namespace Lang.Php.Compiler.Source
@@ -310,7 +313,7 @@ namespace Lang.Php.Compiler.Source
         /// <summary>
         /// Przestrzeń nazw; własność jest tylko do odczytu.
         /// </summary>
-        public string Namespace
+        public PhpNamespace Namespace
         {
             get
             {

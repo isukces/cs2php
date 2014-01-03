@@ -27,7 +27,7 @@ namespace Lang.Php.Compiler.Source
     smartClassEnd
     */
 
-    public partial class PhpClassDefinition : ICodeRelated
+    public partial class PhpClassDefinition : ICodeRelated, IEmitable
     {
         #region Static Methods
 
@@ -48,11 +48,14 @@ namespace Lang.Php.Compiler.Source
 
         public void Emit(PhpSourceCodeEmiter emiter, PhpSourceCodeWriter writer, PhpEmitStyle style)
         {
-            var save_styleCurrentClass = style.CurrentClass;          
+            var save_styleCurrentClass = style.CurrentClass;
+            var save_styleCurrentNamespace = style.CurrentNamespace;
             try
             {
                 if (IsEmpty)
                     return;
+                if (style.CurrentNamespace == null)
+                    style.CurrentNamespace = PhpNamespace.Root;
                 if (style.CurrentNamespace != name.Namespace)
                     throw new Exception("Unable to emit class into different namespace");
                 string e = "";
@@ -72,6 +75,7 @@ namespace Lang.Php.Compiler.Source
             finally
             {
                 style.CurrentClass = save_styleCurrentClass;
+                style.CurrentNamespace = save_styleCurrentNamespace;
             }
         }
 

@@ -79,7 +79,7 @@ namespace Lang.Php.Compiler.Source
 
                 #region ModuleAttribute
                 {
-                    ModuleAttribute _module = ats.OfType<ModuleAttribute>().FirstOrDefault();
+                    ModuleAttribute _module = ReflectionUtil.GetAttribute<ModuleAttribute>(type);
                     if (_module != null)
                     {
                         Name = _module.ModuleShortName;
@@ -89,7 +89,7 @@ namespace Lang.Php.Compiler.Source
                 #endregion
                 #region PageAttribute
                 {
-                    var _page = ats.OfType<PageAttribute>().FirstOrDefault();
+                    var _page = ReflectionUtil.GetAttribute<PageAttribute>(type);
                     if (_page != null)
                         Name = _page.ModuleShortName;
                 }
@@ -121,18 +121,6 @@ namespace Lang.Php.Compiler.Source
                 }
             pathItems.Add(new PhpConstValue(name + Extension));
             PhpIncludePathExpression = PhpBinaryOperatorExpression.ConcatStrings(pathItems.ToArray());
-
-
-            //if (assemblyPath != null)
-            //{
-            //    var pathItems = new IPhpValue[]{
-            //        assemblyPath,
-            //        new PhpConstValue(name + Extension)
-            //    };
-            //    PhpIncludePathExpression = PhpBinaryOperatorExpression.ConcatStrings(pathItems);
-            //}
-            //else
-            //    PhpIncludePathExpression = new PhpConstValue(name + Extension);
         }
 
         #endregion Constructors
@@ -175,7 +163,12 @@ namespace Lang.Php.Compiler.Source
             if (relatedTo.Library == Library)
             {
                 var knownPath = ProcessPath(name + extension, relatedTo.name + extension);
-                return new PhpConstValue(knownPath);
+                //dirname(__FILE__)
+                var __FILE__ = new PhpDefinedConstExpression("__FILE__", null);
+                var dirname = new PhpMethodCallExpression("dirname", __FILE__);
+                var path = new PhpConstValue(PathUtil.MakeUnixPath(PathUtil.UNIX_SEP + knownPath));
+                var result = PhpBinaryOperatorExpression.ConcatStrings(dirname, path);
+                return result;
             }
             else
             {

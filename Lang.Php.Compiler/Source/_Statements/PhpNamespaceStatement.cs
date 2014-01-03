@@ -12,24 +12,27 @@ namespace Lang.Php.Compiler.Source
     option NoAdditionalFile
     implement Constructor Name
     
-    property Name string namespace name
-    	preprocess value = PathUtil.MakeWinPath(PathUtil.WIN_SEP + value);
+    property Name PhpNamespace namespace name
     
     property Code PhpCodeBlock 
     	init #
     smartClassEnd
     */
-
+    
     public partial class PhpNamespaceStatement : PhpSourceBase, IPhpStatement, ICodeRelated
     {
-        public IEnumerable<ICodeRequest> GetCodeRequests()
+        #region Methods
+
+        // Public Methods 
+
+        public static bool IsRootNamespace(string name)
         {
-            return code.GetCodeRequests();
+            return string.IsNullOrEmpty(name) || name == PathUtil.WIN_SEP;
         }
 
         public void Emit(PhpSourceCodeEmiter emiter, PhpSourceCodeWriter writer, PhpEmitStyle style)
         {
-            if (name == "" || name == PathUtil.WIN_SEP)
+            if (name.IsRoot)
                 writer.OpenLn("namespace {");
             else
                 writer.OpenLnF("namespace {0} {{", name);
@@ -37,20 +40,34 @@ namespace Lang.Php.Compiler.Source
             writer.CloseLn("}");
         }
 
+        public IEnumerable<ICodeRequest> GetCodeRequests()
+        {
+            return code.GetCodeRequests();
+        }
+
         public StatementEmitInfo GetStatementEmitInfo(PhpEmitStyle style)
         {
             return StatementEmitInfo.NormalSingleStatement;
         }
+
+        public override string ToString()
+        {
+            if (name.IsRoot)
+                return "Root Php namespace";
+            return string.Format("Php namespace {0}", name);
+        }
+
+        #endregion Methods
     }
 }
 
 
-// -----:::::##### smartClass embedded code begin #####:::::----- generated 2013-12-07 15:29
+// -----:::::##### smartClass embedded code begin #####:::::----- generated 2014-01-03 13:07
 // File generated automatically ver 2013-07-10 08:43
 // Smartclass.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0c4d5d36fb5eb4ac
 namespace Lang.Php.Compiler.Source
 {
-    public partial class PhpNamespaceStatement
+    public partial class PhpNamespaceStatement 
     {
         /*
         /// <summary>
@@ -75,7 +92,7 @@ namespace Lang.Php.Compiler.Source
         /// Tworzy instancję obiektu
         /// <param name="Name">namespace name</param>
         /// </summary>
-        public PhpNamespaceStatement(string Name)
+        public PhpNamespaceStatement(PhpNamespace Name)
         {
             this.Name = Name;
         }
@@ -100,7 +117,7 @@ namespace Lang.Php.Compiler.Source
         /// <summary>
         /// namespace name
         /// </summary>
-        public string Name
+        public PhpNamespace Name
         {
             get
             {
@@ -108,12 +125,10 @@ namespace Lang.Php.Compiler.Source
             }
             set
             {
-                value = (value ?? String.Empty).Trim();
-                value = PathUtil.MakeWinPath(PathUtil.WIN_SEP + value);
                 name = value;
             }
         }
-        private string name = string.Empty;
+        private PhpNamespace name;
         /// <summary>
         /// 
         /// </summary>

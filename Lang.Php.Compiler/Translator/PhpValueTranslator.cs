@@ -357,9 +357,18 @@ namespace Lang.Php.Compiler.Translator
                         var rr = new PhpClassFieldAccessExpression();
                         rr.FieldName = isStatic ? tInfo.ScriptName : PhpVariableExpression.AddDollar(tInfo.ScriptName);
                         rr.ClassName = state.Principles.GetPhpType(member_declaring_type, true);
+                        rr.IsConst = tInfo.Destination == FieldTranslationDestionations.ClassConst;
+                        return SimplifyPhpExpression(rr);
+                    case FieldTranslationDestionations.ClassConst:
+                        if (tInfo.IsScriptNamePhpEncoded)
+                            throw new Exception("Encoded php values are not supported");
+                        rr = new PhpClassFieldAccessExpression();
+                        rr.FieldName = tInfo.ScriptName;
+                        rr.ClassName = state.Principles.GetPhpType(member_declaring_type, true);
+                        rr.IsConst = true;
                         return SimplifyPhpExpression(rr);
                     default:
-                        throw new NotSupportedException();
+                        throw new NotSupportedException(string.Format("Unable to translate class field with destination option equal {0}", tInfo.Destination));
                 }
 
 
@@ -502,7 +511,7 @@ namespace Lang.Php.Compiler.Translator
                             {
                                 if (tmp.Length > 1 || tmp[0] != DirectCallAttribute.THIS)
                                     throw new NotSupportedException(string.Format("Property {1}.{0} has invalid 'Map' parameter in DirectCallAttribute", propertyInfo.Name, propertyInfo.DeclaringType));
-                            } 
+                            }
                             #endregion
                             return phpTargetObject;
                         }

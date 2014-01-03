@@ -11,6 +11,7 @@ namespace Lang.Php.Compiler
         NormalField,
         DefinedConst,
         GlobalVariable,
-        JustValue
+        JustValue,
+        ClassConst
     }
 }

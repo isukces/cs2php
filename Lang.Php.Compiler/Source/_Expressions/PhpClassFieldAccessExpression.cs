@@ -11,20 +11,25 @@ namespace Lang.Php.Compiler.Source
     smartClass
     option NoAdditionalFile
     
-    property ClassName PhpClassName 
+    property ClassName PhpQualifiedName 
     
     property FieldName string 
+    
+    property IsConst bool 
     smartClassEnd
     */
-
-    public partial class PhpClassFieldAccessExpression : IPhpValueBase 
+    
+    public partial class PhpClassFieldAccessExpression : IPhpValueBase
     {
         public override string GetPhpCode(PhpEmitStyle style)
         {
-            return string.Format("{0}::{1}", className.NameForEmit(style), fieldName);
+            return string.Format("{0}::{1}{2}",
+                className.NameForEmit(style),
+                isConst ? "" : "$",
+                fieldName);
         }
 
-        public  override IEnumerable<ICodeRequest> GetCodeRequests()
+        public override IEnumerable<ICodeRequest> GetCodeRequests()
         {
             yield return new ClassCodeRequest(className);
         }
@@ -32,12 +37,12 @@ namespace Lang.Php.Compiler.Source
 }
 
 
-// -----:::::##### smartClass embedded code begin #####:::::----- generated 2013-11-10 20:22
+// -----:::::##### smartClass embedded code begin #####:::::----- generated 2014-01-03 18:05
 // File generated automatically ver 2013-07-10 08:43
 // Smartclass.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0c4d5d36fb5eb4ac
 namespace Lang.Php.Compiler.Source
 {
-    public partial class PhpClassFieldAccessExpression
+    public partial class PhpClassFieldAccessExpression 
     {
         /*
         /// <summary>
@@ -51,9 +56,9 @@ namespace Lang.Php.Compiler.Source
 
         implement INotifyPropertyChanged
         implement INotifyPropertyChanged_Passive
-        implement ToString ##ClassName## ##FieldName##
-        implement ToString ClassName=##ClassName##, FieldName=##FieldName##
-        implement equals ClassName, FieldName
+        implement ToString ##ClassName## ##FieldName## ##IsConst##
+        implement ToString ClassName=##ClassName##, FieldName=##FieldName##, IsConst=##IsConst##
+        implement equals ClassName, FieldName, IsConst
         implement equals *
         implement equals *, ~exclude1, ~exclude2
         */
@@ -66,6 +71,10 @@ namespace Lang.Php.Compiler.Source
         /// Nazwa własności FieldName; 
         /// </summary>
         public const string PROPERTYNAME_FIELDNAME = "FieldName";
+        /// <summary>
+        /// Nazwa własności IsConst; 
+        /// </summary>
+        public const string PROPERTYNAME_ISCONST = "IsConst";
         #endregion Constants
 
         #region Methods
@@ -103,6 +112,21 @@ namespace Lang.Php.Compiler.Source
             }
         }
         private string fieldName = string.Empty;
+        /// <summary>
+        /// 
+        /// </summary>
+        public bool IsConst
+        {
+            get
+            {
+                return isConst;
+            }
+            set
+            {
+                isConst = value;
+            }
+        }
+        private bool isConst;
         #endregion Properties
 
     }
