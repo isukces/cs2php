@@ -18,14 +18,14 @@ namespace Lang.Php.Compiler
         public static string MakeUnixPath(string path)
         {
             path = path.Replace(WIN_SEP, UNIX_SEP);
-            while (path.IndexOf(TWO_UNIX_SEP) > 0)
+            while (path.IndexOf(TWO_UNIX_SEP) >= 0)
                 path = path.Replace(TWO_UNIX_SEP, UNIX_SEP);
             return path;
         }
         public static string MakeWinPath(string path)
         {
             path = path.Replace(UNIX_SEP, WIN_SEP);
-            while (path.IndexOf(TWO_WIN_SEP) > 0)
+            while (path.IndexOf(TWO_WIN_SEP) >= 0)
                 path = path.Replace(TWO_WIN_SEP, WIN_SEP);
             return path;
         }
