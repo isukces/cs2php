@@ -14,14 +14,19 @@ namespace Lang.Php
             Value = dt;
         }
 
+        [ScriptName("A")]
+        [DirectCall(null,"0")]
         public static implicit operator string(MySqlDateTime src)
         {
             return src.Value;
         }
+        [ScriptName("B")]
+        [DirectCall(null, "0")]
         public static implicit operator MySqlDateTime(string src)
         {
             return new MySqlDateTime(src);
         }
+
         [DirectCall("strtotime")]
         public static implicit operator DateTime(MySqlDateTime src)
         {
