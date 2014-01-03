@@ -29,7 +29,7 @@ namespace Lang.Php
     /// </remarks>
     /// </summary>
 
-    public partial class AsValue : Attribute
+    public partial class AsValueAttribute : Attribute
     {
     }
 }
@@ -40,7 +40,7 @@ namespace Lang.Php
 // Smartclass.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0c4d5d36fb5eb4ac
 namespace Lang.Php
 {
-    public partial class AsValue 
+    public partial class AsValueAttribute 
     {
         /*
         /// <summary>
@@ -64,7 +64,7 @@ namespace Lang.Php
         /// <summary>
         /// Tworzy instancję obiektu
         /// </summary>
-        public AsValue()
+        public AsValueAttribute()
         {
         }
 
@@ -72,7 +72,7 @@ namespace Lang.Php
         /// Tworzy instancję obiektu
         /// <param name="Glue">Czy można sklejać wartości stałej z pozostałym tekstem (jeśli stała tekstowa występuje w wyrażeniu z innym tekstem)</param>
         /// </summary>
-        public AsValue(bool Glue)
+        public AsValueAttribute(bool Glue)
         {
             this.Glue = Glue;
         }

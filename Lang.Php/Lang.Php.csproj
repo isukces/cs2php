@@ -97,7 +97,7 @@
     <Compile Include="Runtime\RuntimeMysqlResult.cs" />
     <Compile Include="_attributes\AsDefinedConst.cs" />
     <Compile Include="_attributes\GlobalVariableAttribute.cs" />
-    <Compile Include="_attributes\AsValue.cs" />
+    <Compile Include="_attributes\AsValueAttribute.cs" />
     <Compile Include="_attributes\EnumRenderAttribute.cs" />
     <Compile Include="_attributes\_assembly\ModuleIncludeConstAttribute.cs" />
     <Compile Include="_attributes\TranslatorAttribute.cs" />
@@ -193,7 +193,7 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties BuildVersion_StartDate="2000/1/1" BuildVersion_UpdateFileVersion="True" BuildVersion_UpdateAssemblyVersion="True" BuildVersion_BuildVersioningStyle="None.None.DeltaBaseDateInDays.Increment" />
+      <UserProperties BuildVersion_BuildVersioningStyle="None.None.DeltaBaseDateInDays.Increment" BuildVersion_UpdateAssemblyVersion="True" BuildVersion_UpdateFileVersion="True" BuildVersion_StartDate="2000/1/1" />
     </VisualStudio>
   </ProjectExtensions>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
