@@ -1,0 +1,7 @@
+public static function CostantsAndVariables() {
+    $a = null;
+    $b = 18;
+    $c = 1.2;
+    $pi = M_PI;
+    $h = 'Some text backslash\\ quote" single\' dollar$';
+}

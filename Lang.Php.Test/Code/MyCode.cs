@@ -18,6 +18,16 @@ namespace Lang.Php.Test.Code
             var d = (a + b) / Math.PI;
         }
 
+        public static void CostantsAndVariables()
+        {
+            object a = null;
+            int b = 0x12;
+            double c = 1.2;
+            double pi = Math.PI;
+            string h = "Some text backslash\\ quote\" single' dollar$";
+
+        }
+
         public static void Collections()
         {
             // List

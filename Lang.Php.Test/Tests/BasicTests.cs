@@ -21,7 +21,7 @@ namespace Lang.Php.Test.Tests
 
         // Public Methods 
 
-       
+
 
         [Fact]
         public static void Compile()
@@ -32,6 +32,7 @@ namespace Lang.Php.Test.Tests
 
             MethodTranslation(MODULE_MYCODE, CLASS_MYCODE, "BasicMath1");
             MethodTranslation(MODULE_MYCODE, CLASS_MYCODE, "Collections");
+            MethodTranslation(MODULE_MYCODE, CLASS_MYCODE, "CostantsAndVariables");
         }
 
         [Fact]

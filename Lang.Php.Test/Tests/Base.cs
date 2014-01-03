@@ -52,6 +52,8 @@ namespace Lang.Php.Test.Tests
                     {
                         using (var src = typeof(Base).Assembly.GetManifestResourceStream(resourceName))
                         {
+                            if (src == null)
+                                throw new Exception("Unable to load resource " + resourceName);
                             src.CopyTo(ms);
                             var b = ms.ToArray();
                             ExpectedCode = Encoding.UTF8.GetString(b);
@@ -61,6 +63,7 @@ namespace Lang.Php.Test.Tests
                 catch (Exception e)
                 {
                     Save(translatedCode, shortFilename);
+                    Console.WriteLine(e.Message + "\r\n" + e.StackTrace);
                     throw;
                 }
             }
