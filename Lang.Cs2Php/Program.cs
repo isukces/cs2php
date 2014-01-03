@@ -52,8 +52,12 @@ namespace Lang.Cs2Php
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine("Error:");
                 Console.ResetColor();
-                Console.WriteLine("   " + ex.Message + "\r\n");
-                Console.WriteLine("   " + ex.StackTrace + "\r\n");
+                while (ex != null)
+                {
+                    Console.WriteLine("   " + ex.Message + "\r\n");
+                    ex = ex.InnerException;
+                }
+                // Console.WriteLine("   " + ex.StackTrace + "\r\n");
                 if (showUsage)
                     Usage();
 
