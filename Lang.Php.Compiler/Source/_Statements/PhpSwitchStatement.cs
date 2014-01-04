@@ -31,7 +31,9 @@ namespace Lang.Php.Compiler.Source
             foreach (var sec in sections)
             {
                 foreach (var l in sec.Labels)
-                    writer.WriteLnF("{0}:", l.IsDefault ? "default" : l.Value.GetPhpCode(style));
+                    writer.WriteLnF("{0}{1}:",
+                        l.IsDefault ? "" : "case ",
+                        l.IsDefault ? "default" : l.Value.GetPhpCode(style));
                 writer.IncIndent();
                 sec.Statement.Emit(emiter, writer, style);
                 writer.DecIndent();
