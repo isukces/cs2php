@@ -128,4 +128,4 @@ PHP code
     }
 
 
-[![githalytics.com alpha](https://cruel-carlota.pagodabox.com/5c741c4c2b73a11679d2624f45b2cb31 "githalytics.com")](http://githalytics.com/isukces/cs2php)
+[![githalytics.com alpha](https://cruel-carlota.pagodabox.com/d7704be271547041f28d36ce4320701e "githalytics.com")](http://githalytics.com/isukces/cs2php)
