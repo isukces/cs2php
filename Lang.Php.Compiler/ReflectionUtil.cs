@@ -9,7 +9,11 @@ namespace Lang.Php.Compiler
 {
     public class ReflectionUtil
     {
-        public static T GetAttribute<T>(MemberInfo member) where T : Attribute
+        #region Static Methods
+
+        // Public Methods 
+
+        public static T GetAttribute<T>(ICustomAttributeProvider member) where T : Attribute
         {
             var attribute = member.GetCustomAttributes(true).OfType<T>().FirstOrDefault();
             if (attribute != null)
@@ -23,5 +27,7 @@ namespace Lang.Php.Compiler
             throw new Exception(string.Format("Assembly Lang.Php {0} was loaded instead of {1}",
                 loadedAssembly, expectedAssembly));
         }
+
+        #endregion Static Methods
     }
 }
