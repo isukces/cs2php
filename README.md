@@ -127,3 +127,5 @@ PHP code
         mysql_free_result($result);
     }
 
+
+[![githalytics.com alpha](https://cruel-carlota.pagodabox.com/5c741c4c2b73a11679d2624f45b2cb31 "githalytics.com")](http://githalytics.com/isukces/cs2php)
