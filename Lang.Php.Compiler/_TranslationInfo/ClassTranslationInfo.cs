@@ -39,7 +39,7 @@ namespace Lang.Php.Compiler
     property IsArray bool Czy klasa posiada atrybut ARRAY
     smartClassEnd
     */
-
+    
     public partial class ClassTranslationInfo
     {
         #region Constructors
@@ -109,6 +109,7 @@ namespace Lang.Php.Compiler
                     Skip = true;
             }
             #endregion
+ 
             if (type.IsGenericParameter)
                 Skip = true;
         }
@@ -167,12 +168,12 @@ namespace Lang.Php.Compiler
 }
 
 
-// -----:::::##### smartClass embedded code begin #####:::::----- generated 2013-12-06 10:40
+// -----:::::##### smartClass embedded code begin #####:::::----- generated 2014-01-05 09:59
 // File generated automatically ver 2013-07-10 08:43
 // Smartclass.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0c4d5d36fb5eb4ac
 namespace Lang.Php.Compiler
 {
-    public partial class ClassTranslationInfo
+    public partial class ClassTranslationInfo 
     {
         /*
         /// <summary>
@@ -181,7 +182,9 @@ namespace Lang.Php.Compiler
         public ClassTranslationInfo()
         {
         }
+
         Przykłady użycia
+
         implement INotifyPropertyChanged
         implement INotifyPropertyChanged_Passive
         implement ToString ##Type## ##ParsedCode## ##IgnoreNamespace## ##ScriptName## ##IsPage## ##Skip## ##PageMethod## ##ModuleName## ##IncludeModule## ##IsReflected## ##IsArray##
@@ -190,8 +193,6 @@ namespace Lang.Php.Compiler
         implement equals *
         implement equals *, ~exclude1, ~exclude2
         */
-
-
         #region Constants
         /// <summary>
         /// Nazwa własności Type; 
@@ -239,10 +240,8 @@ namespace Lang.Php.Compiler
         public const string PROPERTYNAME_ISARRAY = "IsArray";
         #endregion Constants
 
-
         #region Methods
         #endregion Methods
-
 
         #region Properties
         /// <summary>
@@ -402,5 +401,6 @@ namespace Lang.Php.Compiler
         }
         private bool isArray;
         #endregion Properties
+
     }
 }

@@ -355,7 +355,7 @@ namespace Lang.Php.Compiler.Translator
                         if (tInfo.IsScriptNamePhpEncoded)
                             throw new Exception("Encoded php values are not supported");
                         var rr = new PhpClassFieldAccessExpression();
-                        rr.FieldName = isStatic ? tInfo.ScriptName : PhpVariableExpression.AddDollar(tInfo.ScriptName);
+                        rr.FieldName = tInfo.ScriptName; // : PhpVariableExpression.AddDollar(tInfo.ScriptName);
                         rr.ClassName = state.Principles.GetPhpType(member_declaring_type, true);
                         rr.IsConst = tInfo.Destination == FieldTranslationDestionations.ClassConst;
                         return SimplifyPhpExpression(rr);

@@ -14,6 +14,7 @@ namespace Lang.Php.Compiler.Source
     property ClassName PhpQualifiedName 
     
     property FieldName string 
+    	preprocess while (value.StartsWith("$")) value = value.Substring(1);
     
     property IsConst bool 
     smartClassEnd
@@ -37,7 +38,7 @@ namespace Lang.Php.Compiler.Source
 }
 
 
-// -----:::::##### smartClass embedded code begin #####:::::----- generated 2014-01-03 18:05
+// -----:::::##### smartClass embedded code begin #####:::::----- generated 2014-01-04 15:04
 // File generated automatically ver 2013-07-10 08:43
 // Smartclass.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0c4d5d36fb5eb4ac
 namespace Lang.Php.Compiler.Source
@@ -108,6 +109,7 @@ namespace Lang.Php.Compiler.Source
             set
             {
                 value = (value ?? String.Empty).Trim();
+                while (value.StartsWith("$")) value = value.Substring(1);
                 fieldName = value;
             }
         }

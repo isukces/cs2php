@@ -22,11 +22,39 @@ namespace Lang.Php.Compiler
                 path = path.Replace(TWO_UNIX_SEP, UNIX_SEP);
             return path;
         }
-        public static string MakeWinPath(string path)
+        public enum SeparatorProcessing
         {
-            path = path.Replace(UNIX_SEP, WIN_SEP);
+            NoChange,
+            Append,
+            Remove
+        }
+        public static string MakeWinPath(string path, SeparatorProcessing atBegin = SeparatorProcessing.NoChange, SeparatorProcessing atEnd = SeparatorProcessing.NoChange)
+        {
+            path = (path ?? "").Replace(UNIX_SEP, WIN_SEP);
             while (path.IndexOf(TWO_WIN_SEP) >= 0)
                 path = path.Replace(TWO_WIN_SEP, WIN_SEP);
+            switch (atBegin)
+            {
+                case SeparatorProcessing.Append:
+                    if (!path.StartsWith(WIN_SEP))
+                        path = WIN_SEP + path;
+                    break;
+                case SeparatorProcessing.Remove:
+                    if (path.StartsWith(WIN_SEP))
+                        path = path.Substring(1);
+                    break;
+            }
+            switch (atEnd)
+            {
+                case SeparatorProcessing.Append:
+                    if (!path.EndsWith(WIN_SEP))
+                        path = path + WIN_SEP;
+                    break;
+                case SeparatorProcessing.Remove:
+                    if (path.EndsWith(WIN_SEP))
+                        path = path.Substring(0, path.Length - 1);
+                    break;
+            }
             return path;
         }
 
@@ -56,7 +84,7 @@ namespace Lang.Php.Compiler
             return concat;
         }
 
-       
+
         public static string MakeRelativePath(string path, string relTo)
         {
             Uri fromUri = new Uri(new DirectoryInfo(relTo + WIN_SEP).FullName);

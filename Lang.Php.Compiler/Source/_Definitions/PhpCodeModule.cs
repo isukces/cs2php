@@ -78,7 +78,7 @@ namespace Lang.Php.Compiler.Source
                                 nsManager.Add(c);
                     }
                     if (bottomCode != null)
-                        nsManager.Add(bottomCode);
+                        nsManager.Add(bottomCode.Statements);
                     if (nsManager.Container.Any())
                     {
                         if (nsManager.OnlyOneRootStatement)

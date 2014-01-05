@@ -37,9 +37,11 @@ namespace Lang.Php.Compiler
     
     property ConfigModuleName string 
     	init "cs2php"
+    
+    property DefaultTimezone Timezones? 
     smartClassEnd
     */
-
+    
     public partial class AssemblyTranslationInfo
     {
         #region Static Methods
@@ -54,21 +56,26 @@ namespace Lang.Php.Compiler
             {
                 ati.assembly = assembly;
 
-                var _ModuleIncludeConst = assembly.GetCustomAttribute<ModuleIncludeConstAttribute>();
+                var _ModuleIncludeConst = ReflectionUtil.GetAttribute<ModuleIncludeConstAttribute>(assembly);
                 if (_ModuleIncludeConst != null)
                     ati.IncludePathConstOrVarName = _ModuleIncludeConst.ConstOrVarName;
                 var _RootPath = assembly.GetCustomAttribute<RootPathAttribute>();
                 ati.RootPath = _RootPath == null ? "/" : _RootPath.Path;
-                var _PhpPackageSource = assembly.GetCustomAttribute<PhpPackageSourceAttribute>();
+                var _PhpPackageSource = ReflectionUtil.GetAttribute<PhpPackageSourceAttribute>(assembly);
                 if (_PhpPackageSource != null)
                 {
                     ati.PhpPackageSourceUri = _PhpPackageSource.SourceUri;
                     ati.PhpPackagePathStrip = _PhpPackageSource.StripArchivePath;
                 }
                 {
-                    var _ConfigModule = assembly.GetCustomAttribute<ConfigModuleAttribute>();
+                    var _ConfigModule = ReflectionUtil.GetAttribute<ConfigModuleAttribute>(assembly);
                     if (_ConfigModule != null)
                         ati.ConfigModuleName = _ConfigModule.Name;
+                }
+                {
+                    var _DefaultTimezone = ReflectionUtil.GetAttribute<DefaultTimezoneAttribute>(assembly);
+                    if (_DefaultTimezone != null)
+                        ati.defaultTimezone = _DefaultTimezone.Timezone;
                 }
             }
             ati.libraryName = LibNameFromAssembly(assembly);
@@ -126,12 +133,12 @@ namespace Lang.Php.Compiler
 }
 
 
-// -----:::::##### smartClass embedded code begin #####:::::----- generated 2013-12-06 17:26
+// -----:::::##### smartClass embedded code begin #####:::::----- generated 2014-01-05 09:59
 // File generated automatically ver 2013-07-10 08:43
 // Smartclass.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0c4d5d36fb5eb4ac
 namespace Lang.Php.Compiler
 {
-    public partial class AssemblyTranslationInfo
+    public partial class AssemblyTranslationInfo 
     {
         /*
         /// <summary>
@@ -145,9 +152,9 @@ namespace Lang.Php.Compiler
 
         implement INotifyPropertyChanged
         implement INotifyPropertyChanged_Passive
-        implement ToString ##Assembly## ##LibraryName## ##IncludePathConstOrVarName## ##RootPath## ##PhpPackageSourceUri## ##PhpPackagePathStrip## ##PhpIncludePathExpression## ##ConfigModuleName##
-        implement ToString Assembly=##Assembly##, LibraryName=##LibraryName##, IncludePathConstOrVarName=##IncludePathConstOrVarName##, RootPath=##RootPath##, PhpPackageSourceUri=##PhpPackageSourceUri##, PhpPackagePathStrip=##PhpPackagePathStrip##, PhpIncludePathExpression=##PhpIncludePathExpression##, ConfigModuleName=##ConfigModuleName##
-        implement equals Assembly, LibraryName, IncludePathConstOrVarName, RootPath, PhpPackageSourceUri, PhpPackagePathStrip, PhpIncludePathExpression, ConfigModuleName
+        implement ToString ##Assembly## ##LibraryName## ##IncludePathConstOrVarName## ##RootPath## ##PhpPackageSourceUri## ##PhpPackagePathStrip## ##PhpIncludePathExpression## ##ConfigModuleName## ##DefaultTimezone##
+        implement ToString Assembly=##Assembly##, LibraryName=##LibraryName##, IncludePathConstOrVarName=##IncludePathConstOrVarName##, RootPath=##RootPath##, PhpPackageSourceUri=##PhpPackageSourceUri##, PhpPackagePathStrip=##PhpPackagePathStrip##, PhpIncludePathExpression=##PhpIncludePathExpression##, ConfigModuleName=##ConfigModuleName##, DefaultTimezone=##DefaultTimezone##
+        implement equals Assembly, LibraryName, IncludePathConstOrVarName, RootPath, PhpPackageSourceUri, PhpPackagePathStrip, PhpIncludePathExpression, ConfigModuleName, DefaultTimezone
         implement equals *
         implement equals *, ~exclude1, ~exclude2
         */
@@ -184,6 +191,10 @@ namespace Lang.Php.Compiler
         /// Nazwa własności ConfigModuleName; 
         /// </summary>
         public const string PROPERTYNAME_CONFIGMODULENAME = "ConfigModuleName";
+        /// <summary>
+        /// Nazwa własności DefaultTimezone; 
+        /// </summary>
+        public const string PROPERTYNAME_DEFAULTTIMEZONE = "DefaultTimezone";
         #endregion Constants
 
         #region Methods
@@ -316,6 +327,21 @@ namespace Lang.Php.Compiler
             }
         }
         private string configModuleName = "cs2php";
+        /// <summary>
+        /// 
+        /// </summary>
+        public Timezones? DefaultTimezone
+        {
+            get
+            {
+                return defaultTimezone;
+            }
+            set
+            {
+                defaultTimezone = value;
+            }
+        }
+        private Timezones? defaultTimezone;
         #endregion Properties
 
     }

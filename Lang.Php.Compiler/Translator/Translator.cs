@@ -139,14 +139,33 @@ namespace Lang.Php.Compiler.Translator
                 }
                 #endregion
                 state.Principles.CurrentType = null;
-                #region Wywołanie metody MAIN dla PAGE
+                #region Wywołanie metody defaulttimezone oraz MAIN dla PAGE
                 {
                     if (classTI.IsPage)
                     {
-                        var mti = MethodTranslationInfo.FromMethodInfo(classTI.PageMethod);
-                        PhpMethodCallExpression callMain = new PhpMethodCallExpression(mti.ScriptName);
-                        callMain.ClassName = classTI.ScriptName.MakeAbsolute();
-                        phpModule.BottomCode.Statements.Add(new PhpExpressionStatement(callMain));
+                        #region Timezone
+                        {
+                            var ati = info.GetOrMakeTranslationInfo(info.CurrentAssembly);
+                            if (ati.DefaultTimezone.HasValue)
+                            {
+                                // date_default_timezone_set('America/Los_Angeles');
+                                var a = new PhpValueTranslator(state);
+                                var aa = a.Visit(new ConstValue(ati.DefaultTimezone.Value));
+                                //var arg =  var a = new StatementTranslatorVisitor(state);
+                                PhpMethodCallExpression date_default_timezone_set = new PhpMethodCallExpression("date_default_timezone_set", aa as IPhpValue);
+                                // date_default_timezone_set.ClassName = classTI.ScriptName.MakeAbsolute();
+                                phpModule.BottomCode.Statements.Add(new PhpExpressionStatement(date_default_timezone_set));
+                            }
+                        }
+                        #endregion
+                        #region Wywołanie main
+                        {
+                            var mti = MethodTranslationInfo.FromMethodInfo(classTI.PageMethod);
+                            PhpMethodCallExpression callMain = new PhpMethodCallExpression(mti.ScriptName);
+                            callMain.ClassName = classTI.ScriptName.MakeAbsolute();
+                            phpModule.BottomCode.Statements.Add(new PhpExpressionStatement(callMain));
+                        }
+                        #endregion
                     }
                 }
                 #endregion

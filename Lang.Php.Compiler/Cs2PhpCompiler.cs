@@ -107,8 +107,36 @@ namespace Lang.Php.Compiler
 
                 GreenOk();
                 TranslateAndCreatePHPFiles(info, OutDir);
+                EmitContentFiles(OutDir);
             }
             return result;
+        }
+
+        private void EmitContentFiles(string OutDir)
+        {
+            if (string.IsNullOrEmpty(project.FilePath))
+                return;
+            var p = Cs.Compiler.VSProject.Project.Load(this.project.FilePath);
+            var contentFiles = (from i in p.Items
+                                where i.BuildAction == Cs.Compiler.VSProject.BuildActions.Content
+                                select PathUtil.MakeWinPath(i.Name, PathUtil.SeparatorProcessing.Append)).ToArray();
+            if (!contentFiles.Any())
+                return;
+            var attr = ReflectionUtil.GetAttribute<ResourcesDirectoryAttribute>(compiledAssembly);
+            var srcDir = PathUtil.MakeWinPath(attr == null ? null : attr.Source, PathUtil.SeparatorProcessing.Append, PathUtil.SeparatorProcessing.Append).ToLower();
+            var dstDir = PathUtil.MakeWinPath(attr == null ? null : attr.Destination, PathUtil.SeparatorProcessing.Append, PathUtil.SeparatorProcessing.Append);
+            string projectDir = new FileInfo(project.FilePath).Directory.FullName;
+            foreach (var fileName in contentFiles)
+            {
+                if (!fileName.ToLower().StartsWith(srcDir))
+                    continue;
+                var relDestFilename = dstDir + fileName.Substring(srcDir.Length);
+                var dstFile = Path.Combine(OutDir, relDestFilename.Substring(1));
+                var srcFile = Path.Combine(projectDir, fileName.Substring(1));
+                Console.WriteLine("copy {0} to {1}", fileName, relDestFilename);
+                new FileInfo(dstFile).Directory.Create();
+                File.Copy(srcFile, dstFile, true);
+            }
         }
 
         private string GetRootPath(Assembly CompiledAssembly)

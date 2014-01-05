@@ -175,7 +175,24 @@ namespace Lang.Php.Compiler.Translator.Node
                       null
                   );
             #endregion
+            #region ValidateIp
+            if (fn == "System.String ValidateIp(System.Object, Lang.Php.Filters.IpFlags, Lang.Php.Filters.IpOptions)")
+            {
+                IPhpValue flags = null;
+                if (src.Arguments.Length > 1)
+                    flags = ctx.TranslateValue(src.Arguments[1].MyValue);
+                return Make_FilterVar(
+                     ctx.TranslateValue(src.Arguments[0].MyValue),
+                     FILTER_VALIDATE_IP,
+                     null,
+                     flags);
+                //PhpArrayCreateExpression.MakeKeyValue(
+                //new PhpConstValue("default"), 
+                //ctx.TranslateValue(src.Arguments[1].MyValue)),
+                //ctx.TranslateValue(src.Arguments[1].MyValue)
 
+            }
+            #endregion
             throw new NotImplementedException();
         }
 
@@ -196,6 +213,13 @@ namespace Lang.Php.Compiler.Translator.Node
             get
             {
                 return new PhpConstValue(KnownFilters.FilterValidateBoolean);
+            }
+        }
+        private static IPhpValue FILTER_VALIDATE_IP
+        {
+            get
+            {
+                return new PhpConstValue(KnownFilters.FilterValidateIp);
             }
         }
 
