@@ -27,19 +27,16 @@ namespace Lang.Cs.Compiler.VSProject
     property ReferencedAssemblies List<Assembly> 
     	init #
     
-    property Sources List<string> 
-    	init #
-    
     property Reference List<string> 
-    	init #
-    
-    property CompileFiles List<string> 
     	init #
     
     property ProjectReferences List<ProjectReference> 
     	init #
     
     property PropertyGroups List<PropertyGroup> 
+    	init #
+    
+    property Items List<ProjectItem> 
     	init #
     smartClassEnd
     */
@@ -97,12 +94,21 @@ namespace Lang.Cs.Compiler.VSProject
                     }
                     else if (i.Name == ns + "Compile")
                     {
-                        p.compileFiles.Add((string)i.Attribute("Include"));
+                        var name = (string)i.Attribute("Include");
+                        var pi = new ProjectItem(name, BuildActions.Compile);
+                        p.items.Add(pi);
+
                     }
                     else if (i.Name == ns + "ProjectReference")
                     {
                         var g = ProjectReference.Deserialize(i);
                         p.projectReferences.Add(g);
+                    }
+                    else if (i.Name == ns + "Content")
+                    {
+                        var name = (string)i.Attribute("Include");
+                        var pi = new ProjectItem(name, BuildActions.Content);
+                        p.items.Add(pi);
                     }
                 }
             }
@@ -137,7 +143,7 @@ namespace Lang.Cs.Compiler.VSProject
                 {
 
                     List<string> codeBatchList = new List<string>();
-                    foreach (var i in compileFiles.Distinct())
+                    foreach (var i in items.Where(i => i.BuildAction == BuildActions.Compile).Select(u => u.Name).Distinct())
                     {
                         var fn = Path.Combine(workingDirectory.FullName, i);
                         codeBatchList.Add(File.ReadAllText(fn));
@@ -192,7 +198,7 @@ namespace Lang.Cs.Compiler.VSProject
 }
 
 
-// -----:::::##### smartClass embedded code begin #####:::::----- generated 2013-11-03 10:45
+// -----:::::##### smartClass embedded code begin #####:::::----- generated 2014-01-04 15:48
 // File generated automatically ver 2013-07-10 08:43
 // Smartclass.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0c4d5d36fb5eb4ac
 namespace Lang.Cs.Compiler.VSProject
@@ -206,17 +212,17 @@ namespace Lang.Cs.Compiler.VSProject
         public Project()
         {
         }
+
         Przykłady użycia
+
         implement INotifyPropertyChanged
         implement INotifyPropertyChanged_Passive
-        implement ToString ##WorkingDirectory## ##AssemblyName## ##OutputType## ##ProjectGuid## ##ReferencedAssemblies## ##Sources## ##Reference## ##CompileFiles## ##ProjectReferences## ##PropertyGroups##
-        implement ToString WorkingDirectory=##WorkingDirectory##, AssemblyName=##AssemblyName##, OutputType=##OutputType##, ProjectGuid=##ProjectGuid##, ReferencedAssemblies=##ReferencedAssemblies##, Sources=##Sources##, Reference=##Reference##, CompileFiles=##CompileFiles##, ProjectReferences=##ProjectReferences##, PropertyGroups=##PropertyGroups##
-        implement equals WorkingDirectory, AssemblyName, OutputType, ProjectGuid, ReferencedAssemblies, Sources, Reference, CompileFiles, ProjectReferences, PropertyGroups
+        implement ToString ##WorkingDirectory## ##AssemblyName## ##OutputType## ##ProjectGuid## ##ReferencedAssemblies## ##Reference## ##ProjectReferences## ##PropertyGroups## ##Items##
+        implement ToString WorkingDirectory=##WorkingDirectory##, AssemblyName=##AssemblyName##, OutputType=##OutputType##, ProjectGuid=##ProjectGuid##, ReferencedAssemblies=##ReferencedAssemblies##, Reference=##Reference##, ProjectReferences=##ProjectReferences##, PropertyGroups=##PropertyGroups##, Items=##Items##
+        implement equals WorkingDirectory, AssemblyName, OutputType, ProjectGuid, ReferencedAssemblies, Reference, ProjectReferences, PropertyGroups, Items
         implement equals *
         implement equals *, ~exclude1, ~exclude2
         */
-
-
         #region Constants
         /// <summary>
         /// Nazwa własności WorkingDirectory; 
@@ -239,17 +245,9 @@ namespace Lang.Cs.Compiler.VSProject
         /// </summary>
         public const string PROPERTYNAME_REFERENCEDASSEMBLIES = "ReferencedAssemblies";
         /// <summary>
-        /// Nazwa własności Sources; 
-        /// </summary>
-        public const string PROPERTYNAME_SOURCES = "Sources";
-        /// <summary>
         /// Nazwa własności Reference; 
         /// </summary>
         public const string PROPERTYNAME_REFERENCE = "Reference";
-        /// <summary>
-        /// Nazwa własności CompileFiles; 
-        /// </summary>
-        public const string PROPERTYNAME_COMPILEFILES = "CompileFiles";
         /// <summary>
         /// Nazwa własności ProjectReferences; 
         /// </summary>
@@ -258,12 +256,14 @@ namespace Lang.Cs.Compiler.VSProject
         /// Nazwa własności PropertyGroups; 
         /// </summary>
         public const string PROPERTYNAME_PROPERTYGROUPS = "PropertyGroups";
+        /// <summary>
+        /// Nazwa własności Items; 
+        /// </summary>
+        public const string PROPERTYNAME_ITEMS = "Items";
         #endregion Constants
-
 
         #region Methods
         #endregion Methods
-
 
         #region Properties
         /// <summary>
@@ -346,21 +346,6 @@ namespace Lang.Cs.Compiler.VSProject
         /// <summary>
         /// 
         /// </summary>
-        public List<string> Sources
-        {
-            get
-            {
-                return sources;
-            }
-            set
-            {
-                sources = value;
-            }
-        }
-        private List<string> sources = new List<string>();
-        /// <summary>
-        /// 
-        /// </summary>
         public List<string> Reference
         {
             get
@@ -373,21 +358,6 @@ namespace Lang.Cs.Compiler.VSProject
             }
         }
         private List<string> reference = new List<string>();
-        /// <summary>
-        /// 
-        /// </summary>
-        public List<string> CompileFiles
-        {
-            get
-            {
-                return compileFiles;
-            }
-            set
-            {
-                compileFiles = value;
-            }
-        }
-        private List<string> compileFiles = new List<string>();
         /// <summary>
         /// 
         /// </summary>
@@ -418,6 +388,22 @@ namespace Lang.Cs.Compiler.VSProject
             }
         }
         private List<PropertyGroup> propertyGroups = new List<PropertyGroup>();
+        /// <summary>
+        /// 
+        /// </summary>
+        public List<ProjectItem> Items
+        {
+            get
+            {
+                return items;
+            }
+            set
+            {
+                items = value;
+            }
+        }
+        private List<ProjectItem> items = new List<ProjectItem>();
         #endregion Properties
+
     }
 }

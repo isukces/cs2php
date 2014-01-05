@@ -90,6 +90,7 @@
     <Compile Include="VSProject\Project.cs" />
     <Compile Include="VSProject\ProjectCollection.cs" />
     <Compile Include="VSProject\ProjectItem.cs" />
+    <Compile Include="VSProject\BuildActions.cs" />
     <Compile Include="VSProject\ProjectReference.cs" />
     <Compile Include="VSProject\PropertyGroup.cs" />
     <Compile Include="_ReflectionExtensions.cs" />
