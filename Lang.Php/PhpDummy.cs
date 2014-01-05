@@ -11,22 +11,6 @@ namespace Lang.Php
     [Skip]
     public class PhpDummy
     {
-
-        [DirectCall("imagecreate")]
-        public static Graph.Image imagecreate(int width, int height)
-        {
-            return Graph.Image.Create(width, height);
-        }
-
-        [DirectCall("getimagesize")]
-        public static Graph.ImageInfo GetImageSize(string filename)
-        {
-            // array getimagesize ( string $filename [, array &$imageinfo ] )
-            throw new NotImplementedException();
-        }
-      
-
-
         #region Static Methods
 
         // Public Methods 
@@ -104,6 +88,12 @@ namespace Lang.Php
         public static string date(string format, int? timestamp = null)
         {
             throw new NotImplementedException();
+        }
+
+        [DirectCall("date_default_timezone_set")]
+        public static void date_default_timezone_set(Timezones timezone)
+        {
+
         }
 
         [DirectCall("decbin")]
@@ -245,6 +235,13 @@ namespace Lang.Php
             throw new MockMethodException();
         }
 
+        [DirectCall("getimagesize")]
+        public static Graph.ImageInfo GetImageSize(string filename)
+        {
+            // array getimagesize ( string $filename [, array &$imageinfo ] )
+            throw new NotImplementedException();
+        }
+
         [DirectCall("getrandmax")]
         public static int getrandmax()
         {
@@ -318,6 +315,12 @@ namespace Lang.Php
         {
             //string iconv ( string $in_charset , string $out_charset , string $str )
             throw new NotImplementedException();
+        }
+
+        [DirectCall("imagecreate")]
+        public static Graph.Image imagecreate(int width, int height)
+        {
+            return Graph.Image.Create(width, height);
         }
 
         [DirectCall("include")]

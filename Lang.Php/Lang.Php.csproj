@@ -78,13 +78,16 @@
     <Compile Include="Runtime\PhpCodeValue.cs" />
     <Compile Include="Runtime\RuntimeMySQLiResult.cs" />
     <Compile Include="Runtime\RuntimePhpDirectory.cs" />
+    <Compile Include="_attributes\_assembly\DefaultTimezoneAttribute.cs" />
     <Compile Include="_attributes\_assembly\PhpPackageSourceAttribute.cs" />
     <Compile Include="_attributes\RequireOnceAttribute.cs" />
+    <Compile Include="_attributes\_assembly\ResourcesDirectoryAttribute.cs" />
     <Compile Include="_attributes\_assembly\RootPathAttribute.cs" />
     <Compile Include="_attributes\_assembly\ConfigModuleAttribute.cs" />
     <Compile Include="_DateTime\UnixTimestamp.cs" />
     <Compile Include="_enums\ClassMembers.cs" />
     <Compile Include="_enums\MethodCallStyles.cs" />
+    <Compile Include="_enums\Timezones.cs" />
     <Compile Include="_Files\PhpDirectoryEntry.cs" />
     <Compile Include="_Files\PhpDirectory.cs" />
     <Compile Include="PhpMath.cs" />

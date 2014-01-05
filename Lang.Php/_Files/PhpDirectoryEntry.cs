@@ -24,6 +24,19 @@ namespace Lang.Php
 
         #endregion Constructors
 
+        #region Static Methods
+
+        // Public Methods 
+
+        [DirectCall("is_file")]
+        public static bool PhpIsFile(string filename)
+        {
+            throw new NotImplementedException();
+
+        }
+
+        #endregion Static Methods
+
         #region Properties
 
         internal string _FullName { get; set; }
