@@ -132,6 +132,35 @@ namespace Lang.Cs.Compiler.Visitors
             return new BreakStatement();
         }
 
+        protected override object VisitInterfaceDeclaration(InterfaceDeclarationSyntax node)
+        {
+            var aaa = context.RoslynModel.GetDeclaredSymbol(node);           
+            var name = _Name(node.Identifier);
+            context.ClassNames.Push(name);
+            try
+            {
+                var fulName = state.Context.CurrentNamespace + "." + name;
+                state.CurrentType = context.KnownTypes.Where(i => i.FullName == fulName).FirstOrDefault();
+                try
+                {
+                    var statements1 = Visit(node.Members);
+                    var wrong = statements1.Where(i => !(i is IClassMember)).ToArray();
+                    if (wrong.Any())
+                        throw new Exception(wrong[0].GetType().FullName);
+                    return new InterfaceDeclaration(name, statements1.Cast<IClassMember>().ToArray());
+                }
+                finally
+                {
+                    state.CurrentType = null;
+                }
+            }
+            finally
+            {
+                context.ClassNames.Pop();
+
+            }
+        }
+
         protected override object VisitClassDeclaration(ClassDeclarationSyntax node)
         {
             // MemberDeclarationSyntax
@@ -722,6 +751,7 @@ namespace Lang.Cs.Compiler.Visitors
             return new MethodDeclaration(mi, body);
         }
 
+      
         object[] Visit(IEnumerable<MemberDeclarationSyntax> i)
         {
             List<object> res = new List<object>();

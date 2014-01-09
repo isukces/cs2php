@@ -31,6 +31,7 @@ namespace Lang.Cs.Compiler
 	
 	MakeClass("NamespaceDeclaration", null, "string Name;Nazwa przestrzeni", "INamespaceMember[] Members; Elementy");
 	MakeClass("ClassDeclaration", "INamespaceMember,IClassMember", "string Name;Nazwa klasy", "IClassMember[] Members;Elementy");
+	MakeClass("InterfaceDeclaration", "INamespaceMember,IClassMember", "string Name;Nazwa interfejsu", "IClassMember[] Members;Elementy");
 	MakeClass("FieldDeclaration", "IClassMember",  "LangType Type", "VariableDeclarator[] Items", "Modifiers Modifiers");
 	MakeClass("VariableDeclarator", "", "string Name", "IValue Value", "FieldInfo OptionalFieldInfo");
 

@@ -139,6 +139,30 @@ namespace Lang.Cs.Compiler
       }
       private IClassMember[] members;
     } // end of ClassDeclaration
+    public partial class InterfaceDeclaration : CSharpBase, INamespaceMember,IClassMember {
+      public InterfaceDeclaration(string Name, IClassMember[] Members){
+        this.name = Name;
+        this.members = Members;
+      }
+      /// <summary>
+      /// Nazwa interfejsu
+      /// </summary>
+      public string Name {
+        get {
+          return name;
+        }
+      }
+      private string name;
+      /// <summary>
+      /// Elementy
+      /// </summary>
+      public IClassMember[] Members {
+        get {
+          return members;
+        }
+      }
+      private IClassMember[] members;
+    } // end of InterfaceDeclaration
     public partial class FieldDeclaration : CSharpBase, IClassMember {
       public FieldDeclaration(LangType Type, VariableDeclarator[] Items, Modifiers Modifiers){
         this.type = Type;
@@ -1250,6 +1274,7 @@ public class CSharpBase {
             if (this is ImportNamespace) return CSharpBaseKinds.ImportNamespaceKind;
             if (this is NamespaceDeclaration) return CSharpBaseKinds.NamespaceDeclarationKind;
             if (this is ClassDeclaration) return CSharpBaseKinds.ClassDeclarationKind;
+            if (this is InterfaceDeclaration) return CSharpBaseKinds.InterfaceDeclarationKind;
             if (this is FieldDeclaration) return CSharpBaseKinds.FieldDeclarationKind;
             if (this is VariableDeclarator) return CSharpBaseKinds.VariableDeclaratorKind;
             if (this is CsharpPropertyDeclaration) return CSharpBaseKinds.PropertyDeclarationKind;
@@ -1317,6 +1342,7 @@ public enum CSharpBaseKinds {
     ImportNamespaceKind,
     NamespaceDeclarationKind,
     ClassDeclarationKind,
+    InterfaceDeclarationKind,
     FieldDeclarationKind,
     VariableDeclaratorKind,
     PropertyDeclarationKind,
@@ -1391,6 +1417,8 @@ public class CSharpBaseVisitor<T> {
                     return VisitNamespaceDeclaration(a as NamespaceDeclaration);
                 case CSharpBaseKinds.ClassDeclarationKind:
                     return VisitClassDeclaration(a as ClassDeclaration);
+                case CSharpBaseKinds.InterfaceDeclarationKind:
+                    return VisitInterfaceDeclaration(a as InterfaceDeclaration);
                 case CSharpBaseKinds.FieldDeclarationKind:
                     return VisitFieldDeclaration(a as FieldDeclaration);
                 case CSharpBaseKinds.VariableDeclaratorKind:
@@ -1522,6 +1550,9 @@ public class CSharpBaseVisitor<T> {
         throw new NotSupportedException();
     }
     protected virtual T VisitClassDeclaration(ClassDeclaration src) {
+        throw new NotSupportedException();
+    }
+    protected virtual T VisitInterfaceDeclaration(InterfaceDeclaration src) {
         throw new NotSupportedException();
     }
     protected virtual T VisitFieldDeclaration(FieldDeclaration src) {
