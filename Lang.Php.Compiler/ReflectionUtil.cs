@@ -15,17 +15,25 @@ namespace Lang.Php.Compiler
 
         public static T GetAttribute<T>(ICustomAttributeProvider member) where T : Attribute
         {
-            var attribute = member.GetCustomAttributes(true).OfType<T>().FirstOrDefault();
-            if (attribute != null)
-                return attribute;
+            var attributes = GetAttributes<T>(member);
+            return attributes.FirstOrDefault();
+        }
+
+        public static T[] GetAttributes<T>(ICustomAttributeProvider member) where T : Attribute
+        {
+            var attributes = member.GetCustomAttributes(true).OfType<T>().ToArray();
+            if (attributes != null && attributes.Any())
+                return attributes;
             var fn = typeof(T).FullName;
             var checkAttribute = member.GetCustomAttributes(true).Where(a => a.GetType().FullName == fn).FirstOrDefault();
             if (checkAttribute == null)
-                return null;
+                return new T[0];
             var loadedAssembly = checkAttribute.GetType().Assembly.Location;
             var expectedAssembly = typeof(DirectCallAttribute).Assembly.Location;
-            throw new Exception(string.Format("Assembly Lang.Php {0} was loaded instead of {1}",
-                loadedAssembly, expectedAssembly));
+            var loadedAssemblyVersion = checkAttribute.GetType().Assembly.GetName().Version;
+            var expectedAssemblyVersion = typeof(DirectCallAttribute).Assembly.GetName().Version;
+            throw new Exception(string.Format("Assembly Lang.Php {0} ver {2} has been loaded instead of {1} ver {3}",
+                loadedAssembly, expectedAssembly, loadedAssemblyVersion, expectedAssemblyVersion));
         }
 
         #endregion Static Methods
