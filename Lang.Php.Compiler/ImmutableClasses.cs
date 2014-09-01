@@ -9,29 +9,70 @@ using Lang.Cs.Compiler;
 
 namespace Lang.Php.Compiler
 {
-    public partial class FullClassDeclaration {
-      public FullClassDeclaration(string FullName, ClassDeclaration ClassDeclaration, NamespaceDeclaration NamespaceDeclaration){
-        this.fullName = FullName;
-        this.classDeclaration = ClassDeclaration;
-        this.namespaceDeclaration = NamespaceDeclaration;
-      }
-      public string FullName {
-        get {
-          return fullName;
+    public partial class FullClassDeclaration
+    {
+        public FullClassDeclaration(string FullName, ClassDeclaration ClassDeclaration, NamespaceDeclaration NamespaceDeclaration)
+        {
+            this.fullName = FullName;
+            this.classDeclaration = ClassDeclaration;
+            this.namespaceDeclaration = NamespaceDeclaration;
         }
-      }
-      private string fullName;
-      public ClassDeclaration ClassDeclaration {
-        get {
-          return classDeclaration;
+        public string FullName
+        {
+            get
+            {
+                return fullName;
+            }
         }
-      }
-      private ClassDeclaration classDeclaration;
-      public NamespaceDeclaration NamespaceDeclaration {
-        get {
-          return namespaceDeclaration;
+        private string fullName;
+        public ClassDeclaration ClassDeclaration
+        {
+            get
+            {
+                return classDeclaration;
+            }
         }
-      }
-      private NamespaceDeclaration namespaceDeclaration;
+        private ClassDeclaration classDeclaration;
+        public NamespaceDeclaration NamespaceDeclaration
+        {
+            get
+            {
+                return namespaceDeclaration;
+            }
+        }
+        private NamespaceDeclaration namespaceDeclaration;
     } // end of FullClassDeclaration
+    public partial class FullInterfaceDeclaration
+    {
+        public FullInterfaceDeclaration(string FullName, InterfaceDeclaration ClassDeclaration, NamespaceDeclaration NamespaceDeclaration)
+        {
+            this.fullName = FullName;
+            this.classDeclaration = ClassDeclaration;
+            this.namespaceDeclaration = NamespaceDeclaration;
+        }
+        public string FullName
+        {
+            get
+            {
+                return fullName;
+            }
+        }
+        private string fullName;
+        public InterfaceDeclaration ClassDeclaration
+        {
+            get
+            {
+                return classDeclaration;
+            }
+        }
+        private InterfaceDeclaration classDeclaration;
+        public NamespaceDeclaration NamespaceDeclaration
+        {
+            get
+            {
+                return namespaceDeclaration;
+            }
+        }
+        private NamespaceDeclaration namespaceDeclaration;
+    } // end of FullInterfaceDeclaration
 }

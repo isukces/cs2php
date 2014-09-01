@@ -18,5 +18,6 @@ namespace Lang.Php.Compiler
 <# 
 		 
 	MakeClass("FullClassDeclaration","", "string FullName", "ClassDeclaration ClassDeclaration", "NamespaceDeclaration NamespaceDeclaration");
+	MakeClass("FullInterfaceDeclaration","", "string FullName", "InterfaceDeclaration ClassDeclaration", "NamespaceDeclaration NamespaceDeclaration");
 #>
 }

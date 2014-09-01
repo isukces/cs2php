@@ -1,9 +1,7 @@
-﻿using Roslyn.Compilers.CSharp;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Lang.Cs.Compiler.Visitors
 {
@@ -37,19 +35,10 @@ namespace Lang.Cs.Compiler.Visitors
         protected override Type VisitGenericName(GenericNameSyntax node)
         {
             var symbolInfo = context.RoslynModel.GetSymbolInfo(node);
-            if (symbolInfo.Symbol is TypeSymbol)
-            {
-                var type = context.Roslyn_ResolveType(symbolInfo.Symbol as TypeSymbol);
-                return type;
-            }
-            throw new NotSupportedException();
-
-            //var types = node.TypeArgumentList.Arguments.Select(i => Visit(i)).ToArray();
-            //var gt = _GetType(node.Identifier, types.Length);
-            //var a = gt.MakeGenericType(types);
-            //return a;
-            //// throw new NotImplementedException(string.Format("Method {0} is not supported", "VisitGenericName"));
-            //// return default(T);
+            if (!(symbolInfo.Symbol is ITypeSymbol)) 
+                throw new NotSupportedException();
+            var type = context.Roslyn_ResolveType(symbolInfo.Symbol as ITypeSymbol);
+            return type;
         }
 
         protected override Type VisitIdentifierName(IdentifierNameSyntax node)
@@ -60,11 +49,11 @@ namespace Lang.Cs.Compiler.Visitors
             // wzięte z [FAQ(1)]
             var model = state.Context.RoslynModel;
             var i1 = model.GetTypeInfo(node);
-            TypeSymbol type = i1.Type;
-            var _netType = state.Context.Roslyn_ResolveType(type);
+            ITypeSymbol type = i1.Type;
+            var netType = state.Context.Roslyn_ResolveType(type);
             //var i2 = model.GetSymbolInfo(node); // alternatywnie
             //type = (TypeSymbol)i2.Symbol;
-            return _netType;
+            return netType;
 #else           
             return _GetType(id, 0);
 #endif
@@ -75,7 +64,6 @@ namespace Lang.Cs.Compiler.Visitors
             var t = state.Context.RoslynModel.GetTypeInfo(node);
             var tt = state.Context.Roslyn_ResolveType(t.Type);
             return tt;
-            throw new NotSupportedException();
         }
 
         protected override Type VisitPredefinedType(PredefinedTypeSyntax node)

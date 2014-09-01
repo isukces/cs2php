@@ -1,9 +1,6 @@
-﻿using Roslyn.Compilers.CSharp;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Lang.Cs.Compiler.Visitors
 {
@@ -27,23 +24,33 @@ namespace Lang.Cs.Compiler.Visitors
                 }
             }
         }
-        protected override QualifiedNameVisitor.R VisitQualifiedName(Roslyn.Compilers.CSharp.QualifiedNameSyntax node)
+        protected override R VisitQualifiedName(QualifiedNameSyntax node)
         {
             var a = Visit(node.Left);
             var b = Visit(node.Right);
             if (a.IsGeneric || b.IsGeneric)
                 throw new NotSupportedException();
-            return new R() { BaseName = a.BaseName + "." + b.BaseName };
+            return new R
+            {
+                BaseName = a.BaseName + "." + b.BaseName
+            };
         }
 
-        protected override QualifiedNameVisitor.R VisitIdentifierName(Roslyn.Compilers.CSharp.IdentifierNameSyntax node)
+        protected override R VisitIdentifierName(IdentifierNameSyntax node)
         {
-            return new R() { BaseName = node.Identifier.ValueText };
+            return new R
+            {
+                BaseName = node.Identifier.ValueText
+            };
         }
-        protected override QualifiedNameVisitor.R VisitGenericName(Roslyn.Compilers.CSharp.GenericNameSyntax node)
+        protected override R VisitGenericName(GenericNameSyntax node)
         {
             var bn = node.Identifier.ValueText;
-            return new R() { BaseName = bn, Generics = node.TypeArgumentList.Arguments.ToArray() };
+            return new R
+            {
+                BaseName = bn, 
+                Generics = node.TypeArgumentList.Arguments.ToArray()
+            };
         }
     }
 }

@@ -1,9 +1,9 @@
-﻿using Roslyn.Compilers.CSharp;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Lang.Cs.Compiler
 {
@@ -27,40 +27,41 @@ namespace Lang.Cs.Compiler
 
         public static DeclarationItemDescription Parse(SyntaxNode node)
         {
+            // wywalili  SyntaxKind.DocumentationCommentTrivia
             var documentationCommentTrivia =
                       node.GetLeadingTrivia()
-                      .SingleOrDefault(t => t.Kind == SyntaxKind.DocumentationCommentTrivia);
-            if (documentationCommentTrivia.Kind == SyntaxKind.None)
+                      .SingleOrDefault(t => t.CSharpKind() == (SyntaxKind)0/* SyntaxKind.DocumentationCommentTrivia */);
+            if (documentationCommentTrivia.CSharpKind() == SyntaxKind.None)
                 return null;
-            DeclarationItemDescription result = new DeclarationItemDescription();
+            var result = new DeclarationItemDescription();
             {
                 var doc = (StructuredTriviaSyntax)documentationCommentTrivia.GetStructure();
                 var docChilds = doc.ChildNodes().OfType<XmlElementSyntax>().ToArray();
                 foreach (var child in docChilds)
                 {
-                    XmlNameSyntax t = child.StartTag.Name;
-                    var tt = t.GetText().ToString();
-                    if (tt == "summary")
+                    var xmlNameSyntax = child.StartTag.Name;
+                    var text = xmlNameSyntax.GetText().ToString();
+                    switch (text)
                     {
-                        result.Summary = GetText(child);
-                    }
-                    else if (tt == "param")
-                    {
-                        XmlAttributeSyntax a = child.StartTag.Attributes.Where(i => i.Name.ToString() == "name").SingleOrDefault();
-                        if (a != null)
+                        case "summary":
+                            result.Summary = GetText(child);
+                            break;
+                        case "param":
                         {
-                            var name = a.Name.ToString();
+                            var xmlAttributeSyntax = child.StartTag.Attributes.SingleOrDefault(i => i.Name.ToString() == "name");
+                            if (xmlAttributeSyntax == null) continue;
+                            var name = xmlAttributeSyntax.Name.ToString();
                             var p = GetText(child);
                             if (p != "")
                                 result.Parameters[name] = p;
                         }
+                            break;
+                        case "returns":
+                            result.Returns = GetText(child);
+                            break;
+                        default:
+                            throw new NotSupportedException();
                     }
-                    else if (tt == "returns")
-                    {
-                        result.Returns = GetText(child);
-                    }
-                    else
-                        throw new NotSupportedException();
                 }
             }
             return result;
@@ -68,13 +69,14 @@ namespace Lang.Cs.Compiler
 
         private static string GetText(XmlElementSyntax child)
         {
-            List<string> lines = new List<string>();
+            var lines = new List<string>();
             foreach (var textSyntax in child.Content.OfType<XmlTextSyntax>())
             {
-                var lines2 = textSyntax.GetText().Lines
-                    .Select(ii => ii.ToString().TrimStart())
-                    .Select(ii => ii.StartsWith("///") ? ii.Substring(3).TrimStart() : ii)
-                    .Where(ii => ii.Trim() != "").ToArray();
+                var lines2 = from textLine in textSyntax.GetText().Lines
+                    let line = textLine.ToString().TrimStart()
+                    let text = (line.StartsWith("///") ? line.Substring(3).TrimStart() : line).Trim()
+                    where !string.IsNullOrEmpty(text)
+                    select text;
                 lines.AddRange(lines2);
             }
             var joined = string.Join("\r\n", lines);

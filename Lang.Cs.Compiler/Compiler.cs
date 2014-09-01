@@ -1,12 +1,11 @@
-﻿using Lang.Cs.Compiler.Visitors;
-using Roslyn.Compilers.CSharp;
+﻿using System.IO;
+using Lang.Cs.Compiler.Visitors;
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Lang.Cs.Compiler
 {
@@ -29,11 +28,9 @@ namespace Lang.Cs.Compiler
 
         public Compiler(bool addCommonAssemblies)
         {
-            if (addCommonAssemblies)
-            {
-                referencedAssemblies.Add(typeof(System.String).Assembly);
-                referencedAssemblies.Add(typeof(List<string>).Assembly);
-            }
+            if (!addCommonAssemblies) return;
+            referencedAssemblies.Add(typeof(System.String).Assembly);
+            referencedAssemblies.Add(typeof(List<string>).Assembly);
         }
 
 		#endregion Constructors 
@@ -55,14 +52,14 @@ namespace Lang.Cs.Compiler
         {
             var availableParameterCount = givenArgumentsTypes.Length;
             var lastParamIdx = parameters.Length - 1;
-            for (int idx = 0; idx < availableParameterCount; idx++)
+            for (var idx = 0; idx < availableParameterCount; idx++)
             {
                 Type given, required;
                 {
                     given = givenArgumentsTypes[idx];
-                    int paramIdx = Math.Min(isExtensionMethod ? idx + 1 : idx, lastParamIdx);
+                    var paramIdx = Math.Min(isExtensionMethod ? idx + 1 : idx, lastParamIdx);
                     required = parameters[paramIdx].ParameterType;
-                    if (lastParameterAsSequence && paramIdx == lastParamIdx && lastParameterAsSequence)
+                    if (lastParameterAsSequence && paramIdx == lastParamIdx)
                     {
                         if (required.IsArray)
                             required = required.GetElementType();
@@ -84,23 +81,26 @@ namespace Lang.Cs.Compiler
 
         public CompileResult[] Compile()
         {
-            List<CompileResult> a = new List<CompileResult>(sources.Count);
+            var compileResults = new List<CompileResult>(sources.Count);
             foreach (var i in sources)
-                a.Add(Compile(i));
-            return a.ToArray();
+                compileResults.Add(Compile(i));
+            return compileResults.ToArray();
         }
  
 		// Private Methods 
 
         CompileResult Compile(string filename)
         {
-            CompileState compileState = new CompileState();
-            LangVisitor v = new LangVisitor(compileState);
-            v.ThrowNotImplementedException = true;
+            var compileState = new CompileState();
+            var langVisitor = new LangVisitor(compileState)
+            {
+                throwNotImplementedException = true
+            };
             compileState.Context.KnownTypes = CompileState.GetAllTypes(referencedAssemblies);
-            SyntaxTree tree = SyntaxTree.ParseFile(filename);
-            CompilationUnitSyntax root = (CompilationUnitSyntax)tree.GetRoot();
-            var x = v.Visit(root) as CompilationUnit;
+            SyntaxTree tree = SyntaxFactory.ParseSyntaxTree(File.ReadAllText(filename));
+            // .ParseFile(filename);
+            var root = (CompilationUnitSyntax)tree.GetRoot();
+            var x = langVisitor.Visit(root) as CompilationUnit;
             return new CompileResult(filename, x);
 
         }

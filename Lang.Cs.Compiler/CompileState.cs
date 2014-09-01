@@ -3,8 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Lang.Cs.Compiler
 {
@@ -19,7 +17,7 @@ namespace Lang.Cs.Compiler
     	init #
     smartClassEnd
     */
-
+    
     public partial class CompileState
     {
 		#region Static Methods 
@@ -29,8 +27,8 @@ namespace Lang.Cs.Compiler
         public static Type[] GetAllTypes(IEnumerable<Assembly> assemblies)
         {
             assemblies = assemblies.Distinct().ToArray();
-            List<Type> result = new List<Type>();
-            foreach (Assembly assembly in assemblies)
+            var result = new List<Type>();
+            foreach (var assembly in assemblies)
                 GetTypesX(assembly, result);
             return result.Distinct().ToArray();
         }
@@ -42,7 +40,7 @@ namespace Lang.Cs.Compiler
                 GetTypesX(type, addTo);
         }
 
-        static void GetTypesX(Type a, List<Type> addTo)
+        private static void GetTypesX(Type a, List<Type> addTo)
         {
             if (addTo.Contains(a))
                 return;
@@ -54,31 +52,30 @@ namespace Lang.Cs.Compiler
                 foreach (var i in tmp)
                     GetTypesX(i, addTo);
             }
-            var mm = a.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static);
+            var mm =
+                a.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static);
             var mm1 = mm.Where(i => i.IsGenericMethod).ToArray();
-            if (mm1.Any())
-            {
-                foreach (var i in mm1)
-                {
-                    var h = i.GetGenericArguments();
-                    foreach (var j in h)
-                        GetTypesX(j, addTo);
-                }
-            }
+            if (!mm1.Any()) return;
 
+            var enumerableTypes = from i in mm1
+                let types = i.GetGenericArguments()
+                from type in types
+                select type;
+            foreach (var type in enumerableTypes)
+                GetTypesX(type, addTo);
         }
 
-		#endregion Static Methods 
+        #endregion Static Methods 
     }
 }
 
 
-// -----:::::##### smartClass embedded code begin #####:::::----- generated 2013-11-04 09:14
+// -----:::::##### smartClass embedded code begin #####:::::----- generated 2014-09-01 23:24
 // File generated automatically ver 2013-07-10 08:43
 // Smartclass.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0c4d5d36fb5eb4ac
 namespace Lang.Cs.Compiler
 {
-    public partial class CompileState
+    public partial class CompileState 
     {
         /*
         /// <summary>
@@ -87,7 +84,9 @@ namespace Lang.Cs.Compiler
         public CompileState()
         {
         }
+
         Przykłady użycia
+
         implement INotifyPropertyChanged
         implement INotifyPropertyChanged_Passive
         implement ToString ##CurrentType## ##Context##
@@ -96,23 +95,19 @@ namespace Lang.Cs.Compiler
         implement equals *
         implement equals *, ~exclude1, ~exclude2
         */
-
-
         #region Constants
         /// <summary>
         /// Nazwa własności CurrentType; 
         /// </summary>
-        public const string PROPERTYNAME_CURRENTTYPE = "CurrentType";
+        public const string PropertyNameCurrentType = "CurrentType";
         /// <summary>
         /// Nazwa własności Context; 
         /// </summary>
-        public const string PROPERTYNAME_CONTEXT = "Context";
+        public const string PropertyNameContext = "Context";
         #endregion Constants
-
 
         #region Methods
         #endregion Methods
-
 
         #region Properties
         /// <summary>
@@ -122,14 +117,14 @@ namespace Lang.Cs.Compiler
         {
             get
             {
-                return currentType;
+                return _currentType;
             }
             set
             {
-                currentType = value;
+                _currentType = value;
             }
         }
-        private Type currentType;
+        private Type _currentType;
         /// <summary>
         /// 
         /// </summary>
@@ -137,14 +132,15 @@ namespace Lang.Cs.Compiler
         {
             get
             {
-                return context;
+                return _context;
             }
             set
             {
-                context = value;
+                _context = value;
             }
         }
-        private LangParseContext context = new LangParseContext();
+        private LangParseContext _context = new LangParseContext();
         #endregion Properties
+
     }
 }

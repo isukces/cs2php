@@ -1,25 +1,21 @@
-﻿using Roslyn.Compilers.CSharp;
+﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Lang.Cs.Compiler.Visitors
 {
     public class CodeVisitor<T>
     {
 	    public LangParseContext context = new LangParseContext();
-        public bool ThrowNotImplementedException = true;
+        public bool throwNotImplementedException = true;
 
         public virtual T Visit(SyntaxNode node)
         {
 			if (node == null)
 				return VisitNull();
-            switch (node.Kind)
+            switch (node.CSharpKind())
             {
-                case SyntaxKind.DocumentationCommentTrivia:
-                      return VisitDocumentationCommentTrivia(node as DocumentationCommentTriviaSyntax);
                 case SyntaxKind.IfDirectiveTrivia:
                       return VisitIfDirectiveTrivia(node as IfDirectiveTriviaSyntax);
                 case SyntaxKind.ElifDirectiveTrivia:
@@ -58,8 +54,6 @@ namespace Lang.Cs.Compiler.Visitors
                       return VisitXmlElementEndTag(node as XmlElementEndTagSyntax);
                 case SyntaxKind.XmlEmptyElement:
                       return VisitXmlEmptyElement(node as XmlEmptyElementSyntax);
-                case SyntaxKind.XmlAttribute:
-                      return VisitXmlAttribute(node as XmlAttributeSyntax);
                 case SyntaxKind.XmlName:
                       return VisitXmlName(node as XmlNameSyntax);
                 case SyntaxKind.XmlPrefix:
@@ -124,8 +118,8 @@ namespace Lang.Cs.Compiler.Visitors
                       return VisitStackAllocArrayCreationExpression(node as StackAllocArrayCreationExpressionSyntax);
                 case SyntaxKind.OmittedArraySizeExpression:
                       return VisitOmittedArraySizeExpression(node as OmittedArraySizeExpressionSyntax);
-                case SyntaxKind.MemberAccessExpression:
-                      return VisitMemberAccessExpression(node as MemberAccessExpressionSyntax);
+                case SyntaxKind.SimpleMemberAccessExpression:
+                      return VisitSimpleMemberAccessExpression(node as MemberAccessExpressionSyntax);
                 case SyntaxKind.ThisExpression:
                       return VisitThisExpression(node as ThisExpressionSyntax);
                 case SyntaxKind.BaseExpression:
@@ -294,8 +288,6 @@ namespace Lang.Cs.Compiler.Visitors
                       return VisitSetAccessorDeclaration(node as AccessorDeclarationSyntax);
                 case SyntaxKind.DivideExpression:
                       return VisitDivideExpression(node as BinaryExpressionSyntax);
-                case SyntaxKind.AssignExpression:
-                      return VisitAssignExpression(node as BinaryExpressionSyntax);
                 case SyntaxKind.AddExpression:
                       return VisitAddExpression(node as BinaryExpressionSyntax);
                 case SyntaxKind.FalseLiteralExpression:
@@ -312,22 +304,16 @@ namespace Lang.Cs.Compiler.Visitors
                       return VisitPostIncrementExpression(node as PostfixUnaryExpressionSyntax);
                 case SyntaxKind.GreaterThanExpression:
                       return VisitGreaterThanExpression(node as BinaryExpressionSyntax);
-                case SyntaxKind.NegateExpression:
-                      return VisitNegateExpression(node as PrefixUnaryExpressionSyntax);
                 case SyntaxKind.NullLiteralExpression:
                       return VisitNullLiteralExpression(node as LiteralExpressionSyntax);
                 case SyntaxKind.LogicalAndExpression:
                       return VisitLogicalAndExpression(node as BinaryExpressionSyntax);
-                case SyntaxKind.AddAssignExpression:
-                      return VisitAddAssignExpression(node as BinaryExpressionSyntax);
                 case SyntaxKind.AsExpression:
                       return VisitAsExpression(node as BinaryExpressionSyntax);
                 case SyntaxKind.LogicalNotExpression:
                       return VisitLogicalNotExpression(node as PrefixUnaryExpressionSyntax);
                 case SyntaxKind.SubtractExpression:
                       return VisitSubtractExpression(node as BinaryExpressionSyntax);
-                case SyntaxKind.SubtractAssignExpression:
-                      return VisitSubtractAssignExpression(node as BinaryExpressionSyntax);
                 case SyntaxKind.GreaterThanOrEqualExpression:
                       return VisitGreaterThanOrEqualExpression(node as BinaryExpressionSyntax);
                 case SyntaxKind.LessThanOrEqualExpression:
@@ -352,8 +338,6 @@ namespace Lang.Cs.Compiler.Visitors
                       return VisitArrayInitializerExpression(node as InitializerExpressionSyntax);
                 case SyntaxKind.BitwiseAndExpression:
                       return VisitBitwiseAndExpression(node as BinaryExpressionSyntax);
-                case SyntaxKind.MultiplyAssignExpression:
-                      return VisitMultiplyAssignExpression(node as BinaryExpressionSyntax);
                 case SyntaxKind.CaseSwitchLabel:
                       return VisitCaseSwitchLabel(node as SwitchLabelSyntax);
                 case SyntaxKind.DefaultSwitchLabel:
@@ -373,1262 +357,1213 @@ namespace Lang.Cs.Compiler.Visitors
                 case SyntaxKind.GenericName:
                       return VisitGenericName(node as GenericNameSyntax);
                 case SyntaxKind.ForEachStatement:
-                      return VisitForEachStatement(node as Roslyn.Compilers.CSharp.ForEachStatementSyntax);
-                default: throw new NotSupportedException(node.Kind.ToString() + "," + node.GetType().Name);
+                      return VisitForEachStatement(node as ForEachStatementSyntax);
+                default: throw new NotSupportedException(node.CSharpKind().ToString() + "," + node.GetType().Name);
             }
         }
 
 		protected virtual T VisitNull()
         {
-            if (ThrowNotImplementedException)
+            if (throwNotImplementedException)
                 throw new NotImplementedException(string.Format("Method {0} is not supported", "VisitXmlAttribute"));
             return default(T);
         }
 
             
-        protected virtual T VisitDocumentationCommentTrivia(DocumentationCommentTriviaSyntax node)
-        {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitDocumentationCommentTrivia", this.GetType().FullName));
-            return default(T);
-        }
-
         protected virtual T VisitIfDirectiveTrivia(IfDirectiveTriviaSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitIfDirectiveTrivia", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitIfDirectiveTrivia", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitElifDirectiveTrivia(ElifDirectiveTriviaSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitElifDirectiveTrivia", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitElifDirectiveTrivia", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitElseDirectiveTrivia(ElseDirectiveTriviaSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitElseDirectiveTrivia", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitElseDirectiveTrivia", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitEndIfDirectiveTrivia(EndIfDirectiveTriviaSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitEndIfDirectiveTrivia", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitEndIfDirectiveTrivia", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitRegionDirectiveTrivia(RegionDirectiveTriviaSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitRegionDirectiveTrivia", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitRegionDirectiveTrivia", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitEndRegionDirectiveTrivia(EndRegionDirectiveTriviaSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitEndRegionDirectiveTrivia", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitEndRegionDirectiveTrivia", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitDefineDirectiveTrivia(DefineDirectiveTriviaSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitDefineDirectiveTrivia", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitDefineDirectiveTrivia", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitUndefDirectiveTrivia(UndefDirectiveTriviaSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitUndefDirectiveTrivia", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitUndefDirectiveTrivia", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitErrorDirectiveTrivia(ErrorDirectiveTriviaSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitErrorDirectiveTrivia", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitErrorDirectiveTrivia", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitWarningDirectiveTrivia(WarningDirectiveTriviaSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitWarningDirectiveTrivia", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitWarningDirectiveTrivia", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitLineDirectiveTrivia(LineDirectiveTriviaSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitLineDirectiveTrivia", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitLineDirectiveTrivia", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitPragmaWarningDirectiveTrivia(PragmaWarningDirectiveTriviaSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitPragmaWarningDirectiveTrivia", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitPragmaWarningDirectiveTrivia", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitPragmaChecksumDirectiveTrivia(PragmaChecksumDirectiveTriviaSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitPragmaChecksumDirectiveTrivia", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitPragmaChecksumDirectiveTrivia", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitReferenceDirectiveTrivia(ReferenceDirectiveTriviaSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitReferenceDirectiveTrivia", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitReferenceDirectiveTrivia", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitBadDirectiveTrivia(BadDirectiveTriviaSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitBadDirectiveTrivia", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitBadDirectiveTrivia", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitSkippedTokensTrivia(SkippedTokensTriviaSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitSkippedTokensTrivia", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitSkippedTokensTrivia", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitXmlElementStartTag(XmlElementStartTagSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitXmlElementStartTag", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitXmlElementStartTag", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitXmlElementEndTag(XmlElementEndTagSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitXmlElementEndTag", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitXmlElementEndTag", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitXmlEmptyElement(XmlEmptyElementSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitXmlEmptyElement", this.GetType().FullName));
-            return default(T);
-        }
-
-        protected virtual T VisitXmlAttribute(XmlAttributeSyntax node)
-        {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitXmlAttribute", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitXmlEmptyElement", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitXmlName(XmlNameSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitXmlName", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitXmlName", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitXmlPrefix(XmlPrefixSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitXmlPrefix", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitXmlPrefix", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitXmlText(XmlTextSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitXmlText", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitXmlText", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitXmlCDataSection(XmlCDataSectionSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitXmlCDataSection", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitXmlCDataSection", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitXmlComment(XmlCommentSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitXmlComment", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitXmlComment", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitXmlProcessingInstruction(XmlProcessingInstructionSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitXmlProcessingInstruction", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitXmlProcessingInstruction", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitIdentifierName(IdentifierNameSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitIdentifierName", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitIdentifierName", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitQualifiedName(QualifiedNameSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitQualifiedName", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitQualifiedName", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitTypeArgumentList(TypeArgumentListSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitTypeArgumentList", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitTypeArgumentList", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitAliasQualifiedName(AliasQualifiedNameSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitAliasQualifiedName", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitAliasQualifiedName", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitPredefinedType(PredefinedTypeSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitPredefinedType", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitPredefinedType", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitArrayRankSpecifier(ArrayRankSpecifierSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitArrayRankSpecifier", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitArrayRankSpecifier", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitNullableType(NullableTypeSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitNullableType", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitNullableType", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitOmittedTypeArgument(OmittedTypeArgumentSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitOmittedTypeArgument", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitOmittedTypeArgument", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitParenthesizedExpression(ParenthesizedExpressionSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitParenthesizedExpression", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitParenthesizedExpression", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitConditionalExpression(ConditionalExpressionSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitConditionalExpression", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitConditionalExpression", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitInvocationExpression(InvocationExpressionSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitInvocationExpression", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitInvocationExpression", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitElementAccessExpression(ElementAccessExpressionSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitElementAccessExpression", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitElementAccessExpression", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitArgumentList(ArgumentListSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitArgumentList", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitArgumentList", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitBracketedArgumentList(BracketedArgumentListSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitBracketedArgumentList", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitBracketedArgumentList", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitNameColon(NameColonSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitNameColon", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitNameColon", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitCastExpression(CastExpressionSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitCastExpression", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitCastExpression", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitAnonymousMethodExpression(AnonymousMethodExpressionSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitAnonymousMethodExpression", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitAnonymousMethodExpression", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitSimpleLambdaExpression(SimpleLambdaExpressionSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitSimpleLambdaExpression", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitSimpleLambdaExpression", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitParenthesizedLambdaExpression(ParenthesizedLambdaExpressionSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitParenthesizedLambdaExpression", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitParenthesizedLambdaExpression", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitAnonymousObjectMemberDeclarator(AnonymousObjectMemberDeclaratorSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitAnonymousObjectMemberDeclarator", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitAnonymousObjectMemberDeclarator", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitObjectCreationExpression(ObjectCreationExpressionSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitObjectCreationExpression", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitObjectCreationExpression", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitAnonymousObjectCreationExpression(AnonymousObjectCreationExpressionSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitAnonymousObjectCreationExpression", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitAnonymousObjectCreationExpression", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitArrayCreationExpression(ArrayCreationExpressionSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitArrayCreationExpression", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitArrayCreationExpression", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitImplicitArrayCreationExpression(ImplicitArrayCreationExpressionSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitImplicitArrayCreationExpression", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitImplicitArrayCreationExpression", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitStackAllocArrayCreationExpression(StackAllocArrayCreationExpressionSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitStackAllocArrayCreationExpression", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitStackAllocArrayCreationExpression", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitOmittedArraySizeExpression(OmittedArraySizeExpressionSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitOmittedArraySizeExpression", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitOmittedArraySizeExpression", GetType().FullName));
             return default(T);
         }
 
-        protected virtual T VisitMemberAccessExpression(MemberAccessExpressionSyntax node)
+        protected virtual T VisitSimpleMemberAccessExpression(MemberAccessExpressionSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitMemberAccessExpression", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitSimpleMemberAccessExpression", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitThisExpression(ThisExpressionSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitThisExpression", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitThisExpression", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitBaseExpression(BaseExpressionSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitBaseExpression", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitBaseExpression", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitTypeOfExpression(TypeOfExpressionSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitTypeOfExpression", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitTypeOfExpression", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitSizeOfExpression(SizeOfExpressionSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitSizeOfExpression", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitSizeOfExpression", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitCheckedExpression(CheckedExpressionSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitCheckedExpression", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitCheckedExpression", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitDefaultExpression(DefaultExpressionSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitDefaultExpression", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitDefaultExpression", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitMakeRefExpression(MakeRefExpressionSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitMakeRefExpression", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitMakeRefExpression", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitRefValueExpression(RefValueExpressionSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitRefValueExpression", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitRefValueExpression", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitRefTypeExpression(RefTypeExpressionSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitRefTypeExpression", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitRefTypeExpression", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitQueryExpression(QueryExpressionSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitQueryExpression", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitQueryExpression", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitQueryBody(QueryBodySyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitQueryBody", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitQueryBody", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitFromClause(FromClauseSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitFromClause", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitFromClause", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitLetClause(LetClauseSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitLetClause", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitLetClause", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitJoinClause(JoinClauseSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitJoinClause", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitJoinClause", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitJoinIntoClause(JoinIntoClauseSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitJoinIntoClause", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitJoinIntoClause", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitWhereClause(WhereClauseSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitWhereClause", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitWhereClause", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitOrderByClause(OrderByClauseSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitOrderByClause", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitOrderByClause", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitSelectClause(SelectClauseSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitSelectClause", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitSelectClause", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitGroupClause(GroupClauseSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitGroupClause", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitGroupClause", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitQueryContinuation(QueryContinuationSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitQueryContinuation", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitQueryContinuation", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitLocalDeclarationStatement(LocalDeclarationStatementSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitLocalDeclarationStatement", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitLocalDeclarationStatement", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitVariableDeclaration(VariableDeclarationSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitVariableDeclaration", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitVariableDeclaration", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitVariableDeclarator(VariableDeclaratorSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitVariableDeclarator", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitVariableDeclarator", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitEqualsValueClause(EqualsValueClauseSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitEqualsValueClause", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitEqualsValueClause", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitExpressionStatement(ExpressionStatementSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitExpressionStatement", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitExpressionStatement", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitEmptyStatement(EmptyStatementSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitEmptyStatement", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitEmptyStatement", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitLabeledStatement(LabeledStatementSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitLabeledStatement", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitLabeledStatement", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitGotoStatement(GotoStatementSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitGotoStatement", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitGotoStatement", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitBreakStatement(BreakStatementSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitBreakStatement", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitBreakStatement", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitContinueStatement(ContinueStatementSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitContinueStatement", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitContinueStatement", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitReturnStatement(ReturnStatementSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitReturnStatement", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitReturnStatement", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitThrowStatement(ThrowStatementSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitThrowStatement", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitThrowStatement", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitWhileStatement(WhileStatementSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitWhileStatement", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitWhileStatement", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitDoStatement(DoStatementSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitDoStatement", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitDoStatement", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitForStatement(ForStatementSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitForStatement", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitForStatement", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitCheckedStatement(CheckedStatementSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitCheckedStatement", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitCheckedStatement", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitUnsafeStatement(UnsafeStatementSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitUnsafeStatement", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitUnsafeStatement", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitLockStatement(LockStatementSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitLockStatement", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitLockStatement", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitIfStatement(IfStatementSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitIfStatement", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitIfStatement", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitElseClause(ElseClauseSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitElseClause", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitElseClause", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitSwitchStatement(SwitchStatementSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitSwitchStatement", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitSwitchStatement", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitSwitchSection(SwitchSectionSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitSwitchSection", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitSwitchSection", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitTryStatement(TryStatementSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitTryStatement", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitTryStatement", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitCatchClause(CatchClauseSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitCatchClause", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitCatchClause", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitCatchDeclaration(CatchDeclarationSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitCatchDeclaration", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitCatchDeclaration", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitFinallyClause(FinallyClauseSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitFinallyClause", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitFinallyClause", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitCompilationUnit(CompilationUnitSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitCompilationUnit", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitCompilationUnit", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitGlobalStatement(GlobalStatementSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitGlobalStatement", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitGlobalStatement", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitNamespaceDeclaration(NamespaceDeclarationSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitNamespaceDeclaration", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitNamespaceDeclaration", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitUsingDirective(UsingDirectiveSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitUsingDirective", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitUsingDirective", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitExternAliasDirective(ExternAliasDirectiveSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitExternAliasDirective", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitExternAliasDirective", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitAttributeList(AttributeListSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitAttributeList", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitAttributeList", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitAttributeTargetSpecifier(AttributeTargetSpecifierSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitAttributeTargetSpecifier", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitAttributeTargetSpecifier", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitAttributeArgumentList(AttributeArgumentListSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitAttributeArgumentList", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitAttributeArgumentList", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitNameEquals(NameEqualsSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitNameEquals", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitNameEquals", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitClassDeclaration(ClassDeclarationSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitClassDeclaration", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitClassDeclaration", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitStructDeclaration(StructDeclarationSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitStructDeclaration", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitStructDeclaration", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitInterfaceDeclaration(InterfaceDeclarationSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitInterfaceDeclaration", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitInterfaceDeclaration", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitEnumDeclaration(EnumDeclarationSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitEnumDeclaration", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitEnumDeclaration", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitDelegateDeclaration(DelegateDeclarationSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitDelegateDeclaration", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitDelegateDeclaration", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitBaseList(BaseListSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitBaseList", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitBaseList", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitConstructorConstraint(ConstructorConstraintSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitConstructorConstraint", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitConstructorConstraint", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitTypeConstraint(TypeConstraintSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitTypeConstraint", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitTypeConstraint", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitExplicitInterfaceSpecifier(ExplicitInterfaceSpecifierSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitExplicitInterfaceSpecifier", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitExplicitInterfaceSpecifier", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitEnumMemberDeclaration(EnumMemberDeclarationSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitEnumMemberDeclaration", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitEnumMemberDeclaration", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitFieldDeclaration(FieldDeclarationSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitFieldDeclaration", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitFieldDeclaration", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitEventFieldDeclaration(EventFieldDeclarationSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitEventFieldDeclaration", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitEventFieldDeclaration", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitMethodDeclaration(MethodDeclarationSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitMethodDeclaration", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitMethodDeclaration", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitOperatorDeclaration(OperatorDeclarationSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitOperatorDeclaration", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitOperatorDeclaration", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitConversionOperatorDeclaration(ConversionOperatorDeclarationSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitConversionOperatorDeclaration", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitConversionOperatorDeclaration", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitConstructorDeclaration(ConstructorDeclarationSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitConstructorDeclaration", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitConstructorDeclaration", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitDestructorDeclaration(DestructorDeclarationSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitDestructorDeclaration", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitDestructorDeclaration", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitPropertyDeclaration(PropertyDeclarationSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitPropertyDeclaration", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitPropertyDeclaration", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitEventDeclaration(EventDeclarationSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitEventDeclaration", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitEventDeclaration", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitIndexerDeclaration(IndexerDeclarationSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitIndexerDeclaration", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitIndexerDeclaration", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitAccessorList(AccessorListSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitAccessorList", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitAccessorList", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitParameterList(ParameterListSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitParameterList", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitParameterList", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitBracketedParameterList(BracketedParameterListSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitBracketedParameterList", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitBracketedParameterList", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitTypeParameterList(TypeParameterListSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitTypeParameterList", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitTypeParameterList", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitIncompleteMember(IncompleteMemberSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitIncompleteMember", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitIncompleteMember", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitEqualsExpression(BinaryExpressionSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitEqualsExpression", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitEqualsExpression", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitGetAccessorDeclaration(AccessorDeclarationSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitGetAccessorDeclaration", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitGetAccessorDeclaration", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitSetAccessorDeclaration(AccessorDeclarationSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitSetAccessorDeclaration", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitSetAccessorDeclaration", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitDivideExpression(BinaryExpressionSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitDivideExpression", this.GetType().FullName));
-            return default(T);
-        }
-
-        protected virtual T VisitAssignExpression(BinaryExpressionSyntax node)
-        {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitAssignExpression", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitDivideExpression", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitAddExpression(BinaryExpressionSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitAddExpression", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitAddExpression", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitFalseLiteralExpression(LiteralExpressionSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitFalseLiteralExpression", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitFalseLiteralExpression", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitCharacterLiteralExpression(LiteralExpressionSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitCharacterLiteralExpression", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitCharacterLiteralExpression", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitMultiplyExpression(BinaryExpressionSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitMultiplyExpression", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitMultiplyExpression", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitTrueLiteralExpression(LiteralExpressionSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitTrueLiteralExpression", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitTrueLiteralExpression", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitLessThanExpression(BinaryExpressionSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitLessThanExpression", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitLessThanExpression", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitPostIncrementExpression(PostfixUnaryExpressionSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitPostIncrementExpression", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitPostIncrementExpression", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitGreaterThanExpression(BinaryExpressionSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitGreaterThanExpression", this.GetType().FullName));
-            return default(T);
-        }
-
-        protected virtual T VisitNegateExpression(PrefixUnaryExpressionSyntax node)
-        {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitNegateExpression", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitGreaterThanExpression", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitNullLiteralExpression(LiteralExpressionSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitNullLiteralExpression", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitNullLiteralExpression", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitLogicalAndExpression(BinaryExpressionSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitLogicalAndExpression", this.GetType().FullName));
-            return default(T);
-        }
-
-        protected virtual T VisitAddAssignExpression(BinaryExpressionSyntax node)
-        {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitAddAssignExpression", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitLogicalAndExpression", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitAsExpression(BinaryExpressionSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitAsExpression", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitAsExpression", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitLogicalNotExpression(PrefixUnaryExpressionSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitLogicalNotExpression", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitLogicalNotExpression", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitSubtractExpression(BinaryExpressionSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitSubtractExpression", this.GetType().FullName));
-            return default(T);
-        }
-
-        protected virtual T VisitSubtractAssignExpression(BinaryExpressionSyntax node)
-        {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitSubtractAssignExpression", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitSubtractExpression", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitGreaterThanOrEqualExpression(BinaryExpressionSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitGreaterThanOrEqualExpression", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitGreaterThanOrEqualExpression", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitLessThanOrEqualExpression(BinaryExpressionSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitLessThanOrEqualExpression", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitLessThanOrEqualExpression", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitLogicalOrExpression(BinaryExpressionSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitLogicalOrExpression", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitLogicalOrExpression", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitPostDecrementExpression(PostfixUnaryExpressionSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitPostDecrementExpression", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitPostDecrementExpression", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitCollectionInitializerExpression(InitializerExpressionSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitCollectionInitializerExpression", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitCollectionInitializerExpression", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitComplexElementInitializerExpression(InitializerExpressionSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitComplexElementInitializerExpression", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitComplexElementInitializerExpression", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitObjectInitializerExpression(InitializerExpressionSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitObjectInitializerExpression", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitObjectInitializerExpression", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitNotEqualsExpression(BinaryExpressionSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitNotEqualsExpression", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitNotEqualsExpression", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitModuloExpression(BinaryExpressionSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitModuloExpression", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitModuloExpression", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitBitwiseOrExpression(BinaryExpressionSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitBitwiseOrExpression", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitBitwiseOrExpression", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitArrayInitializerExpression(InitializerExpressionSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitArrayInitializerExpression", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitArrayInitializerExpression", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitBitwiseAndExpression(BinaryExpressionSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitBitwiseAndExpression", this.GetType().FullName));
-            return default(T);
-        }
-
-        protected virtual T VisitMultiplyAssignExpression(BinaryExpressionSyntax node)
-        {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitMultiplyAssignExpression", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitBitwiseAndExpression", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitCaseSwitchLabel(SwitchLabelSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitCaseSwitchLabel", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitCaseSwitchLabel", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitDefaultSwitchLabel(SwitchLabelSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitDefaultSwitchLabel", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitDefaultSwitchLabel", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitStringLiteralExpression(LiteralExpressionSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitStringLiteralExpression", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitStringLiteralExpression", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitParameter(ParameterSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitParameter", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitParameter", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitArrayType(ArrayTypeSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitArrayType", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitArrayType", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitNumericLiteralExpression(LiteralExpressionSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitNumericLiteralExpression", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitNumericLiteralExpression", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitBlock(BlockSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitBlock", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitBlock", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitArgument(ArgumentSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitArgument", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitArgument", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitGenericName(GenericNameSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitGenericName", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitGenericName", GetType().FullName));
             return default(T);
         }
 
-        protected virtual T VisitForEachStatement(Roslyn.Compilers.CSharp.ForEachStatementSyntax node)
+        protected virtual T VisitForEachStatement(ForEachStatementSyntax node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitForEachStatement", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitForEachStatement", GetType().FullName));
             return default(T);
         }
     }

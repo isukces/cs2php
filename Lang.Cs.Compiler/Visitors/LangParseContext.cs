@@ -1,10 +1,12 @@
-﻿using Roslyn.Compilers.CSharp;
+﻿using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
+using Compilation = Microsoft.CodeAnalysis.Compilation;
+using MethodKind = Microsoft.CodeAnalysis.MethodKind;
+using SemanticModel = Microsoft.CodeAnalysis.SemanticModel;
+using TypeKind = Microsoft.CodeAnalysis.TypeKind;
 
 namespace Lang.Cs.Compiler.Visitors
 {
@@ -63,9 +65,10 @@ namespace Lang.Cs.Compiler.Visitors
             var savedVariables = localVariables.ToArray();
             try
             {
-                if (declaration != null)
-                    foreach (var i in declaration.Declarators)
-                        localVariables.Add(new NameType(i.Name, declaration.Type));
+                if (declaration == null) 
+                    return action();
+                foreach (var i in declaration.Declarators)
+                    localVariables.Add(new NameType(i.Name, declaration.Type));
                 return action();
             }
             finally
@@ -106,7 +109,7 @@ namespace Lang.Cs.Compiler.Visitors
             return types;
         }
 
-        public NamedTypeSymbol[] Roslyn_GetNamedTypeSymbols(NamespaceSymbol m)
+        public INamedTypeSymbol[] Roslyn_GetNamedTypeSymbols(INamespaceSymbol m)
         {
             if (m == null)
                 m = roslynCompilation.GlobalNamespace;
@@ -117,7 +120,7 @@ namespace Lang.Cs.Compiler.Visitors
             return a.Union(b).ToArray();
         }
 
-        public FieldInfo Roslyn_ResolveField(FieldSymbol type)
+        public FieldInfo Roslyn_ResolveField(IFieldSymbol type)
         {
 #warning 'Dorobić const'
             var f = type.IsStatic ? BindingFlags.Static : BindingFlags.Instance;
@@ -131,7 +134,7 @@ namespace Lang.Cs.Compiler.Visitors
 
         }
 
-        public MethodBase Roslyn_ResolveMethod(MethodSymbol method)
+        public MethodBase Roslyn_ResolveMethod(IMethodSymbol method)
         {
             var m = Roslyn_ResolveMethodInternal(method);
             //Console.WriteLine("M  {0} => {1}", method, m);
@@ -140,7 +143,7 @@ namespace Lang.Cs.Compiler.Visitors
             return m;
         }
 
-        public PropertyInfo Roslyn_ResolveProperty(PropertySymbol type)
+        public PropertyInfo Roslyn_ResolveProperty(IPropertySymbol type)
         {
             var t = type.ContainingType;
             var tt = Roslyn_ResolveType(t);
@@ -150,25 +153,27 @@ namespace Lang.Cs.Compiler.Visitors
 
         }
 
-        public Type Roslyn_ResolveType(TypeSymbol type)
+        public Type Roslyn_ResolveType(ITypeSymbol type)
         {
             Type t;
-            if (cache_Roslyn_ResolveType.TryGetValue(type, out t))
+            if (_cacheRoslynResolveType.TryGetValue(type, out t))
                 return t;
             t = Roslyn_ResolveType_internal(type);
-            cache_Roslyn_ResolveType[type] = t;
+            _cacheRoslynResolveType[type] = t;
             return t;
         }
         // Private Methods 
 
-        private MethodBase _Resolve_OrdinaryMethod(MethodSymbol method)
+        private MethodBase _Resolve_OrdinaryMethod(IMethodSymbol method)
         {
             var reflectionFlags = method.IsStatic ? BindingFlags.Static : BindingFlags.Instance;
             reflectionFlags |= BindingFlags.Public | BindingFlags.NonPublic;
 
             var rt = Roslyn_ResolveType(method.ReturnType);
             var _typeArguments = method.TypeArguments.ToArray();
-            var typeArguments = _typeArguments.Select(i => Roslyn_ResolveType(i)).ToArray();
+            if (_typeArguments == null) 
+                throw new ArgumentNullException("_typeArguments");
+            var typeArguments = _typeArguments.Select(Roslyn_ResolveType).ToArray();
             var rType = Roslyn_ResolveType(method.ReturnType);
             var pTypes = ConvertParameterTypes(method.Parameters.ToArray());
             var hostType = Roslyn_ResolveType(method.ContainingType);
@@ -290,8 +295,8 @@ namespace Lang.Cs.Compiler.Visitors
 
         void ClearCache()
         {
-            roslyn_allNamedTypeSymbols = null;
-            cache_Roslyn_ResolveType.Clear();
+            _roslynAllNamedTypeSymbols = null;
+            _cacheRoslynResolveType.Clear();
         }
 
         /// <summary>
@@ -323,23 +328,21 @@ namespace Lang.Cs.Compiler.Visitors
             return true;
         }
 
-        private Type[] ConvertParameterTypes(ParameterSymbol[] _parameters)
+        private Type[] ConvertParameterTypes(IList<IParameterSymbol> parameters)
         {
-            var pTypes = _parameters.Select(i => Roslyn_ResolveType(i.Type)).ToArray();
+            var pTypes = parameters.Select(i => Roslyn_ResolveType(i.Type)).ToArray();
             {
-                for (int i = 0; i < pTypes.Length; i++)
+                for (var i = 0; i < pTypes.Length; i++)
                 {
-                    if (pTypes[i] != null)
-                        if (_parameters[i].RefKind != Roslyn.Compilers.RefKind.None)
-                            pTypes[i] = pTypes[i].MakeByRefType();
-                    //if (pTypes[i].IsGenericType && !pTypes[i].IsGenericTypeDefinition)
-                    //    pTypes[i] = pTypes[i].GetGenericTypeDefinition();
+                    if (pTypes[i] == null) continue;
+                    if (parameters[i].RefKind !=  RefKind.None)
+                        pTypes[i] = pTypes[i].MakeByRefType();
                 }
             }
             return pTypes;
         }
 
-        private bool cs(MethodSymbol a, MethodInfo b)
+        private bool cs(IMethodSymbol a, MethodInfo b)
         {
             if (a.Name != b.Name)
                 return false;
@@ -347,9 +350,7 @@ namespace Lang.Cs.Compiler.Visitors
             var d = b.GetParameters().Select(i => i.Name).ToArray();
             var cc = string.Join("\r\n", c);
             var dd = string.Join("\r\n", d);
-            if (cc != dd)
-                return false;
-            return true;
+            return cc == dd;
         }
 
         private Type MKK(Type rt)
@@ -359,7 +360,7 @@ namespace Lang.Cs.Compiler.Visitors
             return rt;
         }
 
-        private MethodBase Roslyn_ResolveMethodInternal(MethodSymbol method)
+        private MethodBase Roslyn_ResolveMethodInternal(IMethodSymbol method)
         {
             switch (method.MethodKind)
             {
@@ -376,7 +377,7 @@ namespace Lang.Cs.Compiler.Visitors
                     goto case MethodKind.Ordinary;
                 case MethodKind.DelegateInvoke: // 3 The invoke method of a delegate.
                     goto case MethodKind.Ordinary;
-                case MethodKind.Operator:// 9 A user-defined operator
+                case MethodKind.UserDefinedOperator:// 9 A user-defined operator
                     goto case MethodKind.Ordinary;
                 case MethodKind.Ordinary: // 10 A normal method.
                     return _Resolve_OrdinaryMethod(method);
@@ -427,49 +428,49 @@ namespace Lang.Cs.Compiler.Visitors
 
         }
 
-        Type Roslyn_ResolveType_internal(TypeSymbol type)
+        Type Roslyn_ResolveType_internal(ITypeSymbol type)
         {
             // var aaaa = roslynCompilation.GetSpecialType(type.SpecialType);
             switch (type.SpecialType)
             {
-                case Roslyn.Compilers.SpecialType.System_String:
+                case SpecialType.System_String:
                     return typeof(string);
-                case Roslyn.Compilers.SpecialType.System_Double:
+                case SpecialType.System_Double:
                     return typeof(System.Double);
-                case Roslyn.Compilers.SpecialType.System_Decimal:
+                case SpecialType.System_Decimal:
                     return typeof(System.Decimal);
-                case Roslyn.Compilers.SpecialType.System_Int16:
+                case SpecialType.System_Int16:
                     return typeof(System.Int16);
-                case Roslyn.Compilers.SpecialType.System_Int32:
+                case SpecialType.System_Int32:
                     return typeof(System.Int32);
-                case Roslyn.Compilers.SpecialType.System_Int64:
+                case SpecialType.System_Int64:
                     return typeof(System.Int64);
-                case Roslyn.Compilers.SpecialType.System_Object:
+                case SpecialType.System_Object:
                     return typeof(System.Object);
-                case Roslyn.Compilers.SpecialType.System_Boolean:
+                case SpecialType.System_Boolean:
                     return typeof(System.Boolean);
-                case Roslyn.Compilers.SpecialType.System_Char:
+                case SpecialType.System_Char:
                     return typeof(System.Char);
-                case Roslyn.Compilers.SpecialType.System_Void:
+                case SpecialType.System_Void:
                     return typeof(void);
-                case Roslyn.Compilers.SpecialType.System_Array:
+                case SpecialType.System_Array:
                     return typeof(Array);
-                case Roslyn.Compilers.SpecialType.System_DateTime:
+                case SpecialType.System_DateTime:
                     return typeof(DateTime);
-                case Roslyn.Compilers.SpecialType.System_Enum:
+                case SpecialType.System_Enum:
                     return typeof(Enum);
                 default:
                     throw new NotSupportedException(type.ToString());
 
 
-                case Roslyn.Compilers.SpecialType.None:
+                case SpecialType.None:
                     {
 
                         switch (type.TypeKind)
                         {
                             case TypeKind.ArrayType:
                                 {
-                                    var arrayTypeSymbol = type as ArrayTypeSymbol;
+                                    var arrayTypeSymbol = type as IArrayTypeSymbol;
                                     var elementType = Roslyn_ResolveType(arrayTypeSymbol.ElementType);
                                     var result = arrayTypeSymbol.Rank == 1
                                         ? elementType.MakeArrayType()
@@ -480,7 +481,7 @@ namespace Lang.Cs.Compiler.Visitors
                                 return null;
                             case TypeKind.TypeParameter:
                                 {
-                                    var type1 = (TypeParameterSymbol)type;
+                                    var type1 = (ITypeParameterSymbol)type;
                                     var a = knownTypes.Where(i => i.IsGenericParameter && i.DeclaringMethod != null).ToArray();
                                     var b = a.Where(i => i.DeclaringMethod.Name == type1.DeclaringMethod.Name).ToArray();
 
@@ -492,24 +493,24 @@ namespace Lang.Cs.Compiler.Visitors
                         //var a = type.ToDisplayString();
                         //var v = roslynCompilation.GlobalNamespace.GetNamespaceMembers().ToArray(); //.GetTypeByMetadataName(a);
                         //var v5 = v[5].GetTypeMembers();
-                        if (roslyn_allNamedTypeSymbols == null)
-                            roslyn_allNamedTypeSymbols = Roslyn_GetNamedTypeSymbols(null);
+                        if (_roslynAllNamedTypeSymbols == null)
+                            _roslynAllNamedTypeSymbols = Roslyn_GetNamedTypeSymbols(null);
 
-                        if (type is NamedTypeSymbol)
+                        if (type is INamedTypeSymbol)
                         {
-                            var b = type as NamedTypeSymbol;
+                            var b = type as INamedTypeSymbol;
                             //if (b.ContainingType != null)
                             //    throw new NotSupportedException();
                             if (b.IsGenericType)
                             {
                                 var reflectionSearch = b.ToDisplayString();
-                                var reflectionSearch_MD = b.OriginalDefinition.MetadataName;
-                                var reflectionSearchXX = b.ConstructUnboundGenericType();
+                                // var reflectionSearchMd = b.OriginalDefinition.MetadataName;
+                                // var reflectionSearchXx = b.ConstructUnboundGenericType();
                                 var reflectionSearch2 = b.ConstructedFrom.ToDisplayString();
                                 if (reflectionSearch != reflectionSearch2)
                                     reflectionSearch = reflectionSearch2;
-                                reflectionSearch = reflectionSearch.Substring(0, reflectionSearch.IndexOf("<")) + "`" + b.Arity.ToString();
-                                var reflected = KnownTypes.Where(i => i.FullName == reflectionSearch).Single();
+                                reflectionSearch = reflectionSearch.Substring(0, reflectionSearch.IndexOf("<", System.StringComparison.Ordinal)) + "`" + b.Arity.ToString();
+                                var reflected = KnownTypes.Single(i => i.FullName == reflectionSearch);
 
 
                                 var TypeArguments = b.TypeArguments.AsEnumerable().Select(i => Roslyn_ResolveType(i)).ToArray();
@@ -523,18 +524,17 @@ namespace Lang.Cs.Compiler.Visitors
                                     var ct = Roslyn_ResolveType(b.ContainingType);
                                     var kt = KnownTypes.Where(i => i.DeclaringType == ct).ToArray();
                                     var reflectionSearch = b.ContainingType.ToDisplayString() + "+" + b.Name;
-                                    var reflected = KnownTypes.Where(i => i.FullName == reflectionSearch).Single();
+                                    var reflected = KnownTypes.Single(i => i.FullName == reflectionSearch);
                                     return reflected;
                                 }
                                 else
                                 {
                                     var reflectionSearch = b.ToDisplayString();
-                                    var reflected = KnownTypes.Where(i => i.FullName == reflectionSearch).Single();
+                                    var reflected = KnownTypes.Single(i => i.FullName == reflectionSearch);
                                     return reflected;
 
                                 }
                             }
-                            throw new NotSupportedException(type.ToString());
                         }
 
 
@@ -550,8 +550,8 @@ namespace Lang.Cs.Compiler.Visitors
 
         #region Fields
 
-        Dictionary<TypeSymbol, Type> cache_Roslyn_ResolveType = new Dictionary<TypeSymbol, Type>();
-        NamedTypeSymbol[] roslyn_allNamedTypeSymbols;
+        readonly Dictionary<ITypeSymbol, Type> _cacheRoslynResolveType = new Dictionary<ITypeSymbol, Type>();
+        ITypeSymbol[] _roslynAllNamedTypeSymbols;
 
         #endregion Fields
     }

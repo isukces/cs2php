@@ -65,6 +65,8 @@ namespace Lang.Php.Compiler.Translator
         {
             var _classes = info.GetClasses();
             var classesToTranslate = info.ClassTranslations.Values.Where(u => u.Type.Assembly == info.CurrentAssembly).ToArray();
+            var _interfaces = info.GetInterfaces();
+            //     var interfacesToTranslate = info.ClassTranslations.Values.Where(u => u.Type.Assembly == info.CurrentAssembly).ToArray();
             foreach (ClassTranslationInfo classTI in classesToTranslate)
             {
                 PhpClassDefinition phpClass;
@@ -94,50 +96,67 @@ namespace Lang.Php.Compiler.Translator
                 state.Principles.CurrentType = classTI.Type;
                 state.Principles.CurrentAssembly = state.Principles.CurrentType.Assembly;
                 Console.WriteLine(classTI.ModuleName);
-                FullClassDeclaration[] sources = _classes.Where(i => i.FullName == classTI.Type.FullName).ToArray();
+
+                Lang.Cs.Compiler.IClassMember[] members;
+
+                if (classTI.Type.IsInterface)
                 {
-                    var fileNames = classTI.Type.GetCustomAttributes<RequireOnceAttribute>().Select(i => i.Filename).Distinct().ToArray();
-                    if (fileNames.Any())
+                    FullInterfaceDeclaration[] sources = _interfaces.Where(i => i.FullName == classTI.Type.FullName).ToArray();
+                    members = (from i in sources
+                               from j in i.ClassDeclaration.Members
+                               select j).ToArray();
                     {
-                        var b = fileNames.Select(u => new PhpConstValue(u)).ToArray();
-                        phpModule.RequiredFiles.AddRange(b);
+                        var fileNames = ReflectionUtil.GetAttributes<RequireOnceAttribute>(classTI.Type).Select(i => i.Filename).Distinct().ToArray();
+                        if (fileNames.Any())
+                        {
+                            var b = fileNames.Select(u => new PhpConstValue(u)).ToArray();
+                            phpModule.RequiredFiles.AddRange(b);
+                        }
+                    }
+                }
+                else
+                {
+                    FullClassDeclaration[] sources = _classes.Where(i => i.FullName == classTI.Type.FullName).ToArray();
+                    members = (from i in sources
+                               from j in i.ClassDeclaration.Members
+                               select j).ToArray();
+                    {
+                        var fileNames = ReflectionUtil.GetAttributes<RequireOnceAttribute>(classTI.Type).Select(i => i.Filename).Distinct().ToArray();
+                        if (fileNames.Any())
+                        {
+                            var b = fileNames.Select(u => new PhpConstValue(u)).ToArray();
+                            phpModule.RequiredFiles.AddRange(b);
+                        }
                     }
                 }
                 #region Constructors
                 {
-                    foreach (var src in sources)
-                    {
-                        var c = src.ClassDeclaration.Members.OfType<ConstructorDeclaration>().ToArray();
-                        if (c.Length > 1)
-                            throw new Exception("PHP supports only one constructor per class");
-                        if (c.Any())
-                            TranslateConstructor(phpClass, c.First());
-                    }
+                    var c = members.OfType<ConstructorDeclaration>().ToArray();
+                    if (c.Length > 1)
+                        throw new Exception("PHP supports only one constructor per class");
+                    if (c.Any())
+                        TranslateConstructor(phpClass, c.First());
                 }
                 #endregion
                 #region Metody
                 {
-                    foreach (var src in sources)
-                        foreach (var methodDeclaration in src.ClassDeclaration.Members.OfType<MethodDeclaration>())
-                            TranslateMethod(phpClass, methodDeclaration);
-
-
+                    foreach (var methodDeclaration in members.OfType<MethodDeclaration>())
+                        TranslateMethod(phpClass, methodDeclaration);
                 }
                 #endregion
                 #region Własności
                 {
-                    foreach (var src in sources)
-                        foreach (var pDeclaration in src.ClassDeclaration.Members.OfType<CsharpPropertyDeclaration>())
-                            TranslateProperty(phpClass, pDeclaration);
+                    foreach (var pDeclaration in members.OfType<CsharpPropertyDeclaration>())
+                        TranslateProperty(phpClass, pDeclaration);
                 }
                 #endregion
                 #region Pola, stałe
                 {
-                    foreach (var src in sources)
-                        foreach (var constDeclaration in src.ClassDeclaration.Members.OfType<FieldDeclaration>())
-                            TranslateField(phpModule, phpClass, constDeclaration);
+                    foreach (var constDeclaration in members.OfType<FieldDeclaration>())
+                        TranslateField(phpModule, phpClass, constDeclaration);
                 }
                 #endregion
+
                 state.Principles.CurrentType = null;
                 #region Wywołanie metody defaulttimezone oraz MAIN dla PAGE
                 {

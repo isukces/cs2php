@@ -1,12 +1,11 @@
-﻿using Roslyn.Compilers.CSharp;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Lang.Cs.Compiler.Visitors
 {
@@ -59,15 +58,15 @@ namespace Lang.Cs.Compiler.Visitors
 #if ROSLYN
             //FAQ 4
             MethodInfo operatorMethod = null;
-            var expressionTypeInfo = state.Context.RoslynModel.GetTypeInfo(node);
+            var expressionTypeInfo = ModelExtensions.GetTypeInfo(state.Context.RoslynModel, node);
             var roslynResultType = state.Context.Roslyn_ResolveType(expressionTypeInfo.Type);
-            var symbolInfo = state.Context.RoslynModel.GetSymbolInfo(node);
+            var symbolInfo = ModelExtensions.GetSymbolInfo(state.Context.RoslynModel, node);
             if (symbolInfo.Symbol != null)
             {
                 var a = symbolInfo.Symbol;
-                if (a is MethodSymbol)
+                if (a is IMethodSymbol)
                 {
-                    var b = a as MethodSymbol;
+                    var b = a as IMethodSymbol;
                     var mi = state.Context.Roslyn_ResolveMethod(b);
                     if (mi is MethodInfo)
                         operatorMethod = mi as MethodInfo;
@@ -90,65 +89,64 @@ namespace Lang.Cs.Compiler.Visitors
             return Simplify(tmp);
         }
 
-        protected override IValue VisitAddAssignExpression(BinaryExpressionSyntax node)
-        {
-            return internalVisit_AssignWithPrefix(node, "+");
-        }
+        //        protected override IValue VisitAddAssignExpression(BinaryExpressionSyntax node)
+        //        {
+        //            return internalVisit_AssignWithPrefix(node, "+");
+        //        }
 
         protected override IValue VisitAddExpression(BinaryExpressionSyntax node)
         {
             return internalVisit_BinaryExpressionSyntax(node, "+"); // +++ 
         }
 
+
         protected override IValue VisitArgument(ArgumentSyntax node)
         {
             var v = Visit(node.Expression);
-            var eti = state.Context.RoslynModel.GetTypeInfo(node.Expression);
-            if (eti.Type != eti.ConvertedType)
-                System.Diagnostics.Debug.WriteLine("{0} => {1}, {2}", eti.Type, eti.ConvertedType, eti.ImplicitConversion);
+            //TypeInfo eti = ModelExtensions.GetTypeInfo(state.Context.RoslynModel, node.Expression);
+            var eti2 = state.Context.RoslynModel.GetTypeInfo2(node.Expression);
+            // eti.Type.
+            var eti = eti2.TypeInfo;
+            if (!Equals(eti.Type, eti.ConvertedType))
+                Debug.WriteLine("{0} => {1}, {2}", eti.Type, eti.ConvertedType, eti2.ImplicitConversion);
             //if (eti.Type.ToString().Contains("Date"))
             //    System.Diagnostics.Debug.WriteLine("{0} => {1}, {2}", eti.Type, eti.ConvertedType, eti.ImplicitConversion);
-            var g = node.RefOrOutKeyword == null ? "" : node.RefOrOutKeyword.ValueText;
-            FunctionArgument a = new FunctionArgument(g, v);
-            return Simplify(a);
+            var g = node.RefOrOutKeyword.ValueText;
+            var functionArgument = new FunctionArgument(g, v);
+            return Simplify(functionArgument);
 
         }
 
         protected override IValue VisitArrayCreationExpression(ArrayCreationExpressionSyntax node)
         {
-            var _type = state.Context.RoslynModel.GetTypeInfo(node);
-            var type = state.Context.Roslyn_ResolveType(_type.Type);
-            if (type.IsArray && type.GetArrayRank() == 1)
-            {
-                IValue[] initializers = null;
-                if (node.Initializer != null)
-                {
-                    initializers = node.Initializer.Expressions.Select(i => this.Visit(i)).ToArray();
-                }
-                var b = new ArrayCreateExpression(type, initializers);
-                return Simplify(b);
-            }
-            throw new NotSupportedException();
+            var roslynType = ModelExtensions.GetTypeInfo(state.Context.RoslynModel, node);
+            var type = state.Context.Roslyn_ResolveType(roslynType.Type);
+            if (!type.IsArray || type.GetArrayRank() != 1) 
+                throw new NotSupportedException();
+            IValue[] initializers = null;
+            if (node.Initializer != null)
+                initializers = node.Initializer.Expressions.Select(Visit).ToArray();
+            var b = new ArrayCreateExpression(type, initializers);
+            return Simplify(b);
         }
 
         protected override IValue VisitArrayInitializerExpression(InitializerExpressionSyntax node)
         {
-            var b = context.RoslynModel.GetSymbolInfo(node);
-            var a = context.RoslynModel.GetTypeInfo(node);
+            var b = ModelExtensions.GetSymbolInfo(context.RoslynModel, node);
+            var a = context.RoslynModel.GetTypeInfo2(node);
             throw new NotSupportedException();
         }
 
         protected override IValue VisitArrayType(ArrayTypeSyntax node)
         {
-            var info = context.RoslynModel.GetTypeInfo(node);
+            var info = ModelExtensions.GetTypeInfo(context.RoslynModel, node);
             var t = context.Roslyn_ResolveType(info.Type);
             return new TypeValue(t);
-            throw new NotSupportedException();
         }
 
         protected override IValue VisitAsExpression(BinaryExpressionSyntax node)
         {
-            var symbolInfo = state.Context.RoslynModel.GetSymbolInfo(node);
+            var symbolInfo = ModelExtensions.GetSymbolInfo(state.Context.RoslynModel, node);
             if (symbolInfo.Symbol != null)
                 throw new NotSupportedException();
 
@@ -163,21 +161,21 @@ namespace Lang.Cs.Compiler.Visitors
             return Simplify(o);
         }
 
-        protected override IValue VisitAssignExpression(BinaryExpressionSyntax node)
-        {
-            var symbolInfo = state.Context.RoslynModel.GetSymbolInfo(node);
-            if (symbolInfo.Symbol != null)
-                throw new NotSupportedException();
-            var ti = state.Context.RoslynModel.GetTypeInfo(node);
-            if (!ti.ImplicitConversion.IsIdentity)
-                throw new NotSupportedException();
-            if (ti.ImplicitConversion.Method != null)
-                throw new NotSupportedException();
-            var left = Visit(node.Left);
-            var rigth = Visit(node.Right);
-            var a = new CsharpAssignExpression(left, rigth, "");
-            return Simplify(a);
-        }
+        //        protected override IValue VisitAssignExpression(BinaryExpressionSyntax node)
+        //        {
+        //            var symbolInfo = state.Context.RoslynModel.GetSymbolInfo(node);
+        //            if (symbolInfo.Symbol != null)
+        //                throw new NotSupportedException();
+        //            var ti = state.Context.RoslynModel.GetTypeInfo(node);
+        //            if (!ti.ImplicitConversion.IsIdentity)
+        //                throw new NotSupportedException();
+        //            if (ti.ImplicitConversion.Method != null)
+        //                throw new NotSupportedException();
+        //            var left = Visit(node.Left);
+        //            var rigth = Visit(node.Right);
+        //            var a = new CsharpAssignExpression(left, rigth, "");
+        //            return Simplify(a);
+        //        }
 
         protected override IValue VisitBitwiseAndExpression(BinaryExpressionSyntax node)
         {
@@ -192,7 +190,7 @@ namespace Lang.Cs.Compiler.Visitors
         protected override IValue VisitCastExpression(CastExpressionSyntax node)
         {
             var e = Visit(node.Expression);
-            var tt = context.RoslynModel.GetTypeInfo(node);
+            var tt = ModelExtensions.GetTypeInfo(context.RoslynModel, node);
             var t = context.Roslyn_ResolveType(tt.Type);
             // var t1 = context.Roslyn_ResolveType(node.Type);
             return new CastExpression(e, t);
@@ -202,7 +200,6 @@ namespace Lang.Cs.Compiler.Visitors
         {
             var t = node.Token.ValueText.Trim();
             return new ConstValue(t[0]);
-            return base.VisitCharacterLiteralExpression(node);
         }
 
         protected override IValue VisitCollectionInitializerExpression(InitializerExpressionSyntax node)
@@ -222,7 +219,7 @@ namespace Lang.Cs.Compiler.Visitors
 
         protected override IValue VisitConditionalExpression(ConditionalExpressionSyntax node)
         {
-            var aaaa = state.Context.RoslynModel.GetTypeInfo(node);
+            var aaaa = ModelExtensions.GetTypeInfo(state.Context.RoslynModel, node);
             var resultType = state.Context.Roslyn_ResolveType(aaaa.Type);
             var condition = Visit(node.Condition);
             var whenTrue = Visit(node.WhenTrue);
@@ -238,7 +235,7 @@ namespace Lang.Cs.Compiler.Visitors
 
         protected override IValue VisitDivideExpression(BinaryExpressionSyntax node)
         {
-            var symbolInfo = state.Context.RoslynModel.GetSymbolInfo(node);
+            var symbolInfo = ModelExtensions.GetSymbolInfo(state.Context.RoslynModel, node);
             if (symbolInfo.Symbol != null)
                 throw new NotSupportedException();
 
@@ -288,13 +285,13 @@ namespace Lang.Cs.Compiler.Visitors
 
         protected override IValue VisitGenericName(GenericNameSyntax node)
         {
-            var info = context.RoslynModel.GetSymbolInfo(node);
-            var info2 = context.RoslynModel.AnalyzeDataFlow(node);
+            var info = ModelExtensions.GetSymbolInfo(context.RoslynModel, node);
+            var info2 = ModelExtensions.AnalyzeDataFlow(context.RoslynModel, node);
             //var info3 = context.RoslynModel.GetDeclaredSymbol(node);
-            var mg = context.RoslynModel.GetMemberGroup(node);
+            var mg = ModelExtensions.GetMemberGroup(context.RoslynModel, node);
 
 
-            var identifier = internalVisitTextIdentifier(node.Identifier.ValueText.Trim());
+            var identifier = InternalVisitTextIdentifier(node.Identifier.ValueText.Trim());
             var genericTypes = node.TypeArgumentList.Arguments.Select(i => Visit(i)).ToArray();
             var gt1 = genericTypes.OfType<TypeValue>().ToArray();
             Debug.Assert(genericTypes.Length == gt1.Length);
@@ -318,25 +315,17 @@ namespace Lang.Cs.Compiler.Visitors
                 var result = new UnknownIdentifierValue(xx.Identifier, genericTypes);
                 return Simplify(result);
             }
-            if (gt1.Length > 0)
-            {
-                if (identifier is TypeValue)
-                {
-                    var a = node.Identifier.ValueText.Trim();
-                    var b = context.MatchTypes(a, gt1.Length);
-                    if (b.Length == 1)
-                    {
-                        var t = b.First();
-                        Debug.Assert(t.IsGenericType);
-                        var tt = t.MakeGenericType(gt1.Select(i => i.DotnetType).ToArray());
-                        return new TypeValue(tt);
-                    }
-
-                }
+            if (gt1.Length <= 0) return base.VisitGenericName(node);
+            if (!(identifier is TypeValue)) 
                 throw new NotSupportedException();
-            }
-
-            return base.VisitGenericName(node);
+            var a = node.Identifier.ValueText.Trim();
+            var b = context.MatchTypes(a, gt1.Length);
+            if (b.Length != 1) 
+                throw new NotSupportedException();
+            var t = b.First();
+            Debug.Assert(t.IsGenericType);
+            var tt = t.MakeGenericType(gt1.Select(i => i.DotnetType).ToArray());
+            return new TypeValue(tt);
         }
 
         protected override IValue VisitGreaterThanExpression(BinaryExpressionSyntax node)
@@ -353,19 +342,21 @@ namespace Lang.Cs.Compiler.Visitors
         {
             // var tt = context.Roslyn_GetNamedTypeSymbols(null);
 
-            var sInfo = context.RoslynModel.GetSymbolInfo(node);
-            var tInfo = context.RoslynModel.GetTypeInfo(node);
+            var sInfo = ModelExtensions.GetSymbolInfo(context.RoslynModel, node);
+            var tInfo2 = context.RoslynModel.GetTypeInfo2(node);
+            var tInfo = tInfo2.TypeInfo;
+            //var sInfo = sInfo2.ty
             Type type = tInfo.Type == null ? null : context.Roslyn_ResolveType(tInfo.Type);
             switch (sInfo.Symbol.Kind)
             {
                 case SymbolKind.Local:
-                    //var symbolLocal = info.Symbol as Roslyn.Compilers.CSharp.SourceLocalSymbol;
+                    //var symbolLocal = info.Symbol as CSharp.SourceLocalSymbol;
                     IValue tmp = new LocalVariableExpression(sInfo.Symbol.Name, new LangType(type));
-                    tmp = ImplicitConvert(tmp, tInfo);
+                    tmp = ImplicitConvert(tmp, tInfo2);
                     return Simplify(tmp);
                 case SymbolKind.NamedType:
                     var a = sInfo.Symbol.ToDisplayString();
-                    var b = sInfo.Symbol.OriginalDefinition as NamedTypeSymbol;
+                    var b = sInfo.Symbol.OriginalDefinition as INamedTypeSymbol;
                     if (b != null)
                     {
                         var c = context.Roslyn_ResolveType(b);
@@ -377,20 +368,20 @@ namespace Lang.Cs.Compiler.Visitors
                     tmp = new LocalVariableExpression(sInfo.Symbol.Name, new LangType(type));
                     return Simplify(tmp);
                 case SymbolKind.Field:
-                    var ax = context.Roslyn_ResolveField(sInfo.Symbol as FieldSymbol);
+                    var ax = context.Roslyn_ResolveField(sInfo.Symbol as IFieldSymbol);
                     if (ax.IsStatic)
                     {
                         // throw new NotSupportedException();
 
-                        tmp = new ClassFieldAccessExpression(ax, (sInfo.Symbol as FieldSymbol).IsConst);
+                        var fieldSymbol = sInfo.Symbol as IFieldSymbol;
+                        tmp = new ClassFieldAccessExpression(ax, fieldSymbol != null && fieldSymbol.IsConst);
                         return Simplify(tmp);
                     }
                     tmp = new InstanceFieldAccessExpression(ax, new ThisExpression(state.CurrentType)); // niczego nie wiem o kontekście -> domyślam się, że this
                     return Simplify(tmp);
-                    throw new NotSupportedException();
                 case SymbolKind.Method:
                     {
-                        var methodBaseInfo = context.Roslyn_ResolveMethod(sInfo.Symbol as MethodSymbol);
+                        var methodBaseInfo = context.Roslyn_ResolveMethod(sInfo.Symbol as IMethodSymbol);
                         if (methodBaseInfo is MethodInfo)
                         {
                             var methodInfo = methodBaseInfo as MethodInfo;
@@ -410,7 +401,7 @@ namespace Lang.Cs.Compiler.Visitors
                     break;
                 case SymbolKind.Property:
                     {
-                        var pi = context.Roslyn_ResolveProperty(sInfo.Symbol as PropertySymbol);
+                        var pi = context.Roslyn_ResolveProperty(sInfo.Symbol as IPropertySymbol);
                         var targetObject = new ThisExpression(state.CurrentType);
                         var result = new CsharpInstancePropertyAccessExpression(pi, targetObject);
                         return result;
@@ -427,12 +418,12 @@ namespace Lang.Cs.Compiler.Visitors
             //var mg = context.RoslynModel.GetMemberGroup(node);
 
             string identifier = node.Identifier.ValueText.Trim();
-            return internalVisitTextIdentifier(identifier);
+            return InternalVisitTextIdentifier(identifier);
         }
 
         protected override IValue VisitInvocationExpression(InvocationExpressionSyntax node)
         {
-            var si = context.RoslynModel.GetSymbolInfo(node);
+            var si = ModelExtensions.GetSymbolInfo(context.RoslynModel, node);
             var nl = _internalVisitArgumentList(node.ArgumentList);
             IValue expression;
 
@@ -458,8 +449,8 @@ namespace Lang.Cs.Compiler.Visitors
                 throw new NotSupportedException();
             };
 
-            var info = context.RoslynModel.GetSymbolInfo(node);
-            var symbol = info.Symbol as MethodSymbol;
+            var info = ModelExtensions.GetSymbolInfo(context.RoslynModel, node);
+            var symbol = info.Symbol as IMethodSymbol;
             var mi1 = context.Roslyn_ResolveMethod(symbol);
             if (mi1 == null)
                 throw new Exception("method not found: " + symbol.Name);
@@ -524,14 +515,14 @@ namespace Lang.Cs.Compiler.Visitors
 
             // var info2 = context.RoslynModel.GetSymbolInfo(node.Parent);
             //var info3 = context.RoslynModel.GetDeclaredSymbol(node);
-            var mg = context.RoslynModel.GetMemberGroup(node);
+            var mg = ModelExtensions.GetMemberGroup(context.RoslynModel, node);
 
             var roslynMethods = (from tree in context.RoslynCompilation.SyntaxTrees.AsEnumerable()
                                  let model = context.RoslynCompilation.GetSemanticModel(tree)
                                  from node1 in tree.GetRoot().DescendantNodes().ToArray()
-                                 where node1.Kind == SyntaxKind.MethodDeclaration
+                                 where node1.CSharpKind() == SyntaxKind.MethodDeclaration
                                  let b = node1 as MethodDeclarationSyntax
-                                 select (MethodSymbol)model.GetDeclaredSymbol(b)).ToArray();
+                                 select (IMethodSymbol)ModelExtensions.GetDeclaredSymbol(model, b)).ToArray();
 
             //var m = context
             //    .RoslynModel
@@ -666,7 +657,7 @@ namespace Lang.Cs.Compiler.Visitors
         protected override IValue VisitLogicalNotExpression(PrefixUnaryExpressionSyntax node)
         {
             var operand = Visit(node.Operand);
-            Debug.Assert(node.OperatorToken.Kind == SyntaxKind.ExclamationToken);
+            Debug.Assert(node.OperatorToken.CSharpKind() == SyntaxKind.ExclamationToken);
             Type t;
             if (operand.ValueType == typeof(bool))
                 t = operand.ValueType;
@@ -681,137 +672,149 @@ namespace Lang.Cs.Compiler.Visitors
             return internalVisit_BinaryExpressionSyntax(node, "||");
         }
 
-        protected override IValue VisitMemberAccessExpression(MemberAccessExpressionSyntax node)
-        {
-            var typeInfo = state.Context.RoslynModel.GetTypeInfo(node);
-            var typeInfo2 = state.Context.RoslynModel.GetTypeInfo(node.Expression);
-            var tt = state.Context.RoslynModel.GetSymbolInfo(node);
-
-            MemberInfo member = null;
-
-            switch (tt.Symbol.Kind)
-            {
-                case SymbolKind.Field:
-                    var fieldSymbol = tt.Symbol as FieldSymbol;
-                    var fieldInfo = context.Roslyn_ResolveField(fieldSymbol);
-                    if (fieldInfo.IsStatic)
-                        return Simplify(new ClassFieldAccessExpression(fieldInfo, true));
-                    else
-                    {
-                        var _expression = Visit(node.Expression);
-                        return Simplify(new InstanceFieldAccessExpression(fieldInfo, _expression));
-                    }
-                    break;
-                case SymbolKind.Method:
-                    var sss = tt.Symbol as MethodSymbol;
-                    var methodInfo = context.Roslyn_ResolveMethod(sss);
-                    member = methodInfo;
-
-                    break;
-                case SymbolKind.Property:
-                    var uuu = tt.Symbol as PropertySymbol;
-                    var propertyInfo = context.Roslyn_ResolveProperty(uuu);
-                    member = propertyInfo;
-                    break;
-
-            }
-            IValue expression;
-            var fullName = _Name(node.Name);
-
-
-            if (typeInfo2.Type != null)
-            {
-                Symbol[] gg;
-                if (fullName.IsGeneric)
+        /*
+                protected override IValue VisitMemberAccessExpression(MemberAccessExpressionSyntax node)
                 {
-                    var arity = fullName.Generics.Length;
-                    var gg1 = typeInfo2.Type.GetMembers()
-                        .AsEnumerable()
-                        .OfType<MethodSymbol>()
-                        .Where(i => i.Name == fullName.BaseName && i.Arity == arity)
-                        .ToArray();
-                    gg = gg1;
-                    // throw new NotSupportedException();
-                }
-                else
-                    gg = typeInfo2.Type.GetMembers(fullName.GetNonGeneric()).ToArray();
-                if (gg.Length == 1)
-                {
-                    Symbol ggg = gg.Single();
-                    switch (ggg.Kind)
+                    var typeInfo = state.Context.RoslynModel.GetTypeInfo(node);
+                    var typeInfo2 = state.Context.RoslynModel.GetTypeInfo(node.Expression);
+                    var tt = state.Context.RoslynModel.GetSymbolInfo(node);
+
+                    MemberInfo member = null;
+
+                    switch (tt.Symbol.Kind)
                     {
-                        case SymbolKind.Property:
-                            PropertySymbol ps = ggg as PropertySymbol;
-                            var pi = context.Roslyn_ResolveProperty(ps);
-                            if (ps.IsStatic)
-                            {
-                                ClassPropertyAccessExpression tmp = new ClassPropertyAccessExpression(pi);
-                                return Simplify(tmp);
-                            }
+                        case SymbolKind.Field:
+                            var fieldSymbol = tt.Symbol as FieldSymbol;
+                            var fieldInfo = context.Roslyn_ResolveField(fieldSymbol);
+                            if (fieldInfo.IsStatic)
+                                return Simplify(new ClassFieldAccessExpression(fieldInfo, true));
                             else
                             {
-                                expression = Visit(node.Expression);
-                                CsharpInstancePropertyAccessExpression tmp = new CsharpInstancePropertyAccessExpression(pi, expression);
-                                return Simplify(tmp);
+                                var _expression = Visit(node.Expression);
+                                return Simplify(new InstanceFieldAccessExpression(fieldInfo, _expression));
                             }
                             break;
+                        case SymbolKind.Method:
+                            var sss = tt.Symbol as MethodSymbol;
+                            var methodInfo = context.Roslyn_ResolveMethod(sss);
+                            member = methodInfo;
+
+                            break;
+                        case SymbolKind.Property:
+                            var uuu = tt.Symbol as PropertySymbol;
+                            var propertyInfo = context.Roslyn_ResolveProperty(uuu);
+                            member = propertyInfo;
+                            break;
+
                     }
+                    IValue expression;
+                    var fullName = _Name(node.Name);
+
+
+                    if (typeInfo2.Type != null)
+                    {
+                        Symbol[] gg;
+                        if (fullName.IsGeneric)
+                        {
+                            var arity = fullName.Generics.Length;
+                            var gg1 = typeInfo2.Type.GetMembers()
+                                .AsEnumerable()
+                                .OfType<MethodSymbol>()
+                                .Where(i => i.Name == fullName.BaseName && i.Arity == arity)
+                                .ToArray();
+                            gg = gg1;
+                            // throw new NotSupportedException();
+                        }
+                        else
+                            gg = typeInfo2.Type.GetMembers(fullName.GetNonGeneric()).ToArray();
+                        if (gg.Length == 1)
+                        {
+                            Symbol ggg = gg.Single();
+                            switch (ggg.Kind)
+                            {
+                                case SymbolKind.Property:
+                                    PropertySymbol ps = ggg as PropertySymbol;
+                                    var pi = context.Roslyn_ResolveProperty(ps);
+                                    if (ps.IsStatic)
+                                    {
+                                        ClassPropertyAccessExpression tmp = new ClassPropertyAccessExpression(pi);
+                                        return Simplify(tmp);
+                                    }
+                                    else
+                                    {
+                                        expression = Visit(node.Expression);
+                                        CsharpInstancePropertyAccessExpression tmp = new CsharpInstancePropertyAccessExpression(pi, expression);
+                                        return Simplify(tmp);
+                                    }
+                                    break;
+                            }
+                        }
+                    }
+                    // throw new NotSupportedException();
+                    expression = Visit(node.Expression);
+                    if (expression is UnknownIdentifierValue)
+                    {
+                        if (fullName.IsGeneric)
+                            throw new NotSupportedException();
+                        var name = fullName.BaseName;
+
+                        var a = ((expression as UnknownIdentifierValue)).Identifier + "." + name;
+                        var t = context.MatchTypes(a, 0);
+                        if (t.Length == 1)
+                            return new TypeValue(t[0]);
+                        return new UnknownIdentifierValue(a, new IValue[0]);
+                    }
+                    if (expression is TypeValue)
+                    {
+                        if (fullName.IsGeneric)
+                            throw new NotSupportedException();
+                        var name = fullName.BaseName;
+                        var tmp = new StaticMemberAccessExpression(name, new LangType((expression as TypeValue).DotnetType));
+                        return Simplify(tmp);
+                    }
+                    if (expression is LocalVariableExpression || expression is ConstValue
+                        || expression is ClassFieldAccessExpression || expression is InstanceFieldAccessExpression
+                        || expression is ElementAccessExpression || expression is ArgumentExpression
+                        || expression is CsharpMethodCallExpression || expression is CsharpInstancePropertyAccessExpression
+                        || expression is ClassPropertyAccessExpression || expression is ParenthesizedExpression)
+                    {
+                        // if (fullName.IsGeneric)
+                        //     throw new NotSupportedException();
+                        var name = fullName.BaseName;
+                        if (member == null)
+                            throw new NotSupportedException();
+                        var tmp = new InstanceMemberAccessExpression(name, expression, member);
+                        return Simplify(tmp);
+                    }
+
+
+
+                    if (expression is ThisExpression)
+                    {
+                        if (fullName.IsGeneric)
+                            throw new NotSupportedException();
+                        var name = fullName.BaseName;
+                        var xx = expression as ThisExpression;
+                        if (member == null)
+                            throw new NotSupportedException();
+                        var tmp = new InstanceMemberAccessExpression(name, expression, member);
+                        return Simplify(tmp);
+                    }
+                    //if (expression is CastExpression)
+                    //{
+                    //    var e = expression as CastExpression;
+                    //    //var tmp = new InstanceMemberAccessExpression(name, expression, member);
+                    //    //return Simplify(tmp);
+                    //}
+                    //if (expression is ParenthesizedExpression)
+                    //{
+                    //    var e = expression as ParenthesizedExpression;
+                    //    var name = fullName.BaseName;
+                    //}
+                    throw new NotImplementedException("*** " + expression.GetType().FullName);
+                    // return new MemberAccessExpression(name, expression);
                 }
-            }
-            // throw new NotSupportedException();
-            expression = Visit(node.Expression);
-            if (expression is UnknownIdentifierValue)
-            {
-                if (fullName.IsGeneric)
-                    throw new NotSupportedException();
-                var name = fullName.BaseName;
-
-                var a = ((expression as UnknownIdentifierValue)).Identifier + "." + name;
-                var t = context.MatchTypes(a, 0);
-                if (t.Length == 1)
-                    return new TypeValue(t[0]);
-                return new UnknownIdentifierValue(a, new IValue[0]);
-            }
-            if (expression is TypeValue)
-            {
-                if (fullName.IsGeneric)
-                    throw new NotSupportedException();
-                var name = fullName.BaseName;
-                var tmp = new StaticMemberAccessExpression(name, new LangType((expression as TypeValue).DotnetType));
-                return Simplify(tmp);
-            }
-            if (expression is LocalVariableExpression || expression is ConstValue
-                || expression is ClassFieldAccessExpression || expression is InstanceFieldAccessExpression
-                || expression is ElementAccessExpression || expression is ArgumentExpression
-                || expression is CsharpMethodCallExpression || expression is CsharpInstancePropertyAccessExpression
-                || expression is ClassPropertyAccessExpression)
-            {
-                // if (fullName.IsGeneric)
-                //     throw new NotSupportedException();
-                var name = fullName.BaseName;
-                if (member == null)
-                    throw new NotSupportedException();
-                var tmp = new InstanceMemberAccessExpression(name, expression, member);
-                return Simplify(tmp);
-            }
-
-
-
-            if (expression is ThisExpression)
-            {
-                if (fullName.IsGeneric)
-                    throw new NotSupportedException();
-                var name = fullName.BaseName;
-                var xx = expression as ThisExpression;
-                if (member == null)
-                    throw new NotSupportedException();
-                var tmp = new InstanceMemberAccessExpression(name, expression, member);
-                return Simplify(tmp);
-            }
-
-            throw new NotImplementedException("*** " + expression.GetType().FullName);
-            // return new MemberAccessExpression(name, expression);
-        }
+        */
 
         protected override IValue VisitModuloExpression(BinaryExpressionSyntax node)
         {
@@ -847,18 +850,20 @@ namespace Lang.Cs.Compiler.Visitors
             //return new BinaryOperatorExpression(left, right, "*", t, null);
         }
 
-        protected override IValue VisitNegateExpression(PrefixUnaryExpressionSyntax node)
-        {
-            var operand = Visit(node.Operand);
-            Debug.Assert(node.OperatorToken.Kind == SyntaxKind.MinusToken);
-            Type t;
-            if (TypesUtil.IsNumberType(operand.ValueType))
-                t = operand.ValueType;
-            else
-                throw new NotSupportedException();
-            var a = new UnaryOperatorExpression(operand, "-", t);
-            return Simplify(a);
-        }
+        /*
+                protected override IValue VisitNegateExpression(PrefixUnaryExpressionSyntax node)
+                {
+                    var operand = Visit(node.Operand);
+                    Debug.Assert(node.OperatorToken.Kind == SyntaxKind.MinusToken);
+                    Type t;
+                    if (TypesUtil.IsNumberType(operand.ValueType))
+                        t = operand.ValueType;
+                    else
+                        throw new NotSupportedException();
+                    var a = new UnaryOperatorExpression(operand, "-", t);
+                    return Simplify(a);
+                }
+        */
 
         protected override IValue VisitNotEqualsExpression(BinaryExpressionSyntax node)
         {
@@ -875,7 +880,7 @@ namespace Lang.Cs.Compiler.Visitors
 
         protected override IValue VisitNullableType(NullableTypeSyntax node)
         {
-            var ti = state.Context.RoslynModel.GetTypeInfo(node);
+            var ti = ModelExtensions.GetTypeInfo(state.Context.RoslynModel, node);
             var tt = state.Context.Roslyn_ResolveType(ti.Type);
             var r = new TypeValue(tt);
             return r;
@@ -889,7 +894,7 @@ namespace Lang.Cs.Compiler.Visitors
 
         protected override IValue VisitNumericLiteralExpression(LiteralExpressionSyntax node)
         {
-            var typeInfo = context.RoslynModel.GetTypeInfo(node);
+            var typeInfo = context.RoslynModel.GetTypeInfo2(node);
             IValue value = new ConstValue(node.Token.Value);
             value = ImplicitConvert(value, typeInfo);
             return value;
@@ -897,9 +902,9 @@ namespace Lang.Cs.Compiler.Visitors
 
         protected override IValue VisitObjectCreationExpression(ObjectCreationExpressionSyntax node)
         {
-            var nodeInfo = model.GetSymbolInfo(node);
+            var nodeInfo = ModelExtensions.GetSymbolInfo(Model, node);
             // var t = model.GetTypeInfo(node);
-            var methodSymbol = nodeInfo.Symbol as MethodSymbol;
+            var methodSymbol = nodeInfo.Symbol as IMethodSymbol;
 
             var constructorInfo = context.Roslyn_ResolveMethod(methodSymbol) as ConstructorInfo;
             if (constructorInfo == null)
@@ -954,7 +959,7 @@ namespace Lang.Cs.Compiler.Visitors
 
         protected override IValue VisitParenthesizedLambdaExpression(ParenthesizedLambdaExpressionSyntax node)
         {
-            var info = state.Context.RoslynModel.GetTypeInfo(node);
+            var info = ModelExtensions.GetTypeInfo(state.Context.RoslynModel, node);
             var ct = state.Context.Roslyn_ResolveType(info.ConvertedType);
             if (ct.BaseType != typeof(MulticastDelegate))
                 throw new NotImplementedException();
@@ -994,7 +999,7 @@ namespace Lang.Cs.Compiler.Visitors
 
         protected override IValue VisitPredefinedType(PredefinedTypeSyntax node)
         {
-            var rt = state.Context.RoslynModel.GetTypeInfo(node);
+            var rt = ModelExtensions.GetTypeInfo(state.Context.RoslynModel, node);
             // var t = TypesUtil.PRIMITIVE_TYPES[node.Keyword.ValueText.Trim()];
             var t = state.Context.Roslyn_ResolveType(rt.Type);
             return new TypeValue(t);
@@ -1002,7 +1007,7 @@ namespace Lang.Cs.Compiler.Visitors
 
         protected override IValue VisitQualifiedName(QualifiedNameSyntax node)
         {
-            var ti = state.Context.RoslynModel.GetTypeInfo(node);
+            var ti = ModelExtensions.GetTypeInfo(state.Context.RoslynModel, node);
             var dot = state.Context.Roslyn_ResolveType(ti.Type);
             return new TypeValue(dot);
             throw new NotSupportedException();
@@ -1021,14 +1026,16 @@ namespace Lang.Cs.Compiler.Visitors
         protected override IValue VisitStringLiteralExpression(LiteralExpressionSyntax node)
         {
             IValue value = new ConstValue(node.Token.Value);
-            value = ImplicitConvert(value, context.RoslynModel.GetTypeInfo(node));
+            value = ImplicitConvert(value, context.RoslynModel.GetTypeInfo2(node));
             return value;
         }
 
-        protected override IValue VisitSubtractAssignExpression(BinaryExpressionSyntax node)
-        {
-            return internalVisit_AssignWithPrefix(node, "-");
-        }
+        /*
+                protected override IValue VisitSubtractAssignExpression(BinaryExpressionSyntax node)
+                {
+                    return internalVisit_AssignWithPrefix(node, "-");
+                }
+        */
 
         protected override IValue VisitSubtractExpression(BinaryExpressionSyntax node)
         {
@@ -1048,11 +1055,10 @@ namespace Lang.Cs.Compiler.Visitors
 
         protected override IValue VisitTypeOfExpression(TypeOfExpressionSyntax node)
         {
-            Type t = null;
-            var g = context.RoslynModel.GetTypeInfo(node.Type);
+            var g = ModelExtensions.GetTypeInfo(context.RoslynModel, node.Type);
             if (g.Type == null)
                 throw new NotSupportedException();
-            t = context.Roslyn_ResolveType(g.Type);
+            Type t = context.Roslyn_ResolveType(g.Type);
             return new TypeOfExpression(t);
         }
         // Private Methods 
@@ -1068,6 +1074,8 @@ namespace Lang.Cs.Compiler.Visitors
 
         private IValue _Make_DotnetMethodCall(MethodBase mi, IValue targetObject, FunctionArgument[] functionArguments, Type[] genericTypes)
         {
+            if (mi == null)
+                throw new ArgumentNullException("mi");
             IValue result;
             bool isDelegate = mi.DeclaringType.BaseType == typeof(MulticastDelegate);
 
@@ -1117,28 +1125,26 @@ namespace Lang.Cs.Compiler.Visitors
 
         Type GT(TypeSyntax s)
         {
-            if (s is IdentifierNameSyntax)
-            {
-                IdentifierNameSyntax ss = s as IdentifierNameSyntax;
-                var a = _Name(ss);
-                if (a.IsGeneric)
-                    throw new NotSupportedException();
-                var gg = context.MatchTypes(a.BaseName, 0);
-                if (gg.Length == 1)
-                    return gg[0];
+            var identifierNameSyntax = s as IdentifierNameSyntax;
+            if (identifierNameSyntax == null)
                 throw new NotSupportedException();
-            }
-            /// IdentifierNameSyntax 
+            var name = _Name(identifierNameSyntax);
+            if (name.IsGeneric)
+                throw new NotSupportedException();
+            var matchTypes = context.MatchTypes(name.BaseName, 0);
+            if (matchTypes.Length == 1)
+                return matchTypes[0];
             throw new NotSupportedException();
         }
 
-        private IValue ImplicitConvert(IValue v, Roslyn.Compilers.CSharp.TypeInfo info)
+        private IValue ImplicitConvert(IValue v, ModelExtensions2.MyInfo info)
         {
-            if (info.ImplicitConversion == null || info.ImplicitConversion.Method == null)
+            var methodSymbol = info.GetMethodSymbol();
+            if (methodSymbol == null)
                 return v;
-            var m = context.Roslyn_ResolveMethod(info.ImplicitConversion.Method);
+            var m = context.Roslyn_ResolveMethod(methodSymbol);
             var a = new CsharpMethodCallExpression(m as MethodInfo, null,
-                new FunctionArgument[] { new FunctionArgument("", v) },
+                new[] { new FunctionArgument("", v) },
                 null, false
                 );
             return a;
@@ -1147,11 +1153,15 @@ namespace Lang.Cs.Compiler.Visitors
 
         private IValue internalVisit_AssignWithPrefix(BinaryExpressionSyntax node, string _operator)
         {
-            var symbolInfo = state.Context.RoslynModel.GetSymbolInfo(node);
+            var symbolInfo = ModelExtensions.GetSymbolInfo(state.Context.RoslynModel, node);
             if (symbolInfo.Symbol != null)
                 throw new NotSupportedException();
-            var ti = state.Context.RoslynModel.GetTypeInfo(node);
-            if (!ti.ImplicitConversion.IsIdentity)
+            //TypeInfo ti = ModelExtensions.GetTypeInfo(state.Context.RoslynModel, node);
+
+            //TypeInfo eti = ModelExtensions.GetTypeInfo(state.Context.RoslynModel, node.Expression);
+            var eti2 = state.Context.RoslynModel.GetTypeInfo2(node);
+           
+            if (!eti2.Conversion1.IsIdentity)
                 throw new NotSupportedException();
             //if (symbolInfo.Symbol.IsImplicitlyDeclared)
             //    throw new Exception();
@@ -1173,7 +1183,7 @@ namespace Lang.Cs.Compiler.Visitors
         //    var g = new BinaryOperatorExpression(l, r, _operator, typeof(bool), null);
         //    return g;
         //}
-        private IValue internalVisitTextIdentifier(string identifier)
+        private IValue InternalVisitTextIdentifier(string identifier)
         {
             var t = context.MatchTypes(identifier, 0);
             if (t.Length > 2)
@@ -1196,17 +1206,9 @@ namespace Lang.Cs.Compiler.Visitors
                 {
                     var tmp = fi[0];
                     if (tmp.IsStatic)
-                    {
                         throw new NotSupportedException();
-                        // var a = new ClassFieldAccessExpression(fi[0]);
-                        //  return Simplify(a);
-                    }
-                    else
-                    {
-                        var a = new InstanceFieldAccessExpression(fi[0], new ThisExpression(state.CurrentType));
-                        return Simplify(a);
-
-                    }
+                    var a = new InstanceFieldAccessExpression(fi[0], new ThisExpression(state.CurrentType));
+                    return Simplify(a);
                 }
 
             }
@@ -1216,10 +1218,9 @@ namespace Lang.Cs.Compiler.Visitors
                     return new TypeValue(aaaa[0]);
             }
             return new UnknownIdentifierValue(identifier, new IValue[0]);
-            throw new NotImplementedException();
         }
 
-        IValue Simplify(IValue src)
+        static IValue Simplify(IValue src)
         {
             return ExpressionConverterVisitor.Visit(src);
         }
@@ -1234,7 +1235,7 @@ namespace Lang.Cs.Compiler.Visitors
 
         #region Properties
 
-        private SemanticModel model
+        private SemanticModel Model
         {
             get
             {

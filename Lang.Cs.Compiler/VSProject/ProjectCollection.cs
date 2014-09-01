@@ -1,10 +1,10 @@
-﻿using System;
+﻿#if OLD
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
+using Microsoft.CodeAnalysis;
 
 namespace Lang.Cs.Compiler.VSProject
 {
@@ -58,12 +58,12 @@ namespace Lang.Cs.Compiler.VSProject
 
         void Add(Project project, List<Project> list)
         {
-            if (list.Where(Q => Q.ProjectGuid == project.ProjectGuid).Any()) return;
+            if (list.Any(Q => Q.ProjectGuid == project.ProjectGuid)) return;
             foreach (var rp in project.ProjectReferences)
             {
                 var requestedGuid = rp.ProjectGuid;
-                if (list.Where(ii => requestedGuid == ii.ProjectGuid).Any()) continue;
-                var item = items.Where(ii => ii.ProjectGuid == requestedGuid).FirstOrDefault();
+                if (list.Any(ii => requestedGuid == ii.ProjectGuid)) continue;
+                var item = items.FirstOrDefault(ii => ii.ProjectGuid == requestedGuid);
                 Add(item, list);
             }
             list.Add(project);
@@ -73,7 +73,7 @@ namespace Lang.Cs.Compiler.VSProject
         public void Load(string csProjFilename)
         {
             VSProject.Project project = VSProject.Project.Load(csProjFilename);
-            if (items.Where(i => i.AssemblyName == project.AssemblyName).Any())
+            if (items.Any(i => i.AssemblyName == project.AssemblyName))
                 return;
 
             items.Add(project);
@@ -182,3 +182,5 @@ namespace Lang.Cs.Compiler.VSProject
 
     }
 }
+
+#endif

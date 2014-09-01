@@ -140,10 +140,15 @@ namespace Lang.Php.Compiler
 #endif
             {
                 classTranslations.Clear();
-                var classes = GetClasses().Select(i => i.FullName).Distinct().ToArray();
+               // var classes = GetClasses().Select(i => i.FullName).Distinct().ToArray();
 
                 foreach (var type in KnownTypes.Where(i => !i.IsEnum))
-                    GetOrMakeTranslationInfo(type); // it is created and stored in classTranslations                  
+                    GetOrMakeTranslationInfo(type); // it is created and stored in classTranslations         
+                //var a = KnownTypes.Where(i => i.IsInterface).ToArray();
+                //var ii = GetClasses().Select(i => i.FullName).Distinct().ToArray();
+
+                //foreach (var type in KnownTypes.Where(i => !i.IsEnum))
+                 //   GetOrMakeTranslationInfo(type); // it is created and stored in classTranslations        
             }
         }
 
@@ -166,6 +171,20 @@ namespace Lang.Php.Compiler
                     from classDeclaration in nsDeclaration.Members.OfType<ClassDeclaration>()
                     let fullName = nsDeclaration.Name + "." + classDeclaration.Name
                     select new FullClassDeclaration(fullName, classDeclaration, nsDeclaration);
+            return q.ToArray();
+        }
+
+        /// <summary>
+        /// Zwraca listę klas w sparsowanych źródłach
+        /// </summary>
+        /// <returns></returns>
+        public FullInterfaceDeclaration[] GetInterfaces()
+        {
+            var q = from _compiled_ in Compiled
+                    from nsDeclaration in _compiled_.NamespaceDeclarations
+                    from classDeclaration in nsDeclaration.Members.OfType<InterfaceDeclaration>()
+                    let fullName = nsDeclaration.Name + "." + classDeclaration.Name
+                    select new FullInterfaceDeclaration(fullName, classDeclaration, nsDeclaration);
             return q.ToArray();
         }
 

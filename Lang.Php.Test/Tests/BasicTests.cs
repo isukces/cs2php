@@ -1,14 +1,5 @@
-﻿using Lang.Php.Compiler;
-using Lang.Php.Compiler.Source;
-using Lang.Php.Compiler.Translator;
-using Roslyn.Compilers;
-using Roslyn.Compilers.CSharp;
-using System;
-using System.Collections.Generic;
-using System.IO;
+﻿using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Xunit;
 
 namespace Lang.Php.Test.Tests

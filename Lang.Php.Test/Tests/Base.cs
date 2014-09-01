@@ -2,14 +2,10 @@
 using Lang.Php.Compiler;
 using Lang.Php.Compiler.Source;
 using Lang.Php.Compiler.Translator;
-using Roslyn.Compilers;
-using Roslyn.Compilers.CSharp;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using Xunit;
 
 namespace Lang.Php.Test.Tests
@@ -116,7 +112,7 @@ namespace Lang.Php.Test.Tests
                 {
                     // ... will be replaced by reference to dll from compiler base dir
                     // I know - compilation libraries should be loaded into separate application domain
-                    var remove = comp.Project.MetadataReferences.Where(i => i.Display.EndsWith(r + ".dll")).FirstOrDefault();
+                    var remove = comp.Project.MetadataReferences.FirstOrDefault(i => i.Display.EndsWith(r + ".dll"));
                     if (remove != null)
                         comp.RemoveMetadataReferences(remove);
                 }

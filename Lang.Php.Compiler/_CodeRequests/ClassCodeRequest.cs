@@ -1,9 +1,4 @@
 ﻿using Lang.Php.Compiler.Source;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Lang.Php.Compiler
 {
@@ -14,7 +9,7 @@ namespace Lang.Php.Compiler
     implement Constructor *
     implement ToString ClassCodeRequest ##PhpClassName##
     
-    property ClassName PhpClassName 
+    property ClassName PhpQualifiedName 
     smartClassEnd
     */
     
@@ -24,7 +19,7 @@ namespace Lang.Php.Compiler
 }
 
 
-// -----:::::##### smartClass embedded code begin #####:::::----- generated 2013-11-20 22:12
+// -----:::::##### smartClass embedded code begin #####:::::----- generated 2014-09-01 23:22
 // File generated automatically ver 2013-07-10 08:43
 // Smartclass.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0c4d5d36fb5eb4ac
 namespace Lang.Php.Compiler
@@ -52,11 +47,11 @@ namespace Lang.Php.Compiler
         #region Constructors
         /// <summary>
         /// Tworzy instancję obiektu
-        /// <param name="ClassName"></param>
+        /// <param name="className"></param>
         /// </summary>
-        public ClassCodeRequest(PhpQualifiedName ClassName)
+        public ClassCodeRequest(PhpQualifiedName className)
         {
-            this.ClassName = ClassName;
+            ClassName = className;
         }
 
         #endregion Constructors
@@ -65,7 +60,7 @@ namespace Lang.Php.Compiler
         /// <summary>
         /// Nazwa własności ClassName; 
         /// </summary>
-        public const string PROPERTYNAME_CLASSNAME = "ClassName";
+        public const string PropertyNameClassName = "ClassName";
         #endregion Constants
 
         #region Methods
@@ -88,14 +83,14 @@ namespace Lang.Php.Compiler
         {
             get
             {
-                return className;
+                return _className;
             }
             set
             {
-                className = value;
+                _className = value;
             }
         }
-        private PhpQualifiedName className;
+        private PhpQualifiedName _className;
         #endregion Properties
 
     }

@@ -5,7 +5,6 @@
 <#@ import namespace="System.Collections.Generic" #>
 <#@ output extension=".cs" #>
 using Lang.Php.Compiler.Source;
-using Roslyn.Compilers.CSharp;
 using System;
 using System.Collections.Generic;
 using System.Linq;

@@ -4,25 +4,23 @@
 <#@ import namespace="System.Linq" #>
 <#@ import namespace="System.Collections.Generic" #>
 <#@ output extension=".cs" #>
-using Roslyn.Compilers.CSharp;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Lang.Cs.Compiler.Visitors
 {
     public class CodeVisitor<T>
     {
 	    public LangParseContext context = new LangParseContext();
-        public bool ThrowNotImplementedException = true;
+        public bool throwNotImplementedException = true;
 
         public virtual T Visit(SyntaxNode node)
         {
 			if (node == null)
 				return VisitNull();
-            switch (node.Kind)
+            switch (node.CSharpKind())
             {
             <#
             foreach(var i in GetDirectives()) {
@@ -31,13 +29,13 @@ namespace Lang.Cs.Compiler.Visitors
                       return Visit<#=j[0]#>(node as <#=j[1]#>);
             <#
             }
-            #>    default: throw new NotSupportedException(node.Kind.ToString() + "," + node.GetType().Name);
+            #>    default: throw new NotSupportedException(node.CSharpKind().ToString() + "," + node.GetType().Name);
             }
         }
 
 		protected virtual T VisitNull()
         {
-            if (ThrowNotImplementedException)
+            if (throwNotImplementedException)
                 throw new NotImplementedException(string.Format("Method {0} is not supported", "VisitXmlAttribute"));
             return default(T);
         }
@@ -49,8 +47,8 @@ namespace Lang.Cs.Compiler.Visitors
 
         protected virtual T Visit<#=j[0]#>(<#=j[1]#> node)
         {
-            if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "Visit<#=j[0]#>", this.GetType().FullName));
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "Visit<#=j[0]#>", GetType().FullName));
             return default(T);
         }
 <#
@@ -69,10 +67,10 @@ string[] GetDirectives() {
 		"Block,BlockSyntax",
 		"Argument,ArgumentSyntax",
 		"GenericName,GenericNameSyntax",
-		"ForEachStatement,Roslyn.Compilers.CSharp.ForEachStatementSyntax"
+		"ForEachStatement,ForEachStatementSyntax"
     };
     var auto= new string[] {
-"DocumentationCommentTrivia,DocumentationCommentTriviaSyntax",
+// "DocumentationCommentTrivia,DocumentationCommentTriviaSyntax",
 "IfDirectiveTrivia,IfDirectiveTriviaSyntax",
 "ElifDirectiveTrivia,ElifDirectiveTriviaSyntax",
 "ElseDirectiveTrivia,ElseDirectiveTriviaSyntax",
@@ -92,7 +90,7 @@ string[] GetDirectives() {
 "XmlElementStartTag,XmlElementStartTagSyntax",
 "XmlElementEndTag,XmlElementEndTagSyntax",
 "XmlEmptyElement,XmlEmptyElementSyntax",
-"XmlAttribute,XmlAttributeSyntax",
+// "XmlAttribute,XmlAttributeSyntax",
 "XmlName,XmlNameSyntax",
 "XmlPrefix,XmlPrefixSyntax",
 "XmlText,XmlTextSyntax",
@@ -125,7 +123,7 @@ string[] GetDirectives() {
 "ImplicitArrayCreationExpression,ImplicitArrayCreationExpressionSyntax",
 "StackAllocArrayCreationExpression,StackAllocArrayCreationExpressionSyntax",
 "OmittedArraySizeExpression,OmittedArraySizeExpressionSyntax",
-"MemberAccessExpression,MemberAccessExpressionSyntax",
+"SimpleMemberAccessExpression,MemberAccessExpressionSyntax",
 "ThisExpression,ThisExpressionSyntax",
 "BaseExpression,BaseExpressionSyntax",
 "TypeOfExpression,TypeOfExpressionSyntax",
@@ -210,7 +208,7 @@ string[] GetDirectives() {
 "GetAccessorDeclaration,AccessorDeclarationSyntax",
 "SetAccessorDeclaration,AccessorDeclarationSyntax",
 "DivideExpression,BinaryExpressionSyntax",
-"AssignExpression,BinaryExpressionSyntax",
+// "AssignExpression,BinaryExpressionSyntax",
 "AddExpression,BinaryExpressionSyntax",
 "FalseLiteralExpression,LiteralExpressionSyntax",
 "CharacterLiteralExpression,LiteralExpressionSyntax",
@@ -219,14 +217,14 @@ string[] GetDirectives() {
 "LessThanExpression,BinaryExpressionSyntax",
 "PostIncrementExpression,PostfixUnaryExpressionSyntax",
 "GreaterThanExpression,BinaryExpressionSyntax",
-"NegateExpression,PrefixUnaryExpressionSyntax",
+//"NegateExpression,PrefixUnaryExpressionSyntax",
 "NullLiteralExpression,LiteralExpressionSyntax",
 "LogicalAndExpression,BinaryExpressionSyntax", 
-"AddAssignExpression,BinaryExpressionSyntax",
+// "AddAssignExpression,BinaryExpressionSyntax",
 "AsExpression,BinaryExpressionSyntax",
 "LogicalNotExpression,PrefixUnaryExpressionSyntax",
 "SubtractExpression,BinaryExpressionSyntax",
-"SubtractAssignExpression,BinaryExpressionSyntax",
+// "SubtractAssignExpression,BinaryExpressionSyntax",
 "GreaterThanOrEqualExpression,BinaryExpressionSyntax",
 "LessThanOrEqualExpression,BinaryExpressionSyntax",
 "LogicalOrExpression,BinaryExpressionSyntax",
@@ -239,7 +237,7 @@ string[] GetDirectives() {
 "BitwiseOrExpression,BinaryExpressionSyntax",
 "ArrayInitializerExpression,InitializerExpressionSyntax",
 "BitwiseAndExpression,BinaryExpressionSyntax",
-"MultiplyAssignExpression,BinaryExpressionSyntax",
+// "MultiplyAssignExpression,BinaryExpressionSyntax",
 "CaseSwitchLabel,SwitchLabelSyntax",
 "DefaultSwitchLabel,SwitchLabelSyntax"
 

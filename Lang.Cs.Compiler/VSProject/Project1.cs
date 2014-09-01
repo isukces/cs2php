@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using System.Linq;
+using Microsoft.CodeAnalysis;
 
 namespace Lang.Cs.Compiler.VSProject
 {
@@ -41,7 +42,7 @@ namespace Lang.Cs.Compiler.VSProject
     smartClassEnd
     */
 
-    public partial class Project
+    public partial class Project1
     {
         public Assembly[] LoadReferencedAssemblies(List<CompileResult> compiled)
         {
@@ -64,11 +65,11 @@ namespace Lang.Cs.Compiler.VSProject
 
         // Public Methods 
 
-        public static Project Load(string filename)
+        public static Project1 Load(string filename)
         {
-            Project p = new Project();
+            var p = new Project1();
             p.workingDirectory = new FileInfo(filename).Directory;
-            XDocument doc = XDocument.Load(filename);
+            var doc = XDocument.Load(filename);
             var ns = doc.Root.Name.Namespace;
 
             foreach (var i in doc.Root.Elements(ns + "PropertyGroup"))
@@ -203,7 +204,7 @@ namespace Lang.Cs.Compiler.VSProject
 // Smartclass.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0c4d5d36fb5eb4ac
 namespace Lang.Cs.Compiler.VSProject
 {
-    public partial class Project
+    public partial class Project1
     {
         /*
         /// <summary>

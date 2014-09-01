@@ -24,11 +24,18 @@ namespace Lang.Php
         {
 
         }
-        [DirectCall("opendir")]
+        [DirectCall("mkdir")]
         public static PhpDirectory Make(string dirName)
         {           
             return new RuntimePhpDirectory(dirName);
         }
+
+        [DirectCall("mkdir")]
+        public static PhpDirectory Make(string dirName, UnixFilePermissions perm)
+        {
+            return new RuntimePhpDirectory(dirName);
+        }
+
         [DirectCall("readdir", "0,this", 0)]
         public virtual bool ReadDir(out PhpDirectoryEntry file)
         {

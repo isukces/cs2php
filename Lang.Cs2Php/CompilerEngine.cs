@@ -1,11 +1,10 @@
 ﻿using Lang.Php.Compiler;
-using Roslyn.Compilers;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
+using Microsoft.CodeAnalysis;
 
 namespace Lang.Cs2Php
 {
@@ -38,10 +37,10 @@ namespace Lang.Cs2Php
 
         // Public Methods 
 
-        public static void WriteCompileError(Roslyn.Compilers.CSharp.Diagnostic diag)
+        private static void WriteCompileError(Diagnostic diag)
         {
-            var info = diag.Info;
-            switch (info.Severity)
+            // var info = diag.;
+            switch (diag.Severity)
             {
                 case DiagnosticSeverity.Warning:
                     Console.ForegroundColor = ConsoleColor.DarkYellow;
@@ -55,7 +54,7 @@ namespace Lang.Cs2Php
                     return;
             }
             Console.ResetColor();
-            Console.WriteLine(": " + info.GetMessage());
+            Console.WriteLine(": " + diag.GetMessage());
         }
 
         #endregion Static Methods
@@ -72,9 +71,11 @@ namespace Lang.Cs2Php
 
         public void Compile()
         {
-            Cs2PhpCompiler comp = new Cs2PhpCompiler();
-            comp.VerboseToConsole = true;
-            comp.ThrowExceptions = true;
+            var comp = new Cs2PhpCompiler
+            {
+                VerboseToConsole = true, 
+                ThrowExceptions = true
+            };
             // Console.WriteLine("Try to load " + csProject);
             comp.LoadProject(csProject, configuration);
 
@@ -83,7 +84,7 @@ namespace Lang.Cs2Php
             {
                 // ... will be replaced by reference to dll from compiler base dir
                 // I know - compilation libraries should be loaded into separate application domain
-                var remove = comp.Project.MetadataReferences.Where(i => i.Display.EndsWith("Lang.Php.dll")).FirstOrDefault();
+                var remove = comp.Project.MetadataReferences.FirstOrDefault(i => i.Display.EndsWith("Lang.Php.dll"));
                 if (remove != null)
                     comp.RemoveMetadataReferences(remove);
             }
@@ -92,10 +93,10 @@ namespace Lang.Cs2Php
             #region We have to remove and add again references - strange
             {
                 // in other cases some referenced libraries are ignored
-                var refToRemove = comp.Project.MetadataReferences.OfType<MetadataFileReference>().ToList();
+                List<MetadataFileReference> refToRemove = comp.Project.MetadataReferences.OfType<MetadataFileReference>().ToList();
                 foreach (var i in refToRemove)
                     comp.RemoveMetadataReferences(i);
-                var ref1 = refToRemove.Select(i => i.FullPath).Union(referenced).ToList();
+                var ref1 = refToRemove.Select(i => i.FilePath).Union(referenced).ToList();
                 ref1.Add(Path.Combine(ExeDir, "Lang.Php.dll"));
                 filenames = ref1.Distinct().ToArray();
             }
@@ -104,13 +105,15 @@ namespace Lang.Cs2Php
             {
                 var g = new MetadataFileReference(fileName, MetadataReferenceProperties.Assembly);
                 comp.AddMetadataReferences(g);
-                // Console.WriteLine("  Add reference     {0}", g.Display);
+#if DEBUG
+                Console.WriteLine("  Add reference     {0}", g.Display);                
+#endif
             }
             Swap(comp);
 
-            Dictionary<string, KnownConstInfo> referencedLibsPaths = new Dictionary<string, KnownConstInfo>();
+            // Dictionary<string, KnownConstInfo> referencedLibsPaths = new Dictionary<string, KnownConstInfo>();
 
-            List<Assembly> loadedAssemblies = new List<Assembly>();
+            var loadedAssemblies = new List<Assembly>();
 
             foreach (var @ref in comp.Project.MetadataReferences)
             {
@@ -127,22 +130,19 @@ namespace Lang.Cs2Php
                     comp.TranslationAssemblies.Add(a);
                 }
             }
-            comp.TranslationAssemblies.Add(typeof(Lang.Php.Framework.Extension).Assembly);
-            comp.TranslationAssemblies.Add(typeof(Lang.Php.Compiler.Translator.Translator).Assembly);
+            comp.TranslationAssemblies.Add(typeof(Php.Framework.Extension).Assembly);
+            comp.TranslationAssemblies.Add(typeof(Php.Compiler.Translator.Translator).Assembly);
 
             //  comp.TranslationAssemblies.Add(typeof(Lang.Php.Wp.Compile.ModuleProcessor).Assembly);
 
-            /// DebugDisplayReferences(comp);
+            // DebugDisplayReferences(comp);
             var emitResult = comp.Compile2PhpAndEmit(outDir, loadedAssemblies, referencedPhpLibsLocations);
-            if (!emitResult.Success)
-            {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("Compilation errors:");
-                Console.ResetColor();
-                foreach (var i in emitResult.Diagnostics)
-                    WriteCompileError(i);
-            }
-
+            if (emitResult.Success) return;
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("Compilation errors:");
+            Console.ResetColor();
+            foreach (var i in emitResult.Diagnostics)
+                WriteCompileError(i);
         }
         // Private Methods 
 
@@ -150,25 +150,27 @@ namespace Lang.Cs2Php
         /// Zamienia deklarowane referencje na te, które są w katalogu aplikacji
         /// </summary>
         /// <param name="comp"></param>
-        private void Swap(Cs2PhpCompiler comp)
+        private static void Swap(Cs2PhpCompiler comp)
         {
             var aaa = typeof(Program).Assembly.GetReferencedAssemblies();
             var bbb = new DirectoryInfo(ExeDir).GetFiles("*.*");
-            var h = comp.Project.MetadataReferences.OfType<MetadataFileReference>().Select(i => new { REF = i, fn = new FileInfo(i.FullPath).Name.ToLower() }).ToArray();
+            var h = comp.Project.MetadataReferences.OfType<MetadataFileReference>().Select(i => new
+            {
+                REF = i, 
+                fn = new FileInfo(i.FilePath).Name.ToLower()
+            }).ToArray();
 
             foreach (var hh in h)
             {
-                var o = bbb.Where(i => i.Name.ToLower() == hh.fn).FirstOrDefault();
-                if (o != null)
-                {
-                    var remove = hh.REF;
-                    var add = new MetadataFileReference(o.FullName, MetadataReferenceProperties.Assembly);
-                    if (remove.Display == add.Display)
-                        continue;
-                    comp.RemoveMetadataReferences(remove);
-                    comp.AddMetadataReferences(add);
-                    Console.WriteLine("Swap\r\n    {0}\r\n    {1}", remove.Display, add.Display);
-                }
+                var o = bbb.FirstOrDefault(i => i.Name.ToLower() == hh.fn);
+                if (o == null) continue;
+                var remove = hh.REF;
+                var add = new MetadataFileReference(o.FullName, MetadataReferenceProperties.Assembly);
+                if (remove.Display == add.Display)
+                    continue;
+                comp.RemoveMetadataReferences(remove);
+                comp.AddMetadataReferences(add);
+                Console.WriteLine("Swap\r\n    {0}\r\n    {1}", remove.Display, add.Display);
             }
         }
 
