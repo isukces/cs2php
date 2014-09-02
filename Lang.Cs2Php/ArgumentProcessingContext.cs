@@ -2,9 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace Lang.Cs2Php
 {
@@ -27,35 +25,35 @@ namespace Lang.Cs2Php
 
         // Public Methods 
 
-        public void Parse(string[] args)
+        public void Parse(IEnumerable<string> args)
         {
 
             foreach (var arg in args)
                 ProcessArgument(arg);
-            if (!string.IsNullOrEmpty(command))
-                throw new Exception("command " + command + " has no parameter(s)");
+            if (!string.IsNullOrEmpty(_command))
+                throw new Exception("command " + _command + " has no parameter(s)");
 
         }
 
-        public string ResolveFilename(string filename)
+        private string ResolveFilename(string filename)
         {
             bool doThisAgain ;
             do
             {
                 doThisAgain = false;
-                Regex re = new Regex("(%([A-Z]+)%)", RegexOptions.IgnoreCase);
-                filename = re.Replace(filename, (m) =>
+                var regex = new Regex("(%([A-Z]+)%)", RegexOptions.IgnoreCase);
+                filename = regex.Replace(filename, match =>
                 {
                     string t;
-                    names.TryGetValue(m.Groups[2].Value, out t);
+                    _names.TryGetValue(match.Groups[2].Value, out t);
                     doThisAgain = true;
                     return t;
                 });
                
             } while (doThisAgain);
             
-            if (!string.IsNullOrEmpty(currentDir))
-                filename = Path.Combine(currentDir, filename);
+            if (!string.IsNullOrEmpty(_currentDir))
+                filename = Path.Combine(_currentDir, filename);
             filename = new FileInfo(filename).FullName;
             return filename;
         }
@@ -65,62 +63,62 @@ namespace Lang.Cs2Php
         {
             if (arg.StartsWith("-"))
             {
-                command = arg.Substring(1).ToLower();
+                _command = arg.Substring(1).ToLower();
                 return;
             }
-            if (string.IsNullOrEmpty(command))
+            if (string.IsNullOrEmpty(_command))
             {
                 files.Add(ResolveFilename(arg));
                 return;
             }
-            switch (command)
+            switch (_command)
             {
                 case "r":
                     var fileName = ResolveFilename(arg);
                     if (!File.Exists(fileName))
                         throw new Exception("Referenced library " + fileName + " doesn't exist");
                     engine.Referenced.Add(fileName);
-                    command = null;
+                    _command = null;
                     break;
                 case "t":
                     fileName = ResolveFilename(arg);
                     if (!File.Exists(fileName))
                         throw new Exception("Referenced library " + fileName + " doesn't exist");
                     engine.TranlationHelpers.Add(fileName);
-                    command = null;
+                    _command = null;
                     break;
                 case "lib":
                     {
-                        var a = arg.IndexOf("=");
-                        if (a < 0)
+                        var indexOfEqualSign = arg.IndexOf("=", StringComparison.Ordinal);
+                        if (indexOfEqualSign < 0)
                             throw new Exception("Invalid data for 'lib' option. Use 'lib libraryname=path'.");
-                        var lib = arg.Substring(0, a).Trim();
-                        var path = arg.Substring(a + 1).Trim();
+                        var lib = arg.Substring(0, indexOfEqualSign).Trim();
+                        var path = arg.Substring(indexOfEqualSign + 1).Trim();
                         engine.ReferencedPhpLibsLocations[lib] = ResolveFilename(path);
                     }
-                    command = null;
+                    _command = null;
                     break;
                 case "conf":
                     engine.Configuration = arg;
-                    command = null;
+                    _command = null;
                     break;
                 case "f":
                     ProcessFile(ResolveFilename(arg));
-                    command = null;
+                    _command = null;
                     break;
                 default:
-                    throw new Exception("Unknown option " + command);
+                    throw new Exception("Unknown option " + _command);
 
             }
         }
 
         void ProcessFile(string filename)
         {
-            var c = command; command = "";
-            var cd = currentDir;
+            var c = _command; _command = "";
+            var cd = _currentDir;
             try
             {
-                currentDir = new FileInfo(filename).DirectoryName;
+                _currentDir = new FileInfo(filename).DirectoryName;
                 var lines = (from i in File.ReadAllLines(filename)
                              let it = (i ?? "").Trim()
                              where !string.IsNullOrEmpty(it) && !it.StartsWith(";")
@@ -130,21 +128,21 @@ namespace Lang.Cs2Php
                 {
                     if (line.StartsWith("set "))
                     {
-                        Regex re = new Regex("^set\\s+([A-Z]+)\\s*=\\s*(.*)$", RegexOptions.IgnoreCase);
-                        var m = re.Match(line);
-                        if (!m.Success)
+                        var regex = new Regex("^set\\s+([A-Z]+)\\s*=\\s*(.*)$", RegexOptions.IgnoreCase);
+                        var match = regex.Match(line);
+                        if (!match.Success)
                             throw new Exception("Syntax error in \r\n" + line);
-                        names[m.Groups[1].Value.Trim()] = m.Groups[2].Value.Trim();
+                        _names[match.Groups[1].Value.Trim()] = match.Groups[2].Value.Trim();
                         continue;
                     }
                     if (line.StartsWith("-"))
                     {
-                        Regex re = new Regex("^(-[A-Z]+)\\s+(.*)$", RegexOptions.IgnoreCase);
-                        var m = re.Match(line);
-                        if (!m.Success)
+                        var regex = new Regex("^(-[A-Z]+)\\s+(.*)$", RegexOptions.IgnoreCase);
+                        var match = regex.Match(line);
+                        if (!match.Success)
                             throw new Exception("Syntax error in \r\n" + line);
-                        ProcessArgument(m.Groups[1].Value);
-                        ProcessArgument(m.Groups[2].Value);
+                        ProcessArgument(match.Groups[1].Value);
+                        ProcessArgument(match.Groups[2].Value);
                     }
                     else
                     {
@@ -154,8 +152,8 @@ namespace Lang.Cs2Php
             }
             finally
             {
-                command = c;
-                currentDir = cd;
+                _command = c;
+                _currentDir = cd;
             }
         }
 
@@ -163,11 +161,11 @@ namespace Lang.Cs2Php
 
         #region Fields
 
-        string command = "";
-        string currentDir;
-        public CompilerEngine engine = new CompilerEngine();
-        public List<string> files = new List<string>();
-        Dictionary<string, string> names = new Dictionary<string, string>();
+        string _command = "";
+        string _currentDir;
+        public readonly CompilerEngine engine = new CompilerEngine();
+        public readonly List<string> files = new List<string>();
+        readonly Dictionary<string, string> _names = new Dictionary<string, string>();
 
         #endregion Fields
     }

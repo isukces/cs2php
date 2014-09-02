@@ -142,12 +142,11 @@ namespace Lang.Php.Compiler
             _project = _solution.Projects.Single(a => a.Id == _project.Id);
         }
 
-        public EmitResult Compile2PhpAndEmit(string outDir, IEnumerable<Assembly> assToScan, Dictionary<string, string> referencedPhpLibsLocations)
+        public EmitResult Compile2PhpAndEmit(AssemblySandbox sandbox, string outDir, IEnumerable<Assembly> assToScan, Dictionary<string, string> referencedPhpLibsLocations)
         {
-            EmitResult result;
             if (_verboseToConsole)
                 Console.WriteLine("Compilation");
-            GetCompilation(out result);
+            var result = GetCompilation(sandbox);
             if (!result.Success)
                 return result;
             GreenOk();
@@ -213,8 +212,9 @@ namespace Lang.Php.Compiler
             GreenOk();
         }
 
-        protected TranslationInfo ParseCsSource()
+        public TranslationInfo ParseCsSource()
         {
+            // must be public
             var knownTypes = GetKnownTypes();
 
             CheckRequiredTranslator();
@@ -333,23 +333,44 @@ namespace Lang.Php.Compiler
                         Console.WriteLine("  ProjectReferences {0}", i.ProjectId);
                 }
         */
-        protected Compilation GetCompilation(out EmitResult result)
+
+        public EmitResult GetCompilation(AssemblySandbox sandbox)
         {
+            // must be public !!!!!!!!!!
             _projectCompilation = _project.GetCompilationAsync().Result;
             _projectCompilation =
                 _projectCompilation.WithOptions(new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
             _projectCompilation = _projectCompilation.WithReferences(_project.MetadataReferences);
             foreach (var i in _projectCompilation.References)
                 Console.WriteLine("   linked with {0}", i.Display);
-            _compiledAssembly = RoslynHelper.CompileAssembly(_projectCompilation, out result);
-            return _projectCompilation;
+            EmitResult result;
+            _compiledAssembly = sandbox.CompileAssembly(_projectCompilation, out result);
+            return result;
         }
 
         private Type[] GetKnownTypes()
         {
+            AppDomain d = AppDomain.CreateDomain(Guid.NewGuid().ToString());
+            try
+            {
+                Console.WriteLine(AppDomain.CurrentDomain.FriendlyName);
+                Console.WriteLine(d.FriendlyName);
+
+
+                if (_compiledAssembly == null)
+                    throw new Exception("Assembly is not compiled yet");
+                List<Assembly> assemblies1 = _project.MetadataReferences.Select(i => d.Load(i.Display)).ToList();
+                assemblies1.Add(_compiledAssembly);
+
+            }
+            finally
+            {
+                AppDomain.Unload(d);
+            }
             if (_compiledAssembly == null)
                 throw new Exception("Assembly is not compiled yet");
-            var assemblies = _project.MetadataReferences.Select(i => Assembly.LoadFile(i.Display)).ToList();
+            // todo:use Application domain instead of Assembly.Load
+            List<Assembly> assemblies = _project.MetadataReferences.Select(i => Assembly.LoadFile(i.Display)).ToList();
             assemblies.Add(_compiledAssembly);
             return CompileState.GetAllTypes(assemblies);
         }

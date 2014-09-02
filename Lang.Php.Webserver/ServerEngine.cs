@@ -93,6 +93,7 @@ namespace Lang.Php.Webserver
 
         public void Load(string n)
         {
+            // todo:use Application domain instead of Assembly.Load
             var loadedAssembly = Assembly.LoadFile(n);
             assemblies.Add(loadedAssembly);
             var types = loadedAssembly.GetTypes();

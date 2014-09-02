@@ -6,6 +6,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Text;
+using Microsoft.CodeAnalysis;
 using Xunit;
 
 namespace Lang.Php.Test.Tests
@@ -17,7 +18,7 @@ namespace Lang.Php.Test.Tests
 
         // Protected Methods 
 
-        protected static string GetCode(PhpClassMethodDefinition method)
+        private static string GetCode(PhpClassMethodDefinition method)
         {
             var emiter = new PhpSourceCodeEmiter();
             var writer = new PhpSourceCodeWriter();
@@ -26,25 +27,26 @@ namespace Lang.Php.Test.Tests
             return writer.GetCode(true).Trim();
         }
 
-        protected static void MethodTranslation(string MODULE, string CLASS, string METHOD)
+        protected static void MethodTranslation(string module, string xClass, string methodName)
         {
-            string ExpectedCode, translatedCode, shortFilename;
+            if (methodName == null) throw new ArgumentNullException("methodName");
+            string expectedCode, translatedCode, shortFilename;
             {
-                var translator = Base.PrepareTranslator();
+                var translator = PrepareTranslator();
                 Console.WriteLine("We have module " + translator.Modules.First().Name.Name);
-                var mod = translator.Modules.Where(i => i.Name.Name == MODULE).First();
+                var mod = translator.Modules.First(i => i.Name.Name == module);
                 var cl = mod.Classes[0];
-                Assert.True(cl.Name == CLASS, "Invalid class name translation - attribute ScriptName");
-                var method = cl.Methods.Where(i => i.Name == METHOD).First();
+                Assert.True(cl.Name == xClass, "Invalid class name translation - attribute ScriptName");
+                var method = cl.Methods.First(i => i.Name == methodName);
                 translatedCode = GetCode(method);
             }
 
             {
-                shortFilename = string.Format("{0}_{1}.txt", CLASS.Replace("\\", ""), METHOD);
+                shortFilename = string.Format("{0}_{1}.txt", xClass.Replace("\\", ""), methodName);
                 var resourceName = "Lang.Php.Test.php." + shortFilename;
                 try
                 {
-                    using (MemoryStream ms = new MemoryStream())
+                    using (var ms = new MemoryStream())
                     {
                         using (var src = typeof(Base).Assembly.GetManifestResourceStream(resourceName))
                         {
@@ -52,7 +54,7 @@ namespace Lang.Php.Test.Tests
                                 throw new Exception("Unable to load resource " + resourceName);
                             src.CopyTo(ms);
                             var b = ms.ToArray();
-                            ExpectedCode = Encoding.UTF8.GetString(b);
+                            expectedCode = Encoding.UTF8.GetString(b);
                         }
                     }
                 }
@@ -64,10 +66,10 @@ namespace Lang.Php.Test.Tests
                 }
             }
 
-            if (ExpectedCode != translatedCode)
+            if (expectedCode != translatedCode)
                 Save(translatedCode, shortFilename);
 
-            Assert.True(ExpectedCode == translatedCode, "Invalid translation");
+            Assert.True(expectedCode == translatedCode, "Invalid translation");
         }
         // Private Methods 
 
@@ -75,20 +77,19 @@ namespace Lang.Php.Test.Tests
         {
 #if WRITE_CODE
             var fi = new FileInfo(Path.Combine(Directory.GetCurrentDirectory(), "..\\..\\php\\new\\" + shortFilename));
-            fi.Directory.Create();
-            System.IO.File.WriteAllText(fi.FullName, translatedCode);
+            if (fi.Directory != null) 
+                fi.Directory.Create();
+            File.WriteAllText(fi.FullName, translatedCode);
 #endif
         }
         // Internal Methods 
 
         internal static Translator PrepareTranslator()
         {
-            if (translator != null)
-                return translator;
+            if (_translator != null)
+                return _translator;
             var csProject = CsProj;
-            Cs2PhpCompiler comp = new Cs2PhpCompiler();
-            comp.VerboseToConsole = true;
-            comp.ThrowExceptions = true;
+            var comp = new Cs2PhpCompiler {VerboseToConsole = true, ThrowExceptions = true};
             Console.WriteLine("Try to load " + csProject);
 
 #if DEBUG
@@ -125,20 +126,20 @@ namespace Lang.Php.Test.Tests
                 var refToRemove = comp.Project.MetadataReferences.OfType<MetadataFileReference>().ToList();
                 foreach (var i in refToRemove)
                     comp.RemoveMetadataReferences(i);
-                var ref1 = refToRemove.Select(i => i.FullPath).ToList();
+                var ref1 = refToRemove.Select(i => i.FilePath).ToList();
                 // foreach (var r in removeL)
                 //     ref1.Add(Path.Combine(Directory.GetCurrentDirectory(), r + ".dll"));
-                ref1.Add(typeof(Lang.Php.DirectCallAttribute).Assembly.Location);
-                ref1.Add(typeof(Lang.Php.Compiler.EmitContext).Assembly.Location);
-                ref1.Add(typeof(Lang.Php.Framework.Extension).Assembly.Location);
+                ref1.Add(typeof(DirectCallAttribute).Assembly.Location);
+                ref1.Add(typeof(EmitContext).Assembly.Location);
+                ref1.Add(typeof(Framework.Extension).Assembly.Location);
                 filenames = ref1.Distinct().ToArray();
             }
             #endregion
 
             #region Translation assemblies
             {
-                comp.TranslationAssemblies.Add(typeof(Lang.Php.Framework.Extension).Assembly);
-                comp.TranslationAssemblies.Add(typeof(Lang.Php.Compiler.Translator.Translator).Assembly);
+                comp.TranslationAssemblies.Add(typeof(Framework.Extension).Assembly);
+                comp.TranslationAssemblies.Add(typeof(Translator).Assembly);
             }
             #endregion
 
@@ -149,47 +150,52 @@ namespace Lang.Php.Test.Tests
                 Console.WriteLine("  Add reference     {0}", g.Display);
             }
 
-
-            EmitResult result;
-            Console.WriteLine("Start compile");
-            comp.GetCompilation(out result);
-            if (!result.Success)
+            using (var sandbox = new AssemblySandbox())
             {
-                foreach (var i in result.Diagnostics)
-                    Console.WriteLine(i.Info);
+
+                Console.WriteLine("Start compile");
+                var result = comp.GetCompilation(sandbox);
+                if (!result.Success)
+                {
+                    foreach (var i in result.Diagnostics)
+                        Console.WriteLine(i);
+                }
+                Assert.True(result.Success, "Compilation failed");
             }
-            Assert.True(result.Success, "Compilation failed");
             TranslationInfo translationInfo = comp.ParseCsSource();
 
 
             translationInfo.CurrentAssembly = comp.CompiledAssembly;
-            var assemblyTI = translationInfo.GetOrMakeTranslationInfo(comp.CompiledAssembly);
-            var ec_BaseDir = Path.Combine(Directory.GetCurrentDirectory(), assemblyTI.RootPath.Replace("/", "\\"));
-            Console.WriteLine("Output root {0}", ec_BaseDir);
+            var assemblyTi = translationInfo.GetOrMakeTranslationInfo(comp.CompiledAssembly);
+            var ecBaseDir = Path.Combine(Directory.GetCurrentDirectory(), assemblyTi.RootPath.Replace("/", "\\"));
+            Console.WriteLine("Output root {0}", ecBaseDir);
 
-            TranslationState translationState = new TranslationState(translationInfo);
-            translator = new Lang.Php.Compiler.Translator.Translator(translationState);
+            var translationState = new TranslationState(translationInfo);
+            _translator = new Translator(translationState);
 
-            translator.Translate();
-            return translator;
+            _translator.Translate();
+            return _translator;
         }
 
         #endregion Static Methods
 
         #region Static Fields
 
-        static Translator translator;
+        static Translator _translator;
 
         #endregion Static Fields
 
         #region Static Properties
 
-        public static string CsProj
+        protected static string CsProj
         {
             get
             {
                 // C:\programs\_CS2PHP\PUBLIC\Lang.Php.Test\bin\Debug
-                var dir = new DirectoryInfo(Directory.GetCurrentDirectory()).Parent.Parent;
+                var directoryInfo = new DirectoryInfo(Directory.GetCurrentDirectory()).Parent;
+                if (directoryInfo == null) return null;
+                var dir = directoryInfo.Parent;
+                if (dir == null) return null;
                 var proj = Path.Combine(dir.FullName, "Lang.Php.Test.csproj");
                 return proj;
             }

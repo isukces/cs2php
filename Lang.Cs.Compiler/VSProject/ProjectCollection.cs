@@ -37,6 +37,7 @@ namespace Lang.Cs.Compiler.VSProject
                     compiled[project.ProjectGuid] = new CompileResult()
                     {
                         ProjectGuid = project.ProjectGuid,
+                        // todo:use Application domain instead of Assembly.Load
                         CompiledAssembly = Assembly.LoadFile(loadFN),
                         OutputAssemblyFilename = loadFN
                     };

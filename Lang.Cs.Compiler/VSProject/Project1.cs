@@ -49,6 +49,7 @@ namespace Lang.Cs.Compiler.VSProject
             List<Assembly> result = new List<Assembly>();
             foreach (var i in reference)
             {
+                // todo:use Application domain instead of Assembly.Load
                 var aa = Assembly.LoadWithPartialName(i);
                 result.Add(aa);
             }

@@ -1,22 +1,19 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Text;
+using Lang.Php.Compiler;
 
 namespace Lang.Cs2Php
 {
     class Program
     {
-        #region Static Methods
+		#region Static Methods 
 
-        // Private Methods 
+		// Private Methods 
 
         static void Main(string[] args)
         {
-            AssemblyLoader.Init();
-            bool showUsage = true;
+            AssemblySandbox.Init();
+            var showUsage = true;
             Console.Write("        ");
             Console.ForegroundColor = ConsoleColor.Green;
             Console.Write("C# to Php");
@@ -25,21 +22,17 @@ namespace Lang.Cs2Php
 
             try
             {
-                ArgumentProcessingContext cfg = new ArgumentProcessingContext();
-
-                cfg.Parse(args);
-
-
-
-                if (cfg.files.Count < 2)
+                var processingContext = new ArgumentProcessingContext();
+                processingContext.Parse(args);
+                if (processingContext.files.Count < 2)
                     throw new Exception("Invalid input options, unknown csproj file or output directory");
-                if (cfg.files.Count > 2)
-                    throw new Exception("Unknown parameter " + cfg.files[2]);
-                cfg.engine.CsProject = cfg.files.First();
-                cfg.engine.OutDir = cfg.files.Last();
-                cfg.engine.Check();
+                if (processingContext.files.Count > 2)
+                    throw new Exception("Unknown parameter " + processingContext.files[2]);
+                processingContext.engine.CsProject = processingContext.files.First();
+                processingContext.engine.OutDir = processingContext.files.Last();
+                processingContext.engine.Check();
                 showUsage = false;
-                cfg.engine.Compile();
+                processingContext.engine.Compile();
 
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("Success");
@@ -47,28 +40,24 @@ namespace Lang.Cs2Php
 
 
             }
-            catch (Exception ex)
+            catch (Exception exception)
             {
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine("Error:");
                 Console.ResetColor();
-                while (ex != null)
+                while (exception != null)
                 {
-                    Console.WriteLine("   " + ex.Message + "\r\n");
-                    ex = ex.InnerException;
+                    Console.WriteLine("   " + exception.Message + "\r\n");
+                    exception = exception.InnerException;
                 }
-                // Console.WriteLine("   " + ex.StackTrace + "\r\n");
                 if (showUsage)
                     Usage();
-
             }
             Console.WriteLine("press any key...");
             Console.ReadKey();
         }
 
-      
-
-        static void Usage()
+              static void Usage()
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Usage:");
@@ -84,6 +73,6 @@ namespace Lang.Cs2Php
         -t filename      : cs2php translation helper");
         }
 
-        #endregion Static Methods
+		#endregion Static Methods 
     }
 }

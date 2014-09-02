@@ -89,6 +89,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AssemblySandbox.cs" />
     <Compile Include="Cs2PhpCompiler.cs" />
     <Compile Include="EmitContext.cs" />
     <Compile Include="PathUtil.cs" />
