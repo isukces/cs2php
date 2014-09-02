@@ -1,14 +1,9 @@
 ﻿using System;
-using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Linq;
-using System.Linq;
-using Microsoft.CodeAnalysis;
 
 namespace Lang.Cs.Compiler.VSProject
 {
@@ -41,9 +36,10 @@ namespace Lang.Cs.Compiler.VSProject
     	init #
     smartClassEnd
     */
-
+    
     public partial class Project1
     {
+/*
         public Assembly[] LoadReferencedAssemblies(List<CompileResult> compiled)
         {
             List<Assembly> result = new List<Assembly>();
@@ -62,22 +58,27 @@ namespace Lang.Cs.Compiler.VSProject
 
             return result.ToArray();
         }
+*/
         #region Static Methods
 
         // Public Methods 
 
         public static Project1 Load(string filename)
         {
-            var p = new Project1();
-            p.workingDirectory = new FileInfo(filename).Directory;
+            var project = new Project1
+            {
+                _workingDirectory = new FileInfo(filename).Directory
+            };
             var doc = XDocument.Load(filename);
-            var ns = doc.Root.Name.Namespace;
+            var docRoot = doc.Root;
+            if (docRoot == null) return project;
 
-            foreach (var i in doc.Root.Elements(ns + "PropertyGroup"))
-                p.ParsePropertyGroup(i);
-            var ItemGroups = doc.Root.Elements(ns + "ItemGroup").ToArray();
+            var ns = docRoot.Name.Namespace;
 
-            foreach (var ig in ItemGroups)
+            foreach (var i in docRoot.Elements(ns + "PropertyGroup"))
+                project.ParsePropertyGroup(i);
+            var itemGroups = docRoot.Elements(ns + "ItemGroup").ToArray();
+            foreach (var ig in itemGroups)
             {
                 /*
                  *  <Reference Include="System" />
@@ -92,29 +93,29 @@ namespace Lang.Cs.Compiler.VSProject
                 {
                     if (i.Name == ns + "Reference")
                     {
-                        p.reference.Add((string)i.Attribute("Include"));
+                        project._reference.Add((string)i.Attribute("Include"));
                     }
                     else if (i.Name == ns + "Compile")
                     {
                         var name = (string)i.Attribute("Include");
                         var pi = new ProjectItem(name, BuildActions.Compile);
-                        p.items.Add(pi);
+                        project._items.Add(pi);
 
                     }
                     else if (i.Name == ns + "ProjectReference")
                     {
                         var g = ProjectReference.Deserialize(i);
-                        p.projectReferences.Add(g);
+                        project._projectReferences.Add(g);
                     }
                     else if (i.Name == ns + "Content")
                     {
                         var name = (string)i.Attribute("Include");
                         var pi = new ProjectItem(name, BuildActions.Content);
-                        p.items.Add(pi);
+                        project._items.Add(pi);
                     }
                 }
             }
-            return p;
+            return project;
         }
 
         #endregion Static Methods
@@ -123,6 +124,7 @@ namespace Lang.Cs.Compiler.VSProject
 
         // Public Methods 
 
+/*
         public CompileResult Compile(string outDir, string[] compiledReferences)
         {
             using (Microsoft.CSharp.CSharpCodeProvider provider = new Microsoft.CSharp.CSharpCodeProvider())
@@ -177,6 +179,7 @@ namespace Lang.Cs.Compiler.VSProject
                 }
             }
         }
+*/
         // Private Methods 
 
         void ParsePropertyGroup(XElement xElement)
@@ -184,10 +187,10 @@ namespace Lang.Cs.Compiler.VSProject
             var a = PropertyGroup.Deserialize(xElement);
             if (!string.IsNullOrEmpty(a.OutputType))
             {
-                outputType = a.OutputType;
-                assemblyName = a.AssemblyName;
+                _outputType = a.OutputType;
+                _assemblyName = a.AssemblyName;
                 if (a.ProjectGuid.HasValue)
-                    projectGuid = a.ProjectGuid.Value;
+                    _projectGuid = a.ProjectGuid.Value;
             }
             else
             {
@@ -200,18 +203,18 @@ namespace Lang.Cs.Compiler.VSProject
 }
 
 
-// -----:::::##### smartClass embedded code begin #####:::::----- generated 2014-01-04 15:48
+// -----:::::##### smartClass embedded code begin #####:::::----- generated 2014-09-02 19:37
 // File generated automatically ver 2013-07-10 08:43
 // Smartclass.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0c4d5d36fb5eb4ac
 namespace Lang.Cs.Compiler.VSProject
 {
-    public partial class Project1
+    public partial class Project1 
     {
         /*
         /// <summary>
         /// Tworzy instancję obiektu
         /// </summary>
-        public Project()
+        public Project1()
         {
         }
 
@@ -229,39 +232,39 @@ namespace Lang.Cs.Compiler.VSProject
         /// <summary>
         /// Nazwa własności WorkingDirectory; 
         /// </summary>
-        public const string PROPERTYNAME_WORKINGDIRECTORY = "WorkingDirectory";
+        public const string PropertyNameWorkingDirectory = "WorkingDirectory";
         /// <summary>
         /// Nazwa własności AssemblyName; nazwa DLL lub Exe
         /// </summary>
-        public const string PROPERTYNAME_ASSEMBLYNAME = "AssemblyName";
+        public const string PropertyNameAssemblyName = "AssemblyName";
         /// <summary>
         /// Nazwa własności OutputType; 
         /// </summary>
-        public const string PROPERTYNAME_OUTPUTTYPE = "OutputType";
+        public const string PropertyNameOutputType = "OutputType";
         /// <summary>
         /// Nazwa własności ProjectGuid; 
         /// </summary>
-        public const string PROPERTYNAME_PROJECTGUID = "ProjectGuid";
+        public const string PropertyNameProjectGuid = "ProjectGuid";
         /// <summary>
         /// Nazwa własności ReferencedAssemblies; 
         /// </summary>
-        public const string PROPERTYNAME_REFERENCEDASSEMBLIES = "ReferencedAssemblies";
+        public const string PropertyNameReferencedAssemblies = "ReferencedAssemblies";
         /// <summary>
         /// Nazwa własności Reference; 
         /// </summary>
-        public const string PROPERTYNAME_REFERENCE = "Reference";
+        public const string PropertyNameReference = "Reference";
         /// <summary>
         /// Nazwa własności ProjectReferences; 
         /// </summary>
-        public const string PROPERTYNAME_PROJECTREFERENCES = "ProjectReferences";
+        public const string PropertyNameProjectReferences = "ProjectReferences";
         /// <summary>
         /// Nazwa własności PropertyGroups; 
         /// </summary>
-        public const string PROPERTYNAME_PROPERTYGROUPS = "PropertyGroups";
+        public const string PropertyNamePropertyGroups = "PropertyGroups";
         /// <summary>
         /// Nazwa własności Items; 
         /// </summary>
-        public const string PROPERTYNAME_ITEMS = "Items";
+        public const string PropertyNameItems = "Items";
         #endregion Constants
 
         #region Methods
@@ -275,14 +278,14 @@ namespace Lang.Cs.Compiler.VSProject
         {
             get
             {
-                return workingDirectory;
+                return _workingDirectory;
             }
             set
             {
-                workingDirectory = value;
+                _workingDirectory = value;
             }
         }
-        private DirectoryInfo workingDirectory;
+        private DirectoryInfo _workingDirectory;
         /// <summary>
         /// nazwa DLL lub Exe
         /// </summary>
@@ -290,15 +293,15 @@ namespace Lang.Cs.Compiler.VSProject
         {
             get
             {
-                return assemblyName;
+                return _assemblyName;
             }
             set
             {
                 value = (value ?? String.Empty).Trim();
-                assemblyName = value;
+                _assemblyName = value;
             }
         }
-        private string assemblyName = string.Empty;
+        private string _assemblyName = string.Empty;
         /// <summary>
         /// 
         /// </summary>
@@ -306,15 +309,15 @@ namespace Lang.Cs.Compiler.VSProject
         {
             get
             {
-                return outputType;
+                return _outputType;
             }
             set
             {
                 value = (value ?? String.Empty).Trim();
-                outputType = value;
+                _outputType = value;
             }
         }
-        private string outputType = string.Empty;
+        private string _outputType = string.Empty;
         /// <summary>
         /// 
         /// </summary>
@@ -322,14 +325,14 @@ namespace Lang.Cs.Compiler.VSProject
         {
             get
             {
-                return projectGuid;
+                return _projectGuid;
             }
             set
             {
-                projectGuid = value;
+                _projectGuid = value;
             }
         }
-        private Guid projectGuid;
+        private Guid _projectGuid;
         /// <summary>
         /// 
         /// </summary>
@@ -337,14 +340,14 @@ namespace Lang.Cs.Compiler.VSProject
         {
             get
             {
-                return referencedAssemblies;
+                return _referencedAssemblies;
             }
             set
             {
-                referencedAssemblies = value;
+                _referencedAssemblies = value;
             }
         }
-        private List<Assembly> referencedAssemblies = new List<Assembly>();
+        private List<Assembly> _referencedAssemblies = new List<Assembly>();
         /// <summary>
         /// 
         /// </summary>
@@ -352,14 +355,14 @@ namespace Lang.Cs.Compiler.VSProject
         {
             get
             {
-                return reference;
+                return _reference;
             }
             set
             {
-                reference = value;
+                _reference = value;
             }
         }
-        private List<string> reference = new List<string>();
+        private List<string> _reference = new List<string>();
         /// <summary>
         /// 
         /// </summary>
@@ -367,14 +370,14 @@ namespace Lang.Cs.Compiler.VSProject
         {
             get
             {
-                return projectReferences;
+                return _projectReferences;
             }
             set
             {
-                projectReferences = value;
+                _projectReferences = value;
             }
         }
-        private List<ProjectReference> projectReferences = new List<ProjectReference>();
+        private List<ProjectReference> _projectReferences = new List<ProjectReference>();
         /// <summary>
         /// 
         /// </summary>
@@ -382,14 +385,14 @@ namespace Lang.Cs.Compiler.VSProject
         {
             get
             {
-                return propertyGroups;
+                return _propertyGroups;
             }
             set
             {
-                propertyGroups = value;
+                _propertyGroups = value;
             }
         }
-        private List<PropertyGroup> propertyGroups = new List<PropertyGroup>();
+        private List<PropertyGroup> _propertyGroups = new List<PropertyGroup>();
         /// <summary>
         /// 
         /// </summary>
@@ -397,14 +400,14 @@ namespace Lang.Cs.Compiler.VSProject
         {
             get
             {
-                return items;
+                return _items;
             }
             set
             {
-                items = value;
+                _items = value;
             }
         }
-        private List<ProjectItem> items = new List<ProjectItem>();
+        private List<ProjectItem> _items = new List<ProjectItem>();
         #endregion Properties
 
     }

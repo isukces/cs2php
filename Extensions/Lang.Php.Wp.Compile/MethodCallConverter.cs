@@ -16,7 +16,7 @@ namespace Lang.Php.Wp.Compile
 		#region Static Methods 
 
 		// Private Methods 
-        public int getPriority()
+        public int GetPriority()
         {
             return 1;
         }

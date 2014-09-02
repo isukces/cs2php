@@ -39,7 +39,7 @@ namespace Lang.Php.Compiler.Translator.Node
             return null;
         }
 
-        public int getPriority()
+        public int GetPriority()
         {
             return 1;
         }

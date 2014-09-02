@@ -44,9 +44,9 @@ namespace Lang.Php.Compiler
 
     public partial class Cs2PhpCompiler
     {
-        #region Static Methods
+		#region Static Methods 
 
-        // Private Methods 
+		// Private Methods 
 
         private static void DownloadAndUnzip(string src, string outDir, string str)
         {
@@ -118,7 +118,7 @@ namespace Lang.Php.Compiler
             #endregion
         }
 
-        protected static string GetRootPath(Assembly compiledAssembly)
+        private static string GetRootPath(Assembly compiledAssembly)
         {
             var tmp = compiledAssembly.GetCustomAttribute<RootPathAttribute>();
             if (tmp == null)
@@ -129,11 +129,11 @@ namespace Lang.Php.Compiler
             return realOutputDir;
         }
 
-        #endregion Static Methods
+		#endregion Static Methods 
 
-        #region Methods
+		#region Methods 
 
-        // Public Methods 
+		// Public Methods 
 
         public void AddMetadataReferences(params MetadataReference[] adds)
         {
@@ -188,6 +188,30 @@ namespace Lang.Php.Compiler
             GreenOk();
             TranslateAndCreatePhpFiles(info, outDir);
             EmitContentFiles(outDir);
+            return result;
+        }
+
+        /*
+                public void DisplayRef(string title)
+                {
+                    Console.WriteLine(" ==== " + title);
+                    foreach (var i in Project.MetadataReferences)
+                        Console.WriteLine("  MetadataReference {0}", i.Display);
+                    foreach (var i in Project.ProjectReferences)
+                        Console.WriteLine("  ProjectReferences {0}", i.ProjectId);
+                }
+        */
+        public EmitResult GetCompilation(AssemblySandbox sandbox)
+        {
+            // must be public !!!!!!!!!!
+            _projectCompilation = _project.GetCompilationAsync().Result;
+            _projectCompilation =
+                _projectCompilation.WithOptions(new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
+            _projectCompilation = _projectCompilation.WithReferences(_project.MetadataReferences);
+            foreach (var i in _projectCompilation.References)
+                Console.WriteLine("   linked with {0}", i.Display);
+            EmitResult result;
+            _compiledAssembly = sandbox.CompileAssembly(_projectCompilation, out result);
             return result;
         }
 
@@ -259,40 +283,7 @@ namespace Lang.Php.Compiler
                 _solution = _solution.RemoveMetadataReference(_project.Id, remove);
             _project = _solution.Projects.Single(a => a.Id == _project.Id);
         }
-        // Private Methods 
-
-        /* public void UpdateCompilationOptions(CommonCompilationOptions options)
-         {
-             solution = solution.UpdateCompilationOptions(project.Id, options);
-             project = solution.Projects.Single();
-         }*/
-        private void CheckRequiredTranslator()
-        {
-            var allAssemblies = GetKnownTypes().Select(i => i.Assembly).Distinct().ToArray();
-            foreach (var assembly in allAssemblies)
-                CheckRequiredTranslator(assembly);
-        }
-
-        private void CheckRequiredTranslator(Assembly assembly)
-        {
-            var requiredTranslatorAttribute = assembly.GetCustomAttribute<RequiredTranslatorAttribute>();
-            if (requiredTranslatorAttribute == null)
-                return;
-            var guidAttribute = assembly.GetCustomAttribute<GuidAttribute>();
-            if (guidAttribute == null)
-                throw new Exception(string.Format("Assembly {0} has no guid", _compiledAssembly));
-            var guid = Guid.Parse(guidAttribute.Value);
-            foreach (var i in _translationAssemblies)
-            {
-                //var customAttributes = i.GetCustomAttributes();
-                var h = i.GetCustomAttributes<PriovidesTranslatorAttribute>()
-                        .Where(u => u.TranslatorForAssembly == guid);
-                if (h.Any())
-                    return;
-            }
-            throw new Exception(string.Format("There is no tranlation helper for\r\n{0}\r\n\r\n{1}\r\nis suggested.", assembly, requiredTranslatorAttribute.Suggested));
-
-        }
+		// Protected Methods 
 
         protected void EmitContentFiles(string outDir)
         {
@@ -322,60 +313,53 @@ namespace Lang.Php.Compiler
                 File.Copy(srcFile, dstFile, true);
             }
         }
+		// Private Methods 
 
-        /*
-                public void DisplayRef(string title)
-                {
-                    Console.WriteLine(" ==== " + title);
-                    foreach (var i in Project.MetadataReferences)
-                        Console.WriteLine("  MetadataReference {0}", i.Display);
-                    foreach (var i in Project.ProjectReferences)
-                        Console.WriteLine("  ProjectReferences {0}", i.ProjectId);
-                }
-        */
-
-        public EmitResult GetCompilation(AssemblySandbox sandbox)
+        /* public void UpdateCompilationOptions(CommonCompilationOptions options)
+         {
+             solution = solution.UpdateCompilationOptions(project.Id, options);
+             project = solution.Projects.Single();
+         }*/
+        private void CheckRequiredTranslator()
         {
-            // must be public !!!!!!!!!!
-            _projectCompilation = _project.GetCompilationAsync().Result;
-            _projectCompilation =
-                _projectCompilation.WithOptions(new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
-            _projectCompilation = _projectCompilation.WithReferences(_project.MetadataReferences);
-            foreach (var i in _projectCompilation.References)
-                Console.WriteLine("   linked with {0}", i.Display);
-            EmitResult result;
-            _compiledAssembly = sandbox.CompileAssembly(_projectCompilation, out result);
-            return result;
+            var allAssemblies = GetKnownTypes().Select(i => i.Assembly).Distinct().ToArray();
+            foreach (var assembly in allAssemblies)
+                CheckRequiredTranslator(assembly);
+        }
+
+        private void CheckRequiredTranslator(Assembly assembly)
+        {
+            var requiredTranslatorAttribute = assembly.GetCustomAttribute<RequiredTranslatorAttribute>();
+            if (requiredTranslatorAttribute == null)
+                return;
+            var guidAttribute = assembly.GetCustomAttribute<GuidAttribute>();
+            if (guidAttribute == null)
+                throw new Exception(string.Format("Assembly {0} has no guid", _compiledAssembly));
+            var guid = Guid.Parse(guidAttribute.Value);
+            foreach (var i in _translationAssemblies)
+            {
+                var h = i.GetCustomAttributes<PriovidesTranslatorAttribute>().Any(u => u.TranslatorForAssembly == guid);
+                if (h)
+                    return;
+            }
+            throw new Exception(string.Format("There is no tranlation helper for\r\n{0}\r\n\r\n{1}\r\nis suggested.", assembly, requiredTranslatorAttribute.Suggested));
+
         }
 
         private Type[] GetKnownTypes()
         {
-            AppDomain d = AppDomain.CreateDomain(Guid.NewGuid().ToString());
-            try
+            using (var sandbox = new AssemblySandbox())
             {
-                Console.WriteLine(AppDomain.CurrentDomain.FriendlyName);
-                Console.WriteLine(d.FriendlyName);
-
-
                 if (_compiledAssembly == null)
                     throw new Exception("Assembly is not compiled yet");
-                List<Assembly> assemblies1 = _project.MetadataReferences.Select(i => d.Load(i.Display)).ToList();
-                assemblies1.Add(_compiledAssembly);
-
+                var assemblies = _project.MetadataReferences.Select(i => sandbox.LoadByFullPath(i.Display)).ToList();
+                assemblies.Add(_compiledAssembly);
+                return CompileState.GetAllTypes(assemblies);
+                
             }
-            finally
-            {
-                AppDomain.Unload(d);
-            }
-            if (_compiledAssembly == null)
-                throw new Exception("Assembly is not compiled yet");
-            // todo:use Application domain instead of Assembly.Load
-            List<Assembly> assemblies = _project.MetadataReferences.Select(i => Assembly.LoadFile(i.Display)).ToList();
-            assemblies.Add(_compiledAssembly);
-            return CompileState.GetAllTypes(assemblies);
         }
 
-        protected void GreenOk()
+        private void GreenOk()
         {
             if (!_verboseToConsole) return;
             Console.ForegroundColor = ConsoleColor.DarkGreen;
@@ -383,7 +367,7 @@ namespace Lang.Php.Compiler
             Console.ResetColor();
         }
 
-        protected void TranslateAndCreatePhpFiles(TranslationInfo translationInfo, string outDir)
+        private void TranslateAndCreatePhpFiles(TranslationInfo translationInfo, string outDir)
         {
             if (_verboseToConsole)
                 Console.WriteLine("Translate C# -> Php");
@@ -432,7 +416,7 @@ namespace Lang.Php.Compiler
             #endregion
         }
 
-        #endregion Methods
+		#endregion Methods 
     }
 }
 
@@ -451,9 +435,7 @@ namespace Lang.Php.Compiler
         public Cs2PhpCompiler()
         {
         }
-
         Przykłady użycia
-
         implement INotifyPropertyChanged
         implement INotifyPropertyChanged_Passive
         implement ToString ##Solution## ##Project## ##ProjectCompilation## ##CompiledAssembly## ##TranslationAssemblies## ##VerboseToConsole## ##ThrowExceptions##
@@ -462,6 +444,8 @@ namespace Lang.Php.Compiler
         implement equals *
         implement equals *, ~exclude1, ~exclude2
         */
+
+
         #region Constants
         /// <summary>
         /// Nazwa własności Solution; 
@@ -493,8 +477,10 @@ namespace Lang.Php.Compiler
         public const string PropertyNameThrowExceptions = "ThrowExceptions";
         #endregion Constants
 
+
         #region Methods
         #endregion Methods
+
 
         #region Properties
         /// <summary>
@@ -599,6 +585,5 @@ namespace Lang.Php.Compiler
         }
         private bool _throwExceptions;
         #endregion Properties
-
     }
 }

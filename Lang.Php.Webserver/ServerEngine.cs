@@ -8,7 +8,7 @@ using System.Net.Sockets;
 using System.Reflection;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
+using Lang.Php.Webserver.Properties;
 
 namespace Lang.Php.Webserver
 {
@@ -36,7 +36,7 @@ namespace Lang.Php.Webserver
     property DocumentRoot string 
     smartClassEnd
     */
-
+    
     public partial class ServerEngine
     {
         #region Static Methods
@@ -45,7 +45,7 @@ namespace Lang.Php.Webserver
 
         private static void Send(Socket handler, byte[] byteData)
         {
-            handler.BeginSend(byteData, 0, byteData.Length, 0, new AsyncCallback(SendCallback), handler);
+            handler.BeginSend(byteData, 0, byteData.Length, 0, SendCallback, handler);
         }
 
         private static void SendCallback(IAsyncResult ar)
@@ -53,11 +53,11 @@ namespace Lang.Php.Webserver
             try
             {
                 // Retrieve the socket from the state object.
-                Socket handler = (Socket)ar.AsyncState;
+                var handler = (Socket)ar.AsyncState;
 
                 // Complete sending the data to the remote device.
                 int bytesSent = handler.EndSend(ar);
-                Console.WriteLine("Sent {0} bytes to client.", bytesSent);
+                Console.WriteLine(Resources.Sent__0__bytes_to_client_, bytesSent);
 
                 handler.Shutdown(SocketShutdown.Both);
                 handler.Close();
@@ -75,7 +75,7 @@ namespace Lang.Php.Webserver
 
         // Public Methods 
 
-        public void AcceptCallback(IAsyncResult ar)
+        private void AcceptCallback(IAsyncResult ar)
         {
             // Signal the main thread to continue.
             allDone.Set();
@@ -85,126 +85,113 @@ namespace Lang.Php.Webserver
             Socket handler = listener.EndAccept(ar);
 
             // Create the state object.
-            StateObject state = new StateObject();
-            state.workSocket = handler;
-            handler.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0,
-                new AsyncCallback(ReadCallback), state);
+            var state = new StateObject { workSocket = handler };
+            handler.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0, ReadCallback, state);
         }
 
         public void Load(string n)
         {
             // todo:use Application domain instead of Assembly.Load
             var loadedAssembly = Assembly.LoadFile(n);
-            assemblies.Add(loadedAssembly);
+            _assemblies.Add(loadedAssembly);
             var types = loadedAssembly.GetTypes();
             foreach (var type in types)
             {
                 var a1 = type.GetCustomAttribute<PageAttribute>();
-                if (a1 != null)
-                {
-                    var m = a1.ModuleShortName;
-                    pages[m + ".php"] = type;
-                }
+                if (a1 == null) continue;
+                var m = a1.ModuleShortName;
+                _pages[m + ".php"] = type;
             }
         }
 
-        public HttpResponse ProcessRequest(HttpRequest x)
+        private HttpResponse ProcessRequest(HttpRequest x)
         {
             DoLog(string.Format("{0} {1}", x.Method, x.RequestUri));
             string script = x.Script;
-            HttpResponse y = new HttpResponse();
+            var httpResponse = new HttpResponse();
+            Type type;
             if (script.EndsWith("/"))
             {
-                var g = this.indexOrder.Split(' ');
+                var g = _indexOrder.Split(' ');
                 foreach (var gg in g)
                 {
-                    var type = TypeByScript(script + gg);
+                    type = TypeByScript(script + gg);
                     if (type != null)
-                        return ProcessRequestInSandbox(x, y, type);
+                        return ProcessRequestInSandbox(x, httpResponse, type);
                 }
-                y.StatusCode = HttpStatusCode.NotFound;
-                return y;
+                httpResponse.StatusCode = HttpStatusCode.NotFound;
+                return httpResponse;
 
+            }
+            type = TypeByScript(script);
+            if (type != null)
+                return ProcessRequestInSandbox(x, httpResponse, type);
+            httpResponse.StatusCode = HttpStatusCode.NotFound;
+            return httpResponse;
+        }
+
+        private void ReadCallback(IAsyncResult ar)
+        {
+            // Retrieve the state object and the handler socket
+            // from the asynchronous state object.
+            var state = (StateObject)ar.AsyncState;
+            var handler = state.workSocket;
+
+            // Read data from the client socket. 
+            var bytesRead = handler.EndReceive(ar);
+
+            if (bytesRead <= 0) return;
+            // There  might be more data, so store the data received so far.
+            state.sb.Append(Encoding.ASCII.GetString(state.buffer, 0, bytesRead));
+
+            // Check for end-of-file tag. If it is not there, read 
+            // more data.
+            var content = state.sb.ToString();
+            if (content.IndexOf("\r\n", StringComparison.Ordinal) > -1)
+            {
+                var httpRequest = HttpRequest.Parse(content);
+                {
+                    httpRequest.Server.DocumentRoot = _documentRoot.Replace("\\", "/");
+
+                    if (!httpRequest.Server.DocumentRoot.EndsWith("/"))
+                        httpRequest.Server.DocumentRoot += "/";
+                    httpRequest.Update();
+                }
+                var resp = ProcessRequest(httpRequest);
+                var byteContent = resp.GetComplete(_outupEncoding);
+                // All the data has been read from the 
+                // client. Display it on the console.
+                Console.WriteLine("Read {0} bytes from socket. \n Data : {1}", content.Length, content);
+                // Echo the data back to the client.
+                Send(handler, byteContent);
             }
             else
             {
-                var type = TypeByScript(script);
-                if (type != null)
-                    return ProcessRequestInSandbox(x, y, type);
-                y.StatusCode = HttpStatusCode.NotFound;
-                return y;
-            }
-        }
-
-        public void ReadCallback(IAsyncResult ar)
-        {
-            String content = String.Empty;
-
-            // Retrieve the state object and the handler socket
-            // from the asynchronous state object.
-            StateObject state = (StateObject)ar.AsyncState;
-            Socket handler = state.workSocket;
-
-            // Read data from the client socket. 
-            int bytesRead = handler.EndReceive(ar);
-
-            if (bytesRead > 0)
-            {
-                // There  might be more data, so store the data received so far.
-                state.sb.Append(Encoding.ASCII.GetString(state.buffer, 0, bytesRead));
-
-                // Check for end-of-file tag. If it is not there, read 
-                // more data.
-                content = state.sb.ToString();
-                if (content.IndexOf("\r\n") > -1)
-                {
-
-                    HttpRequest r = HttpRequest.Parse(content);
-                    {
-                        r.Server.DocumentRoot = documentRoot.Replace("\\", "/");
-
-                        if (!r.Server.DocumentRoot.EndsWith("/"))
-                            r.Server.DocumentRoot += "/";
-                        r.Update();
-                    }
-                    var resp = ProcessRequest(r);
-                    var byteContent = resp.GetComplete(outupEncoding);
-                    // All the data has been read from the 
-                    // client. Display it on the console.
-                    Console.WriteLine("Read {0} bytes from socket. \n Data : {1}", content.Length, content);
-                    // Echo the data back to the client.
-                    Send(handler, byteContent);
-                }
-                else
-                {
-                    // Not all data received. Get more.
-                    handler.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0,
-                    new AsyncCallback(ReadCallback), state);
-                }
+                // Not all data received. Get more.
+                handler.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0, ReadCallback, state);
             }
         }
 
         public void StartListening()
         {
             // Data buffer for incoming data.
-            byte[] bytes = new Byte[1024];
 
             // Establish the local endpoint for the socket.
             // The DNS name of the computer
             // running the listener is "host.contoso.com".
-            IPHostEntry ipHostInfo = Dns.Resolve(Dns.GetHostName());
-            IPAddress ipAddress = ipHostInfo.AddressList[0];
+            var ipHostInfo = Dns.Resolve(Dns.GetHostName());
+            var ipAddress = ipHostInfo.AddressList[0];
             ipAddress = IPAddress.Loopback;
-            IPEndPoint localEndPoint = new IPEndPoint(ipAddress, ListenPort);
+            var localEndPoint = new IPEndPoint(ipAddress, ListenPort);
 
             // Create a TCP/IP socket.
-            Socket listener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            var listener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
             // Bind the socket to the local endpoint and listen for incoming connections.
             try
             {
                 listener.Bind(localEndPoint);
-                work = true;
+                _work = true;
                 listener.Listen(100);
 
                 Thread t = new Thread(() =>
@@ -214,9 +201,9 @@ namespace Lang.Php.Webserver
                     {
                         allDone.Reset();
                         Console.WriteLine("Waiting for a connection...");
-                        listener.BeginAccept(new AsyncCallback(AcceptCallback), listener);
+                        listener.BeginAccept(AcceptCallback, listener);
                         allDone.WaitOne();
-                        if (!work)
+                        if (!_work)
                             break;
                     }
                 });
@@ -237,7 +224,7 @@ namespace Lang.Php.Webserver
 
         public void Stop()
         {
-            work = false;
+            _work = false;
             allDone.Reset();
         }
         // Private Methods 
@@ -246,14 +233,14 @@ namespace Lang.Php.Webserver
         {
             if (OnLog == null)
                 return;
-            OnLog(this, new OnLogEventArgs() { Text = x });
+            OnLog(this, new OnLogEventArgs { Text = x });
         }
 
         private HttpResponse ProcessRequest(HttpRequest req, Type type)
         {
             var y = new HttpResponse();
             ClassTranslationInfo ci = translationInfo.GetOrMakeTranslationInfo(type);
-           
+
             if (ci.PageMethod == null)
                 throw new Exception(string.Format("Page method not found in type {0}", type.FullName));
             {
@@ -290,10 +277,8 @@ namespace Lang.Php.Webserver
 
         private Type TypeByScript(string script)
         {
-            var a = pages.Where(i => "/" + i.Key == script).ToArray();
-            if (a.Any())
-                return a.First().Value;
-            return null;
+            var a = _pages.Where(i => "/" + i.Key == script).ToArray();
+            return a.Any() ? a.First().Value : null;
         }
 
         #endregion Methods
@@ -306,7 +291,7 @@ namespace Lang.Php.Webserver
 
         #region Fields
 
-        bool work;
+        bool _work;
 
         #endregion Fields
 
@@ -325,7 +310,7 @@ namespace Lang.Php.Webserver
         {
             #region Fields
 
-            public string Text;
+            public string Text { get; set; }
 
             #endregion Fields
         }
@@ -334,12 +319,12 @@ namespace Lang.Php.Webserver
 }
 
 
-// -----:::::##### smartClass embedded code begin #####:::::----- generated 2013-11-24 23:44
+// -----:::::##### smartClass embedded code begin #####:::::----- generated 2014-09-02 19:41
 // File generated automatically ver 2013-07-10 08:43
 // Smartclass.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0c4d5d36fb5eb4ac
 namespace Lang.Php.Webserver
 {
-    public partial class ServerEngine
+    public partial class ServerEngine 
     {
         /*
         /// <summary>
@@ -362,7 +347,7 @@ namespace Lang.Php.Webserver
         /// <summary>
         /// Pole statyczne dla singletona
         /// </summary>
-        private static ServerEngine instance;
+        private static ServerEngine _instance;
         private static readonly object __staticLockObject__ = new Object();
 
         // Explicit static constructor to tell C# compiler not to mark type as beforefieldinit
@@ -380,15 +365,15 @@ namespace Lang.Php.Webserver
         {
             get
             {
-                if (instance == (object)null)
+                if (_instance == (object)null)
                 {
-                    lock (__staticLockObject__)
+                    lock(__staticLockObject__)
                     {
-                        if (instance == (object)null)
-                            instance = new ServerEngine();
+                        if (_instance == (object)null)
+                            _instance = new ServerEngine();
                     }
                 }
-                return instance;
+                return _instance;
             }
         }
 
@@ -406,27 +391,27 @@ namespace Lang.Php.Webserver
         /// <summary>
         /// Nazwa własności Assemblies; 
         /// </summary>
-        public const string PROPERTYNAME_ASSEMBLIES = "Assemblies";
+        public const string PropertyNameAssemblies = "Assemblies";
         /// <summary>
         /// Nazwa własności Pages; 
         /// </summary>
-        public const string PROPERTYNAME_PAGES = "Pages";
+        public const string PropertyNamePages = "Pages";
         /// <summary>
         /// Nazwa własności IndexOrder; 
         /// </summary>
-        public const string PROPERTYNAME_INDEXORDER = "IndexOrder";
+        public const string PropertyNameIndexOrder = "IndexOrder";
         /// <summary>
         /// Nazwa własności ListenPort; 
         /// </summary>
-        public const string PROPERTYNAME_LISTENPORT = "ListenPort";
+        public const string PropertyNameListenPort = "ListenPort";
         /// <summary>
         /// Nazwa własności OutupEncoding; 
         /// </summary>
-        public const string PROPERTYNAME_OUTUPENCODING = "OutupEncoding";
+        public const string PropertyNameOutupEncoding = "OutupEncoding";
         /// <summary>
         /// Nazwa własności DocumentRoot; 
         /// </summary>
-        public const string PROPERTYNAME_DOCUMENTROOT = "DocumentRoot";
+        public const string PropertyNameDocumentRoot = "DocumentRoot";
         #endregion Constants
 
         #region Methods
@@ -440,14 +425,14 @@ namespace Lang.Php.Webserver
         {
             get
             {
-                return assemblies;
+                return _assemblies;
             }
             set
             {
-                assemblies = value;
+                _assemblies = value;
             }
         }
-        private List<Assembly> assemblies = new List<Assembly>();
+        private List<Assembly> _assemblies = new List<Assembly>();
         /// <summary>
         /// 
         /// </summary>
@@ -455,14 +440,14 @@ namespace Lang.Php.Webserver
         {
             get
             {
-                return pages;
+                return _pages;
             }
             set
             {
-                pages = value;
+                _pages = value;
             }
         }
-        private Dictionary<string, Type> pages = new Dictionary<string, Type>();
+        private Dictionary<string, Type> _pages = new Dictionary<string, Type>();
         /// <summary>
         /// 
         /// </summary>
@@ -470,15 +455,15 @@ namespace Lang.Php.Webserver
         {
             get
             {
-                return indexOrder;
+                return _indexOrder;
             }
             set
             {
                 value = (value ?? String.Empty).Trim();
-                indexOrder = value;
+                _indexOrder = value;
             }
         }
-        private string indexOrder = "index.php index.htm index.html";
+        private string _indexOrder = "index.php index.htm index.html";
         /// <summary>
         /// 
         /// </summary>
@@ -486,14 +471,14 @@ namespace Lang.Php.Webserver
         {
             get
             {
-                return listenPort;
+                return _listenPort;
             }
             set
             {
-                listenPort = value;
+                _listenPort = value;
             }
         }
-        private int listenPort = 81;
+        private int _listenPort = 81;
         /// <summary>
         /// 
         /// </summary>
@@ -501,14 +486,14 @@ namespace Lang.Php.Webserver
         {
             get
             {
-                return outupEncoding;
+                return _outupEncoding;
             }
             set
             {
-                outupEncoding = value;
+                _outupEncoding = value;
             }
         }
-        private Encoding outupEncoding = Encoding.UTF8;
+        private Encoding _outupEncoding = Encoding.UTF8;
         /// <summary>
         /// 
         /// </summary>
@@ -516,15 +501,15 @@ namespace Lang.Php.Webserver
         {
             get
             {
-                return documentRoot;
+                return _documentRoot;
             }
             set
             {
                 value = (value ?? String.Empty).Trim();
-                documentRoot = value;
+                _documentRoot = value;
             }
         }
-        private string documentRoot = string.Empty;
+        private string _documentRoot = string.Empty;
         #endregion Properties
 
     }

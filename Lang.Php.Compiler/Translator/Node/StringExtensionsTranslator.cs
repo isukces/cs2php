@@ -50,7 +50,7 @@ namespace Lang.Php.Compiler.Translator.Node
 
         }
 
-        public int getPriority()
+        public int GetPriority()
         {
             return 2;
         }

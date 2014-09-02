@@ -62,7 +62,7 @@ namespace Lang.Php.Compiler.Translator.Node
             return phpm;
         }
 
-        public int getPriority()
+        public int GetPriority()
         {
             return 1;
         }

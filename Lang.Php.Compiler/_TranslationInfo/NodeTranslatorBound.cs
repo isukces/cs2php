@@ -20,7 +20,7 @@ namespace Lang.Php.Compiler
     property TargetObject object 
     
     property Priority int? 
-    	read only getPriority()
+    	read only GetPriority()
     smartClassEnd
     */
     
@@ -34,7 +34,7 @@ namespace Lang.Php.Compiler
             return method.Invoke(targetObject, new object[] { ctx, node }) as IPhpValue;
         }
 
-        int getPriority()
+        int GetPriority()
         {
             if (!priority.HasValue)
             {
@@ -164,7 +164,7 @@ namespace Lang.Php.Compiler
         {
             get
             {
-                return getPriority();
+                return GetPriority();
             }
         }
         #endregion Properties

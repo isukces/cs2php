@@ -14,7 +14,7 @@ namespace Lang.Php.Wp.Compile
     class ClassFieldAccessExpressionConverter : IPhpNodeTranslator<ClassFieldAccessExpression>
     {
 
-        public int getPriority()
+        public int GetPriority()
         {
             return 1;
         }

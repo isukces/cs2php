@@ -11,6 +11,6 @@ namespace Lang.Php.Compiler
     {
 
         IPhpValue TranslateToPhp(IExternalTranslationContext ctx, T src);
-        int getPriority();
+        int GetPriority();
     }
 }

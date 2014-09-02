@@ -13,7 +13,7 @@ namespace Lang.Php.Compiler.Translator.Node
         #region Methods
 
         // Public Methods 
-        public int getPriority()
+        public int GetPriority()
         {
             return 100;
         }

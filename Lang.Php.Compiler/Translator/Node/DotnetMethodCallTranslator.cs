@@ -44,7 +44,7 @@ namespace Lang.Php.Compiler.Translator.Node
 
         // Public Methods 
 
-        public int getPriority()
+        public int GetPriority()
         {
             return 999;
         }

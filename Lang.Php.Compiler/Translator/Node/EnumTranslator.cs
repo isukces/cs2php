@@ -24,7 +24,7 @@ namespace Lang.Php.Compiler.Translator.Node
             throw new NotImplementedException();
         }
 
-        public int getPriority()
+        public int GetPriority()
         {
             return 1;
         }
