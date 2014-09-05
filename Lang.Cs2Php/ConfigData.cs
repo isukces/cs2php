@@ -1,8 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Runtime.InteropServices;
 
 namespace Lang.Cs2Php
 {
-    internal class ConfigData : IConfigData
+    internal class ConfigData : MarshalByRefObject, IConfigData
     {
         #region Constructors
 
@@ -27,6 +29,7 @@ namespace Lang.Cs2Php
         public List<string> TranlationHelpers { get; private set; }
         public string CsProject { get; set; }
         public string OutDir { get; set; }
+        public string BinaryOutputDir { get; set; }
 
         #endregion Properties
     }

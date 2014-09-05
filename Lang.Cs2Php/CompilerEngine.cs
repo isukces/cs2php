@@ -28,6 +28,8 @@ namespace Lang.Cs2Php
     
     property Configuration string i.e. DEBUG, RELEASE
     	init "RELEASE"
+    
+    property BinaryOutputDir string 
     smartClassEnd
     */
 
@@ -143,6 +145,7 @@ namespace Lang.Cs2Php
                         comp.RemoveMetadataReferences(i);
                     var ref1 = refToRemove.Select(i => i.FilePath).Union(_referenced).ToList();
                     ref1.Add(Path.Combine(ExeDir, "Lang.Php.dll"));
+                    ref1.AddRange(Referenced);
                     filenames = ref1.Distinct().ToArray();
                 }
 
@@ -153,7 +156,7 @@ namespace Lang.Cs2Php
                     var g = new MetadataFileReference(fileName, MetadataReferenceProperties.Assembly);
                     comp.AddMetadataReferences(g);
 #if DEBUG
-                  Console.WriteLine("  Add reference     {0}", g.Display);                
+                    Console.WriteLine("  Add reference     {0}", g.Display);
 #endif
                 }
 
@@ -166,6 +169,7 @@ namespace Lang.Cs2Php
                         Console.WriteLine(" " + x.Aliases);
                         //hack project path
                         var xx = x.ToString();
+                        // comp.RemoveMetadataReferences(remove);
                     }
 
                 }
@@ -201,7 +205,7 @@ namespace Lang.Cs2Php
                 //  comp.TranslationAssemblies.Add(typeof(Lang.Php.Wp.Compile.ModuleProcessor).Assembly);
 
                 // DebugDisplayReferences(comp);
-                var emitResult = comp.Compile2PhpAndEmit(_outDir, loadedAssemblies, _referencedPhpLibsLocations);
+                var emitResult = comp.Compile2PhpAndEmit(_outDir, DllFilename, loadedAssemblies, _referencedPhpLibsLocations);
 
 
                 if (emitResult.Success) return;
@@ -214,6 +218,12 @@ namespace Lang.Cs2Php
         }
 
         #endregion Methods
+
+        #region Fields
+
+        private readonly string _tempDir = Path.Combine(Path.GetTempPath(), "cs2php" + Guid.NewGuid().ToString("D"));
+
+        #endregion Fields
 
         #region Static Properties
 
@@ -228,6 +238,22 @@ namespace Lang.Cs2Php
         }
 
         #endregion Static Properties
+
+        #region Properties
+
+        private string DllFilename
+        {
+            get
+            {
+                var fi = new FileInfo(_csProject);
+                var name = fi.Name;
+                name = name.Substring(0, name.Length - fi.Extension.Length);
+                name = Path.Combine(!string.IsNullOrEmpty(BinaryOutputDir) ? BinaryOutputDir : _tempDir, name + ".dll");
+                return name;
+            }
+        }
+
+        #endregion Properties
 
         /*
         public static string SlnDir
@@ -245,8 +271,8 @@ namespace Lang.Cs2Php
 }
 
 
-// -----:::::##### smartClass embedded code begin #####:::::----- generated 2014-09-03 11:57
-// File generated automatically ver 2013-07-10 08:43
+// -----:::::##### smartClass embedded code begin #####:::::----- generated 2014-09-05 19:16
+// File generated automatically ver 2014-09-01 19:00
 // Smartclass.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0c4d5d36fb5eb4ac
 namespace Lang.Cs2Php
 {
@@ -262,9 +288,9 @@ namespace Lang.Cs2Php
         Przykłady użycia
         implement INotifyPropertyChanged
         implement INotifyPropertyChanged_Passive
-        implement ToString ##CsProject## ##OutDir## ##Referenced## ##TranlationHelpers## ##ReferencedPhpLibsLocations## ##Configuration##
-        implement ToString CsProject=##CsProject##, OutDir=##OutDir##, Referenced=##Referenced##, TranlationHelpers=##TranlationHelpers##, ReferencedPhpLibsLocations=##ReferencedPhpLibsLocations##, Configuration=##Configuration##
-        implement equals CsProject, OutDir, Referenced, TranlationHelpers, ReferencedPhpLibsLocations, Configuration
+        implement ToString ##CsProject## ##OutDir## ##Referenced## ##TranlationHelpers## ##ReferencedPhpLibsLocations## ##Configuration## ##BinaryOutputDir##
+        implement ToString CsProject=##CsProject##, OutDir=##OutDir##, Referenced=##Referenced##, TranlationHelpers=##TranlationHelpers##, ReferencedPhpLibsLocations=##ReferencedPhpLibsLocations##, Configuration=##Configuration##, BinaryOutputDir=##BinaryOutputDir##
+        implement equals CsProject, OutDir, Referenced, TranlationHelpers, ReferencedPhpLibsLocations, Configuration, BinaryOutputDir
         implement equals *
         implement equals *, ~exclude1, ~exclude2
         */
@@ -295,6 +321,10 @@ namespace Lang.Cs2Php
         /// Nazwa własności Configuration; i.e. DEBUG, RELEASE
         /// </summary>
         public const string PropertyNameConfiguration = "Configuration";
+        /// <summary>
+        /// Nazwa własności BinaryOutputDir; 
+        /// </summary>
+        public const string PropertyNameBinaryOutputDir = "BinaryOutputDir";
         #endregion Constants
 
 
@@ -396,6 +426,22 @@ namespace Lang.Cs2Php
             }
         }
         private string _configuration = "RELEASE";
+        /// <summary>
+        /// 
+        /// </summary>
+        public string BinaryOutputDir
+        {
+            get
+            {
+                return _binaryOutputDir;
+            }
+            set
+            {
+                value = (value ?? String.Empty).Trim();
+                _binaryOutputDir = value;
+            }
+        }
+        private string _binaryOutputDir = string.Empty;
         #endregion Properties
     }
 }

@@ -58,6 +58,8 @@ namespace Lang.Php.Compiler
 
         #endregion Constructors
 
+
+       
         #region Static Methods
 
         // Private Methods 
@@ -150,11 +152,11 @@ namespace Lang.Php.Compiler
             _cSharpProject = _solution.Projects.Single(a => a.Id == _cSharpProject.Id);
         }
 
-        public EmitResult Compile2PhpAndEmit(string outDir, IEnumerable<Assembly> assToScan, Dictionary<string, string> referencedPhpLibsLocations)
+        public EmitResult Compile2PhpAndEmit(string outDir, string dllFilename,  IEnumerable<Assembly> assToScan, Dictionary<string, string> referencedPhpLibsLocations)
         {
             if (_verboseToConsole)
                 Console.WriteLine("Compilation");
-            var emitResult = CompileCSharpProject(_sandbox);
+            var emitResult = CompileCSharpProject(_sandbox, dllFilename);
             if (!emitResult.Success)
                 return emitResult;
             GreenOk();
@@ -215,7 +217,7 @@ namespace Lang.Php.Compiler
         /// </summary>
         /// <param name="sandbox"></param>
         /// <returns></returns>
-        public EmitResult CompileCSharpProject(AssemblySandbox sandbox)
+        public EmitResult CompileCSharpProject(AssemblySandbox sandbox, string dllFilename)
         {
             // must be public !!!!!!!!!!
             _projectCompilation = _cSharpProject.GetCompilationAsync().Result;
@@ -225,7 +227,8 @@ namespace Lang.Php.Compiler
             foreach (var i in _projectCompilation.References)
                 Console.WriteLine("   linked with {0}", i.Display);
             EmitResult result;
-            var tmp = sandbox.EmitCompiledAssembly(_projectCompilation, out result);
+ 
+            var tmp = sandbox.EmitCompiledAssembly(_projectCompilation, out result, dllFilename);
             _compiledAssembly = tmp != null ? tmp.WrappedAssembly : null;
             return result;
         }
@@ -627,6 +630,9 @@ namespace Lang.Php.Compiler
                 _throwExceptions = value;
             }
         }
+
+       
+
         private bool _throwExceptions;
         #endregion Properties
 

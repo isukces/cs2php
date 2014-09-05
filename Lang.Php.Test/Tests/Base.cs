@@ -165,7 +165,7 @@ namespace Lang.Php.Test.Tests
                 {
 
                     Console.WriteLine("Start compile");
-                    var result = comp.CompileCSharpProject(sandbox);
+                    var result = comp.CompileCSharpProject(sandbox, comp.DllFileName);
                     if (!result.Success)
                     {
                         foreach (var i in result.Diagnostics)

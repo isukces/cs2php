@@ -9,7 +9,8 @@ namespace Lang.Cs2Php
         string CsProject { get; set; }
         string OutDir { get; set; }
         List<string> Referenced { get; }
-        Dictionary<string, string> ReferencedPhpLibsLocations { get; set; }
+        Dictionary<string, string> ReferencedPhpLibsLocations { get; }
         List<string> TranlationHelpers { get; }
+        string BinaryOutputDir { get; set; }
     }
 }

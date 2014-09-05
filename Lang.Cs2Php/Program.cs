@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Linq;
 using Lang.Php.Compiler;
 
@@ -6,9 +7,9 @@ namespace Lang.Cs2Php
 {
     class Program
     {
-		#region Static Methods 
+        #region Static Methods
 
-		// Private Methods 
+        // Private Methods 
 
         static void Main(string[] args)
         {
@@ -32,7 +33,7 @@ namespace Lang.Cs2Php
                 processingContext.Engine.OutDir = processingContext.files.Last();
 
 
-               
+
                 DoCompilation(processingContext.Engine, ref showUsage);
 
                 Console.ForegroundColor = ConsoleColor.Green;
@@ -58,7 +59,7 @@ namespace Lang.Cs2Php
             Console.ReadKey();
         }
 
-        private static void DoCompilation(ConfigData aa,ref  bool showUsage)
+        private static void DoCompilation(ConfigData aa, ref  bool showUsage)
         {
             string domainName = "sandbox" + Guid.NewGuid();
             var domainSetup = new AppDomainSetup
@@ -73,15 +74,21 @@ namespace Lang.Cs2Php
                 var ce = (CompilerEngine)appDomain.CreateInstanceFrom(
                     wrapperType.Assembly.Location,
                     wrapperType.FullName).Unwrap();
-              
-                ce.CopyFrom(aa);
+
+                //public static void CopyFrom(ref IConfigData x, IConfigData s)
+                {
+                    ce.CopyFrom(aa);
+                    Debug.Assert(aa.Referenced.Count == ce.Referenced.Count);
+                    Debug.Assert(aa.TranlationHelpers.Count == ce.TranlationHelpers.Count);
+                    Debug.Assert(aa.ReferencedPhpLibsLocations.Count == ce.ReferencedPhpLibsLocations.Count);
+                }
                 ce.Check();
                 showUsage = false;
                 ce.Compile();
             }
             finally
             {
-                
+
             }
         }
 
@@ -101,6 +108,6 @@ namespace Lang.Cs2Php
         -t filename      : cs2php translation helper");
         }
 
-		#endregion Static Methods 
+        #endregion Static Methods
     }
 }

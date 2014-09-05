@@ -125,10 +125,11 @@ namespace Lang.Php.Compiler
         /// <param name="compilation"></param>
         /// <param name="result"></param>
         /// <returns></returns>
-        public AssemblyWrapper EmitCompiledAssembly(Compilation compilation, out EmitResult result)
+        public AssemblyWrapper EmitCompiledAssembly(Compilation compilation, out EmitResult result, string filename)
         {
-            var fn = "c:\\temp\\aaa.dll";
-            using (var fs = new FileStream(fn, FileMode.Create))
+            var fi = new FileInfo(filename);
+            if (fi.Directory != null) fi.Directory.Create();
+            using (var fs = new FileStream(fi.FullName, FileMode.Create))
             {
                 result = compilation.Emit(fs);
                 if (!result.Success)
@@ -136,7 +137,7 @@ namespace Lang.Php.Compiler
 
 
             }
-            var assembly = LoadByFullFilename(fn);
+            var assembly = LoadByFullFilename(fi.FullName);
             return assembly;
 
 

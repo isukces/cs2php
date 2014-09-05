@@ -13,7 +13,7 @@ namespace Lang.Cs2Php
         public ArgumentProcessingContext()
         {
 #if DEBUG
-            engine.Configuration = "DEBUG";
+            _engine.Configuration = "DEBUG";
 #else
             _engine.Configuration = "RELEASE";
 #endif
@@ -55,11 +55,16 @@ namespace Lang.Cs2Php
             }
             switch (_command)
             {
+
                 case "r":
                     var fileName = ResolveFilename(arg);
                     if (!File.Exists(fileName))
                         throw new Exception("Referenced library " + fileName + " doesn't exist");
                     _engine.Referenced.Add(fileName);
+                    _command = null;
+                    break;
+                case "binout":
+                    _engine.BinaryOutputDir = ResolveFilename(arg);
                     _command = null;
                     break;
                 case "t":
@@ -101,10 +106,10 @@ namespace Lang.Cs2Php
             try
             {
                 _currentDir = new FileInfo(filename).DirectoryName;
-                var lines = (from i in File.ReadAllLines(filename)
-                             let it = (i ?? "").Trim()
-                             where !string.IsNullOrEmpty(it) && !it.StartsWith(";")
-                             select it).ToArray();
+                var lines = (from line in File.ReadAllLines(filename)
+                             let lineTrimmed = (line ?? "").Trim()
+                             where !string.IsNullOrEmpty(lineTrimmed) && !lineTrimmed.StartsWith(";")
+                             select lineTrimmed).ToArray();
                 // set FORMSBIN=c:\programs\_CS2PHP\
                 foreach (var line in lines)
                 {
@@ -169,7 +174,7 @@ namespace Lang.Cs2Php
         string _command = "";
         string _currentDir;
         private readonly ConfigData _engine = new ConfigData();
-        readonly Dictionary<string, string> _names = new Dictionary<string, string>();
+        readonly Dictionary<string, string> _names = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         public readonly List<string> files = new List<string>();
 
         #endregion Fields

@@ -1,17 +1,34 @@
-﻿namespace Lang.Cs2Php
+﻿using System;
+using System.Diagnostics;
+using System.Linq;
+
+namespace Lang.Cs2Php
 {
-    public static class ConfigDataExtension 
+    public static class ConfigDataExtension
     {
-        public static void CopyFrom(this IConfigData x, IConfigData s)
+        public static void CopyFrom(this IConfigData dst, IConfigData src)
         {
-            x.Configuration = s.Configuration;
-            x.CsProject = s.CsProject;
-            x.OutDir = s.OutDir;
-            x.Referenced.Clear(); x.Referenced.AddRange(s.Referenced);
-            x.TranlationHelpers.Clear(); x.TranlationHelpers.AddRange(s.TranlationHelpers);
-            x.ReferencedPhpLibsLocations.Clear();
-            foreach (var a in s.ReferencedPhpLibsLocations)
-                x.ReferencedPhpLibsLocations.Add(a.Key, a.Value);
+
+            dst.Configuration = src.Configuration;
+            dst.CsProject = src.CsProject;
+            dst.OutDir = src.OutDir;
+            dst.Referenced.Clear();
+            dst.TranlationHelpers.Clear();
+            dst.ReferencedPhpLibsLocations.Clear();
+
+            // src and dest can be in different application domain
+            // we need to add item by item
+            foreach (var q in src.Referenced.ToArray())
+                dst.Referenced.Add(q);
+            foreach (var q in src.TranlationHelpers.ToArray())
+                dst.TranlationHelpers.Add(q);
+            foreach (var a in src.ReferencedPhpLibsLocations)
+                dst.ReferencedPhpLibsLocations.Add(a.Key, a.Value);
+
+            dst.BinaryOutputDir = src.BinaryOutputDir;
+            Debug.Assert(dst.Referenced.Count == src.Referenced.Count);
+            Debug.Assert(dst.TranlationHelpers.Count == src.TranlationHelpers.Count);
+            Debug.Assert(dst.ReferencedPhpLibsLocations.Count == src.ReferencedPhpLibsLocations.Count);
         }
     }
 }
