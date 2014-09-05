@@ -92,11 +92,11 @@
     <Compile Include="AssemblySandbox.cs" />
     <Compile Include="Cs2PhpCompiler.cs" />
     <Compile Include="EmitContext.cs" />
+    <Compile Include="LangPhpCompilerReflectionExtension.cs" />
     <Compile Include="PathUtil.cs" />
     <Compile Include="OptimizeOptions.cs" />
     <Compile Include="PhpModuleNamespaceManager.cs" />
     <Compile Include="PhpNamespace.cs" />
-    <Compile Include="ReflectionUtil.cs" />
     <Compile Include="Source\PhpSourceBase.cs" />
     <Compile Include="Source\_Expressions\PhpArrayCreateExpression.cs" />
     <Compile Include="Source\_Expressions\PhpDefinedConstExpression.cs" />

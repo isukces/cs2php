@@ -288,6 +288,8 @@ namespace Lang.Cs.Compiler.Visitors
                       return VisitSetAccessorDeclaration(node as AccessorDeclarationSyntax);
                 case SyntaxKind.DivideExpression:
                       return VisitDivideExpression(node as BinaryExpressionSyntax);
+                case SyntaxKind.SimpleAssignmentExpression:
+                      return VisitSimpleAssignmentExpression(node as BinaryExpressionSyntax);
                 case SyntaxKind.AddExpression:
                       return VisitAddExpression(node as BinaryExpressionSyntax);
                 case SyntaxKind.FalseLiteralExpression:
@@ -297,7 +299,7 @@ namespace Lang.Cs.Compiler.Visitors
                 case SyntaxKind.MultiplyExpression:
                       return VisitMultiplyExpression(node as BinaryExpressionSyntax);
                 case SyntaxKind.TrueLiteralExpression:
-                      return VisitTrueLiteralExpression(node as LiteralExpressionSyntax);
+                      return VisitTrueLiteralExpression(node as LiteralEaxpressionSyntax);
                 case SyntaxKind.LessThanExpression:
                       return VisitLessThanExpression(node as BinaryExpressionSyntax);
                 case SyntaxKind.PostIncrementExpression:
@@ -1322,6 +1324,13 @@ namespace Lang.Cs.Compiler.Visitors
             return default(T);
         }
 
+        protected virtual T VisitSimpleAssignmentExpression(BinaryExpressionSyntax node)
+        {
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitSimpleAssignmentExpression", GetType().FullName));
+            return default(T);
+        }
+
         protected virtual T VisitAddExpression(BinaryExpressionSyntax node)
         {
             if (throwNotImplementedException)
@@ -1350,7 +1359,7 @@ namespace Lang.Cs.Compiler.Visitors
             return default(T);
         }
 
-        protected virtual T VisitTrueLiteralExpression(LiteralExpressionSyntax node)
+        protected virtual T VisitTrueLiteralExpression(LiteralEaxpressionSyntax node)
         {
             if (throwNotImplementedException)
                 throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitTrueLiteralExpression", GetType().FullName));

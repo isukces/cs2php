@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Lang.Cs.Compiler
 {
@@ -19,30 +16,30 @@ namespace Lang.Cs.Compiler
         }
         public static string GetMethodHeader(this MethodInfo method)
         {
-            StringBuilder sb = new StringBuilder();
-            sb.Append(GetVisibility(method.IsPublic, method.IsPrivate) + " ");
-            sb.Append(TypesUtil.TypeToString(method.ReturnType) + " ");
-            sb.Append(method.Name);
-            sb.Append("(");
+            var builder = new StringBuilder();
+            builder.Append(GetVisibility(method.IsPublic, method.IsPrivate) + " ");
+            builder.Append(TypesUtil.TypeToString(method.ReturnType) + " ");
+            builder.Append(method.Name);
+            builder.Append("(");
             bool addC = false;
             foreach (var a in method.GetParameters())
             {
                 if (a.IsDefined(typeof(ParamArrayAttribute)))
-                    sb.Append("params ");
-                if (addC) sb.Append(", ");
+                    builder.Append("params ");
+                if (addC) builder.Append(", ");
                 addC = true;
                 if (a.IsOut)
-                    sb.Append("out ");
+                    builder.Append("out ");
                 else if (a.IsRetval)
-                    sb.AppendFormat("ref");
-                sb.AppendFormat("{0} {1}", TypesUtil.TypeToString(a.ParameterType), a.Name);
+                    builder.AppendFormat("ref");
+                builder.AppendFormat("{0} {1}", TypesUtil.TypeToString(a.ParameterType), a.Name);
                 if (a.HasDefaultValue)
                 {
-                    sb.AppendFormat(" = {0}", TypesUtil.CSValueToString(a.DefaultValue));
+                    builder.AppendFormat(" = {0}", TypesUtil.CSValueToString(a.DefaultValue));
                 }
             }
-            sb.Append(")");
-            return sb.ToString();
+            builder.Append(")");
+            return builder.ToString();
 
         }
     }

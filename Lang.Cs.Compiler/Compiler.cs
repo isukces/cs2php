@@ -1,11 +1,5 @@
-﻿using System.IO;
-using Lang.Cs.Compiler.Visitors;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Reflection;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Lang.Cs.Compiler
 {
@@ -14,7 +8,7 @@ namespace Lang.Cs.Compiler
     smartClass
     option NoAdditionalFile
     
-    property ReferencedAssemblies List<Assembly> 
+    property ReferencedAssemblies List<AssemblyWrapper> 
     	init #
     
     property Sources List<string> 
@@ -22,20 +16,20 @@ namespace Lang.Cs.Compiler
     smartClassEnd
     */
 
-    public partial class Compiler
+    internal static class Compiler
     {
 		#region Constructors 
-
+#if OLD
         public Compiler(bool addCommonAssemblies)
         {
             if (!addCommonAssemblies) return;
-            referencedAssemblies.Add(typeof(System.String).Assembly);
-            referencedAssemblies.Add(typeof(List<string>).Assembly);
+            _referencedAssemblies.Add(typeof(System.String).Assembly);
+            _referencedAssemblies.Add(typeof(List<string>).Assembly);
         }
-
+#endif
 		#endregion Constructors 
 
-		#region Static Methods 
+        #region Static Methods 
 
 		// Public Methods 
 
@@ -73,16 +67,16 @@ namespace Lang.Cs.Compiler
             return true;
         }
 
-		#endregion Static Methods 
-
-		#region Methods 
+        #endregion Static Methods 
+#if OLD
+        #region Methods 
 
 		// Public Methods 
 
         public CompileResult[] Compile()
         {
-            var compileResults = new List<CompileResult>(sources.Count);
-            foreach (var i in sources)
+            var compileResults = new List<CompileResult>(_sources.Count);
+            foreach (var i in _sources)
                 compileResults.Add(Compile(i));
             return compileResults.ToArray();
         }
@@ -96,7 +90,7 @@ namespace Lang.Cs.Compiler
             {
                 throwNotImplementedException = true
             };
-            compileState.Context.KnownTypes = CompileState.GetAllTypes(referencedAssemblies);
+            compileState.Context.KnownTypes = CompileState.GetAllTypes(_referencedAssemblies);
             SyntaxTree tree = SyntaxFactory.ParseSyntaxTree(File.ReadAllText(filename));
             // .ParseFile(filename);
             var root = (CompilationUnitSyntax)tree.GetRoot();
@@ -105,89 +99,12 @@ namespace Lang.Cs.Compiler
 
         }
 
-		#endregion Methods 
+        #endregion Methods
+#endif
+        #region Static Fields
 
-		#region Static Fields 
-
-        public static readonly bool[] _false_true_ = new bool[] { false, true };
+        public static readonly bool[] FalseTrueArray = { false, true };
 
 		#endregion Static Fields 
-    }
-}
-
-
-// -----:::::##### smartClass embedded code begin #####:::::----- generated 2013-11-05 11:04
-// File generated automatically ver 2013-07-10 08:43
-// Smartclass.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0c4d5d36fb5eb4ac
-namespace Lang.Cs.Compiler
-{
-    public partial class Compiler
-    {
-        /*
-        /// <summary>
-        /// Tworzy instancję obiektu
-        /// </summary>
-        public Compiler()
-        {
-        }
-        Przykłady użycia
-        implement INotifyPropertyChanged
-        implement INotifyPropertyChanged_Passive
-        implement ToString ##ReferencedAssemblies## ##Sources##
-        implement ToString ReferencedAssemblies=##ReferencedAssemblies##, Sources=##Sources##
-        implement equals ReferencedAssemblies, Sources
-        implement equals *
-        implement equals *, ~exclude1, ~exclude2
-        */
-
-
-        #region Constants
-        /// <summary>
-        /// Nazwa własności ReferencedAssemblies; 
-        /// </summary>
-        public const string PROPERTYNAME_REFERENCEDASSEMBLIES = "ReferencedAssemblies";
-        /// <summary>
-        /// Nazwa własności Sources; 
-        /// </summary>
-        public const string PROPERTYNAME_SOURCES = "Sources";
-        #endregion Constants
-
-
-        #region Methods
-        #endregion Methods
-
-
-        #region Properties
-        /// <summary>
-        /// 
-        /// </summary>
-        public List<Assembly> ReferencedAssemblies
-        {
-            get
-            {
-                return referencedAssemblies;
-            }
-            set
-            {
-                referencedAssemblies = value;
-            }
-        }
-        private List<Assembly> referencedAssemblies = new List<Assembly>();
-        /// <summary>
-        /// 
-        /// </summary>
-        public List<string> Sources
-        {
-            get
-            {
-                return sources;
-            }
-            set
-            {
-                sources = value;
-            }
-        }
-        private List<string> sources = new List<string>();
-        #endregion Properties
     }
 }

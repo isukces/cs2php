@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Lang.Cs.Compiler.Sandbox;
 
 namespace Lang.Php.Compiler.Translator
 {
@@ -28,8 +29,8 @@ namespace Lang.Php.Compiler.Translator
 }
 
 
-// -----:::::##### smartClass embedded code begin #####:::::----- generated 2013-11-04 09:34
-// File generated automatically ver 2013-07-10 08:43
+// -----:::::##### smartClass embedded code begin #####:::::----- generated 2014-09-03 17:54
+// File generated automatically ver 2014-09-01 19:00
 // Smartclass.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0c4d5d36fb5eb4ac
 namespace Lang.Php.Compiler.Translator
 {
@@ -56,13 +57,13 @@ namespace Lang.Php.Compiler.Translator
         #region Constructors
         /// <summary>
         /// Tworzy instancję obiektu
-        /// <param name="SourceType">Typ oryginalny .NET</param>
-        /// <param name="ReplaceBy">typ, którym zastępujemy</param>
+        /// <param name="sourceType">Typ oryginalny .NET</param>
+        /// <param name="replaceBy">typ, którym zastępujemy</param>
         /// </summary>
-        public ClassReplaceInfo(Type SourceType, Type ReplaceBy)
+        public ClassReplaceInfo(Type sourceType, Type replaceBy)
         {
-            this.sourceType = SourceType;
-            this.replaceBy = ReplaceBy;
+            _sourceType = sourceType;
+            _replaceBy = replaceBy;
         }
 
         #endregion Constructors
@@ -71,11 +72,11 @@ namespace Lang.Php.Compiler.Translator
         /// <summary>
         /// Nazwa własności SourceType; Typ oryginalny .NET
         /// </summary>
-        public const string PROPERTYNAME_SOURCETYPE = "SourceType";
+        public const string PropertyNameSourceType = "SourceType";
         /// <summary>
         /// Nazwa własności ReplaceBy; typ, którym zastępujemy
         /// </summary>
-        public const string PROPERTYNAME_REPLACEBY = "ReplaceBy";
+        public const string PropertyNameReplaceBy = "ReplaceBy";
         #endregion Constants
 
         #region Methods
@@ -85,13 +86,13 @@ namespace Lang.Php.Compiler.Translator
         /// <returns>Tekstowa reprezentacja obiektu</returns>
         public override string ToString()
         {
-            return string.Format("{0}  => {1}", sourceType, replaceBy);
+            return string.Format("{0}  => {1}", _sourceType, _replaceBy);
         }
 
         /// <summary>
         /// Sprawdza, czy wskazany obiekt jest równy bieżącemu
         /// </summary>
-        /// <param name="obj">obiekt do porównania z obiektem bieżącym</param>
+        /// <param name="other">obiekt do porównania z obiektem bieżącym</param>
         /// <returns><c>true</c> jeśli wskazany obiekt jest równy bieżącemu; w przeciwnym wypadku<c>false</c></returns>
         public bool Equals(ClassReplaceInfo other)
         {
@@ -101,7 +102,7 @@ namespace Lang.Php.Compiler.Translator
         /// <summary>
         /// Sprawdza, czy wskazany obiekt jest równy bieżącemu
         /// </summary>
-        /// <param name="obj">obiekt do porównania z obiektem bieżącym</param>
+        /// <param name="other">obiekt do porównania z obiektem bieżącym</param>
         /// <returns><c>true</c> jeśli wskazany obiekt jest równy bieżącemu; w przeciwnym wypadku<c>false</c></returns>
         public override bool Equals(object other)
         {
@@ -117,8 +118,8 @@ namespace Lang.Php.Compiler.Translator
         {
             // Good implementation suggested by Josh Bloch
             int _hash_ = 17;
-            _hash_ = _hash_ * 31 + sourceType.GetHashCode();
-            _hash_ = _hash_ * 31 + replaceBy.GetHashCode();
+            _hash_ = _hash_ * 31 + _sourceType.GetHashCode();
+            _hash_ = _hash_ * 31 + _replaceBy.GetHashCode();
             return _hash_;
         }
 
@@ -135,7 +136,7 @@ namespace Lang.Php.Compiler.Translator
         {
             if (left == (object)null && right == (object)null) return true;
             if (left == (object)null || right == (object)null) return false;
-            return left.sourceType == right.sourceType && left.replaceBy == right.replaceBy;
+            return left._sourceType == right._sourceType && left._replaceBy == right._replaceBy;
         }
 
         /// <summary>
@@ -148,7 +149,7 @@ namespace Lang.Php.Compiler.Translator
         {
             if (left == (object)null && right == (object)null) return false;
             if (left == (object)null || right == (object)null) return true;
-            return left.sourceType != right.sourceType || left.replaceBy != right.replaceBy;
+            return left._sourceType != right._sourceType || left._replaceBy != right._replaceBy;
         }
 
         #endregion Operators
@@ -161,10 +162,10 @@ namespace Lang.Php.Compiler.Translator
         {
             get
             {
-                return sourceType;
+                return _sourceType;
             }
         }
-        private Type sourceType;
+        private Type _sourceType;
         /// <summary>
         /// typ, którym zastępujemy; własność jest tylko do odczytu.
         /// </summary>
@@ -172,10 +173,10 @@ namespace Lang.Php.Compiler.Translator
         {
             get
             {
-                return replaceBy;
+                return _replaceBy;
             }
         }
-        private Type replaceBy;
+        private Type _replaceBy;
         #endregion Properties
 
     }

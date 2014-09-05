@@ -1,4 +1,5 @@
 ﻿using Lang.Cs.Compiler;
+using Lang.Cs.Compiler.Sandbox;
 using Lang.Php.Compiler.Source;
 using System;
 using System.Collections.Generic;
@@ -11,11 +12,15 @@ namespace Lang.Php.Compiler
     /*
     smartClass
     option NoAdditionalFile
+    implement Constructor Sandbox
+    
+    property Sandbox AssemblySandbox 
+    	read only
     
     property CurrentAssembly Assembly obecnie konwertowane assembly
     
     property CurrentType Type Typ obecnie konwertowany
-    	OnChange currentTypeTranslationInfo = GetTI(currentType, false);
+    	OnChange _currentTypeTranslationInfo = GetTI(_currentType, false);
     
     property CurrentTypeTranslationInfo ClassTranslationInfo 
     	read only
@@ -52,7 +57,7 @@ namespace Lang.Php.Compiler
     	init #
     smartClassEnd
     */
-
+    
     public partial class TranslationInfo
     {
         #region Methods
@@ -148,7 +153,7 @@ namespace Lang.Php.Compiler
 
         public ClassTranslationInfo GetOrMakeTranslationInfo(Type type)
         {
-            if (type == null)
+            if ((object)type == null)
                 throw new ArgumentNullException("type");
             ClassTranslationInfo cti;
             if (_classTranslations.TryGetValue(type, out cti)) return cti;
@@ -191,13 +196,13 @@ namespace Lang.Php.Compiler
         [Obsolete("maybe will be better to resolve short names while emit proces")]
         public PhpQualifiedName GetPhpType(Type t, bool doCheckAccesibility)
         {
-            if (t == null)
+            if ((object)t == null)
                 return null;
             if (doCheckAccesibility)
                 CheckAccesibility(t);
             var classTranslationInfo = GetOrMakeTranslationInfo(t);
             var phpQualifiedName = classTranslationInfo.ScriptName.XClone();
-            if (_currentType == null) return phpQualifiedName;
+            if ((object)_currentType == null) return phpQualifiedName;
             if (t == _currentType)
                 phpQualifiedName.CurrentEffectiveName = PhpQualifiedName.SELF;
             else if (t != typeof(object) && t == _currentType.BaseType)
@@ -211,9 +216,9 @@ namespace Lang.Php.Compiler
         }
 
         [Obsolete("I don't think this is best way to obtain info..")]
-        public ClassTranslationInfo GetTI(Type t, bool doCheckAccesibility = true)
+        public ClassTranslationInfo GetTi(Type t, bool doCheckAccesibility = true)
         {
-            if (t == null)
+            if ((object)t == null)
                 return null;
             var a = GetPhpType(t, doCheckAccesibility);
             return _classTranslations[t];
@@ -243,7 +248,11 @@ namespace Lang.Php.Compiler
                     var generic = interfaceType.IsGenericType
                         ? interfaceType.GetGenericTypeDefinition()
                         : interfaceType;
+
+#warning 'Not finishied'
+
                     #region IPhpNodeTranslator
+
                     if (generic == typeof(IPhpNodeTranslator<>))
                     {
                         var genericType = interfaceType.GetGenericArguments()[0];
@@ -256,6 +265,7 @@ namespace Lang.Php.Compiler
                         _nodeTranslators.Add(genericType, bound);
                     }
                     #endregion
+
                     #region IModuleProcessor
                     // ReSharper disable once InvertIf
                     if (generic == typeof(IModuleProcessor))
@@ -264,6 +274,8 @@ namespace Lang.Php.Compiler
                         _moduleProcessors.Add(obj);
                     }
                     #endregion
+
+
                 }
             }
         }
@@ -278,7 +290,7 @@ namespace Lang.Php.Compiler
         {
             if (m == null || m.DeclaringType == _currentType)
                 return;
-            var tt = GetTI(m.DeclaringType, false);
+            var tt = GetTi(m.DeclaringType, false);
             if (!tt.IsPage && !tt.IsArray) return;
             if (tt.ModuleName == CurrentTypeTranslationInfo.ModuleName) return;
             if (m is ConstructorInfo)
@@ -298,7 +310,7 @@ namespace Lang.Php.Compiler
         {
             if (type == _currentType)
                 return;
-            var tt = GetTI(type, false);
+            var tt = GetTi(type, false);
             if (!tt.IsPage)
                 return;
             if (tt.ModuleName != CurrentTypeTranslationInfo.ModuleName)
@@ -338,12 +350,12 @@ namespace Lang.Php.Compiler
 }
 
 
-// -----:::::##### smartClass embedded code begin #####:::::----- generated 2014-09-02 20:00
-// File generated automatically ver 2013-07-10 08:43
+// -----:::::##### smartClass embedded code begin #####:::::----- generated 2014-09-05 17:14
+// File generated automatically ver 2014-09-01 19:00
 // Smartclass.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0c4d5d36fb5eb4ac
 namespace Lang.Php.Compiler
 {
-    public partial class TranslationInfo
+    public partial class TranslationInfo 
     {
         /*
         /// <summary>
@@ -352,18 +364,34 @@ namespace Lang.Php.Compiler
         public TranslationInfo()
         {
         }
+
         Przykłady użycia
+
         implement INotifyPropertyChanged
         implement INotifyPropertyChanged_Passive
-        implement ToString ##CurrentAssembly## ##CurrentType## ##CurrentTypeTranslationInfo## ##CurrentMethod## ##Compiled## ##TranslationAssemblies## ##NodeTranslators## ##ModuleProcessors## ##ClassTranslations## ##AssemblyTranslations## ##FieldTranslations## ##State## ##KnownConstsValues## ##Logs##
-        implement ToString CurrentAssembly=##CurrentAssembly##, CurrentType=##CurrentType##, CurrentTypeTranslationInfo=##CurrentTypeTranslationInfo##, CurrentMethod=##CurrentMethod##, Compiled=##Compiled##, TranslationAssemblies=##TranslationAssemblies##, NodeTranslators=##NodeTranslators##, ModuleProcessors=##ModuleProcessors##, ClassTranslations=##ClassTranslations##, AssemblyTranslations=##AssemblyTranslations##, FieldTranslations=##FieldTranslations##, State=##State##, KnownConstsValues=##KnownConstsValues##, Logs=##Logs##
-        implement equals CurrentAssembly, CurrentType, CurrentTypeTranslationInfo, CurrentMethod, Compiled, TranslationAssemblies, NodeTranslators, ModuleProcessors, ClassTranslations, AssemblyTranslations, FieldTranslations, State, KnownConstsValues, Logs
+        implement ToString ##Sandbox## ##CurrentAssembly## ##CurrentType## ##CurrentTypeTranslationInfo## ##CurrentMethod## ##Compiled## ##TranslationAssemblies## ##NodeTranslators## ##ModuleProcessors## ##ClassTranslations## ##AssemblyTranslations## ##FieldTranslations## ##State## ##KnownConstsValues## ##Logs##
+        implement ToString Sandbox=##Sandbox##, CurrentAssembly=##CurrentAssembly##, CurrentType=##CurrentType##, CurrentTypeTranslationInfo=##CurrentTypeTranslationInfo##, CurrentMethod=##CurrentMethod##, Compiled=##Compiled##, TranslationAssemblies=##TranslationAssemblies##, NodeTranslators=##NodeTranslators##, ModuleProcessors=##ModuleProcessors##, ClassTranslations=##ClassTranslations##, AssemblyTranslations=##AssemblyTranslations##, FieldTranslations=##FieldTranslations##, State=##State##, KnownConstsValues=##KnownConstsValues##, Logs=##Logs##
+        implement equals Sandbox, CurrentAssembly, CurrentType, CurrentTypeTranslationInfo, CurrentMethod, Compiled, TranslationAssemblies, NodeTranslators, ModuleProcessors, ClassTranslations, AssemblyTranslations, FieldTranslations, State, KnownConstsValues, Logs
         implement equals *
         implement equals *, ~exclude1, ~exclude2
         */
+        #region Constructors
+        /// <summary>
+        /// Tworzy instancję obiektu
+        /// <param name="sandbox"></param>
+        /// </summary>
+        public TranslationInfo(AssemblySandbox sandbox)
+        {
+            _sandbox = sandbox;
+        }
 
+        #endregion Constructors
 
         #region Constants
+        /// <summary>
+        /// Nazwa własności Sandbox; 
+        /// </summary>
+        public const string PropertyNameSandbox = "Sandbox";
         /// <summary>
         /// Nazwa własności CurrentAssembly; obecnie konwertowane assembly
         /// </summary>
@@ -422,12 +450,21 @@ namespace Lang.Php.Compiler
         public const string PropertyNameLogs = "Logs";
         #endregion Constants
 
-
         #region Methods
         #endregion Methods
 
-
         #region Properties
+        /// <summary>
+        /// Własność jest tylko do odczytu.
+        /// </summary>
+        public AssemblySandbox Sandbox
+        {
+            get
+            {
+                return _sandbox;
+            }
+        }
+        private AssemblySandbox _sandbox;
         /// <summary>
         /// obecnie konwertowane assembly
         /// </summary>
@@ -456,7 +493,7 @@ namespace Lang.Php.Compiler
             {
                 if (value == _currentType) return;
                 _currentType = value;
-                _currentTypeTranslationInfo = GetTI(_currentType, false);
+                _currentTypeTranslationInfo = GetTi(_currentType, false);
             }
         }
         private Type _currentType;
@@ -637,5 +674,6 @@ namespace Lang.Php.Compiler
         }
         private List<TranslationMessage> _logs = new List<TranslationMessage>();
         #endregion Properties
+
     }
 }

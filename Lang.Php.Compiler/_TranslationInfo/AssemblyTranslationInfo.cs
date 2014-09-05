@@ -1,11 +1,7 @@
-﻿using Lang.Php.Compiler.Source;
-using Lang.Php;
+﻿using System.Reflection;
+using Lang.Php.Compiler.Source;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Lang.Php.Compiler
 {
@@ -16,35 +12,40 @@ namespace Lang.Php.Compiler
     
     property Assembly Assembly 
     	access public private private
+    	read only
     
     property LibraryName string 
     	read only
     
     property IncludePathConstOrVarName string nazwa stałej lub zmiennej, która oznacza ścieżkę do biblioteki
+    	access public private private
     
     property RootPath string 
-    	preprocess value = value.Replace("\\", "/");
-    	preprocess value = value.StartsWith("/") ? value.Substring(1) : value;
-    	preprocess value = value.EndsWith("/") ? value : (value + "/");
-    	preprocess value = value.Replace("//", "/");
-    	preprocess value = value == "/" ? "" : value;
+    	read only
     
     property PhpPackageSourceUri string 
+    	access public private private
     
     property PhpPackagePathStrip string 
+    	access public private private
     
     property PhpIncludePathExpression IPhpValue 
+    	access public private private
     
     property ConfigModuleName string 
     	init "cs2php"
+    	access public private private
     
     property DefaultTimezone Timezones? 
+    	read only
     smartClassEnd
     */
-    
+
     public partial class AssemblyTranslationInfo
     {
         #region Static Methods
+
+
 
         // Public Methods 
 
@@ -52,38 +53,48 @@ namespace Lang.Php.Compiler
         {
             if (assembly == null)
                 return null;
-            AssemblyTranslationInfo ati = new AssemblyTranslationInfo();
+            var ati = new AssemblyTranslationInfo();
             {
-                ati.assembly = assembly;
+                ati._assembly = assembly;
 
-                var _ModuleIncludeConst = ReflectionUtil.GetAttribute<ModuleIncludeConstAttribute>(assembly);
-                if (_ModuleIncludeConst != null)
-                    ati.IncludePathConstOrVarName = _ModuleIncludeConst.ConstOrVarName;
-                var _RootPath = assembly.GetCustomAttribute<RootPathAttribute>();
-                ati.RootPath = _RootPath == null ? "/" : _RootPath.Path;
-                var _PhpPackageSource = ReflectionUtil.GetAttribute<PhpPackageSourceAttribute>(assembly);
-                if (_PhpPackageSource != null)
+                var moduleIncludeConst = assembly.GetCustomAttribute<ModuleIncludeConstAttribute>();
+                if (moduleIncludeConst != null)
+                    ati.IncludePathConstOrVarName = moduleIncludeConst.ConstOrVarName;
+                
+                   ati._rootPath =  GetRootPath(assembly);
+                
+                var phpPackageSource = assembly.GetCustomAttribute<PhpPackageSourceAttribute>();
+                if (phpPackageSource != null)
                 {
-                    ati.PhpPackageSourceUri = _PhpPackageSource.SourceUri;
-                    ati.PhpPackagePathStrip = _PhpPackageSource.StripArchivePath;
+                    ati.PhpPackageSourceUri = phpPackageSource.SourceUri;
+                    ati.PhpPackagePathStrip = phpPackageSource.StripArchivePath;
                 }
                 {
-                    var _ConfigModule = ReflectionUtil.GetAttribute<ConfigModuleAttribute>(assembly);
-                    if (_ConfigModule != null)
-                        ati.ConfigModuleName = _ConfigModule.Name;
+                    var configModule = assembly.GetCustomAttribute<ConfigModuleAttribute>();
+                    if (configModule != null)
+                        ati.ConfigModuleName = configModule.Name;
                 }
                 {
-                    var _DefaultTimezone = ReflectionUtil.GetAttribute<DefaultTimezoneAttribute>(assembly);
-                    if (_DefaultTimezone != null)
-                        ati.defaultTimezone = _DefaultTimezone.Timezone;
+                    var defaultTimezone = assembly.GetCustomAttribute<DefaultTimezoneAttribute>();
+                    if (defaultTimezone != null)
+                        ati._defaultTimezone = defaultTimezone.Timezone;
                 }
             }
-            ati.libraryName = LibNameFromAssembly(assembly);
+            ati._libraryName = LibNameFromAssembly(assembly);
             ati.PhpIncludePathExpression = GetDefaultIncludePath(ati, translationInfo);
             return ati;
         }
 
-        public static string LibNameFromAssembly(Assembly a)
+        public static string GetRootPath(Assembly assembly)
+        {
+            var rootPathAttribute = assembly.GetCustomAttribute<RootPathAttribute>();
+            string result = (rootPathAttribute.Path ?? "").Replace("\\", "/").TrimEnd('/').TrimStart('/') + "/";
+            while (result.Contains("//"))
+                result = result.Replace("//", "/");
+            return result;
+        }
+
+        private static string LibNameFromAssembly(Assembly a)
         {
             var tmp = a.ManifestModule.ScopeName.ToLower();
             if (tmp.EndsWith(".dll"))
@@ -93,11 +104,11 @@ namespace Lang.Php.Compiler
         // Private Methods 
         public override string ToString()
         {
-            return libraryName;
+            return _libraryName;
         }
         static IPhpValue GetDefaultIncludePath(AssemblyTranslationInfo ati, TranslationInfo translationInfo)
         {
-            List<IPhpValue> pathElements = new List<IPhpValue>();
+            var pathElements = new List<IPhpValue>();
             #region Take include path variable or const
             if (!string.IsNullOrEmpty(ati.IncludePathConstOrVarName))
             {
@@ -133,12 +144,12 @@ namespace Lang.Php.Compiler
 }
 
 
-// -----:::::##### smartClass embedded code begin #####:::::----- generated 2014-01-05 09:59
-// File generated automatically ver 2013-07-10 08:43
+// -----:::::##### smartClass embedded code begin #####:::::----- generated 2014-09-05 17:28
+// File generated automatically ver 2014-09-01 19:00
 // Smartclass.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0c4d5d36fb5eb4ac
 namespace Lang.Php.Compiler
 {
-    public partial class AssemblyTranslationInfo 
+    public partial class AssemblyTranslationInfo
     {
         /*
         /// <summary>
@@ -162,39 +173,39 @@ namespace Lang.Php.Compiler
         /// <summary>
         /// Nazwa własności Assembly; 
         /// </summary>
-        public const string PROPERTYNAME_ASSEMBLY = "Assembly";
+        public const string PropertyNameAssembly = "Assembly";
         /// <summary>
         /// Nazwa własności LibraryName; 
         /// </summary>
-        public const string PROPERTYNAME_LIBRARYNAME = "LibraryName";
+        public const string PropertyNameLibraryName = "LibraryName";
         /// <summary>
         /// Nazwa własności IncludePathConstOrVarName; nazwa stałej lub zmiennej, która oznacza ścieżkę do biblioteki
         /// </summary>
-        public const string PROPERTYNAME_INCLUDEPATHCONSTORVARNAME = "IncludePathConstOrVarName";
+        public const string PropertyNameIncludePathConstOrVarName = "IncludePathConstOrVarName";
         /// <summary>
         /// Nazwa własności RootPath; 
         /// </summary>
-        public const string PROPERTYNAME_ROOTPATH = "RootPath";
+        public const string PropertyNameRootPath = "RootPath";
         /// <summary>
         /// Nazwa własności PhpPackageSourceUri; 
         /// </summary>
-        public const string PROPERTYNAME_PHPPACKAGESOURCEURI = "PhpPackageSourceUri";
+        public const string PropertyNamePhpPackageSourceUri = "PhpPackageSourceUri";
         /// <summary>
         /// Nazwa własności PhpPackagePathStrip; 
         /// </summary>
-        public const string PROPERTYNAME_PHPPACKAGEPATHSTRIP = "PhpPackagePathStrip";
+        public const string PropertyNamePhpPackagePathStrip = "PhpPackagePathStrip";
         /// <summary>
         /// Nazwa własności PhpIncludePathExpression; 
         /// </summary>
-        public const string PROPERTYNAME_PHPINCLUDEPATHEXPRESSION = "PhpIncludePathExpression";
+        public const string PropertyNamePhpIncludePathExpression = "PhpIncludePathExpression";
         /// <summary>
         /// Nazwa własności ConfigModuleName; 
         /// </summary>
-        public const string PROPERTYNAME_CONFIGMODULENAME = "ConfigModuleName";
+        public const string PropertyNameConfigModuleName = "ConfigModuleName";
         /// <summary>
         /// Nazwa własności DefaultTimezone; 
         /// </summary>
-        public const string PROPERTYNAME_DEFAULTTIMEZONE = "DefaultTimezone";
+        public const string PropertyNameDefaultTimezone = "DefaultTimezone";
         #endregion Constants
 
         #region Methods
@@ -202,20 +213,16 @@ namespace Lang.Php.Compiler
 
         #region Properties
         /// <summary>
-        /// 
+        /// Własność jest tylko do odczytu.
         /// </summary>
         public Assembly Assembly
         {
             get
             {
-                return assembly;
-            }
-            private set
-            {
-                assembly = value;
+                return _assembly;
             }
         }
-        private Assembly assembly;
+        private Assembly _assembly;
         /// <summary>
         /// Własność jest tylko do odczytu.
         /// </summary>
@@ -223,10 +230,10 @@ namespace Lang.Php.Compiler
         {
             get
             {
-                return libraryName;
+                return _libraryName;
             }
         }
-        private string libraryName = string.Empty;
+        private string _libraryName = string.Empty;
         /// <summary>
         /// nazwa stałej lub zmiennej, która oznacza ścieżkę do biblioteki
         /// </summary>
@@ -234,36 +241,26 @@ namespace Lang.Php.Compiler
         {
             get
             {
-                return includePathConstOrVarName;
+                return _includePathConstOrVarName;
             }
-            set
+            private set
             {
                 value = (value ?? String.Empty).Trim();
-                includePathConstOrVarName = value;
+                _includePathConstOrVarName = value;
             }
         }
-        private string includePathConstOrVarName = string.Empty;
+        private string _includePathConstOrVarName = string.Empty;
         /// <summary>
-        /// 
+        /// Własność jest tylko do odczytu.
         /// </summary>
         public string RootPath
         {
             get
             {
-                return rootPath;
-            }
-            set
-            {
-                value = (value ?? String.Empty).Trim();
-                value = value.Replace("\\", "/");
-                value = value.StartsWith("/") ? value.Substring(1) : value;
-                value = value.EndsWith("/") ? value : (value + "/");
-                value = value.Replace("//", "/");
-                value = value == "/" ? "" : value;
-                rootPath = value;
+                return _rootPath;
             }
         }
-        private string rootPath = string.Empty;
+        private string _rootPath = string.Empty;
         /// <summary>
         /// 
         /// </summary>
@@ -271,15 +268,15 @@ namespace Lang.Php.Compiler
         {
             get
             {
-                return phpPackageSourceUri;
+                return _phpPackageSourceUri;
             }
-            set
+            private set
             {
                 value = (value ?? String.Empty).Trim();
-                phpPackageSourceUri = value;
+                _phpPackageSourceUri = value;
             }
         }
-        private string phpPackageSourceUri = string.Empty;
+        private string _phpPackageSourceUri = string.Empty;
         /// <summary>
         /// 
         /// </summary>
@@ -287,15 +284,15 @@ namespace Lang.Php.Compiler
         {
             get
             {
-                return phpPackagePathStrip;
+                return _phpPackagePathStrip;
             }
-            set
+            private set
             {
                 value = (value ?? String.Empty).Trim();
-                phpPackagePathStrip = value;
+                _phpPackagePathStrip = value;
             }
         }
-        private string phpPackagePathStrip = string.Empty;
+        private string _phpPackagePathStrip = string.Empty;
         /// <summary>
         /// 
         /// </summary>
@@ -303,14 +300,14 @@ namespace Lang.Php.Compiler
         {
             get
             {
-                return phpIncludePathExpression;
+                return _phpIncludePathExpression;
             }
-            set
+            private set
             {
-                phpIncludePathExpression = value;
+                _phpIncludePathExpression = value;
             }
         }
-        private IPhpValue phpIncludePathExpression;
+        private IPhpValue _phpIncludePathExpression;
         /// <summary>
         /// 
         /// </summary>
@@ -318,30 +315,26 @@ namespace Lang.Php.Compiler
         {
             get
             {
-                return configModuleName;
+                return _configModuleName;
             }
-            set
+            private set
             {
                 value = (value ?? String.Empty).Trim();
-                configModuleName = value;
+                _configModuleName = value;
             }
         }
-        private string configModuleName = "cs2php";
+        private string _configModuleName = "cs2php";
         /// <summary>
-        /// 
+        /// Własność jest tylko do odczytu.
         /// </summary>
         public Timezones? DefaultTimezone
         {
             get
             {
-                return defaultTimezone;
-            }
-            set
-            {
-                defaultTimezone = value;
+                return _defaultTimezone;
             }
         }
-        private Timezones? defaultTimezone;
+        private Timezones? _defaultTimezone;
         #endregion Properties
 
     }

@@ -28,11 +28,12 @@ namespace Lang.Cs2Php
                     throw new Exception("Invalid input options, unknown csproj file or output directory");
                 if (processingContext.files.Count > 2)
                     throw new Exception("Unknown parameter " + processingContext.files[2]);
-                processingContext.engine.CsProject = processingContext.files.First();
-                processingContext.engine.OutDir = processingContext.files.Last();
-                processingContext.engine.Check();
-                showUsage = false;
-                processingContext.engine.Compile();
+                processingContext.Engine.CsProject = processingContext.files.First();
+                processingContext.Engine.OutDir = processingContext.files.Last();
+
+
+               
+                DoCompilation(processingContext.Engine, ref showUsage);
 
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("Success");
@@ -57,7 +58,34 @@ namespace Lang.Cs2Php
             Console.ReadKey();
         }
 
-              static void Usage()
+        private static void DoCompilation(ConfigData aa,ref  bool showUsage)
+        {
+            string domainName = "sandbox" + Guid.NewGuid();
+            var domainSetup = new AppDomainSetup
+            {
+                ApplicationName = domainName,
+                ApplicationBase = Environment.CurrentDirectory
+            };
+            var appDomain = AppDomain.CreateDomain(domainName, null, domainSetup);
+            try
+            {
+                var wrapperType = typeof(CompilerEngine);
+                var ce = (CompilerEngine)appDomain.CreateInstanceFrom(
+                    wrapperType.Assembly.Location,
+                    wrapperType.FullName).Unwrap();
+              
+                ce.CopyFrom(aa);
+                ce.Check();
+                showUsage = false;
+                ce.Compile();
+            }
+            finally
+            {
+                
+            }
+        }
+
+        static void Usage()
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Usage:");

@@ -1,14 +1,10 @@
 ﻿using Lang.Cs.Compiler;
+using Lang.Cs.Compiler.Sandbox;
 using Lang.Php.Compiler.Source;
-using Lang.Php.Compiler;
-using Lang.Php;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Lang.Php.Compiler.Translator
 {
@@ -25,20 +21,22 @@ namespace Lang.Php.Compiler.Translator
     	read only
     smartClassEnd
     */
-
+    
     public partial class Translator
     {
         #region Constructors
 
         public Translator(TranslationState translationState)
         {
+            if (translationState == null) 
+                throw new ArgumentNullException("translationState");
 #if DEBUG
             if (translationState == null)
                 throw new ArgumentNullException("translationState");
 
 #endif
-            this.state = translationState ?? new TranslationState(new TranslationInfo());
-            info = translationState.Principles;
+            _state = translationState; // ?? new TranslationState(new TranslationInfo());
+            _info = translationState.Principles;
         }
 
         #endregion Constructors
@@ -47,10 +45,12 @@ namespace Lang.Php.Compiler.Translator
 
         // Private Methods 
 
+/*
         static IPhpStatement[] MkArray(IPhpStatement x)
         {
             return new IPhpStatement[] { x };
         }
+*/
 
         #endregion Static Methods
 
@@ -61,52 +61,52 @@ namespace Lang.Php.Compiler.Translator
 
 
 
-        public void Translate()
+        public void Translate(AssemblySandbox sandbox)
         {
-            var _classes = info.GetClasses();
-            var classesToTranslate = info.ClassTranslations.Values.Where(u => u.Type.Assembly == info.CurrentAssembly).ToArray();
-            var _interfaces = info.GetInterfaces();
+            var classes = _info.GetClasses();
+            var classesToTranslate = _info.ClassTranslations.Values.Where(u => u.Type.Assembly.FullName == _info.CurrentAssembly.FullName).ToArray();
+            var interfaces = _info.GetInterfaces();
             //     var interfacesToTranslate = info.ClassTranslations.Values.Where(u => u.Type.Assembly == info.CurrentAssembly).ToArray();
-            foreach (ClassTranslationInfo classTI in classesToTranslate)
+            foreach (var classTranslationInfo in classesToTranslate)
             {
                 PhpClassDefinition phpClass;
-                PhpCodeModule phpModule = GetOrMakeModuleByName(classTI.ModuleName);
-                var assemblyTI = info.GetOrMakeTranslationInfo(info.CurrentAssembly);
+                var phpModule = GetOrMakeModuleByName(classTranslationInfo.ModuleName);
+                // var assemblyTI = _info.GetOrMakeTranslationInfo(_info.CurrentAssembly);
 
                 #region Szukanie / Tworzenie PhpClassDefinition
                 {
                     PhpQualifiedName phpBaseClassName;
                     #region Szukanie nazwy klasy bazowej
                     {
-                        var netBaseType = classTI.Type.BaseType;
-                        if (netBaseType == null || netBaseType == typeof(object))
+                        Type netBaseType = classTranslationInfo.Type.BaseType;
+                        if ((object)netBaseType == null || netBaseType == typeof(object))
                             phpBaseClassName = null;
                         else
                         {
-                            phpBaseClassName = state.Principles.GetPhpType(netBaseType, true);
-                            ClassTranslationInfo baseTypeTI = state.Principles.GetOrMakeTranslationInfo(netBaseType);
-                            if (baseTypeTI.Skip)
+                            phpBaseClassName = _state.Principles.GetPhpType(netBaseType, true);
+                            var baseTypeTranslationInfo = _state.Principles.GetOrMakeTranslationInfo(netBaseType);
+                            if (baseTypeTranslationInfo.Skip)
                                 phpBaseClassName = null;
                         }
                     }
                     #endregion
-                    phpClass = phpModule.FindOrCreateClass(classTI.ScriptName, phpBaseClassName);
+                    phpClass = phpModule.FindOrCreateClass(classTranslationInfo.ScriptName, phpBaseClassName);
                 }
                 #endregion
-                state.Principles.CurrentType = classTI.Type;
-                state.Principles.CurrentAssembly = state.Principles.CurrentType.Assembly;
-                Console.WriteLine(classTI.ModuleName);
+                _state.Principles.CurrentType = classTranslationInfo.Type;
+                _state.Principles.CurrentAssembly = _state.Principles.CurrentType.Assembly;
+                Console.WriteLine(classTranslationInfo.ModuleName);
 
-                Lang.Cs.Compiler.IClassMember[] members;
+                Cs.Compiler.IClassMember[] members;
 
-                if (classTI.Type.IsInterface)
+                if (classTranslationInfo.Type.IsInterface)
                 {
-                    FullInterfaceDeclaration[] sources = _interfaces.Where(i => i.FullName == classTI.Type.FullName).ToArray();
+                    FullInterfaceDeclaration[] sources = interfaces.Where(i => i.FullName == classTranslationInfo.Type.FullName).ToArray();
                     members = (from i in sources
                                from j in i.ClassDeclaration.Members
                                select j).ToArray();
                     {
-                        var fileNames = ReflectionUtil.GetAttributes<RequireOnceAttribute>(classTI.Type).Select(i => i.Filename).Distinct().ToArray();
+                        var fileNames = classTranslationInfo.Type.GetCustomAttributes<RequireOnceAttribute>().Select(i => i.Filename).Distinct().ToArray();
                         if (fileNames.Any())
                         {
                             var b = fileNames.Select(u => new PhpConstValue(u)).ToArray();
@@ -116,12 +116,12 @@ namespace Lang.Php.Compiler.Translator
                 }
                 else
                 {
-                    FullClassDeclaration[] sources = _classes.Where(i => i.FullName == classTI.Type.FullName).ToArray();
+                    FullClassDeclaration[] sources = classes.Where(i => i.FullName == classTranslationInfo.Type.FullName).ToArray();
                     members = (from i in sources
                                from j in i.ClassDeclaration.Members
                                select j).ToArray();
                     {
-                        var fileNames = ReflectionUtil.GetAttributes<RequireOnceAttribute>(classTI.Type).Select(i => i.Filename).Distinct().ToArray();
+                        var fileNames = classTranslationInfo.Type.GetCustomAttributes<RequireOnceAttribute>().Select(i => i.Filename).Distinct().ToArray();
                         if (fileNames.Any())
                         {
                             var b = fileNames.Select(u => new PhpConstValue(u)).ToArray();
@@ -157,31 +157,29 @@ namespace Lang.Php.Compiler.Translator
                 }
                 #endregion
 
-                state.Principles.CurrentType = null;
+                _state.Principles.CurrentType = null;
                 #region Wywołanie metody defaulttimezone oraz MAIN dla PAGE
                 {
-                    if (classTI.IsPage)
+                    if (classTranslationInfo.IsPage)
                     {
                         #region Timezone
                         {
-                            var ati = info.GetOrMakeTranslationInfo(info.CurrentAssembly);
+                            AssemblyTranslationInfo ati = _info.GetOrMakeTranslationInfo(_info.CurrentAssembly);
                             if (ati.DefaultTimezone.HasValue)
                             {
                                 // date_default_timezone_set('America/Los_Angeles');
-                                var a = new PhpValueTranslator(state);
-                                var aa = a.Visit(new ConstValue(ati.DefaultTimezone.Value));
-                                //var arg =  var a = new StatementTranslatorVisitor(state);
-                                PhpMethodCallExpression date_default_timezone_set = new PhpMethodCallExpression("date_default_timezone_set", aa as IPhpValue);
-                                // date_default_timezone_set.ClassName = classTI.ScriptName.MakeAbsolute();
-                                phpModule.BottomCode.Statements.Add(new PhpExpressionStatement(date_default_timezone_set));
+                                var a = new PhpValueTranslator(_state);
+                                var aa = a.Visit(new ConstValue(ati.DefaultTimezone.Value));                                
+                                var dateDefaultTimezoneSet = new PhpMethodCallExpression("date_default_timezone_set", aa);
+                                phpModule.BottomCode.Statements.Add(new PhpExpressionStatement(dateDefaultTimezoneSet));
                             }
                         }
                         #endregion
                         #region Wywołanie main
                         {
-                            var mti = MethodTranslationInfo.FromMethodInfo(classTI.PageMethod);
+                            var mti = MethodTranslationInfo.FromMethodInfo(classTranslationInfo.PageMethod);
                             PhpMethodCallExpression callMain = new PhpMethodCallExpression(mti.ScriptName);
-                            callMain.ClassName = classTI.ScriptName.MakeAbsolute();
+                            callMain.ClassName = classTranslationInfo.ScriptName.MakeAbsolute();
                             phpModule.BottomCode.Statements.Add(new PhpExpressionStatement(callMain));
                         }
                         #endregion
@@ -202,7 +200,7 @@ namespace Lang.Php.Compiler.Translator
 
                         foreach (var c in clas)
                         {
-                            var m = info.ClassTranslations.Values.Where(i => i.ScriptName.FullName == c).ToArray();
+                            var m = _info.ClassTranslations.Values.Where(i => i.ScriptName.FullName == c).ToArray();
                             if (m.Length != 1)
                                 throw new NotSupportedException();
                             var mm = m[0];
@@ -245,7 +243,7 @@ namespace Lang.Php.Compiler.Translator
 
             if (req.AssemblyInfo != null && !string.IsNullOrEmpty(req.AssemblyInfo.IncludePathConstOrVarName))
             {
-                var isCurrentAssembly = info.CurrentAssembly == req.AssemblyInfo.Assembly;
+                var isCurrentAssembly = _info.CurrentAssembly == req.AssemblyInfo.Assembly;
                 if (!isCurrentAssembly)
                 {
                     var tmp = req.AssemblyInfo.IncludePathConstOrVarName;
@@ -257,11 +255,11 @@ namespace Lang.Php.Compiler.Translator
                     if (!phpModule.DefinedConsts.Where(i => i.Key == tmp).Any())
                     {
                         KnownConstInfo value;
-                        if (info.KnownConstsValues.TryGetValue(tmp, out value))
+                        if (_info.KnownConstsValues.TryGetValue(tmp, out value))
                         {
                             if (!value.UseFixedValue)
                             {
-                                var expression = PathUtil.MakePathValueRelatedToFile(value, info);
+                                var expression = PathUtil.MakePathValueRelatedToFile(value, _info);
                                 phpModule.DefinedConsts.Add(new KeyValuePair<string, IPhpValue>(tmp, expression));
                             }
                             else
@@ -269,7 +267,7 @@ namespace Lang.Php.Compiler.Translator
                         }
                         else
                         {
-                            info.Log(MessageLevels.Error,
+                            _info.Log(MessageLevels.Error,
                                 string.Format("const {0} defined in {1} has no known value", tmp, phpModule.Name));
                             phpModule.DefinedConsts.Add(new KeyValuePair<string, IPhpValue>(tmp, new PhpConstValue("UNKNOWN")));
                         }
@@ -284,13 +282,15 @@ namespace Lang.Php.Compiler.Translator
                 var s = new PhpEmitStyle();
                 var code = fileNameExpression.GetPhpCode(s);
                 var a = current.RequiredFiles.Select(i => i.GetPhpCode(s)).ToArray();
-                if (a.Where(i => i == code).Any())
+                if (a.Any(i => i == code))
                     return;
             }
-            if (fileNameExpression is ICodeRelated)
+           
+            // if (fileNameExpression1 !=null)
             {
+                var fileNameExpressionICodeRelated = fileNameExpression as ICodeRelated;
                 // scan nested requests
-                var nestedCodeRequests = (fileNameExpression as ICodeRelated).GetCodeRequests().ToArray();
+                var nestedCodeRequests = fileNameExpressionICodeRelated.GetCodeRequests().ToArray();
                 if (nestedCodeRequests.Any())
                 {
                     var nestedModuleCodeRequests = nestedCodeRequests.OfType<ModuleCodeRequest>();
@@ -303,27 +303,23 @@ namespace Lang.Php.Compiler.Translator
 
         private PhpCodeModule CurrentConfigModule()
         {
-            var assemblyTI = info.GetOrMakeTranslationInfo(info.CurrentAssembly);
-            PhpCodeModuleName name = new PhpCodeModuleName(assemblyTI.ConfigModuleName, assemblyTI);
-            PhpCodeModule phpModule = GetOrMakeModuleByName(name);
+            var assemblyTranslationInfo = _info.GetOrMakeTranslationInfo(_info.CurrentAssembly);
+            var phpCodeModuleName = new PhpCodeModuleName(assemblyTranslationInfo.ConfigModuleName, assemblyTranslationInfo);
+            var phpModule = GetOrMakeModuleByName(phpCodeModuleName);
             return phpModule;
         }
 
         public IPhpStatement[] TranslateStatement(IStatement x)
         {
-            if (x is CSharpBase)
-            {
-                OptimizeOptions op = new OptimizeOptions();
+            if (!(x is CSharpBase)) throw new Exception("Błąd translacji " + x.GetType().FullName);
+            var op = new OptimizeOptions();
 
-                StatementSimplifier s = new StatementSimplifier(op);
-                var a = new StatementTranslatorVisitor(state);
-                var tmp = a.Visit(x as CSharpBase);
-                List<IPhpStatement> result = new List<IPhpStatement>();
-                foreach (var i in tmp)
-                    result.Add(s.Visit(i as PhpSourceBase));
-                return result.ToArray();
-            }
-            throw new Exception("Błąd translacji " + x.GetType().FullName);
+            var s = new StatementSimplifier(op);
+            var a = new StatementTranslatorVisitor(_state);
+            var tmp = a.Visit(x as CSharpBase);
+            var result = new List<IPhpStatement>(tmp.Length);
+            result.AddRange(tmp.Select(i => s.Visit(i as PhpSourceBase)));
+            return result.ToArray();
         }
         // Private Methods 
 
@@ -334,18 +330,16 @@ namespace Lang.Php.Compiler.Translator
         /// <returns></returns>
         PhpCodeModule GetOrMakeModuleByName(PhpCodeModuleName requiredModuleName)
         {
-            var mod = modules.Where(i => i.Name == requiredModuleName).FirstOrDefault();
-            if (mod == null)
-            {
-                mod = new PhpCodeModule(requiredModuleName);
-                modules.Add(mod);
-            }
+            var mod = _modules.FirstOrDefault(i => i.Name == requiredModuleName);
+            if (mod != null) return mod;
+            mod = new PhpCodeModule(requiredModuleName);
+            _modules.Add(mod);
             return mod;
         }
 
         private void Tranlate_MethodOrProperty(PhpClassDefinition phpClass, MethodInfo info, IStatement body, string overrideName)
         {
-            state.Principles.CurrentMethod = info;
+            _state.Principles.CurrentMethod = info;
             try
             {
                 MethodTranslationInfo mti = MethodTranslationInfo.FromMethodInfo(info);
@@ -379,7 +373,7 @@ namespace Lang.Php.Compiler.Translator
             }
             finally
             {
-                state.Principles.CurrentMethod = null;
+                _state.Principles.CurrentMethod = null;
             }
         }
 
@@ -420,7 +414,7 @@ namespace Lang.Php.Compiler.Translator
             }
             finally
             {
-                state.Principles.CurrentMethod = null;
+                _state.Principles.CurrentMethod = null;
             }
         }
 
@@ -429,86 +423,80 @@ namespace Lang.Php.Compiler.Translator
             PhpValueTranslator phpValueTranslator = null;
             foreach (var item in field.Items)
             {
-                FieldTranslationInfo fti = null;
-
-                if (item.OptionalFieldInfo != null)
+                if (item.OptionalFieldInfo == null) continue;
+                var fti = _info.GetOrMakeTranslationInfo(item.OptionalFieldInfo);
+                switch (fti.Destination)
                 {
-                    fti = info.GetOrMakeTranslationInfo(item.OptionalFieldInfo);
-                    switch (fti.Destination)
-                    {
-                        case FieldTranslationDestionations.DefinedConst:
-                            if (item.Value == null)
-                                throw new NotSupportedException();
-                            if (phpValueTranslator == null)
-                                phpValueTranslator = new PhpValueTranslator(state);
-                            IPhpValue definedValue = phpValueTranslator.TransValue(item.Value);
-                            module.DefinedConsts.Add(new KeyValuePair<string, IPhpValue>(fti.ScriptName, definedValue));
-                            break;
-                        case FieldTranslationDestionations.GlobalVariable:
-                            if (item.Value != null)
+                    case FieldTranslationDestionations.DefinedConst:
+                        if (item.Value == null)
+                            throw new NotSupportedException();
+                        if (phpValueTranslator == null)
+                            phpValueTranslator = new PhpValueTranslator(_state);
+                        IPhpValue definedValue = phpValueTranslator.TransValue(item.Value);
+                        module.DefinedConsts.Add(new KeyValuePair<string, IPhpValue>(fti.ScriptName, definedValue));
+                        break;
+                    case FieldTranslationDestionations.GlobalVariable:
+                        if (item.Value != null)
+                        {
+
+                            IPhpValue value;
+                            // muszę na chwilę wyłączyć current type, bo to jes poza klasą generowane
                             {
-
-                                IPhpValue value;
-                                // muszę na chwilę wyłączyć current type, bo to jes poza klasą generowane
-                                {
-                                    var saveCurrentType = state.Principles.CurrentType;
-                                    state.Principles.CurrentType = null;
-                                    try
-                                    {
-                                        if (phpValueTranslator == null)
-                                            phpValueTranslator = new PhpValueTranslator(state);
-                                        value = phpValueTranslator.TransValue(item.Value);
-                                    }
-                                    finally
-                                    {
-                                        state.Principles.CurrentType = saveCurrentType;
-                                    }
-                                }
-
-                                #region Tworzenie kodu
-                                var assign = new PhpAssignExpression(PhpVariableExpression.MakeGlobal(fti.ScriptName), value);
-                                module.TopCode.Statements.Add(new PhpExpressionStatement(assign));
-                                #endregion
-                            }
-                            break;
-                        case FieldTranslationDestionations.JustValue:
-                            continue; // don't define
-                        case FieldTranslationDestionations.NormalField:
-                        case FieldTranslationDestionations.ClassConst:
-                            {
-                                var def = new PhpClassFieldDefinition();
-                                var cti = state.Principles.GetTI(state.Principles.CurrentType);
-                                if (cti.IsArray)
-                                    continue;
-                                if (field.Modifiers.Has("const") ^ fti.Destination == FieldTranslationDestionations.ClassConst)
-                                    throw new Exception("beige lion");
-
-                                def.IsConst = fti.Destination == FieldTranslationDestionations.ClassConst;// field.Modifiers.Has("const");
-                                def.Name = PhpVariableExpression.AddDollar(fti.ScriptName, !def.IsConst);
-
-                                def.IsStatic = def.IsConst || field.Modifiers.Has("static");
-                                if (field.Modifiers.Has("public"))
-                                    def.Visibility = Visibility.Public;
-                                else if (field.Modifiers.Has("protected"))
-                                    def.Visibility = Visibility.Protected;
-                                else
-                                    def.Visibility = Visibility.Private;
-
-                                if (item.Value != null)
+                                var saveCurrentType = _state.Principles.CurrentType;
+                                _state.Principles.CurrentType = null;
+                                try
                                 {
                                     if (phpValueTranslator == null)
-                                        phpValueTranslator = new PhpValueTranslator(state);
-                                    def.ConstValue = phpValueTranslator.TransValue(item.Value);
+                                        phpValueTranslator = new PhpValueTranslator(_state);
+                                    value = phpValueTranslator.TransValue(item.Value);
                                 }
-                                phpClass.Fields.Add(def);
-                                break;
+                                finally
+                                {
+                                    _state.Principles.CurrentType = saveCurrentType;
+                                }
                             }
-                        default:
-                            throw new NotSupportedException();
+
+                            #region Tworzenie kodu
+                            var assign = new PhpAssignExpression(PhpVariableExpression.MakeGlobal(fti.ScriptName), value);
+                            module.TopCode.Statements.Add(new PhpExpressionStatement(assign));
+                            #endregion
+                        }
+                        break;
+                    case FieldTranslationDestionations.JustValue:
+                        continue; // don't define
+                    case FieldTranslationDestionations.NormalField:
+                    case FieldTranslationDestionations.ClassConst:
+                    {
+                        var def = new PhpClassFieldDefinition();
+                        var cti = _state.Principles.GetTi(_state.Principles.CurrentType);
+                        if (cti.IsArray)
+                            continue;
+                        if (field.Modifiers.Has("const") ^ fti.Destination == FieldTranslationDestionations.ClassConst)
+                            throw new Exception("beige lion");
+
+                        def.IsConst = fti.Destination == FieldTranslationDestionations.ClassConst;// field.Modifiers.Has("const");
+                        def.Name = PhpVariableExpression.AddDollar(fti.ScriptName, !def.IsConst);
+
+                        def.IsStatic = def.IsConst || field.Modifiers.Has("static");
+                        if (field.Modifiers.Has("public"))
+                            def.Visibility = Visibility.Public;
+                        else if (field.Modifiers.Has("protected"))
+                            def.Visibility = Visibility.Protected;
+                        else
+                            def.Visibility = Visibility.Private;
+
+                        if (item.Value != null)
+                        {
+                            if (phpValueTranslator == null)
+                                phpValueTranslator = new PhpValueTranslator(_state);
+                            def.ConstValue = phpValueTranslator.TransValue(item.Value);
+                        }
+                        phpClass.Fields.Add(def);
+                        break;
                     }
-
+                    default:
+                        throw new NotSupportedException();
                 }
-
             }
         }
 
@@ -517,53 +505,49 @@ namespace Lang.Php.Compiler.Translator
             Tranlate_MethodOrProperty(phpClass, md.Info, md.Body, null);
         }
 
-        private void TranslateProperty(PhpClassDefinition phpClass, CsharpPropertyDeclaration pd)
+        private void TranslateProperty(PhpClassDefinition phpClassDefinition, CsharpPropertyDeclaration propertyDeclaration)
         {
-            var pi = this.state.Principles.CurrentType.GetProperty(pd.PropertyName);
+            var pi = _state.Principles.CurrentType.GetProperty(propertyDeclaration.PropertyName);
             var pti = PropertyTranslationInfo.FromPropertyInfo(pi);
             if (pti.GetSetByMethod)
             {
+                CsharpPropertyDeclarationAccessor accessor;
                 if (!string.IsNullOrEmpty(pti.GetMethodName))
                 {
-
-                    var m = pd.Accessors.Where(u => u.Name == "get").FirstOrDefault();
-                    if (m != null)
-                        Tranlate_MethodOrProperty(phpClass, pi.GetGetMethod(), m.Statement, pti.GetMethodName);
+                    accessor = propertyDeclaration.Accessors.FirstOrDefault(u => u.Name == "get");
+                    if (accessor != null)
+                        Tranlate_MethodOrProperty(phpClassDefinition, pi.GetGetMethod(), accessor.Statement, pti.GetMethodName);
                 }
-                if (!string.IsNullOrEmpty(pti.SetMethodName))
-                {
-                    var m = pd.Accessors.Where(u => u.Name == "set").FirstOrDefault();
-                    if (m != null)
-                        Tranlate_MethodOrProperty(phpClass, pi.GetSetMethod(), m.Statement, pti.SetMethodName);
-                }
+                if (string.IsNullOrEmpty(pti.SetMethodName)) return;
+                accessor = propertyDeclaration.Accessors.FirstOrDefault(u => u.Name == "set");
+                if (accessor != null)
+                    Tranlate_MethodOrProperty(phpClassDefinition, pi.GetSetMethod(), accessor.Statement, pti.SetMethodName);
             }
             else
-            {
-                phpClass.Fields.Add(new PhpClassFieldDefinition()
+                phpClassDefinition.Fields.Add(new PhpClassFieldDefinition
                 {
                     Name = pti.FieldScriptName,
                     IsStatic = pti.IsStatic
                 });
-            }
         }
 
         #endregion Methods
 
         #region Fields
 
-        TranslationState state;
+        readonly TranslationState _state;
 
         #endregion Fields
     }
 }
 
 
-// -----:::::##### smartClass embedded code begin #####:::::----- generated 2013-11-04 09:20
+// -----:::::##### smartClass embedded code begin #####:::::----- generated 2014-09-03 12:41
 // File generated automatically ver 2013-07-10 08:43
 // Smartclass.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0c4d5d36fb5eb4ac
 namespace Lang.Php.Compiler.Translator
 {
-    public partial class Translator
+    public partial class Translator 
     {
         /*
         /// <summary>
@@ -572,7 +556,9 @@ namespace Lang.Php.Compiler.Translator
         public Translator()
         {
         }
+
         Przykłady użycia
+
         implement INotifyPropertyChanged
         implement INotifyPropertyChanged_Passive
         implement ToString ##Info## ##Modules##
@@ -581,23 +567,19 @@ namespace Lang.Php.Compiler.Translator
         implement equals *
         implement equals *, ~exclude1, ~exclude2
         */
-
-
         #region Constants
         /// <summary>
         /// Nazwa własności Info; 
         /// </summary>
-        public const string PROPERTYNAME_INFO = "Info";
+        public const string PropertyNameInfo = "Info";
         /// <summary>
         /// Nazwa własności Modules; 
         /// </summary>
-        public const string PROPERTYNAME_MODULES = "Modules";
+        public const string PropertyNameModules = "Modules";
         #endregion Constants
-
 
         #region Methods
         #endregion Methods
-
 
         #region Properties
         /// <summary>
@@ -607,10 +589,10 @@ namespace Lang.Php.Compiler.Translator
         {
             get
             {
-                return info;
+                return _info;
             }
         }
-        private TranslationInfo info;
+        private TranslationInfo _info;
         /// <summary>
         /// Własność jest tylko do odczytu.
         /// </summary>
@@ -618,10 +600,11 @@ namespace Lang.Php.Compiler.Translator
         {
             get
             {
-                return modules;
+                return _modules;
             }
         }
-        private List<PhpCodeModule> modules = new List<PhpCodeModule>();
+        private List<PhpCodeModule> _modules = new List<PhpCodeModule>();
         #endregion Properties
+
     }
 }

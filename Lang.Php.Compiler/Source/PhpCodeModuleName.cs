@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using Lang.Cs.Compiler.Sandbox;
 
 namespace Lang.Php.Compiler.Source
 {
@@ -60,9 +61,9 @@ namespace Lang.Php.Compiler.Source
         {
             if (assemblyInfo == null)
                 throw new ArgumentNullException("assemblyInfo");
-            if (type == null)
+            if ((object)type == null)
                 throw new ArgumentNullException("type");
-            if (type.DeclaringType != null && declaringTypeInfo == null)
+            if ((object)type.DeclaringType != null && declaringTypeInfo == null)
                 throw new ArgumentNullException("declaringTypeInfo");
 
             this.assemblyInfo = assemblyInfo;
@@ -79,7 +80,7 @@ namespace Lang.Php.Compiler.Source
 
                 #region ModuleAttribute
                 {
-                    ModuleAttribute _module = ReflectionUtil.GetAttribute<ModuleAttribute>(type);
+                    ModuleAttribute _module = type.GetCustomAttribute<ModuleAttribute>();
                     if (_module != null)
                     {
                         Name = _module.ModuleShortName;
@@ -89,7 +90,7 @@ namespace Lang.Php.Compiler.Source
                 #endregion
                 #region PageAttribute
                 {
-                    var _page = ReflectionUtil.GetAttribute<PageAttribute>(type);
+                    var _page = type.GetCustomAttribute<PageAttribute>();
                     if (_page != null)
                         Name = _page.ModuleShortName;
                 }

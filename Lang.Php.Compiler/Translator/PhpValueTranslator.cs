@@ -1,4 +1,5 @@
 ﻿using Lang.Cs.Compiler;
+using Lang.Cs.Compiler.Sandbox;
 using Lang.Php.Compiler.Source;
 using Lang.Php;
 using Lang.Php.Runtime;
@@ -135,8 +136,8 @@ namespace Lang.Php.Compiler.Translator
 
                 var a = new CsharpMethodCallExpression(
                     src.OperatorMethod, null,
-                    new FunctionArgument[] { new FunctionArgument("", src.Left), new FunctionArgument("", src.Right) },
-                    new Type[0], false);
+                    new[] { new FunctionArgument("", src.Left), new FunctionArgument("", src.Right) },
+                    new Type[0],  false);
                 var trans = TransValue(a);
                 return trans;
 
@@ -190,7 +191,7 @@ namespace Lang.Php.Compiler.Translator
 
             r.ClassName = state.Principles.GetPhpType(src.Info.ReflectedType, true);
 
-            var cccc = state.Principles.GetTI(src.Info.ReflectedType);
+            var cccc = state.Principles.GetTi(src.Info.ReflectedType);
             if (cccc.IsArray)
             {
                 if (src.Initializers != null && src.Initializers.Any())
@@ -208,7 +209,7 @@ namespace Lang.Php.Compiler.Translator
 
             }
             {
-                var cti = state.Principles.GetTI(src.Info.ReflectedType);
+                var cti = state.Principles.GetTi(src.Info.ReflectedType);
                 if (cti.IsReflected)
                 {
                     var replacer = state.FindOneClassReplacer(src.Info.ReflectedType);
@@ -261,38 +262,38 @@ namespace Lang.Php.Compiler.Translator
 
             bool isStatic = src.IsStatic;
             FieldInfo member = src.Member;
-            var member_name = member.Name;
-            var member_declaring_type = member.DeclaringType;
+            var memberName = member.Name;
+            var memberDeclaringType = member.DeclaringType;
 
             {
                 FieldTranslationInfo tInfo = state.Principles.GetOrMakeTranslationInfo(src.Member);
                 if (tInfo.IsDefinedInNonincludableModule)
                 {
                     var a = state.Principles.CurrentType;
-                    var b = state.Principles.GetTI(this.state.Principles.CurrentType);
+                    var b = state.Principles.GetTi(this.state.Principles.CurrentType);
                     if (tInfo.IncludeModule != b.ModuleName)
                         throw new Exception(
                              string.Format(
                                  "Unable to reference to field {1}.{0} from {2}.{3}. Containing module is page and cannot be included.",
-                                 member_name,
-                                 member_declaring_type.FullName,
+                                 memberName,
+                                 memberDeclaringType.FullName,
                                  state.Principles.CurrentType.FullName,
                                  state.Principles.CurrentMethod
                                  ));
 
                 }
-                var fieldDeclaringType = member_declaring_type;
-                var fieldDeclaringTypeInfo = state.Principles.GetTI(fieldDeclaringType, false);
+                var fieldDeclaringType = memberDeclaringType;
+                var fieldDeclaringTypeInfo = state.Principles.GetTi(fieldDeclaringType, false);
                 #region Konwersja ENUMA
                 {
                     if (fieldDeclaringType.IsEnum)
                     {
                         if (!isStatic)
                             throw new NotSupportedException();
-                        AsDefinedConst _asDefinedConst = member.GetCustomAttribute<AsDefinedConst>();
-                        if (_asDefinedConst != null)
+                        AsDefinedConstAttribute asDefinedConstAttribute = member.GetCustomAttribute<AsDefinedConstAttribute>();
+                        if (asDefinedConstAttribute != null)
                         {
-                            var definedExpression = new PhpDefinedConstExpression(_asDefinedConst.DefinedConstName, tInfo.IncludeModule);
+                            var definedExpression = new PhpDefinedConstExpression(asDefinedConstAttribute.DefinedConstName, tInfo.IncludeModule);
                             return SimplifyPhpExpression(definedExpression);
                         }
                         var _renderValue = member.GetCustomAttribute<RenderValueAttribute>();
@@ -356,7 +357,7 @@ namespace Lang.Php.Compiler.Translator
                             throw new Exception("Encoded php values are not supported");
                         var rr = new PhpClassFieldAccessExpression();
                         rr.FieldName = tInfo.ScriptName; // : PhpVariableExpression.AddDollar(tInfo.ScriptName);
-                        rr.ClassName = state.Principles.GetPhpType(member_declaring_type, true);
+                        rr.ClassName = state.Principles.GetPhpType(memberDeclaringType, true);
                         rr.IsConst = tInfo.Destination == FieldTranslationDestionations.ClassConst;
                         return SimplifyPhpExpression(rr);
                     case FieldTranslationDestionations.ClassConst:
@@ -364,7 +365,7 @@ namespace Lang.Php.Compiler.Translator
                             throw new Exception("Encoded php values are not supported");
                         rr = new PhpClassFieldAccessExpression();
                         rr.FieldName = tInfo.ScriptName;
-                        rr.ClassName = state.Principles.GetPhpType(member_declaring_type, true);
+                        rr.ClassName = state.Principles.GetPhpType(memberDeclaringType, true);
                         rr.IsConst = true;
                         return SimplifyPhpExpression(rr);
                     default:
@@ -610,7 +611,8 @@ namespace Lang.Php.Compiler.Translator
         {
             var x = state.Principles.NodeTranslators.Translate(state, src);
             if (x != null)
-                return this.SimplifyPhpExpression(x);
+                return SimplifyPhpExpression(x);
+            x = state.Principles.NodeTranslators.Translate(state, src);
             throw new NotSupportedException(src.ToString());
         }
 

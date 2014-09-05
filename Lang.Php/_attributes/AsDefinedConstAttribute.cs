@@ -17,7 +17,7 @@ namespace Lang.Php
     smartClassEnd
     */
     
-    public partial class AsDefinedConst:Attribute
+    public partial class AsDefinedConstAttribute:Attribute
     {
     }
 }
@@ -28,7 +28,7 @@ namespace Lang.Php
 // Smartclass.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0c4d5d36fb5eb4ac
 namespace Lang.Php
 {
-    public partial class AsDefinedConst 
+    public partial class AsDefinedConstAttribute 
     {
         /*
         /// <summary>
@@ -52,7 +52,7 @@ namespace Lang.Php
         /// <summary>
         /// Tworzy instancję obiektu
         /// </summary>
-        public AsDefinedConst()
+        public AsDefinedConstAttribute()
         {
         }
 
@@ -60,7 +60,7 @@ namespace Lang.Php
         /// Tworzy instancję obiektu
         /// <param name="DefinedConstName"></param>
         /// </summary>
-        public AsDefinedConst(string DefinedConstName)
+        public AsDefinedConstAttribute(string DefinedConstName)
         {
             this.definedConstName = DefinedConstName;
         }

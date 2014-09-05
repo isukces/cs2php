@@ -1,4 +1,5 @@
 ﻿using Lang.Cs.Compiler;
+using Lang.Cs.Compiler.Sandbox;
 using Lang.Php.Compiler.Translator;
 using System;
 using System.Collections.Generic;

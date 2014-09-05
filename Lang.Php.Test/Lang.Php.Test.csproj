@@ -5,7 +5,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{524926F6-8C8E-4FDC-9C18-0D9E3C9A8794}</ProjectGuid>
-    <OutputType>Library</OutputType>
+    <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Lang.Php.Test</RootNamespace>
     <AssemblyName>Lang.Php.Test</AssemblyName>
@@ -28,6 +28,9 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.CodeAnalysis">
@@ -87,12 +90,18 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ApplicationDomains.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="SandboxTest.cs" />
     <Compile Include="Tests\BasicTests.cs" />
     <Compile Include="Tests\Base.cs" />
     <Compile Include="Code\MyCode.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Lang.Cs.Compiler\Lang.Cs.Compiler.csproj">
+      <Project>{db0bf6b7-adea-496b-af49-f4a0cd39ada9}</Project>
+      <Name>Lang.Cs.Compiler</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Lang.Php.Compiler\Lang.Php.Compiler.csproj">
       <Project>{88a316a0-0cc6-486d-8323-1966cd501bf8}</Project>
       <Name>Lang.Php.Compiler</Name>

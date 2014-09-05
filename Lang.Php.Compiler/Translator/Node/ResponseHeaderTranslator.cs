@@ -1,13 +1,8 @@
 ﻿using Lang.Cs.Compiler;
 using Lang.Php.Compiler.Source;
-using Lang.Php;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace Lang.Php.Compiler.Translator.Node
 {
@@ -15,36 +10,33 @@ namespace Lang.Php.Compiler.Translator.Node
     {
         public IPhpValue TranslateToPhp(IExternalTranslationContext ctx, CsharpMethodCallExpression src)
         {
-            if (src.MethodInfo.DeclaringType == typeof(ResponseHeader))
+            if (src.MethodInfo.DeclaringType != typeof (ResponseHeader)) return null;
+            var fn = src.MethodInfo.ToString();
+            switch (fn)
             {
-                var fn = src.MethodInfo.ToString();
-                if (fn == "Void Expires(System.DateTime)")
-                    return mkHeader(ctx, "Expires", _PhpFormat(src.Arguments[0]));
-                if (fn == "Void LastModified(System.DateTime)")
-                    return mkHeader(ctx, "Last-Modified", _PhpFormat(src.Arguments[0]));
-                if (fn == "Void ContentType(System.String, Boolean)")
-                {
-                    if (src.Arguments.Length == 2)
-                        return mkHeader(ctx, "Last-Modified", src.Arguments[0], src.Arguments[1]);
-                    return mkHeader(ctx, "Last-Modified", src.Arguments[0]);
-                }
-                throw new NotImplementedException();
+                case "Void Expires(System.DateTime)":
+                    return MkHeader(ctx, "Expires", _PhpFormat(src.Arguments[0]));
+                case "Void LastModified(System.DateTime)":
+                    return MkHeader(ctx, "Last-Modified", _PhpFormat(src.Arguments[0]));          
+                case "Void ContentType(System.String, Boolean)":
+                    return src.Arguments.Length == 2 
+                        ? MkHeader(ctx, "Last-Modified", src.Arguments[0], src.Arguments[1]) 
+                        : MkHeader(ctx, "Last-Modified", src.Arguments[0]);
             }
-            return null;
+            throw new NotImplementedException();
         }
 
-        private static CsharpMethodCallExpression _PhpFormat(FunctionArgument a1)
+        private static CsharpMethodCallExpression _PhpFormat(FunctionArgument functionArgument)
         {
             var a2 = new FunctionArgument("", new ConstValue(DateTimeFormats.HttpHeader));
-            var m = typeof(DateTimeExtension)
-                .GetMethods(System.Reflection.BindingFlags.Static | BindingFlags.Public)
-                .Where(i => i.ToString() == "System.String PhpFormat(System.DateTime, Lang.Php.DateTimeFormats)")
-                .Single();
-            var dmc = new CsharpMethodCallExpression(m, null, new FunctionArgument[] { a1, a2 }, null, false);
+            var methodInfo = typeof(DateTimeExtension)
+                .GetMethods(BindingFlags.Static | BindingFlags.Public)
+                .Single(i => i.ToString() == "System.String PhpFormat(System.DateTime, Lang.Php.DateTimeFormats)");
+            var dmc = new CsharpMethodCallExpression( methodInfo, null, new[] { functionArgument, a2 }, null, false);
             return dmc;
         }
 
-        public IPhpValue mkHeader(IExternalTranslationContext ctx, string key, IValue v, IValue replace = null)
+        private static IPhpValue MkHeader(IExternalTranslationContext ctx, string key, IValue v, IValue replace = null)
         {
             if (v is FunctionArgument)
                 v = (v as FunctionArgument).MyValue;

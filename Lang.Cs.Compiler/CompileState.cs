@@ -27,33 +27,35 @@ namespace Lang.Cs.Compiler
         public static Type[] GetAllTypes(IEnumerable<Assembly> assemblies)
         {
             assemblies = assemblies.Distinct().ToArray();
-            var result = new List<Type>();
+            var result = new Dictionary<string, Type>();
             foreach (var assembly in assemblies)
                 GetTypesX(assembly, result);
-            return result.Distinct().ToArray();
+            return result.Values.ToArray();
         }
 		// Private Methods 
 
-        static void GetTypesX(Assembly a, List<Type> addTo)
+        static void GetTypesX(Assembly a, Dictionary<string, Type> addTo)
         {
             foreach (var type in a.GetTypes())
                 GetTypesX(type, addTo);
         }
 
-        private static void GetTypesX(Type a, List<Type> addTo)
+        private static void GetTypesX(Type aType, Dictionary<string, Type> addTo)
         {
-            if (addTo.Contains(a))
+            var assemblyQualifiedName2 = aType.IdString();
+            if (addTo.ContainsKey(assemblyQualifiedName2))
                 return;
-            addTo.Add(a);
-            var tmp = a.GetNestedTypes();
+            addTo.Add(assemblyQualifiedName2, aType);
+            var tmp = aType.GetNestedTypes();
             if (tmp.Length != 0)
             {
-                addTo.AddRange(tmp);
+                foreach (var qType in tmp)
+                    addTo[qType.IdString()] = qType;
                 foreach (var i in tmp)
                     GetTypesX(i, addTo);
             }
             var mm =
-                a.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static);
+                aType.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static);
             var mm1 = mm.Where(i => i.IsGenericMethod).ToArray();
             if (!mm1.Any()) return;
 
@@ -70,8 +72,8 @@ namespace Lang.Cs.Compiler
 }
 
 
-// -----:::::##### smartClass embedded code begin #####:::::----- generated 2014-09-01 23:24
-// File generated automatically ver 2013-07-10 08:43
+// -----:::::##### smartClass embedded code begin #####:::::----- generated 2014-09-03 15:20
+// File generated automatically ver 2014-09-01 19:00
 // Smartclass.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0c4d5d36fb5eb4ac
 namespace Lang.Cs.Compiler
 {

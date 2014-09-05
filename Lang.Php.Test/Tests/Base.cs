@@ -77,7 +77,7 @@ namespace Lang.Php.Test.Tests
         {
 #if WRITE_CODE
             var fi = new FileInfo(Path.Combine(Directory.GetCurrentDirectory(), "..\\..\\php\\new\\" + shortFilename));
-            if (fi.Directory != null) 
+            if (fi.Directory != null)
                 fi.Directory.Create();
             File.WriteAllText(fi.FullName, translatedCode);
 #endif
@@ -89,92 +89,104 @@ namespace Lang.Php.Test.Tests
             if (_translator != null)
                 return _translator;
             var csProject = CsProj;
-            var comp = new Cs2PhpCompiler {VerboseToConsole = true, ThrowExceptions = true};
-            Console.WriteLine("Try to load " + csProject);
+            using (var comp = new Cs2PhpCompiler { VerboseToConsole = true, ThrowExceptions = true })
+            {
+                Console.WriteLine("Try to load " + csProject);
 
 #if DEBUG
             comp.LoadProject(csProject, "DEBUG");
 #else
-            comp.LoadProject(csProject, "RELEASE");
+                comp.LoadProject(csProject, "RELEASE");
 #endif
 
-            /*
+                /*
    linked with C:\programs\_CS2PHP\PUBLIC\Lang.Php.Compiler\bin\Debug\Lang.Php.Compiler.dll
    linked with C:\programs\_CS2PHP\PUBLIC\Lang.Php.Framework\bin\Debug\Lang.Php.Framework.dll
    linked with C:\programs\_CS2PHP\PUBLIC\Lang.Php.Test\bin\Debug\Lang.Php.dll
              */
 
 
-            Console.WriteLine("Preparing before compilation");
-            string[] removeL = "Lang.Php.Compiler,Lang.Php.Framework,Lang.Php".Split(',');
-            #region Remove Lang.Php reference
-            {
-                foreach (var r in removeL)
+                Console.WriteLine("Preparing before compilation");
+                string[] removeL = "Lang.Php.Compiler,Lang.Php.Framework,Lang.Php".Split(',');
+
+                #region Remove Lang.Php reference
+
                 {
-                    // ... will be replaced by reference to dll from compiler base dir
-                    // I know - compilation libraries should be loaded into separate application domain
-                    var remove = comp.Project.MetadataReferences.FirstOrDefault(i => i.Display.EndsWith(r + ".dll"));
-                    if (remove != null)
-                        comp.RemoveMetadataReferences(remove);
+                    foreach (var r in removeL)
+                    {
+                        // ... will be replaced by reference to dll from compiler base dir
+                        // I know - compilation libraries should be loaded into separate application domain
+                        var remove =
+                            comp.CSharpProject.MetadataReferences.FirstOrDefault(i => i.Display.EndsWith(r + ".dll"));
+                        if (remove != null)
+                            comp.RemoveMetadataReferences(remove);
+                    }
                 }
-            }
-            #endregion
-            string[] filenames;
-            #region We have to remove and add again references - strange
-            {
-                // in other cases some referenced libraries are ignored
-                var refToRemove = comp.Project.MetadataReferences.OfType<MetadataFileReference>().ToList();
-                foreach (var i in refToRemove)
-                    comp.RemoveMetadataReferences(i);
-                var ref1 = refToRemove.Select(i => i.FilePath).ToList();
-                // foreach (var r in removeL)
-                //     ref1.Add(Path.Combine(Directory.GetCurrentDirectory(), r + ".dll"));
-                ref1.Add(typeof(DirectCallAttribute).Assembly.Location);
-                ref1.Add(typeof(EmitContext).Assembly.Location);
-                ref1.Add(typeof(Framework.Extension).Assembly.Location);
-                filenames = ref1.Distinct().ToArray();
-            }
-            #endregion
 
-            #region Translation assemblies
-            {
-                comp.TranslationAssemblies.Add(typeof(Framework.Extension).Assembly);
-                comp.TranslationAssemblies.Add(typeof(Translator).Assembly);
-            }
-            #endregion
+                #endregion
 
-            foreach (var fileName in filenames)
-            {
-                var g = new MetadataFileReference(fileName, MetadataReferenceProperties.Assembly);
-                comp.AddMetadataReferences(g);
-                Console.WriteLine("  Add reference     {0}", g.Display);
-            }
+                string[] filenames;
 
-            using (var sandbox = new AssemblySandbox())
-            {
+                #region We have to remove and add again references - strange
 
-                Console.WriteLine("Start compile");
-                var result = comp.GetCompilation(sandbox);
-                if (!result.Success)
                 {
-                    foreach (var i in result.Diagnostics)
-                        Console.WriteLine(i);
+                    // in other cases some referenced libraries are ignored
+                    var refToRemove = comp.CSharpProject.MetadataReferences.OfType<MetadataFileReference>().ToList();
+                    foreach (var i in refToRemove)
+                        comp.RemoveMetadataReferences(i);
+                    var ref1 = refToRemove.Select(i => i.FilePath).ToList();
+                    // foreach (var r in removeL)
+                    //     ref1.Add(Path.Combine(Directory.GetCurrentDirectory(), r + ".dll"));
+                    ref1.Add(typeof(DirectCallAttribute).Assembly.Location);
+                    ref1.Add(typeof(EmitContext).Assembly.Location);
+                    ref1.Add(typeof(Framework.Extension).Assembly.Location);
+                    filenames = ref1.Distinct().ToArray();
                 }
-                Assert.True(result.Success, "Compilation failed");
+
+                #endregion
+
+                #region Translation assemblies
+
+                {
+                    comp.TranslationAssemblies.Add(typeof(Framework.Extension).Assembly);
+                    comp.TranslationAssemblies.Add(typeof(Translator).Assembly);
+                }
+
+                #endregion
+
+                foreach (var fileName in filenames)
+                {
+                    var g = new MetadataFileReference(fileName, MetadataReferenceProperties.Assembly);
+                    comp.AddMetadataReferences(g);
+                    Console.WriteLine("  Add reference     {0}", g.Display);
+                }
+
+                using (var sandbox = new AssemblySandbox(null))
+                {
+
+                    Console.WriteLine("Start compile");
+                    var result = comp.CompileCSharpProject(sandbox);
+                    if (!result.Success)
+                    {
+                        foreach (var i in result.Diagnostics)
+                            Console.WriteLine(i);
+                    }
+                    Assert.True(result.Success, "Compilation failed");
+                }
+                TranslationInfo translationInfo = comp.ParseCsSource();
+
+
+                translationInfo.CurrentAssembly = comp.CompiledAssembly;
+                var assemblyTi = translationInfo.GetOrMakeTranslationInfo(comp.CompiledAssembly);
+                var ecBaseDir = Path.Combine(Directory.GetCurrentDirectory(), assemblyTi.RootPath.Replace("/", "\\"));
+                Console.WriteLine("Output root {0}", ecBaseDir);
+
+                var translationState = new TranslationState(translationInfo);
+                _translator = new Translator(translationState);
+
+                _translator.Translate(comp.Sandbox);
+                return _translator;
             }
-            TranslationInfo translationInfo = comp.ParseCsSource();
-
-
-            translationInfo.CurrentAssembly = comp.CompiledAssembly;
-            var assemblyTi = translationInfo.GetOrMakeTranslationInfo(comp.CompiledAssembly);
-            var ecBaseDir = Path.Combine(Directory.GetCurrentDirectory(), assemblyTi.RootPath.Replace("/", "\\"));
-            Console.WriteLine("Output root {0}", ecBaseDir);
-
-            var translationState = new TranslationState(translationInfo);
-            _translator = new Translator(translationState);
-
-            _translator.Translate();
-            return _translator;
         }
 
         #endregion Static Methods

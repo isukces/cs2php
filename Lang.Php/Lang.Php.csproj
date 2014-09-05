@@ -98,7 +98,7 @@
     <Compile Include="Runtime\PhpStringBuilder.cs" />
     <Compile Include="Runtime\PhpValues.cs" />
     <Compile Include="Runtime\RuntimeMysqlResult.cs" />
-    <Compile Include="_attributes\AsDefinedConst.cs" />
+    <Compile Include="_attributes\AsDefinedConstAttribute.cs" />
     <Compile Include="_attributes\GlobalVariableAttribute.cs" />
     <Compile Include="_attributes\AsValueAttribute.cs" />
     <Compile Include="_attributes\EnumRenderAttribute.cs" />
@@ -196,7 +196,7 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties BuildVersion_BuildVersioningStyle="None.None.DeltaBaseDateInDays.Increment" BuildVersion_UpdateAssemblyVersion="True" BuildVersion_UpdateFileVersion="True" BuildVersion_StartDate="2000/1/1" />
+      <UserProperties BuildVersion_StartDate="2000/1/1" BuildVersion_UpdateFileVersion="True" BuildVersion_UpdateAssemblyVersion="True" BuildVersion_BuildVersioningStyle="None.None.DeltaBaseDateInDays.Increment" />
     </VisualStudio>
   </ProjectExtensions>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -2,14 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Text;
-using System.Threading.Tasks;
+using Lang.Cs.Compiler.Sandbox;
 
 namespace Lang.Cs.Compiler
 {
 
-    public class TypesUtil
+    public static class TypesUtil
     {
         public static Type GetEnumerateItemType(Type srcType)
         {
@@ -36,37 +35,38 @@ namespace Lang.Cs.Compiler
             }
             throw new NotSupportedException(); // np. lista
         }
+        [Obsolete]
         public static Type GetElementType(Type srcType)
         {
+
             if (srcType == typeof(string))
                 return typeof(char);
             if (srcType.IsArray)
                 return srcType.GetElementType();
-            if (srcType.IsGenericType)
-            {
-                var generic = srcType.GetGenericTypeDefinition();
-                var definitionTypes = srcType.GetGenericArguments();
-                if (generic == typeof(Dictionary<,>))
-                    return definitionTypes[1];
-                if (generic == typeof(List<>))
-                    return definitionTypes[0];
-                throw new NotSupportedException();
-            }
-            throw new NotSupportedException(); // np. lista
+            if (!srcType.IsGenericType) throw new NotSupportedException(); // np. lista
+            var generic = srcType.GetGenericTypeDefinition();
+            var definitionTypes = srcType.GetGenericArguments();
+            if (generic == typeof(Dictionary<,>))
+                return definitionTypes[1];
+            if (generic == typeof(List<>))
+                return definitionTypes[0];
+            throw new NotSupportedException();
+
+            //return srcType.GetElementTypeForLinq();
         }
         public static bool IsNumberType(Type t)
         {
-            return t == typeof(System.Double)
-                || t == typeof(System.Single)
-                || t == typeof(System.Decimal)
-                || t == typeof(System.Int64)
-                || t == typeof(System.Int32)
-                || t == typeof(System.Byte)
-                || t == typeof(System.UInt64)
-                || t == typeof(System.UInt32)
-                || t == typeof(System.UInt16);
+            return t == typeof(Double)
+                || t == typeof(Single)
+                || t == typeof(Decimal)
+                || t == typeof(Int64)
+                || t == typeof(Int32)
+                || t == typeof(Byte)
+                || t == typeof(UInt64)
+                || t == typeof(UInt32)
+                || t == typeof(UInt16);
         }
-        public static string CSStringToString(string o)
+        public static string CsStringToString(string o)
         {
             if (o == null)
                 return "null";
@@ -83,7 +83,7 @@ namespace Lang.Cs.Compiler
             if (o == null)
                 return "null";
             if (o is string)
-                return CSStringToString(o as string);
+                return CsStringToString(o as string);
             if (o is bool)
                 return o.ToString().ToLower();
             return o.ToString();
@@ -97,7 +97,7 @@ namespace Lang.Cs.Compiler
                 if (required.GetArrayRank() == given.GetArrayRank())
                 {
                     if (IsAssignableFrom(required.GetElementType(), given.GetElementType(), useImplicitOperator))
-                        return true; 
+                        return true;
                 }
             }
             if (useImplicitOperator)
@@ -124,28 +124,25 @@ namespace Lang.Cs.Compiler
 
         public static FieldInfo[] ListFields(Type t, string identifier)
         {
-            List<FieldInfo> fi = new List<FieldInfo>();
-            bool all = true;
-            while (t != typeof(object))
+            var fi = new List<FieldInfo>();
+            var all = true;
+            while ((object)t != null)
             {
                 var g = t.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static).Where(a => a.Name == identifier).ToArray();
-                if (all)
-                    fi.AddRange(g);
-                else
-                    fi.AddRange(g.Where(i => !i.IsPrivate));
+                fi.AddRange(all ? g : g.Where(i => !i.IsPrivate));
                 all = false;
                 t = t.BaseType;
             }
             return fi.ToArray();
         }
 
-      
+
 
         public static MethodInfo[] GetExtensionMethods(Type searchType, string methodName, Type firsArg)
         {
             var extensionMethods = (
                      from method in searchType.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)
-                     where method.Name == methodName && MethodUtils.IsExtensionMethod(method)
+                     where method.Name == methodName && method.IsExtensionMethod()
                      let parameters = method.GetParameters()
                      where parameters.Length > 0
                      let fa1 = parameters[0]
@@ -158,39 +155,43 @@ namespace Lang.Cs.Compiler
         {
             PRIMITIVE_TYPES = new Dictionary<string, Type>()
             {
-                {"void", typeof(void)},         
-                {"bool", typeof(bool)},       
-                {"object", typeof(object)},       
-                {"string", typeof(string)},         
-                {"char", typeof(char)},         
-                {"double", typeof(double)},         
-                {"int", typeof(int)},         
-                {"long", typeof(long)},
-                {"decimal", typeof(decimal)}
+                {"void",   typeof(void)},         
+                {"bool",    typeof(bool)},       
+                {"object",   typeof(object)},       
+                {"string",   typeof(string)},         
+                {"char",   typeof(char)},         
+                {"double",   typeof(double)},         
+                {"int",   typeof(int)},         
+                {"long",  typeof(long)},
+                {"decimal",  typeof(decimal)}
             };
             PRIMITIVE_TYPES_REV = PRIMITIVE_TYPES.ToDictionary(a => a.Value, a => a.Key);
         }
 
+        [Obsolete("to jest zależne od domeny i załadowanych assembly")]
         public static readonly Dictionary<string, Type> PRIMITIVE_TYPES;
-        public static readonly Dictionary< Type, string> PRIMITIVE_TYPES_REV;
+        public static readonly Dictionary<Type, string> PRIMITIVE_TYPES_REV;
 
+
+        public static bool IsMulticastDelegate(this Type type)
+        {
+            return type == typeof(MulticastDelegate);
+        }
 
         public static string TypeToString(Type t)
         {
             if (t.IsArray)
             {
-                StringBuilder sb = new StringBuilder();
-                sb.AppendFormat("{0}[", TypeToString(t.GetElementType()));
+                var builder = new StringBuilder();
+                builder.AppendFormat("{0}[", TypeToString(t.GetElementType()));
                 var q = t.GetArrayRank();
                 for (int i = 01; i < q; i++)
-                    sb.Append(",");
-                sb.Append("]");
-                return sb.ToString();
+                    builder.Append(",");
+                builder.Append("]");
+                return builder.ToString();
             }
             string o;
-            if (PRIMITIVE_TYPES_REV.TryGetValue(t, out o))
-                return o;
-            return t.ToString();
+            return PRIMITIVE_TYPES_REV.TryGetValue(t, out o) ? o : t.ToString();
         }
 
         public static Type ResultType(MemberInfo mi)
@@ -206,7 +207,7 @@ namespace Lang.Cs.Compiler
 
         public static Type GetMemberType(LangType t, string name, bool isstatic)
         {
-            if (t == null || t.DotnetType == null)
+            if (t == null || (object)t.DotnetType == null)
                 throw new Exception("");
             var bf = isstatic ? BindingFlags.Static : BindingFlags.Instance;
             var a = t.DotnetType.GetMembers(BindingFlags.Public | BindingFlags.NonPublic | bf).Where(i => i.Name == name).ToArray();

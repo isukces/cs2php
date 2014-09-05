@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using Lang.Cs.Compiler.Sandbox;
 
 namespace Lang.Php.Compiler
 {
@@ -15,19 +16,16 @@ namespace Lang.Php.Compiler
     property ScriptName string 
     smartClassEnd
     */
-
+    
     public partial class MethodTranslationInfo
     {
         public static MethodTranslationInfo FromMethodInfo(MethodInfo methodInfo)
         {
-            var result = new MethodTranslationInfo();
-            result.ScriptName = methodInfo.Name;
+            var result = new MethodTranslationInfo {ScriptName = methodInfo.Name};
             {
-                var attr = methodInfo.GetCustomAttribute<Lang.Php.ScriptNameAttribute>();
+                var attr = methodInfo.GetCustomAttribute<ScriptNameAttribute>();
                 if (attr != null)
-                {
-                    result.scriptName = attr.Name;
-                }
+                    result._scriptName = attr.Name;
             }
             return result;
         }
@@ -35,12 +33,12 @@ namespace Lang.Php.Compiler
 }
 
 
-// -----:::::##### smartClass embedded code begin #####:::::----- generated 2013-11-10 17:15
-// File generated automatically ver 2013-07-10 08:43
+// -----:::::##### smartClass embedded code begin #####:::::----- generated 2014-09-03 18:00
+// File generated automatically ver 2014-09-01 19:00
 // Smartclass.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0c4d5d36fb5eb4ac
 namespace Lang.Php.Compiler
 {
-    public partial class MethodTranslationInfo
+    public partial class MethodTranslationInfo 
     {
         /*
         /// <summary>
@@ -64,7 +62,7 @@ namespace Lang.Php.Compiler
         /// <summary>
         /// Nazwa własności ScriptName; 
         /// </summary>
-        public const string PROPERTYNAME_SCRIPTNAME = "ScriptName";
+        public const string PropertyNameScriptName = "ScriptName";
         #endregion Constants
 
         #region Methods
@@ -78,15 +76,15 @@ namespace Lang.Php.Compiler
         {
             get
             {
-                return scriptName;
+                return _scriptName;
             }
             set
             {
                 value = (value ?? String.Empty).Trim();
-                scriptName = value;
+                _scriptName = value;
             }
         }
-        private string scriptName = string.Empty;
+        private string _scriptName = string.Empty;
         #endregion Properties
 
     }

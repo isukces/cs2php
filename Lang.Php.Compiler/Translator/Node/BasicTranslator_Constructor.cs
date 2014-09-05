@@ -3,16 +3,15 @@ using Lang.Php.Compiler.Source;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Reflection;
 
 namespace Lang.Php.Compiler.Translator.Node
 {
-    public class BasicTranslator_Constructor : IPhpNodeTranslator<CallConstructor>
+    public class BasicTranslatorForConstructor : IPhpNodeTranslator<CallConstructor>
     {
-		#region Methods 
+        #region Methods
 
-		// Public Methods 
+        // Public Methods 
 
         public int GetPriority()
         {
@@ -22,6 +21,8 @@ namespace Lang.Php.Compiler.Translator.Node
         public IPhpValue TranslateToPhp(IExternalTranslationContext ctx, CallConstructor src)
         {
             var type = src.Info.DeclaringType;
+            if (type == null)
+                throw new Exception(string.Format("Strange. {0} has empty DeclaringType", src.Info));
             var cType = type.IsGenericType ? type.GetGenericTypeDefinition() : type;
             if (cType == typeof(List<>))
             {
@@ -42,17 +43,14 @@ namespace Lang.Php.Compiler.Translator.Node
                 return new PhpArrayCreateExpression();
             }
             {
-                var directCallAttribute = src.Info.GetCustomAttributes(false).OfType<DirectCallAttribute>().FirstOrDefault();
-                if (directCallAttribute != null)
-                {
-                    var result = DotnetMethodCallTranslator.CreateExpressionFromDirectCallAttribute(
-                        ctx, directCallAttribute, null, src.Arguments);
-                    return result;
-                }
+                var directCallAttribute = src.Info.GetCustomAttributes<DirectCallAttribute>().FirstOrDefault();
+                if (directCallAttribute == null) return null;
+                var result = DotnetMethodCallTranslator.CreateExpressionFromDirectCallAttribute(
+                    ctx, directCallAttribute, null, src.Arguments);
+                return result;
             }
-            return null;
         }
 
-		#endregion Methods 
+        #endregion Methods
     }
 }

@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Lang.Php.Compiler.Translator
 {
@@ -12,18 +8,19 @@ namespace Lang.Php.Compiler.Translator
 
         public static string GetCompareName(MemberInfo mi)
         {
-            if (mi is FieldInfo || mi is PropertyInfo)
+            if (mi is PropertyInfo || mi is FieldInfo)
                 return GetCompareName(mi.DeclaringType) + "::" + mi.Name;
             if (mi is MethodInfo)
             {
                 var mii = mi as MethodInfo;
                 if (mii.IsGenericMethod && !mii.IsGenericMethodDefinition)
                     mii = mii.GetGenericMethodDefinition();
-                return GetCompareName(mi.DeclaringType) + "::" + mii.ToString();
+                return GetCompareName(mi.DeclaringType) + "::" + mii;
             }
             throw new NotSupportedException();
         }
-        public static string GetCompareName(Type t)
+
+        private static string GetCompareName(Type t)
         {
             t = GetGenericTypeDefinition(t);
             return t.FullName;

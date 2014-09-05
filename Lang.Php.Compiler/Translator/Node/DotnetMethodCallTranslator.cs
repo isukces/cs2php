@@ -1,4 +1,5 @@
 ﻿using Lang.Cs.Compiler;
+using Lang.Cs.Compiler.Sandbox;
 using Lang.Php.Compiler.Source;
 using Lang.Php;
 using System;
@@ -31,12 +32,7 @@ namespace Lang.Php.Compiler.Translator.Node
             return a;
         }
 
-        private static DirectCallAttribute GetDirectCallAttribute(MethodInfo methodInfo)
-        {
-            if (methodInfo == null)
-                throw new ArgumentNullException("methodInfo");
-            return ReflectionUtil.GetAttribute<DirectCallAttribute>(methodInfo);
-        }
+    
 
         #endregion Static Methods
 
@@ -83,7 +79,7 @@ namespace Lang.Php.Compiler.Translator.Node
             {
 
                 if (cti == null)
-                    cti = principles.GetTI(src.MethodInfo.DeclaringType);
+                    cti = principles.GetTi(src.MethodInfo.DeclaringType);
                 if (cti != null)
                 {
                     //if (MethodUtils.IsExtensionMethod(src.MethodInfo))
@@ -164,12 +160,12 @@ namespace Lang.Php.Compiler.Translator.Node
         /// <summary>
         /// Jeśli metoda .NET ma zdefiniowany argument <see cref="DirectCallAttribute">DirectCall</see> to tworzy odpowiednie wywołanie funkcji PHP
         /// </summary>
+        /// <param name="ctx"></param>
         /// <param name="src"></param>
-        /// <param name="phpMethod"></param>
         /// <returns></returns>
-        private IPhpValue Try_DirectCallAttribute(IExternalTranslationContext ctx, CsharpMethodCallExpression src)
+        private static IPhpValue Try_DirectCallAttribute(IExternalTranslationContext ctx, CsharpMethodCallExpression src)
         {
-            DirectCallAttribute directCallAttribute = GetDirectCallAttribute(src.MethodInfo);
+            DirectCallAttribute directCallAttribute = src.MethodInfo.GetDirectCallAttribute();
             if (directCallAttribute == null)
                 return null;
             return CreateExpressionFromDirectCallAttribute(ctx, directCallAttribute, src.TargetObject, src.Arguments);

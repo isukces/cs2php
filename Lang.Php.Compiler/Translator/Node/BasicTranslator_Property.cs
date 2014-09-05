@@ -23,7 +23,7 @@ namespace Lang.Php.Compiler.Translator.Node
             this.ctx = ctx;
             this.src = src;
             var t = TranslatorBase.GetGenericTypeDefinition(src.Member.DeclaringType);
-            if (t == typeof(System.Collections.Generic.KeyValuePair<,>))
+            if (t == typeof(KeyValuePair<,>))
                 return _KeyValuePair();
             if (t == typeof(System.Nullable<>))
                 return _Nullable();

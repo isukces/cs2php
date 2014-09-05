@@ -24,17 +24,22 @@ namespace Lang.Php.Compiler
     smartClass
     option NoAdditionalFile
     
+    property Sandbox AssemblySandbox 
+    	init new AssemblySandbox(AppDomain.CurrentDomain)
+    	read only
+    
     property Solution Solution 
     
-    property Project Project
+    property CSharpProject Project 
     
     property ProjectCompilation Compilation 
-        read only
-    
-    property CompiledAssembly Assembly 
+    	read only
     
     property TranslationAssemblies List<Assembly> 
-        init #
+    	init #
+    
+    property CompiledAssembly Assembly 
+    	read only
     
     property VerboseToConsole bool 
     
@@ -42,11 +47,20 @@ namespace Lang.Php.Compiler
     smartClassEnd
     */
 
-    public partial class Cs2PhpCompiler
+    public sealed partial class Cs2PhpCompiler : IDisposable
     {
-		#region Static Methods 
+        #region Constructors
 
-		// Private Methods 
+        ~Cs2PhpCompiler()
+        {
+            Dispose(false);
+        }
+
+        #endregion Constructors
+
+        #region Static Methods
+
+        // Private Methods 
 
         private static void DownloadAndUnzip(string src, string outDir, string str)
         {
@@ -118,43 +132,37 @@ namespace Lang.Php.Compiler
             #endregion
         }
 
-        private static string GetRootPath(Assembly compiledAssembly)
-        {
-            var tmp = compiledAssembly.GetCustomAttribute<RootPathAttribute>();
-            if (tmp == null)
-                return "";
-            var realOutputDir = (tmp.Path ?? "").Replace("/", "\\");
-            while (realOutputDir.StartsWith("\\"))
-                realOutputDir = realOutputDir.Substring(1);
-            return realOutputDir;
-        }
+       
 
-		#endregion Static Methods 
+        #endregion Static Methods
 
-		#region Methods 
+        #region Methods
 
-		// Public Methods 
+        // Public Methods 
 
         public void AddMetadataReferences(params MetadataReference[] adds)
         {
             foreach (var add in adds)
-                _solution = _solution.AddMetadataReference(_project.Id, add);
-            _project = _solution.Projects.Single(a => a.Id == _project.Id);
+            {
+                Console.WriteLine("Add {0}", add.Display);
+                _solution = _solution.AddMetadataReference(_cSharpProject.Id, add);
+            }
+            _cSharpProject = _solution.Projects.Single(a => a.Id == _cSharpProject.Id);
         }
 
-        public EmitResult Compile2PhpAndEmit(AssemblySandbox sandbox, string outDir, IEnumerable<Assembly> assToScan, Dictionary<string, string> referencedPhpLibsLocations)
+        public EmitResult Compile2PhpAndEmit(string outDir, IEnumerable<Assembly> assToScan, Dictionary<string, string> referencedPhpLibsLocations)
         {
             if (_verboseToConsole)
                 Console.WriteLine("Compilation");
-            var result = GetCompilation(sandbox);
-            if (!result.Success)
-                return result;
+            var emitResult = CompileCSharpProject(_sandbox);
+            if (!emitResult.Success)
+                return emitResult;
             GreenOk();
             if (_verboseToConsole)
                 Console.WriteLine("Analize C# source");
             var info = ParseCsSource();
             {
-                var realOutputDir = Path.Combine(outDir, GetRootPath(CompiledAssembly));
+                var realOutputDir = Path.Combine(outDir, AssemblyTranslationInfo.GetRootPath(CompiledAssembly));
 
 
                 var ggg = (from assembly in assToScan
@@ -165,7 +173,7 @@ namespace Lang.Php.Compiler
                            {
                                DefinedConstName = moduleIncludeConst.ConstOrVarName,
                                AssemblyName = assemblyName,
-                               RootPath = GetRootPath(assembly)
+                               RootPath = AssemblyTranslationInfo.GetRootPath(assembly)
                            }).ToArray();
 
                 foreach (var x in ggg)
@@ -188,7 +196,7 @@ namespace Lang.Php.Compiler
             GreenOk();
             TranslateAndCreatePhpFiles(info, outDir);
             EmitContentFiles(outDir);
-            return result;
+            return emitResult;
         }
 
         /*
@@ -201,18 +209,31 @@ namespace Lang.Php.Compiler
                         Console.WriteLine("  ProjectReferences {0}", i.ProjectId);
                 }
         */
-        public EmitResult GetCompilation(AssemblySandbox sandbox)
+        /// <summary>
+        /// Runs C# project compilation and fills <see cref="ProjectCompilation">ProjectCompilation</see>
+        /// and <see cref="CompiledAssembly">CompiledAssembly</see>.
+        /// </summary>
+        /// <param name="sandbox"></param>
+        /// <returns></returns>
+        public EmitResult CompileCSharpProject(AssemblySandbox sandbox)
         {
             // must be public !!!!!!!!!!
-            _projectCompilation = _project.GetCompilationAsync().Result;
+            _projectCompilation = _cSharpProject.GetCompilationAsync().Result;
             _projectCompilation =
                 _projectCompilation.WithOptions(new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
-            _projectCompilation = _projectCompilation.WithReferences(_project.MetadataReferences);
+            _projectCompilation = _projectCompilation.WithReferences(_cSharpProject.MetadataReferences);
             foreach (var i in _projectCompilation.References)
                 Console.WriteLine("   linked with {0}", i.Display);
             EmitResult result;
-            _compiledAssembly = sandbox.CompileAssembly(_projectCompilation, out result);
+            _compiledAssembly = sandbox.EmitCompiledAssembly(_projectCompilation, out result).WrappedAssembly;
             return result;
+        }
+
+        public void Dispose()
+        {
+            // ta metoda MUSI zawsze wyglądać tak samo
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
 
         public void LoadProject(string csProj, string configuration)
@@ -221,15 +242,15 @@ namespace Lang.Php.Compiler
                 Console.WriteLine("Loading {0}", csProj);
 
             var buildWorkspace = MSBuildWorkspace.Create();
-            _project = buildWorkspace.OpenProjectAsync(csProj).Result;
-            _solution = _project.Solution;
+            _cSharpProject = buildWorkspace.OpenProjectAsync(csProj).Result;
+            _solution = _cSharpProject.Solution;
 
-            var parseOptions = (CSharpParseOptions)_project.ParseOptions;
+            var parseOptions = (CSharpParseOptions)_cSharpProject.ParseOptions;
             {
                 var s = parseOptions.PreprocessorSymbolNames.Union(new[] { "CS2PHP" }).ToArray();
                 parseOptions = parseOptions.WithPreprocessorSymbols(s);
-                _solution = _solution.WithProjectParseOptions(_project.Id, parseOptions);
-                _project = _solution.Projects.Single(a => a.Id == _project.Id);
+                _solution = _solution.WithProjectParseOptions(_cSharpProject.Id, parseOptions);
+                _cSharpProject = _solution.Projects.Single(a => a.Id == _cSharpProject.Id);
             }
             //var co = new CompilationOptions(OutputKind.DynamicallyLinkedLibrary);
             // var aa = project.ParseOptions.PreprocessorSymbolNames.ToArray();
@@ -243,7 +264,7 @@ namespace Lang.Php.Compiler
 
             CheckRequiredTranslator();
 
-            var translationInfo = new TranslationInfo();
+            var translationInfo = new TranslationInfo(_sandbox);
             translationInfo.TranslationAssemblies.AddRange(_translationAssemblies);
             translationInfo.Prepare();
             // Console.WriteLine("======================");
@@ -280,26 +301,36 @@ namespace Lang.Php.Compiler
         public void RemoveMetadataReferences(params MetadataReference[] removes)
         {
             foreach (var remove in removes)
-                _solution = _solution.RemoveMetadataReference(_project.Id, remove);
-            _project = _solution.Projects.Single(a => a.Id == _project.Id);
+            {
+                Console.WriteLine("remove {0}", remove.Display);
+                _solution = _solution.RemoveMetadataReference(_cSharpProject.Id, remove);
+            }
+            _cSharpProject = _solution.Projects.Single(a => a.Id == _cSharpProject.Id);
         }
-		// Protected Methods 
+        // Protected Methods 
 
-        protected void EmitContentFiles(string outDir)
+        private void Dispose(bool disposing)
         {
-            if (string.IsNullOrEmpty(_project.FilePath))
+            if (!disposing || _sandbox == null) return;
+            _sandbox.Dispose();
+            _sandbox = null;
+        }
+
+        private void EmitContentFiles(string outDir)
+        {
+            if (string.IsNullOrEmpty(_cSharpProject.FilePath))
                 return;
-            var p = Project1.Load(_project.FilePath);
+            var p = Project1.Load(_cSharpProject.FilePath);
             var contentFiles = (from i in p.Items
                                 where i.BuildAction == BuildActions.Content
                                 select PathUtil.MakeWinPath(i.Name, PathUtil.SeparatorProcessing.Append)).ToArray();
             if (!contentFiles.Any())
                 return;
-            var attr = ReflectionUtil.GetAttribute<ResourcesDirectoryAttribute>(_compiledAssembly);
+            var attr = _compiledAssembly.GetCustomAttribute<ResourcesDirectoryAttribute>();
             var srcDir = PathUtil.MakeWinPath(attr == null ? null : attr.Source, PathUtil.SeparatorProcessing.Append, PathUtil.SeparatorProcessing.Append).ToLower();
             var dstDir = PathUtil.MakeWinPath(attr == null ? null : attr.Destination, PathUtil.SeparatorProcessing.Append, PathUtil.SeparatorProcessing.Append);
             // ReSharper disable once PossibleNullReferenceException
-            var projectDir = new FileInfo(_project.FilePath).Directory.FullName;
+            var projectDir = new FileInfo(_cSharpProject.FilePath).Directory.FullName;
             foreach (var fileName in contentFiles)
             {
                 if (!fileName.ToLower().StartsWith(srcDir))
@@ -313,7 +344,7 @@ namespace Lang.Php.Compiler
                 File.Copy(srcFile, dstFile, true);
             }
         }
-		// Private Methods 
+        // Private Methods 
 
         /* public void UpdateCompilationOptions(CommonCompilationOptions options)
          {
@@ -336,27 +367,30 @@ namespace Lang.Php.Compiler
             if (guidAttribute == null)
                 throw new Exception(string.Format("Assembly {0} has no guid", _compiledAssembly));
             var guid = Guid.Parse(guidAttribute.Value);
-            foreach (var i in _translationAssemblies)
-            {
-                var h = i.GetCustomAttributes<PriovidesTranslatorAttribute>().Any(u => u.TranslatorForAssembly == guid);
-                if (h)
-                    return;
-            }
-            throw new Exception(string.Format("There is no tranlation helper for\r\n{0}\r\n\r\n{1}\r\nis suggested.", assembly, requiredTranslatorAttribute.Suggested));
 
+            var q = from i in _translationAssemblies
+                from u in i.GetCustomAttributes<PriovidesTranslatorAttribute>()
+                where u.TranslatorForAssembly == guid
+                select u;
+            if (q.Any())
+                return;
+            throw new Exception(string.Format("There is no tranlation helper for\r\n{0}\r\n\r\n{1}\r\nis suggested.", assembly, requiredTranslatorAttribute.Suggested));
         }
 
         private Type[] GetKnownTypes()
         {
-            using (var sandbox = new AssemblySandbox())
+
+            if (_compiledAssembly == null)
+                throw new Exception("Assembly is not compiled yet");
+            var assemblies = _cSharpProject.MetadataReferences.Select(i =>
             {
-                if (_compiledAssembly == null)
-                    throw new Exception("Assembly is not compiled yet");
-                var assemblies = _project.MetadataReferences.Select(i => sandbox.LoadByFullPath(i.Display)).ToList();
-                assemblies.Add(_compiledAssembly);
-                return CompileState.GetAllTypes(assemblies);
-                
-            }
+                var g = i as MetadataFileReference;
+                if (g != null)
+                    return _sandbox.LoadByFullFilename(g.FilePath).WrappedAssembly;
+                throw new NotSupportedException(i.GetType().FullName);
+            }).ToList();
+            assemblies.Add(_compiledAssembly);
+            return CompileState.GetAllTypes(assemblies);
         }
 
         private void GreenOk()
@@ -373,7 +407,7 @@ namespace Lang.Php.Compiler
                 Console.WriteLine("Translate C# -> Php");
 
             translationInfo.CurrentAssembly = _compiledAssembly;
-            var assemblyTi = translationInfo.GetOrMakeTranslationInfo(_compiledAssembly);
+            AssemblyTranslationInfo assemblyTi = translationInfo.GetOrMakeTranslationInfo(_compiledAssembly);
             var ecBaseDir = Path.Combine(outDir, assemblyTi.RootPath.Replace("/", "\\"));
             Console.WriteLine("Output root {0}", ecBaseDir);
 
@@ -385,7 +419,7 @@ namespace Lang.Php.Compiler
             var translationState = new TranslationState(translationInfo);
             var translator = new Translator.Translator(translationState);
 
-            translator.Translate();
+            translator.Translate(_sandbox);
 
             var libName = assemblyTi.LibraryName;
 
@@ -416,17 +450,17 @@ namespace Lang.Php.Compiler
             #endregion
         }
 
-		#endregion Methods 
+        #endregion Methods
     }
 }
 
 
-// -----:::::##### smartClass embedded code begin #####:::::----- generated 2014-09-01 17:21
-// File generated automatically ver 2013-07-10 08:43
+// -----:::::##### smartClass embedded code begin #####:::::----- generated 2014-09-05 17:15
+// File generated automatically ver 2014-09-01 19:00
 // Smartclass.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0c4d5d36fb5eb4ac
 namespace Lang.Php.Compiler
 {
-    public partial class Cs2PhpCompiler
+    public sealed partial class Cs2PhpCompiler
     {
         /*
         /// <summary>
@@ -435,38 +469,42 @@ namespace Lang.Php.Compiler
         public Cs2PhpCompiler()
         {
         }
+
         Przykłady użycia
+
         implement INotifyPropertyChanged
         implement INotifyPropertyChanged_Passive
-        implement ToString ##Solution## ##Project## ##ProjectCompilation## ##CompiledAssembly## ##TranslationAssemblies## ##VerboseToConsole## ##ThrowExceptions##
-        implement ToString Solution=##Solution##, Project=##Project##, ProjectCompilation=##ProjectCompilation##, CompiledAssembly=##CompiledAssembly##, TranslationAssemblies=##TranslationAssemblies##, VerboseToConsole=##VerboseToConsole##, ThrowExceptions=##ThrowExceptions##
-        implement equals Solution, Project, ProjectCompilation, CompiledAssembly, TranslationAssemblies, VerboseToConsole, ThrowExceptions
+        implement ToString ##Sandbox## ##Solution## ##CSharpProject## ##ProjectCompilation## ##TranslationAssemblies## ##CompiledAssembly## ##VerboseToConsole## ##ThrowExceptions##
+        implement ToString Sandbox=##Sandbox##, Solution=##Solution##, CSharpProject=##CSharpProject##, ProjectCompilation=##ProjectCompilation##, TranslationAssemblies=##TranslationAssemblies##, CompiledAssembly=##CompiledAssembly##, VerboseToConsole=##VerboseToConsole##, ThrowExceptions=##ThrowExceptions##
+        implement equals Sandbox, Solution, CSharpProject, ProjectCompilation, TranslationAssemblies, CompiledAssembly, VerboseToConsole, ThrowExceptions
         implement equals *
         implement equals *, ~exclude1, ~exclude2
         */
-
-
         #region Constants
+        /// <summary>
+        /// Nazwa własności Sandbox; 
+        /// </summary>
+        public const string PropertyNameSandbox = "Sandbox";
         /// <summary>
         /// Nazwa własności Solution; 
         /// </summary>
         public const string PropertyNameSolution = "Solution";
         /// <summary>
-        /// Nazwa własności Project; 
+        /// Nazwa własności CSharpProject; 
         /// </summary>
-        public const string PropertyNameProject = "Project";
+        public const string PropertyNameCSharpProject = "CSharpProject";
         /// <summary>
         /// Nazwa własności ProjectCompilation; 
         /// </summary>
         public const string PropertyNameProjectCompilation = "ProjectCompilation";
         /// <summary>
-        /// Nazwa własności CompiledAssembly; 
-        /// </summary>
-        public const string PropertyNameCompiledAssembly = "CompiledAssembly";
-        /// <summary>
         /// Nazwa własności TranslationAssemblies; 
         /// </summary>
         public const string PropertyNameTranslationAssemblies = "TranslationAssemblies";
+        /// <summary>
+        /// Nazwa własności CompiledAssembly; 
+        /// </summary>
+        public const string PropertyNameCompiledAssembly = "CompiledAssembly";
         /// <summary>
         /// Nazwa własności VerboseToConsole; 
         /// </summary>
@@ -477,12 +515,21 @@ namespace Lang.Php.Compiler
         public const string PropertyNameThrowExceptions = "ThrowExceptions";
         #endregion Constants
 
-
         #region Methods
         #endregion Methods
 
-
         #region Properties
+        /// <summary>
+        /// Własność jest tylko do odczytu.
+        /// </summary>
+        public AssemblySandbox Sandbox
+        {
+            get
+            {
+                return _sandbox;
+            }
+        }
+        private AssemblySandbox _sandbox = new AssemblySandbox(AppDomain.CurrentDomain);
         /// <summary>
         /// 
         /// </summary>
@@ -501,18 +548,18 @@ namespace Lang.Php.Compiler
         /// <summary>
         /// 
         /// </summary>
-        public Project Project
+        public Project CSharpProject
         {
             get
             {
-                return _project;
+                return _cSharpProject;
             }
             set
             {
-                _project = value;
+                _cSharpProject = value;
             }
         }
-        private Project _project;
+        private Project _cSharpProject;
         /// <summary>
         /// Własność jest tylko do odczytu.
         /// </summary>
@@ -524,21 +571,6 @@ namespace Lang.Php.Compiler
             }
         }
         private Compilation _projectCompilation;
-        /// <summary>
-        /// 
-        /// </summary>
-        public Assembly CompiledAssembly
-        {
-            get
-            {
-                return _compiledAssembly;
-            }
-            set
-            {
-                _compiledAssembly = value;
-            }
-        }
-        private Assembly _compiledAssembly;
         /// <summary>
         /// 
         /// </summary>
@@ -554,6 +586,17 @@ namespace Lang.Php.Compiler
             }
         }
         private List<Assembly> _translationAssemblies = new List<Assembly>();
+        /// <summary>
+        /// Własność jest tylko do odczytu.
+        /// </summary>
+        public Assembly CompiledAssembly
+        {
+            get
+            {
+                return _compiledAssembly;
+            }
+        }
+        private Assembly _compiledAssembly;
         /// <summary>
         /// 
         /// </summary>
@@ -585,5 +628,6 @@ namespace Lang.Php.Compiler
         }
         private bool _throwExceptions;
         #endregion Properties
+
     }
 }

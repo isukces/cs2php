@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using Lang.Cs.Compiler.Sandbox;
+using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -37,7 +38,7 @@ namespace Lang.Cs.Compiler.Visitors
     	OnChange ClearCache();
     smartClassEnd
     */
-
+    
     public partial class LangParseContext
     {
         #region Methods
@@ -46,40 +47,40 @@ namespace Lang.Cs.Compiler.Visitors
 
         public void DoWithLocalVariables(VariableDeclaration declaration, Action action)
         {
-            var savedVariables = localVariables.ToArray();
+            var savedVariables = _localVariables.ToArray();
             try
             {
                 if (declaration != null)
                     foreach (var i in declaration.Declarators)
-                        localVariables.Add(new NameType(i.Name, declaration.Type));
+                        _localVariables.Add(new NameType(i.Name, declaration.Type));
                 action();
             }
             finally
             {
-                localVariables = savedVariables.ToList();
+                _localVariables = savedVariables.ToList();
             }
         }
 
         public T DoWithLocalVariables<T>(VariableDeclaration declaration, Func<T> action)
         {
-            var savedVariables = localVariables.ToArray();
+            var savedVariables = _localVariables.ToArray();
             try
             {
                 if (declaration == null) 
                     return action();
                 foreach (var i in declaration.Declarators)
-                    localVariables.Add(new NameType(i.Name, declaration.Type));
+                    _localVariables.Add(new NameType(i.Name, declaration.Type));
                 return action();
             }
             finally
             {
-                localVariables = savedVariables.ToList();
+                _localVariables = savedVariables.ToList();
             }
         }
 
         public NameType GetLocalVariableByName(string variableName)
         {
-            var g = localVariables.Where(u => u.Name == variableName).ToArray();
+            var g = _localVariables.Where(u => u.Name == variableName).ToArray();
             if (g.Length == 1)
                 return g.First();
             throw new Exception("rough salamander, unable to find local variable " + variableName);
@@ -88,19 +89,19 @@ namespace Lang.Cs.Compiler.Visitors
         public Type[] MatchTypes(string name, int gen)
         {
             if (gen > 0)
-                name += "`" + gen.ToString();
+                name += "`" + gen;
 
             if (TypesUtil.PRIMITIVE_TYPES.ContainsKey(name))
-                return new Type[] { TypesUtil.PRIMITIVE_TYPES[name] };
+                return new[] { TypesUtil.PRIMITIVE_TYPES[name] };
             var t1 = KnownTypes.Where(i => i.FullName == name).ToArray();
             if (t1.Length == 1)
                 return t1;
             if (t1.Length > 1)
                 throw new Exception("pink sparrow");
 
-            var fullNames = importedNamespaces.Select(i => i.Name + "." + name).Distinct().ToList();
-            if (!string.IsNullOrEmpty(currentNamespace))
-                fullNames.Add(currentNamespace + "." + name);
+            var fullNames = _importedNamespaces.Select(i => i.Name + "." + name).Distinct().ToList();
+            if (!string.IsNullOrEmpty(_currentNamespace))
+                fullNames.Add(_currentNamespace + "." + name);
             var types = (from fullname in fullNames.Distinct()
                          join type in KnownTypes
                          on fullname equals type.FullName
@@ -112,7 +113,7 @@ namespace Lang.Cs.Compiler.Visitors
         public INamedTypeSymbol[] Roslyn_GetNamedTypeSymbols(INamespaceSymbol m)
         {
             if (m == null)
-                m = roslynCompilation.GlobalNamespace;
+                m = _roslynCompilation.GlobalNamespace;
             var a = m.GetTypeMembers().ToArray();
             var b = (from mm in m.GetNamespaceMembers()
                      from h in Roslyn_GetNamedTypeSymbols(mm)
@@ -130,8 +131,6 @@ namespace Lang.Cs.Compiler.Visitors
             var ct = Roslyn_ResolveType(type.ContainingType);
             var fi = ct.GetField(type.Name, f);
             return fi;
-            throw new NotSupportedException();
-
         }
 
         public MethodBase Roslyn_ResolveMethod(IMethodSymbol method)
@@ -178,8 +177,9 @@ namespace Lang.Cs.Compiler.Visitors
             var pTypes = ConvertParameterTypes(method.Parameters.ToArray());
             var hostType = Roslyn_ResolveType(method.ContainingType);
 
-            var AllMethods = hostType.GetMethods(reflectionFlags).Where(i => i.Name == method.Name).ToArray();
-            var AllMethods1 = (from i in AllMethods
+            MethodInfo[] AllMethods = hostType.GetMethods(reflectionFlags).Where(i => i.Name == method.Name).ToArray();
+            var
+                AllMethods1 = (from i in AllMethods
                                where cs(method, i)
                                select i
                                    ).ToArray();
@@ -220,7 +220,7 @@ namespace Lang.Cs.Compiler.Visitors
             }
             else
             {
-                Type[] pTypes1 = pTypes;
+                var pTypes1 = pTypes;
                 if (!hostType.IsGenericType)
                 {
                     //metody generyczne w niegenerycznej klasie
@@ -315,7 +315,7 @@ namespace Lang.Cs.Compiler.Visitors
             return a.FullName == b.FullName;
         }
 
-        private bool CompareArrayTypes(ParameterInfo[] a, Type[] b)
+        private static bool CompareArrayTypes(ParameterInfo[] a, Type[] b)
         {
             if (a.Length != b.Length) return false;
             for (int i = 0; i < a.Length; i++)
@@ -334,7 +334,7 @@ namespace Lang.Cs.Compiler.Visitors
             {
                 for (var i = 0; i < pTypes.Length; i++)
                 {
-                    if (pTypes[i] == null) continue;
+                    if ((object)pTypes[i] == null) continue;
                     if (parameters[i].RefKind !=  RefKind.None)
                         pTypes[i] = pTypes[i].MakeByRefType();
                 }
@@ -373,14 +373,6 @@ namespace Lang.Cs.Compiler.Visitors
                             return ci;
                         throw new NotSupportedException();
                     }
-                case MethodKind.Conversion: // 2 A user-defined conversion.
-                    goto case MethodKind.Ordinary;
-                case MethodKind.DelegateInvoke: // 3 The invoke method of a delegate.
-                    goto case MethodKind.Ordinary;
-                case MethodKind.UserDefinedOperator:// 9 A user-defined operator
-                    goto case MethodKind.Ordinary;
-                case MethodKind.Ordinary: // 10 A normal method.
-                    return _Resolve_OrdinaryMethod(method);
                 case MethodKind.ReducedExtension: // 13 An extension method with the "this" parameter removed.
                     if (method.ReducedFrom != null)
                     {
@@ -392,8 +384,16 @@ namespace Lang.Cs.Compiler.Visitors
                         var m1 = Roslyn_ResolveMethod(method);
                         return m1;
                     }
+                case MethodKind.BuiltinOperator: // 15
+                    goto case MethodKind.Ordinary;
+                case MethodKind.Conversion: // 2 A user-defined conversion.
+                case MethodKind.DelegateInvoke: // 3 The invoke method of a delegate.
+                case MethodKind.UserDefinedOperator:// 9 A user-defined operator
+                   
+                case MethodKind.Ordinary: // 10 A normal method.
+                    return _Resolve_OrdinaryMethod(method);
             };
-            throw new NotSupportedException();
+            throw new NotSupportedException(method.MethodKind.ToString());
 
             /*        //
       
@@ -430,6 +430,8 @@ namespace Lang.Cs.Compiler.Visitors
 
         Type Roslyn_ResolveType_internal(ITypeSymbol type)
         {
+            // throw new NotSupportedException(type.ToString());
+            
             // var aaaa = roslynCompilation.GetSpecialType(type.SpecialType);
             switch (type.SpecialType)
             {
@@ -458,11 +460,7 @@ namespace Lang.Cs.Compiler.Visitors
                 case SpecialType.System_DateTime:
                     return typeof(DateTime);
                 case SpecialType.System_Enum:
-                    return typeof(Enum);
-                default:
-                    throw new NotSupportedException(type.ToString());
-
-
+                    return typeof(Enum);             
                 case SpecialType.None:
                     {
 
@@ -482,7 +480,7 @@ namespace Lang.Cs.Compiler.Visitors
                             case TypeKind.TypeParameter:
                                 {
                                     var type1 = (ITypeParameterSymbol)type;
-                                    var a = knownTypes.Where(i => i.IsGenericParameter && i.DeclaringMethod != null).ToArray();
+                                    var a = _knownTypes.Where(i => i.IsGenericParameter && i.DeclaringMethod != null).ToArray();
                                     var b = a.Where(i => i.DeclaringMethod.Name == type1.DeclaringMethod.Name).ToArray();
 
                                     MethodInfo mi;
@@ -510,40 +508,39 @@ namespace Lang.Cs.Compiler.Visitors
                                 if (reflectionSearch != reflectionSearch2)
                                     reflectionSearch = reflectionSearch2;
                                 reflectionSearch = reflectionSearch.Substring(0, reflectionSearch.IndexOf("<", System.StringComparison.Ordinal)) + "`" + b.Arity.ToString();
-                                var reflected = KnownTypes.Single(i => i.FullName == reflectionSearch);
+                                Type reflected = KnownTypes.Single(i => i.FullName == reflectionSearch);
 
 
-                                var TypeArguments = b.TypeArguments.AsEnumerable().Select(i => Roslyn_ResolveType(i)).ToArray();
-                                var reflected2 = reflected.MakeGenericType(TypeArguments);
+                                Type[] typeArguments = b.TypeArguments.AsEnumerable().Select(Roslyn_ResolveType).ToArray();
+                                var reflected2 = reflected.MakeGenericType(typeArguments);
                                 return reflected2;
+                            }
+                            if (b.ContainingType != null)
+                            {
+                                var ct = Roslyn_ResolveType(b.ContainingType);
+                                var kt = KnownTypes.Where(i => i.DeclaringType == ct).ToArray();
+                                var reflectionSearch = b.ContainingType.ToDisplayString() + "+" + b.Name;
+                                var reflected = KnownTypes.Single(i => i.FullName == reflectionSearch);
+                                return reflected;
                             }
                             else
                             {
-                                if (b.ContainingType != null)
-                                {
-                                    var ct = Roslyn_ResolveType(b.ContainingType);
-                                    var kt = KnownTypes.Where(i => i.DeclaringType == ct).ToArray();
-                                    var reflectionSearch = b.ContainingType.ToDisplayString() + "+" + b.Name;
-                                    var reflected = KnownTypes.Single(i => i.FullName == reflectionSearch);
-                                    return reflected;
-                                }
-                                else
-                                {
-                                    var reflectionSearch = b.ToDisplayString();
-                                    var reflected = KnownTypes.Single(i => i.FullName == reflectionSearch);
-                                    return reflected;
+                                var reflectionSearch = b.ToDisplayString();
+                                var reflected = KnownTypes.Single(i => i.FullName == reflectionSearch);
+                                return reflected;
 
-                                }
                             }
                         }
 
 
                         throw new NotSupportedException(type.ToString());
                     }
-
-
+                default:
+                    throw new NotSupportedException(type.ToString());
             }
 
+            
+           
         }
 
         #endregion Methods
@@ -558,12 +555,12 @@ namespace Lang.Cs.Compiler.Visitors
 }
 
 
-// -----:::::##### smartClass embedded code begin #####:::::----- generated 2013-11-07 11:55
-// File generated automatically ver 2013-07-10 08:43
+// -----:::::##### smartClass embedded code begin #####:::::----- generated 2014-09-03 15:13
+// File generated automatically ver 2014-09-01 19:00
 // Smartclass.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0c4d5d36fb5eb4ac
 namespace Lang.Cs.Compiler.Visitors
 {
-    public partial class LangParseContext
+    public partial class LangParseContext 
     {
         /*
         /// <summary>
@@ -572,7 +569,9 @@ namespace Lang.Cs.Compiler.Visitors
         public LangParseContext()
         {
         }
+
         Przykłady użycia
+
         implement INotifyPropertyChanged
         implement INotifyPropertyChanged_Passive
         implement ToString ##CurrentNamespace## ##ImportedNamespaces## ##ClassNames## ##KnownTypes## ##LocalVariables## ##Arguments## ##RoslynCompilation## ##RoslynModel##
@@ -581,47 +580,43 @@ namespace Lang.Cs.Compiler.Visitors
         implement equals *
         implement equals *, ~exclude1, ~exclude2
         */
-
-
         #region Constants
         /// <summary>
         /// Nazwa własności CurrentNamespace; 
         /// </summary>
-        public const string PROPERTYNAME_CURRENTNAMESPACE = "CurrentNamespace";
+        public const string PropertyNameCurrentNamespace = "CurrentNamespace";
         /// <summary>
         /// Nazwa własności ImportedNamespaces; 
         /// </summary>
-        public const string PROPERTYNAME_IMPORTEDNAMESPACES = "ImportedNamespaces";
+        public const string PropertyNameImportedNamespaces = "ImportedNamespaces";
         /// <summary>
         /// Nazwa własności ClassNames; 
         /// </summary>
-        public const string PROPERTYNAME_CLASSNAMES = "ClassNames";
+        public const string PropertyNameClassNames = "ClassNames";
         /// <summary>
         /// Nazwa własności KnownTypes; 
         /// </summary>
-        public const string PROPERTYNAME_KNOWNTYPES = "KnownTypes";
+        public const string PropertyNameKnownTypes = "KnownTypes";
         /// <summary>
         /// Nazwa własności LocalVariables; 
         /// </summary>
-        public const string PROPERTYNAME_LOCALVARIABLES = "LocalVariables";
+        public const string PropertyNameLocalVariables = "LocalVariables";
         /// <summary>
         /// Nazwa własności Arguments; 
         /// </summary>
-        public const string PROPERTYNAME_ARGUMENTS = "Arguments";
+        public const string PropertyNameArguments = "Arguments";
         /// <summary>
         /// Nazwa własności RoslynCompilation; 
         /// </summary>
-        public const string PROPERTYNAME_ROSLYNCOMPILATION = "RoslynCompilation";
+        public const string PropertyNameRoslynCompilation = "RoslynCompilation";
         /// <summary>
         /// Nazwa własności RoslynModel; 
         /// </summary>
-        public const string PROPERTYNAME_ROSLYNMODEL = "RoslynModel";
+        public const string PropertyNameRoslynModel = "RoslynModel";
         #endregion Constants
-
 
         #region Methods
         #endregion Methods
-
 
         #region Properties
         /// <summary>
@@ -631,15 +626,15 @@ namespace Lang.Cs.Compiler.Visitors
         {
             get
             {
-                return currentNamespace;
+                return _currentNamespace;
             }
             set
             {
                 value = (value ?? String.Empty).Trim();
-                currentNamespace = value;
+                _currentNamespace = value;
             }
         }
-        private string currentNamespace = string.Empty;
+        private string _currentNamespace = string.Empty;
         /// <summary>
         /// 
         /// </summary>
@@ -647,14 +642,14 @@ namespace Lang.Cs.Compiler.Visitors
         {
             get
             {
-                return importedNamespaces;
+                return _importedNamespaces;
             }
             set
             {
-                importedNamespaces = value;
+                _importedNamespaces = value;
             }
         }
-        private List<ImportNamespace> importedNamespaces = new List<ImportNamespace>();
+        private List<ImportNamespace> _importedNamespaces = new List<ImportNamespace>();
         /// <summary>
         /// 
         /// </summary>
@@ -662,14 +657,14 @@ namespace Lang.Cs.Compiler.Visitors
         {
             get
             {
-                return classNames;
+                return _classNames;
             }
             set
             {
-                classNames = value;
+                _classNames = value;
             }
         }
-        private Stack<string> classNames = new Stack<string>();
+        private Stack<string> _classNames = new Stack<string>();
         /// <summary>
         /// 
         /// </summary>
@@ -677,14 +672,14 @@ namespace Lang.Cs.Compiler.Visitors
         {
             get
             {
-                return knownTypes;
+                return _knownTypes;
             }
             set
             {
-                knownTypes = value;
+                _knownTypes = value;
             }
         }
-        private Type[] knownTypes;
+        private Type[] _knownTypes;
         /// <summary>
         /// 
         /// </summary>
@@ -692,14 +687,14 @@ namespace Lang.Cs.Compiler.Visitors
         {
             get
             {
-                return localVariables;
+                return _localVariables;
             }
             set
             {
-                localVariables = value;
+                _localVariables = value;
             }
         }
-        private List<NameType> localVariables = new List<NameType>();
+        private List<NameType> _localVariables = new List<NameType>();
         /// <summary>
         /// 
         /// </summary>
@@ -707,14 +702,14 @@ namespace Lang.Cs.Compiler.Visitors
         {
             get
             {
-                return arguments;
+                return _arguments;
             }
             set
             {
-                arguments = value;
+                _arguments = value;
             }
         }
-        private List<FunctionDeclarationParameter> arguments = new List<FunctionDeclarationParameter>();
+        private List<FunctionDeclarationParameter> _arguments = new List<FunctionDeclarationParameter>();
         /// <summary>
         /// 
         /// </summary>
@@ -722,16 +717,16 @@ namespace Lang.Cs.Compiler.Visitors
         {
             get
             {
-                return roslynCompilation;
+                return _roslynCompilation;
             }
             set
             {
-                if (value == roslynCompilation) return;
-                roslynCompilation = value;
+                if (value == _roslynCompilation) return;
+                _roslynCompilation = value;
                 ClearCache();
             }
         }
-        private Compilation roslynCompilation;
+        private Compilation _roslynCompilation;
         /// <summary>
         /// 
         /// </summary>
@@ -739,16 +734,17 @@ namespace Lang.Cs.Compiler.Visitors
         {
             get
             {
-                return roslynModel;
+                return _roslynModel;
             }
             set
             {
-                if (value == roslynModel) return;
-                roslynModel = value;
+                if (value == _roslynModel) return;
+                _roslynModel = value;
                 ClearCache();
             }
         }
-        private SemanticModel roslynModel;
+        private SemanticModel _roslynModel;
         #endregion Properties
+
     }
 }

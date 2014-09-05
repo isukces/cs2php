@@ -1,4 +1,5 @@
 ﻿using Lang.Cs.Compiler;
+using Lang.Cs.Compiler.Sandbox;
 using Lang.Php.Compiler.Source;
 using System;
 using System.Collections.Generic;
@@ -44,47 +45,47 @@ namespace Lang.Php.Compiler
                 return null;
             FieldTranslationInfo fti = new FieldTranslationInfo();
             if (fieldInfo.IsLiteral)
-                fti.destination = FieldTranslationDestionations.ClassConst;
+                fti._destination = FieldTranslationDestionations.ClassConst;
             {
                 fti.ScriptName = fieldInfo.Name;
                 {
-                    var _sctiptName = ReflectionUtil.GetAttribute<ScriptNameAttribute>(fieldInfo);
+                    var _sctiptName = fieldInfo.GetCustomAttribute<ScriptNameAttribute>();
                     if (_sctiptName != null)
                     {
-                        fti.scriptName = _sctiptName.Name;
-                        fti.isScriptNamePhpEncoded = _sctiptName.Kind == ScriptNameAttribute.Kinds.IntIndex;
+                        fti._scriptName = _sctiptName.Name;
+                        fti._isScriptNamePhpEncoded = _sctiptName.Kind == ScriptNameAttribute.Kinds.IntIndex;
                     }
                 }
             }
             {
-                var _definedConst = ReflectionUtil.GetAttribute<AsDefinedConst>(fieldInfo);
-                if (_definedConst != null)
+                var asDefinedConstAttribute = fieldInfo.GetCustomAttribute<AsDefinedConstAttribute>();
+                if (asDefinedConstAttribute != null)
                 {
                     fti.Destination = FieldTranslationDestionations.DefinedConst;
-                    if (!string.IsNullOrEmpty(_definedConst.DefinedConstName))
-                        fti.scriptName = _definedConst.DefinedConstName;
+                    if (!string.IsNullOrEmpty(asDefinedConstAttribute.DefinedConstName))
+                        fti._scriptName = asDefinedConstAttribute.DefinedConstName;
                 }
             }
             {
-                var _globalVariable = ReflectionUtil.GetAttribute<GlobalVariableAttribute>(fieldInfo);
-                if (_globalVariable != null)
+                var globalVariableAttribute = fieldInfo.GetCustomAttribute<GlobalVariableAttribute>();
+                if (globalVariableAttribute != null)
                 {
                     Check(fieldInfo, fti);
                     fti.Destination = FieldTranslationDestionations.GlobalVariable;
-                    if (!string.IsNullOrEmpty(_globalVariable.GlobalVariableName))
-                        fti.scriptName = _globalVariable.GlobalVariableName;
+                    if (!string.IsNullOrEmpty(globalVariableAttribute.GlobalVariableName))
+                        fti._scriptName = globalVariableAttribute.GlobalVariableName;
                 }
             }
             {
-                var _asValue = ReflectionUtil.GetAttribute<AsValueAttribute>(fieldInfo);
-                if (_asValue != null)
+                var asValueAttribute = fieldInfo.GetCustomAttribute<AsValueAttribute>();
+                if (asValueAttribute != null)
                 {
                     Check(fieldInfo, fti);
                     fti.Destination = FieldTranslationDestionations.JustValue;
-                    fti.UsGlueForValue = _asValue.Glue;
+                    fti.UsGlueForValue = asValueAttribute.Glue;
                 }
             }
-            switch (fti.destination)
+            switch (fti._destination)
             {
                 case FieldTranslationDestionations.JustValue:
                 case FieldTranslationDestionations.GlobalVariable:
@@ -94,7 +95,7 @@ namespace Lang.Php.Compiler
                 case FieldTranslationDestionations.NormalField:
                     var cti = info.GetOrMakeTranslationInfo(fieldInfo.DeclaringType);
                     fti.IncludeModule = cti.ModuleName;
-                    if (fti.includeModule != null)
+                    if (fti._includeModule != null)
                     {
                         if (cti.IsPage)
                             fti.IsDefinedInNonincludableModule = true;
@@ -110,16 +111,18 @@ namespace Lang.Php.Compiler
 
         private static void Check(FieldInfo fieldInfo, FieldTranslationInfo fti)
         {
+            if (fti == null) throw new ArgumentNullException("fti");
             if (fti.Destination != FieldTranslationDestionations.NormalField && fti.Destination != FieldTranslationDestionations.ClassConst)
-                throw new Exception(string.Format("Unable to find right way to convert field {0}.{1}", fieldInfo.DeclaringType.FullName, fieldInfo.Name));
+                throw new Exception(string.Format("Unable to find right way to convert field {0}.{1}", 
+                    fieldInfo.DeclaringType.FullName, 
+                    fieldInfo.Name));
         }
-
     }
 }
 
 
-// -----:::::##### smartClass embedded code begin #####:::::----- generated 2013-12-13 18:02
-// File generated automatically ver 2013-07-10 08:43
+// -----:::::##### smartClass embedded code begin #####:::::----- generated 2014-09-03 17:42
+// File generated automatically ver 2014-09-01 19:00
 // Smartclass.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0c4d5d36fb5eb4ac
 namespace Lang.Php.Compiler
 {
@@ -147,27 +150,27 @@ namespace Lang.Php.Compiler
         /// <summary>
         /// Nazwa własności ScriptName; 
         /// </summary>
-        public const string PROPERTYNAME_SCRIPTNAME = "ScriptName";
+        public const string PropertyNameScriptName = "ScriptName";
         /// <summary>
         /// Nazwa własności IsScriptNamePhpEncoded; 
         /// </summary>
-        public const string PROPERTYNAME_ISSCRIPTNAMEPHPENCODED = "IsScriptNamePhpEncoded";
+        public const string PropertyNameIsScriptNamePhpEncoded = "IsScriptNamePhpEncoded";
         /// <summary>
         /// Nazwa własności Destination; 
         /// </summary>
-        public const string PROPERTYNAME_DESTINATION = "Destination";
+        public const string PropertyNameDestination = "Destination";
         /// <summary>
         /// Nazwa własności UsGlueForValue; czy sklejać wartość stałą w wyrażeniach
         /// </summary>
-        public const string PROPERTYNAME_USGLUEFORVALUE = "UsGlueForValue";
+        public const string PropertyNameUsGlueForValue = "UsGlueForValue";
         /// <summary>
         /// Nazwa własności IncludeModule; 
         /// </summary>
-        public const string PROPERTYNAME_INCLUDEMODULE = "IncludeModule";
+        public const string PropertyNameIncludeModule = "IncludeModule";
         /// <summary>
         /// Nazwa własności IsDefinedInNonincludableModule; czy jest zdefiniowany w module, którego nie można includować
         /// </summary>
-        public const string PROPERTYNAME_ISDEFINEDINNONINCLUDABLEMODULE = "IsDefinedInNonincludableModule";
+        public const string PropertyNameIsDefinedInNonincludableModule = "IsDefinedInNonincludableModule";
         #endregion Constants
 
         #region Methods
@@ -181,15 +184,15 @@ namespace Lang.Php.Compiler
         {
             get
             {
-                return scriptName;
+                return _scriptName;
             }
             protected set
             {
                 value = (value ?? String.Empty).Trim();
-                scriptName = value;
+                _scriptName = value;
             }
         }
-        protected string scriptName = string.Empty;
+        protected string _scriptName = string.Empty;
         /// <summary>
         /// 
         /// </summary>
@@ -197,14 +200,14 @@ namespace Lang.Php.Compiler
         {
             get
             {
-                return isScriptNamePhpEncoded;
+                return _isScriptNamePhpEncoded;
             }
             protected set
             {
-                isScriptNamePhpEncoded = value;
+                _isScriptNamePhpEncoded = value;
             }
         }
-        protected bool isScriptNamePhpEncoded;
+        protected bool _isScriptNamePhpEncoded;
         /// <summary>
         /// 
         /// </summary>
@@ -212,14 +215,14 @@ namespace Lang.Php.Compiler
         {
             get
             {
-                return destination;
+                return _destination;
             }
             protected set
             {
-                destination = value;
+                _destination = value;
             }
         }
-        protected FieldTranslationDestionations destination;
+        protected FieldTranslationDestionations _destination;
         /// <summary>
         /// czy sklejać wartość stałą w wyrażeniach
         /// </summary>
@@ -227,14 +230,14 @@ namespace Lang.Php.Compiler
         {
             get
             {
-                return usGlueForValue;
+                return _usGlueForValue;
             }
             protected set
             {
-                usGlueForValue = value;
+                _usGlueForValue = value;
             }
         }
-        protected bool usGlueForValue;
+        protected bool _usGlueForValue;
         /// <summary>
         /// 
         /// </summary>
@@ -242,14 +245,14 @@ namespace Lang.Php.Compiler
         {
             get
             {
-                return includeModule;
+                return _includeModule;
             }
             protected set
             {
-                includeModule = value;
+                _includeModule = value;
             }
         }
-        protected PhpCodeModuleName includeModule;
+        protected PhpCodeModuleName _includeModule;
         /// <summary>
         /// czy jest zdefiniowany w module, którego nie można includować
         /// </summary>
@@ -257,14 +260,14 @@ namespace Lang.Php.Compiler
         {
             get
             {
-                return isDefinedInNonincludableModule;
+                return _isDefinedInNonincludableModule;
             }
             set
             {
-                isDefinedInNonincludableModule = value;
+                _isDefinedInNonincludableModule = value;
             }
         }
-        private bool isDefinedInNonincludableModule;
+        private bool _isDefinedInNonincludableModule;
         #endregion Properties
 
     }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Lang.Cs.Compiler.Sandbox;
 using Lang.Php;
 using Lang.Php.Compiler;
 using Lang.Cs.Compiler;
@@ -13,9 +14,9 @@ namespace Lang.Php.Wp.Compile
 {
     class MethodCallConverter : IPhpNodeTranslator<CsharpMethodCallExpression>
     {
-		#region Static Methods 
+        #region Static Methods
 
-		// Private Methods 
+        // Private Methods 
         public int GetPriority()
         {
             return 1;
@@ -42,13 +43,14 @@ namespace Lang.Php.Wp.Compile
             WpTags tag;
             if (Enum.TryParse<WpTags>(methodName, out tag))
             {
+                var tt = typeof(WpTags);
                 var methodCallExpression = new PhpMethodCallExpression("add_filter");
-                var fi = typeof(WpTags).GetField(methodName);
+                var fi = tt.GetField(methodName);
                 var sss = new ClassFieldAccessExpression(fi, fi.IsStatic);
                 var sss1 = ctx.TranslateValue(sss);
                 IValue v = new ConstValue(tag);
                 var gg = ctx.TranslateValue(v);
-                
+
                 methodCallExpression.Arguments.Add(new PhpMethodInvokeValue(sss1));
                 foreach (var argument in src.Arguments)
                 {
@@ -72,11 +74,11 @@ namespace Lang.Php.Wp.Compile
             throw new NotSupportedException();
         }
 
-		#endregion Static Methods 
+        #endregion Static Methods
 
-		#region Methods 
+        #region Methods
 
-		// Public Methods 
+        // Public Methods 
 
         public IPhpValue TranslateToPhp(IExternalTranslationContext ctx, CsharpMethodCallExpression src)
         {
@@ -96,6 +98,6 @@ namespace Lang.Php.Wp.Compile
             return null;
         }
 
-		#endregion Methods 
+        #endregion Methods
     }
 }

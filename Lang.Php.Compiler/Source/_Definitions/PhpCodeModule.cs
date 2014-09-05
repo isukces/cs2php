@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Lang.Php.Compiler.Source
 {
@@ -11,8 +10,10 @@ namespace Lang.Php.Compiler.Source
     smartClass
     option NoAdditionalFile
     implement Constructor Name
+    implement ToString Module ##Name##
     
     property Name PhpCodeModuleName nazwa pliku
+    	read only
     
     property TopComments string komentarz na szczycie pliku
     	init "Generated with CS2PHP"
@@ -36,7 +37,7 @@ namespace Lang.Php.Compiler.Source
     	read only
     smartClassEnd
     */
-
+    
     public partial class PhpCodeModule : ICodeRelated
     {
         #region Methods
@@ -49,36 +50,36 @@ namespace Lang.Php.Compiler.Source
             if (string.IsNullOrEmpty(filename))
                 throw new ArgumentNullException("filename");
 
-            PhpSourceCodeWriter writer = new PhpSourceCodeWriter();
-            var style_CurrentNamespace = style.CurrentNamespace;
+            var writer = new PhpSourceCodeWriter();
+            var styleCurrentNamespace = style.CurrentNamespace;
             try
             {
                 var nsManager = new PhpModuleNamespaceManager();
                 style.CurrentNamespace = null;
-                if (!string.IsNullOrEmpty(this.topComments))
-                    writer.WriteLn("/*\r\n" + topComments.Trim() + "\r\n*/");
+                if (!string.IsNullOrEmpty(_topComments))
+                    writer.WriteLn("/*\r\n" + _topComments.Trim() + "\r\n*/");
                 var module = this;
                 {
                     // var noBracketStyle = PhpEmitStyle.xClone(style, ShowBracketsEnum.Never);
                     #region Top code
                     {
-                        /// top code
-                        PhpCodeBlock collectedTopCodeBlock = new PhpCodeBlock();
+                        // top code
+                        var collectedTopCodeBlock = new PhpCodeBlock();
                         collectedTopCodeBlock.Statements.AddRange(ConvertRequestedToCode());
                         collectedTopCodeBlock.Statements.AddRange(ConvertDefinedConstToCode());
-                        if (topCode != null)
-                            collectedTopCodeBlock.Statements.AddRange(topCode.Statements);
+                        if (_topCode != null)
+                            collectedTopCodeBlock.Statements.AddRange(_topCode.Statements);
                         nsManager.Add(collectedTopCodeBlock.Statements);
                     }
                     #endregion
                     {
-                        var classesGBNamespace = module.Classes.GroupBy(u => u.Name.Namespace);
-                        foreach (var classesInNamespace in classesGBNamespace.OrderBy(i => !i.Key.IsRoot))
+                        var classesGbNamespace = module.Classes.GroupBy(u => u.Name.Namespace);
+                        foreach (var classesInNamespace in classesGbNamespace.OrderBy(i => !i.Key.IsRoot))
                             foreach (var c in classesInNamespace)
                                 nsManager.Add(c);
                     }
-                    if (bottomCode != null)
-                        nsManager.Add(bottomCode.Statements);
+                    if (_bottomCode != null)
+                        nsManager.Add(_bottomCode.Statements);
                     if (nsManager.Container.Any())
                     {
                         if (nsManager.OnlyOneRootStatement)
@@ -91,8 +92,8 @@ namespace Lang.Php.Compiler.Source
                 }
                 #region Save to file
                 {
-                    FileInfo fi = new FileInfo(filename);
-                    fi.Directory.Create();
+                    var fi = new FileInfo(filename);
+                    if (fi.Directory != null) fi.Directory.Create();
                     var codeStr = writer.GetCode();
                     var binary = Encoding.UTF8.GetBytes(codeStr);
                     File.WriteAllBytes(fi.FullName, binary);
@@ -101,13 +102,16 @@ namespace Lang.Php.Compiler.Source
             }
             finally
             {
-                style.CurrentNamespace = style_CurrentNamespace;
+                style.CurrentNamespace = styleCurrentNamespace;
             }
         }
 
         private static void EmitWithNamespace(PhpNamespace ns, PhpSourceCodeEmiter emiter, PhpSourceCodeWriter writer, PhpEmitStyle style, IEnumerable<IEmitable> classesInNamespace)
         {
-            if (classesInNamespace == null || !classesInNamespace.Any())
+            if (classesInNamespace==null)
+                return;            
+            var inNamespace = classesInNamespace as IEmitable[] ?? classesInNamespace.ToArray();
+            if (!inNamespace.Any())
                 return;
             style.CurrentNamespace = ns;
             try
@@ -116,7 +120,7 @@ namespace Lang.Php.Compiler.Source
                     writer.OpenLn("namespace {");
                 else
                     writer.OpenLnF("namespace {0} {{", ns.Name.Substring(1));
-                foreach (var cl in classesInNamespace)
+                foreach (var cl in inNamespace)
                     cl.Emit(emiter, writer, style);
                 writer.CloseLn("}");
             }
@@ -126,69 +130,64 @@ namespace Lang.Php.Compiler.Source
             }
         }
 
-        public PhpClassDefinition FindOrCreateClass(PhpQualifiedName PhpClassName, PhpQualifiedName baseClass)
+        public PhpClassDefinition FindOrCreateClass(PhpQualifiedName phpClassName, PhpQualifiedName baseClass)
         {
-            var c = classes.Where(i => PhpClassName == i.Name).FirstOrDefault();
-            if (c == null)
-            {
-                c = new PhpClassDefinition(PhpClassName, baseClass);
-                classes.Add(c);
-            }
+            var c = _classes.FirstOrDefault(i => phpClassName == i.Name);
+            if (c != null) return c;
+            c = new PhpClassDefinition(phpClassName, baseClass);
+            _classes.Add(c);
             return c;
         }
 
         public IEnumerable<ICodeRequest> GetCodeRequests()
         {
-            var a = IPhpStatementBase.XXX(topCode, bottomCode);
-            var b = IPhpStatementBase.XXX<PhpClassDefinition>(classes);
+            var a = IPhpStatementBase.XXX(_topCode, _bottomCode);
+            var b = IPhpStatementBase.XXX(_classes);
             return a.Union(b);
         }
         // Private Methods 
 
-        private IPhpStatement[] ConvertDefinedConstToCode()
+        private IEnumerable<IPhpStatement> ConvertDefinedConstToCode()
         {
-            List<IPhpStatement> result = new List<IPhpStatement>();
+            var result = new List<IPhpStatement>();
+            var alreadyDefined = new List<string>();
+            if (!_definedConsts.Any()) return result.ToArray();
+            var grouped = _definedConsts.GroupBy(u => GetNamespace(u.Key)).ToArray();
 
-            List<string> alreadyDefined = new List<string>();
-            if (definedConsts.Any())
+            bool useNamespaces = grouped.Length > 1 || grouped[0].Key != PathUtil.UNIX_SEP;
+            foreach (var group in grouped)
             {
-                var grouped = definedConsts.GroupBy(u => GetNamespace(u.Key)).ToArray();
-
-                bool useNamespaces = grouped.Length > 1 || grouped[0].Key != PathUtil.UNIX_SEP;
-                foreach (var group in grouped)
+                List<IPhpStatement> container;
+                if (useNamespaces)
                 {
-                    List<IPhpStatement> container;
-                    if (useNamespaces)
-                    {
-                        var ns1 = new PhpNamespaceStatement((PhpNamespace)group.Key);
-                        container = ns1.Code.Statements;
-                        result.Add(ns1);
-                    }
-                    else
-                        container = result;
-                    foreach (var item in group)
-                    {
-                        var shortName = GetShortName(item.Key);
-                        if (alreadyDefined.Contains(item.Key))
-                            continue;
-                        alreadyDefined.Add(item.Key);
-                        var defined = new PhpMethodCallExpression("defined", new PhpConstValue(shortName));
-                        var notDefined = new PhpUnaryOperatorExpression(defined, "!");
-                        var define = new PhpMethodCallExpression("define", new PhpConstValue(shortName), item.Value);
-                        PhpIfStatement ifStatement = new PhpIfStatement(notDefined, new PhpExpressionStatement(define), null);
-                        container.Add(ifStatement);
-                    }
+                    var ns1 = new PhpNamespaceStatement((PhpNamespace)@group.Key);
+                    container = ns1.Code.Statements;
+                    result.Add(ns1);
+                }
+                else
+                    container = result;
+                foreach (var item in @group)
+                {
+                    var shortName = GetShortName(item.Key);
+                    if (alreadyDefined.Contains(item.Key))
+                        continue;
+                    alreadyDefined.Add(item.Key);
+                    var defined = new PhpMethodCallExpression("defined", new PhpConstValue(shortName));
+                    var notDefined = new PhpUnaryOperatorExpression(defined, "!");
+                    var define = new PhpMethodCallExpression("define", new PhpConstValue(shortName), item.Value);
+                    var ifStatement = new PhpIfStatement(notDefined, new PhpExpressionStatement(define), null);
+                    container.Add(ifStatement);
                 }
             }
             return result.ToArray();
         }
 
-        private IPhpStatement[] ConvertRequestedToCode()
+        private IEnumerable<IPhpStatement> ConvertRequestedToCode()
         {
-            List<IPhpStatement> result = new List<IPhpStatement>();
-            List<string> alreadyDefined = new List<string>();
-            PhpEmitStyle style = new PhpEmitStyle();
-            foreach (var item in requiredFiles.Distinct())
+            var result = new List<IPhpStatement>();
+            var alreadyDefined = new List<string>();
+            var style = new PhpEmitStyle();
+            foreach (var item in _requiredFiles.Distinct())
             {
                 var code = item.GetPhpCode(style); //rozróżniam je po wygenerowanym kodzie
                 if (alreadyDefined.Contains(code))
@@ -200,17 +199,17 @@ namespace Lang.Php.Compiler.Source
             return result.ToArray();
         }
 
-        string GetNamespace(string name)
+        static string GetNamespace(string name)
         {
             var a = PathUtil.MakeUnixPath(PathUtil.UNIX_SEP + name);
-            var g = a.LastIndexOf(PathUtil.UNIX_SEP);
+            var g = a.LastIndexOf(PathUtil.UNIX_SEP, StringComparison.Ordinal);
             return a.Substring(0, g);
         }
 
-        string GetShortName(string name)
+        static string GetShortName(string name)
         {
             var a = PathUtil.MakeUnixPath(PathUtil.UNIX_SEP + name);
-            var g = a.LastIndexOf(PathUtil.UNIX_SEP);
+            var g = a.LastIndexOf(PathUtil.UNIX_SEP, StringComparison.Ordinal);
             return a.Substring(g + 1);
         }
 
@@ -222,10 +221,9 @@ namespace Lang.Php.Compiler.Source
         {
             get
             {
-                foreach (var i in classes)
-                    if (!i.IsEmpty)
-                        return false;
-                return definedConsts.Count == 0 && !PhpCodeBlock.HasAny(topCode) && !PhpCodeBlock.HasAny(bottomCode);
+                if (_classes.Any(i => !i.IsEmpty))
+                    return false;
+                return _definedConsts.Count == 0 && !PhpCodeBlock.HasAny(_topCode) && !PhpCodeBlock.HasAny(_bottomCode);
             }
         }
 
@@ -234,12 +232,12 @@ namespace Lang.Php.Compiler.Source
 }
 
 
-// -----:::::##### smartClass embedded code begin #####:::::----- generated 2013-12-06 11:48
-// File generated automatically ver 2013-07-10 08:43
+// -----:::::##### smartClass embedded code begin #####:::::----- generated 2014-09-05 12:38
+// File generated automatically ver 2014-09-01 19:00
 // Smartclass.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0c4d5d36fb5eb4ac
 namespace Lang.Php.Compiler.Source
 {
-    public partial class PhpCodeModule
+    public partial class PhpCodeModule 
     {
         /*
         /// <summary>
@@ -248,7 +246,9 @@ namespace Lang.Php.Compiler.Source
         public PhpCodeModule()
         {
         }
+
         Przykłady użycia
+
         implement INotifyPropertyChanged
         implement INotifyPropertyChanged_Passive
         implement ToString ##Name## ##TopComments## ##TopCode## ##BottomCode## ##Classes## ##RequiredFiles## ##DefinedConsts##
@@ -257,73 +257,73 @@ namespace Lang.Php.Compiler.Source
         implement equals *
         implement equals *, ~exclude1, ~exclude2
         */
-
-
         #region Constructors
         /// <summary>
         /// Tworzy instancję obiektu
-        /// <param name="Name">nazwa pliku</param>
+        /// <param name="name">nazwa pliku</param>
         /// </summary>
-        public PhpCodeModule(PhpCodeModuleName Name)
+        public PhpCodeModule(PhpCodeModuleName name)
         {
-            this.Name = Name;
+            _name = name;
         }
 
         #endregion Constructors
-
 
         #region Constants
         /// <summary>
         /// Nazwa własności Name; nazwa pliku
         /// </summary>
-        public const string PROPERTYNAME_NAME = "Name";
+        public const string PropertyNameName = "Name";
         /// <summary>
         /// Nazwa własności TopComments; komentarz na szczycie pliku
         /// </summary>
-        public const string PROPERTYNAME_TOPCOMMENTS = "TopComments";
+        public const string PropertyNameTopComments = "TopComments";
         /// <summary>
         /// Nazwa własności TopCode; 
         /// </summary>
-        public const string PROPERTYNAME_TOPCODE = "TopCode";
+        public const string PropertyNameTopCode = "TopCode";
         /// <summary>
         /// Nazwa własności BottomCode; 
         /// </summary>
-        public const string PROPERTYNAME_BOTTOMCODE = "BottomCode";
+        public const string PropertyNameBottomCode = "BottomCode";
         /// <summary>
         /// Nazwa własności Classes; classes in this module
         /// </summary>
-        public const string PROPERTYNAME_CLASSES = "Classes";
+        public const string PropertyNameClasses = "Classes";
         /// <summary>
         /// Nazwa własności RequiredFiles; Pliki dołączane do require
         /// </summary>
-        public const string PROPERTYNAME_REQUIREDFILES = "RequiredFiles";
+        public const string PropertyNameRequiredFiles = "RequiredFiles";
         /// <summary>
         /// Nazwa własności DefinedConsts; 
         /// </summary>
-        public const string PROPERTYNAME_DEFINEDCONSTS = "DefinedConsts";
+        public const string PropertyNameDefinedConsts = "DefinedConsts";
         #endregion Constants
 
-
         #region Methods
-        #endregion Methods
+        /// <summary>
+        /// Zwraca tekstową reprezentację obiektu
+        /// </summary>
+        /// <returns>Tekstowa reprezentacja obiektu</returns>
+        public override string ToString()
+        {
+            return string.Format("Module {0}", _name);
+        }
 
+        #endregion Methods
 
         #region Properties
         /// <summary>
-        /// nazwa pliku
+        /// nazwa pliku; własność jest tylko do odczytu.
         /// </summary>
         public PhpCodeModuleName Name
         {
             get
             {
-                return name;
-            }
-            set
-            {
-                name = value;
+                return _name;
             }
         }
-        private PhpCodeModuleName name;
+        private PhpCodeModuleName _name;
         /// <summary>
         /// komentarz na szczycie pliku
         /// </summary>
@@ -331,15 +331,15 @@ namespace Lang.Php.Compiler.Source
         {
             get
             {
-                return topComments;
+                return _topComments;
             }
             set
             {
                 value = (value ?? String.Empty).Trim();
-                topComments = value;
+                _topComments = value;
             }
         }
-        private string topComments = "Generated with CS2PHP";
+        private string _topComments = "Generated with CS2PHP";
         /// <summary>
         /// 
         /// </summary>
@@ -347,14 +347,14 @@ namespace Lang.Php.Compiler.Source
         {
             get
             {
-                return topCode;
+                return _topCode;
             }
             set
             {
-                topCode = value;
+                _topCode = value;
             }
         }
-        private PhpCodeBlock topCode = new PhpCodeBlock();
+        private PhpCodeBlock _topCode = new PhpCodeBlock();
         /// <summary>
         /// 
         /// </summary>
@@ -362,14 +362,14 @@ namespace Lang.Php.Compiler.Source
         {
             get
             {
-                return bottomCode;
+                return _bottomCode;
             }
             set
             {
-                bottomCode = value;
+                _bottomCode = value;
             }
         }
-        private PhpCodeBlock bottomCode = new PhpCodeBlock();
+        private PhpCodeBlock _bottomCode = new PhpCodeBlock();
         /// <summary>
         /// classes in this module; własność jest tylko do odczytu.
         /// </summary>
@@ -377,10 +377,10 @@ namespace Lang.Php.Compiler.Source
         {
             get
             {
-                return classes;
+                return _classes;
             }
         }
-        private List<PhpClassDefinition> classes = new List<PhpClassDefinition>();
+        private List<PhpClassDefinition> _classes = new List<PhpClassDefinition>();
         /// <summary>
         /// Pliki dołączane do require; własność jest tylko do odczytu.
         /// </summary>
@@ -388,21 +388,22 @@ namespace Lang.Php.Compiler.Source
         {
             get
             {
-                return requiredFiles;
+                return _requiredFiles;
             }
         }
-        private List<IPhpValue> requiredFiles = new List<IPhpValue>();
+        private List<IPhpValue> _requiredFiles = new List<IPhpValue>();
         /// <summary>
         /// Własność jest tylko do odczytu.
         /// </summary>
-        public List<KeyValuePair<string, IPhpValue>> DefinedConsts
+        public List<KeyValuePair<string,IPhpValue>> DefinedConsts
         {
             get
             {
-                return definedConsts;
+                return _definedConsts;
             }
         }
-        private List<KeyValuePair<string, IPhpValue>> definedConsts = new List<KeyValuePair<string, IPhpValue>>();
+        private List<KeyValuePair<string,IPhpValue>> _definedConsts = new List<KeyValuePair<string,IPhpValue>>();
         #endregion Properties
+
     }
 }

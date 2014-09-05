@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
+using Lang.Cs.Compiler.Sandbox;
 
 namespace Lang.Php.Compiler
 {
@@ -23,7 +21,7 @@ namespace Lang.Php.Compiler
     property IsStatic bool 
     smartClassEnd
     */
-
+    
     public partial class PropertyTranslationInfo
     {
 		#region Static Methods 
@@ -33,10 +31,10 @@ namespace Lang.Php.Compiler
         public static PropertyTranslationInfo FromPropertyInfo(PropertyInfo propInfo)
         {
             var result = new PropertyTranslationInfo();
-            result.isStatic = (propInfo.CanRead && propInfo.GetGetMethod().IsStatic)
+            result._isStatic = (propInfo.CanRead && propInfo.GetGetMethod().IsStatic)
                 || (propInfo.CanWrite && propInfo.GetSetMethod().IsStatic);
-            var AutoImplemented = IsAutoProperty(propInfo);
-            if (AutoImplemented)
+            var autoImplemented = IsAutoProperty(propInfo);
+            if (autoImplemented)
                 result.FieldScriptName = propInfo.Name; // just field with the same name 
             else
             {
@@ -44,17 +42,17 @@ namespace Lang.Php.Compiler
                 result.FieldScriptName = name.Substring(0, 1).ToLower() + name.Substring(1); // lowecase field name
             }
             {
-                var at = propInfo.GetCustomAttribute<ScriptNameAttribute>();
+                var at = propInfo.GetCustomAttribute<ScriptNameAttribute>(false);
                 if (at != null)
                     result.FieldScriptName = at.Name;// preserve case
             }
-            if (AutoImplemented)
+            if (autoImplemented)
             {
-                result.getSetByMethod = false;
+                result._getSetByMethod = false;
             }
             else
             {
-                result.getSetByMethod = true;
+                result._getSetByMethod = true;
                 if (propInfo.CanRead)
                     result.GetMethodName = propInfo.GetGetMethod().Name;
                 if (propInfo.CanWrite)
@@ -79,12 +77,12 @@ namespace Lang.Php.Compiler
 }
 
 
-// -----:::::##### smartClass embedded code begin #####:::::----- generated 2013-11-26 09:47
-// File generated automatically ver 2013-07-10 08:43
+// -----:::::##### smartClass embedded code begin #####:::::----- generated 2014-09-03 17:57
+// File generated automatically ver 2014-09-01 19:00
 // Smartclass.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0c4d5d36fb5eb4ac
 namespace Lang.Php.Compiler
 {
-    public partial class PropertyTranslationInfo
+    public partial class PropertyTranslationInfo 
     {
         /*
         /// <summary>
@@ -93,7 +91,9 @@ namespace Lang.Php.Compiler
         public PropertyTranslationInfo()
         {
         }
+
         Przykłady użycia
+
         implement INotifyPropertyChanged
         implement INotifyPropertyChanged_Passive
         implement ToString ##FieldScriptName## ##GetSetByMethod## ##SetMethodName## ##GetMethodName## ##IsStatic##
@@ -102,35 +102,31 @@ namespace Lang.Php.Compiler
         implement equals *
         implement equals *, ~exclude1, ~exclude2
         */
-
-
         #region Constants
         /// <summary>
         /// Nazwa własności FieldScriptName; 
         /// </summary>
-        public const string PROPERTYNAME_FIELDSCRIPTNAME = "FieldScriptName";
+        public const string PropertyNameFieldScriptName = "FieldScriptName";
         /// <summary>
         /// Nazwa własności GetSetByMethod; 
         /// </summary>
-        public const string PROPERTYNAME_GETSETBYMETHOD = "GetSetByMethod";
+        public const string PropertyNameGetSetByMethod = "GetSetByMethod";
         /// <summary>
         /// Nazwa własności SetMethodName; 
         /// </summary>
-        public const string PROPERTYNAME_SETMETHODNAME = "SetMethodName";
+        public const string PropertyNameSetMethodName = "SetMethodName";
         /// <summary>
         /// Nazwa własności GetMethodName; 
         /// </summary>
-        public const string PROPERTYNAME_GETMETHODNAME = "GetMethodName";
+        public const string PropertyNameGetMethodName = "GetMethodName";
         /// <summary>
         /// Nazwa własności IsStatic; 
         /// </summary>
-        public const string PROPERTYNAME_ISSTATIC = "IsStatic";
+        public const string PropertyNameIsStatic = "IsStatic";
         #endregion Constants
-
 
         #region Methods
         #endregion Methods
-
 
         #region Properties
         /// <summary>
@@ -140,15 +136,15 @@ namespace Lang.Php.Compiler
         {
             get
             {
-                return fieldScriptName;
+                return _fieldScriptName;
             }
             set
             {
                 value = (value ?? String.Empty).Trim();
-                fieldScriptName = value;
+                _fieldScriptName = value;
             }
         }
-        private string fieldScriptName = string.Empty;
+        private string _fieldScriptName = string.Empty;
         /// <summary>
         /// 
         /// </summary>
@@ -156,14 +152,14 @@ namespace Lang.Php.Compiler
         {
             get
             {
-                return getSetByMethod;
+                return _getSetByMethod;
             }
             set
             {
-                getSetByMethod = value;
+                _getSetByMethod = value;
             }
         }
-        private bool getSetByMethod;
+        private bool _getSetByMethod;
         /// <summary>
         /// 
         /// </summary>
@@ -171,15 +167,15 @@ namespace Lang.Php.Compiler
         {
             get
             {
-                return setMethodName;
+                return _setMethodName;
             }
             set
             {
                 value = (value ?? String.Empty).Trim();
-                setMethodName = value;
+                _setMethodName = value;
             }
         }
-        private string setMethodName = string.Empty;
+        private string _setMethodName = string.Empty;
         /// <summary>
         /// 
         /// </summary>
@@ -187,15 +183,15 @@ namespace Lang.Php.Compiler
         {
             get
             {
-                return getMethodName;
+                return _getMethodName;
             }
             set
             {
                 value = (value ?? String.Empty).Trim();
-                getMethodName = value;
+                _getMethodName = value;
             }
         }
-        private string getMethodName = string.Empty;
+        private string _getMethodName = string.Empty;
         /// <summary>
         /// 
         /// </summary>
@@ -203,14 +199,15 @@ namespace Lang.Php.Compiler
         {
             get
             {
-                return isStatic;
+                return _isStatic;
             }
             set
             {
-                isStatic = value;
+                _isStatic = value;
             }
         }
-        private bool isStatic;
+        private bool _isStatic;
         #endregion Properties
+
     }
 }

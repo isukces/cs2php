@@ -15,8 +15,13 @@ namespace Lang.Cs2Php
 #if DEBUG
             engine.Configuration = "DEBUG";
 #else
-            engine.Configuration = "RELEASE";
+            _engine.Configuration = "RELEASE";
 #endif
+        }
+
+        public ConfigData Engine
+        {
+            get { return _engine; }
         }
 
         #endregion Constructors
@@ -33,29 +38,6 @@ namespace Lang.Cs2Php
             if (!string.IsNullOrEmpty(_command))
                 throw new Exception("command " + _command + " has no parameter(s)");
 
-        }
-
-        private string ResolveFilename(string filename)
-        {
-            bool doThisAgain ;
-            do
-            {
-                doThisAgain = false;
-                var regex = new Regex("(%([A-Z]+)%)", RegexOptions.IgnoreCase);
-                filename = regex.Replace(filename, match =>
-                {
-                    string t;
-                    _names.TryGetValue(match.Groups[2].Value, out t);
-                    doThisAgain = true;
-                    return t;
-                });
-               
-            } while (doThisAgain);
-            
-            if (!string.IsNullOrEmpty(_currentDir))
-                filename = Path.Combine(_currentDir, filename);
-            filename = new FileInfo(filename).FullName;
-            return filename;
         }
         // Private Methods 
 
@@ -77,14 +59,14 @@ namespace Lang.Cs2Php
                     var fileName = ResolveFilename(arg);
                     if (!File.Exists(fileName))
                         throw new Exception("Referenced library " + fileName + " doesn't exist");
-                    engine.Referenced.Add(fileName);
+                    _engine.Referenced.Add(fileName);
                     _command = null;
                     break;
                 case "t":
                     fileName = ResolveFilename(arg);
                     if (!File.Exists(fileName))
                         throw new Exception("Referenced library " + fileName + " doesn't exist");
-                    engine.TranlationHelpers.Add(fileName);
+                    _engine.TranlationHelpers.Add(fileName);
                     _command = null;
                     break;
                 case "lib":
@@ -94,12 +76,12 @@ namespace Lang.Cs2Php
                             throw new Exception("Invalid data for 'lib' option. Use 'lib libraryname=path'.");
                         var lib = arg.Substring(0, indexOfEqualSign).Trim();
                         var path = arg.Substring(indexOfEqualSign + 1).Trim();
-                        engine.ReferencedPhpLibsLocations[lib] = ResolveFilename(path);
+                        _engine.ReferencedPhpLibsLocations[lib] = ResolveFilename(path);
                     }
                     _command = null;
                     break;
                 case "conf":
-                    engine.Configuration = arg;
+                    _engine.Configuration = arg;
                     _command = null;
                     break;
                 case "f":
@@ -157,16 +139,43 @@ namespace Lang.Cs2Php
             }
         }
 
+        private string ResolveFilename(string filename)
+        {
+            bool doThisAgain;
+            do
+            {
+                doThisAgain = false;
+                var regex = new Regex("(%([A-Z]+)%)", RegexOptions.IgnoreCase);
+                filename = regex.Replace(filename, match =>
+                {
+                    string t;
+                    _names.TryGetValue(match.Groups[2].Value, out t);
+                    doThisAgain = true;
+                    return t;
+                });
+
+            } while (doThisAgain);
+
+            if (!string.IsNullOrEmpty(_currentDir))
+                filename = Path.Combine(_currentDir, filename);
+            filename = new FileInfo(filename).FullName;
+            return filename;
+        }
+
         #endregion Methods
 
         #region Fields
 
         string _command = "";
         string _currentDir;
-        public readonly CompilerEngine engine = new CompilerEngine();
-        public readonly List<string> files = new List<string>();
+        private readonly ConfigData _engine = new ConfigData();
         readonly Dictionary<string, string> _names = new Dictionary<string, string>();
+        public readonly List<string> files = new List<string>();
 
         #endregion Fields
+
+        #region Nested Classes
+
+        #endregion Nested Classes
     }
 }

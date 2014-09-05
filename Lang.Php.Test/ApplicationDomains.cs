@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using Lang.Php.Compiler;
 using Xunit;
 
 namespace Lang.Php.Test
@@ -93,5 +94,7 @@ const string x = "DEBUG";
 
 
         #endregion Methods
+
+    
     }
 }

@@ -1,9 +1,6 @@
-﻿using Lang.Php;
+﻿using Lang.Cs.Compiler.Sandbox;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Lang.Php.Compiler.Translator
 {
@@ -33,27 +30,24 @@ namespace Lang.Php.Compiler.Translator
             if (type.IsGenericType)
                 type = type.GetGenericTypeDefinition();
             ClassReplaceInfo[] replacers = ClassReplacers.Where(i => i.SourceType == type).ToArray();
-            if (replacers.Any())
-            {
-                if (replacers.Length > 1)
-                    throw new Exception(string.Format("wise gecko, class replacers has more than 1 replacer for {0}", type.FullName));
-                var atype = replacers[0];
+            if (!replacers.Any()) return null;
+            if (replacers.Length > 1)
+                throw new Exception(string.Format("wise gecko, class replacers has more than 1 replacer for {0}", type.FullName));
+            var atype = replacers[0];
 
-                if (srcType.IsGenericType)
-                {
-                    var a = srcType.GetGenericArguments();
-                    var gtype = atype.ReplaceBy.MakeGenericType(a);
-                    atype = new ClassReplaceInfo(srcType, gtype);
-                }
-                return atype;
+            if (srcType.IsGenericType)
+            {
+                var a = srcType.GetGenericArguments();
+                var gtype = atype.ReplaceBy.MakeGenericType(a);
+                atype = new ClassReplaceInfo(srcType, gtype);
             }
-            return null;
+            return atype;
         }
 		// Private Methods 
 
         TranslationInfo IExternalTranslationContext.GetTranslationInfo()
         {
-            return principles;
+            return _principles;
         }
 
         IPhpValue IExternalTranslationContext.TranslateValue(Lang.Cs.Compiler.IValue srcValue)
@@ -81,17 +75,13 @@ namespace Lang.Php.Compiler.Translator
         {
             get
             {
-                if (_cl == null)
-                {
-                    _cl = (from _assembly in principles.TranslationAssemblies
-                           from _type in _assembly.GetTypes()
-                           let _attributes = _type.GetCustomAttributes(false).OfType<ReplaceAttribute>().ToArray()
-                           where _attributes != null && _attributes.Any()
-                           from _attribute in _attributes
-                           select new ClassReplaceInfo(_attribute.ReplacedType, _type)
-                                  ).Distinct().ToArray();
-                }
-                return _cl;
+                return _cl ?? (_cl = (from assembly in _principles.TranslationAssemblies
+                    from type in assembly.GetTypes()
+                    let attributes = type.GetCustomAttributes(false).OfType<ReplaceAttribute>().ToArray()
+                    where attributes != null && attributes.Any()
+                    from attribute in attributes
+                    select new ClassReplaceInfo(attribute.ReplacedType, type)
+                    ).Distinct().ToArray());
             }
         }
 
@@ -100,8 +90,8 @@ namespace Lang.Php.Compiler.Translator
 }
 
 
-// -----:::::##### smartClass embedded code begin #####:::::----- generated 2013-12-08 18:52
-// File generated automatically ver 2013-07-10 08:43
+// -----:::::##### smartClass embedded code begin #####:::::----- generated 2014-09-03 18:12
+// File generated automatically ver 2014-09-01 19:00
 // Smartclass.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0c4d5d36fb5eb4ac
 namespace Lang.Php.Compiler.Translator
 {
@@ -128,11 +118,11 @@ namespace Lang.Php.Compiler.Translator
         #region Constructors
         /// <summary>
         /// Tworzy instancję obiektu
-        /// <param name="Principles"></param>
+        /// <param name="principles"></param>
         /// </summary>
-        public TranslationState(TranslationInfo Principles)
+        public TranslationState(TranslationInfo principles)
         {
-            this.principles = Principles;
+            _principles = principles;
         }
 
         #endregion Constructors
@@ -141,11 +131,11 @@ namespace Lang.Php.Compiler.Translator
         /// <summary>
         /// Nazwa własności Principles; 
         /// </summary>
-        public const string PROPERTYNAME_PRINCIPLES = "Principles";
+        public const string PropertyNamePrinciples = "Principles";
         /// <summary>
         /// Nazwa własności PhpVersion; 
         /// </summary>
-        public const string PROPERTYNAME_PHPVERSION = "PhpVersion";
+        public const string PropertyNamePhpVersion = "PhpVersion";
         #endregion Constants
 
         #region Methods
@@ -159,10 +149,10 @@ namespace Lang.Php.Compiler.Translator
         {
             get
             {
-                return principles;
+                return _principles;
             }
         }
-        private TranslationInfo principles;
+        private TranslationInfo _principles;
         /// <summary>
         /// 
         /// </summary>
@@ -170,14 +160,14 @@ namespace Lang.Php.Compiler.Translator
         {
             get
             {
-                return phpVersion;
+                return _phpVersion;
             }
             set
             {
-                phpVersion = value;
+                _phpVersion = value;
             }
         }
-        private Version phpVersion = new Version(5,4,0);
+        private Version _phpVersion = new Version(5,3,0);
         #endregion Properties
 
     }

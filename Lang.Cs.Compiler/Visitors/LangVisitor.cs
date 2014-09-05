@@ -1,4 +1,5 @@
 ﻿#define _UNUSED
+using Lang.Cs.Compiler.Sandbox;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -303,7 +304,7 @@ namespace Lang.Cs.Compiler.Visitors
         {
             var collection = _VisitExpression(node.Expression);
 #if ROSLYN
-            var info1 = Microsoft.CodeAnalysis.ModelExtensions.GetDeclaredSymbol(context.RoslynModel, node);
+            var info1 = ModelExtensions.GetDeclaredSymbol(context.RoslynModel, node);
             var info = info1 as ILocalSymbol;
             if (info == null)
                 throw new ArgumentNullException("info");
@@ -603,7 +604,7 @@ namespace Lang.Cs.Compiler.Visitors
             //    throw new Exception("Roslyn powinien tozwiązać ten typ");
 #endif
             var vars = node.Variables.Select(Visit).OfType<VariableDeclarator>().ToArray();
-            if (t.DotnetType == null)
+            if ((object)t.DotnetType == null)
             {
                 if (vars.Any())
                     t = new LangType(vars[0].Value.ValueType);
@@ -657,10 +658,7 @@ namespace Lang.Cs.Compiler.Visitors
         private string _ResolveType(SyntaxNode name)
         {
             var a = _ResolveTypeX(name);
-            if (a == null)
-                return "var";
-            return a.FullName;
-
+            return (object)a == null ? "var" : a.FullName;
         }
 
         private Type _ResolveTypeX(SyntaxNode name)

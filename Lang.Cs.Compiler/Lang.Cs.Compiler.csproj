@@ -79,6 +79,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ReflectionExtension.cs" />
+    <Compile Include="Sandbox\AssemblyWrapper.cs" />
     <Compile Include="CompileState.cs" />
     <Compile Include="DeclarationItemDescription.cs" />
     <Compile Include="DesignTimeUtils.cs" />

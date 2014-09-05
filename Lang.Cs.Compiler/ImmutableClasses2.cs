@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using Lang.Cs.Compiler.Sandbox;
 
 namespace Lang.Cs.Compiler
 {
@@ -35,9 +36,9 @@ namespace Lang.Cs.Compiler
             get
             {
 
-                if (this.myValue == null)
+                if (myValue == null)
                     return null;
-                return myValue.GetType();
+                return  myValue.GetType();
             }
         }
     }
@@ -56,9 +57,7 @@ namespace Lang.Cs.Compiler
     {
         public override string ToString()
         {
-            if (this.dotnetType == null)
-                return "var or unknown";
-            return dotnetType.FullName;
+            return (object)dotnetType == null ? "var or unknown" : dotnetType.FullName;
         }
     }
 
@@ -99,10 +98,7 @@ namespace Lang.Cs.Compiler
 
         Type IValue.ValueType
         {
-            get
-            {
-                return member.FieldType;
-            }
+            get { return  member.FieldType; }
         }
     }
 
@@ -176,7 +172,7 @@ namespace Lang.Cs.Compiler
         {
             get
             {
-                if (this.forceType != null)
+                if ((object)forceType != null)
                     return forceType;
                 throw new NotSupportedException();
             }
@@ -235,7 +231,10 @@ namespace Lang.Cs.Compiler
     {
         Type IValue.ValueType
         {
-            get { return typeof(Type); }
+            get
+            {
+                return typeof(Type);
+            }
         }
     }
 
@@ -279,7 +278,7 @@ namespace Lang.Cs.Compiler
     {
         public override string ToString()
         {
-            return string.Format("{0} = {1}", this.name, this._value);
+            return string.Format("{0} = {1}", name, _value);
         }
     }
 
@@ -369,7 +368,7 @@ namespace Lang.Cs.Compiler
         {
             get
             {
-                Debug.Assert(forceType != null);
+                Debug.Assert((object)forceType != null);
                 return forceType;
             }
         }
@@ -439,7 +438,7 @@ namespace Lang.Cs.Compiler
             get
             {
                 throw new Exception();
-                return method.GetType();
+                // return method.GetType();
             }
         }
     }
