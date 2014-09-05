@@ -213,7 +213,7 @@ string[] GetDirectives() {
 "FalseLiteralExpression,LiteralExpressionSyntax",
 "CharacterLiteralExpression,LiteralExpressionSyntax",
 "MultiplyExpression,BinaryExpressionSyntax",
-"TrueLiteralExpression,LiteralEaxpressionSyntax",
+"TrueLiteralExpression,LiteralExpressionSyntax",
 "LessThanExpression,BinaryExpressionSyntax",
 "PostIncrementExpression,PostfixUnaryExpressionSyntax",
 "GreaterThanExpression,BinaryExpressionSyntax",

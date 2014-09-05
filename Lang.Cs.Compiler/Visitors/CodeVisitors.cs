@@ -299,7 +299,7 @@ namespace Lang.Cs.Compiler.Visitors
                 case SyntaxKind.MultiplyExpression:
                       return VisitMultiplyExpression(node as BinaryExpressionSyntax);
                 case SyntaxKind.TrueLiteralExpression:
-                      return VisitTrueLiteralExpression(node as LiteralEaxpressionSyntax);
+                      return VisitTrueLiteralExpression(node as LiteralExpressionSyntax);
                 case SyntaxKind.LessThanExpression:
                       return VisitLessThanExpression(node as BinaryExpressionSyntax);
                 case SyntaxKind.PostIncrementExpression:
@@ -1359,7 +1359,7 @@ namespace Lang.Cs.Compiler.Visitors
             return default(T);
         }
 
-        protected virtual T VisitTrueLiteralExpression(LiteralEaxpressionSyntax node)
+        protected virtual T VisitTrueLiteralExpression(LiteralExpressionSyntax node)
         {
             if (throwNotImplementedException)
                 throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitTrueLiteralExpression", GetType().FullName));
