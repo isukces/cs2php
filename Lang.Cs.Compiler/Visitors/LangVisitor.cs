@@ -98,13 +98,12 @@ namespace Lang.Cs.Compiler.Visitors
             throw new Exception("Why am I here???");
             return node.Arguments.Select(i => Visit(i) as FunctionArgument).ToArray();
         }
-
-#if UNUSED
- protected override object VisitAssignExpression(BinaryExpressionSyntax node)
+        protected override object VisitSimpleAssignmentExpression(BinaryExpressionSyntax node)
         {
-            return base.VisitAssignExpression(node);
+            Console.WriteLine("aa");
+            return base.VisitSimpleAssignmentExpression(node);
         }
-#endif
+
 
 
         // override visitf
@@ -285,6 +284,7 @@ namespace Lang.Cs.Compiler.Visitors
             var e = _VisitExpression(node.Expression);
             if (e is IStatement)
                 return e;
+            //return new Lang.Cs.Compiler.state
             throw new NotImplementedException();
         }
 
@@ -675,6 +675,7 @@ namespace Lang.Cs.Compiler.Visitors
             return tmp;
         }
 
+
         private object InternalVisitAccessorDeclaration(AccessorDeclarationSyntax node)
         {
             var name = _Name(node.Keyword);
@@ -756,6 +757,7 @@ namespace Lang.Cs.Compiler.Visitors
             return new MethodDeclaration(mi, body);
         }
 
+        
 
         object[] Visit(IEnumerable<MemberDeclarationSyntax> i)
         {

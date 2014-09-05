@@ -774,6 +774,8 @@ namespace Lang.Cs.Compiler
         this.arguments = Arguments;
         this.genericTypes = GenericTypes;
         this.isDelegate = IsDelegate;
+          if (methodInfo.Name=="op_GreaterThanOrEqual")
+              Console.WriteLine("=");
       }
       public MethodInfo MethodInfo {
         get {
@@ -928,6 +930,8 @@ namespace Lang.Cs.Compiler
         this._operator = Operator;
         this.forceType = ForceType;
         this.operatorMethod = OperatorMethod;
+          if (operatorMethod!=null)
+              Console.WriteLine("=");
       }
       public IValue Left {
         get {

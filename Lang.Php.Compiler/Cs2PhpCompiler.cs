@@ -225,7 +225,8 @@ namespace Lang.Php.Compiler
             foreach (var i in _projectCompilation.References)
                 Console.WriteLine("   linked with {0}", i.Display);
             EmitResult result;
-            _compiledAssembly = sandbox.EmitCompiledAssembly(_projectCompilation, out result).WrappedAssembly;
+            var tmp = sandbox.EmitCompiledAssembly(_projectCompilation, out result);
+            _compiledAssembly = tmp != null ? tmp.WrappedAssembly : null;
             return result;
         }
 

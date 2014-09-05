@@ -18,7 +18,7 @@ namespace Lang.Cs.Compiler.Sandbox
         #region Methods
 
         // Public Methods 
-         
+
         [Obsolete]
         public T GetCustomAttribute<T>() where T : Attribute
         {
@@ -54,27 +54,27 @@ namespace Lang.Cs.Compiler.Sandbox
                         throw new Exception(string.Format("Unsupported protocol in URI {0}", assemblyPath));
                     assemblyPath = uri.LocalPath;
                 }
-                
+
                 ResolveEventHandler x = (s, args) =>
                 {
-                    Console.WriteLine("X1 {1} {0}", args.RequestingAssembly, args.Name);
+                    // Console.WriteLine("X1 {1} {0}", args.RequestingAssembly, args.Name);
                     Assembly assembly = Assembly.LoadFrom(args.Name);
                     // if (assembly != null)
-                        return assembly;
+                    return assembly;
                 };
-//                AssemblyLoadEventHandler y = (sender, args) =>
-//                {
-//                    Console.WriteLine("X2 {0}", args.LoadedAssembly);
-//                };  
-                 AppDomain.CurrentDomain.AssemblyResolve += x;
+                //                AssemblyLoadEventHandler y = (sender, args) =>
+                //                {
+                //                    Console.WriteLine("X2 {0}", args.LoadedAssembly);
+                //                };  
+                AppDomain.CurrentDomain.AssemblyResolve += x;
                 //AppDomain.CurrentDomain.AssemblyLoad += y;
 
-                Console.WriteLine("Loading {0} B" , assemblyPath);
+                // Console.WriteLine("Loading {0} B" , assemblyPath);
                 _wrappedAssembly = Assembly.Load(assemblyPath);
-                Console.WriteLine("Loading {0} E", assemblyPath);
+                //Console.WriteLine("Loading {0} E", assemblyPath);
                 var ass = AppDomain.CurrentDomain.GetAssemblies();
-                Console.WriteLine("Current domain contains {0} assemblies", ass.Length);
-                 AppDomain.CurrentDomain.AssemblyResolve -= x;
+                //Console.WriteLine("Current domain contains {0} assemblies", ass.Length);
+                AppDomain.CurrentDomain.AssemblyResolve -= x;
             }
             catch (FileNotFoundException)
             {
@@ -89,10 +89,10 @@ namespace Lang.Cs.Compiler.Sandbox
 
             //AppDomain.CurrentDomain.AssemblyResolve += resolveEventHandler;
 
-//            var ass = AppDomain.CurrentDomain.GetAssemblies();
-//            var assembly = ass.FirstOrDefault(a => String.Compare(a.Location, _assemblyPath, StringComparison.Ordinal) == 0) ??
-//                           _assembly;
-//            Console.WriteLine("Calling func B");          
+            //            var ass = AppDomain.CurrentDomain.GetAssemblies();
+            //            var assembly = ass.FirstOrDefault(a => String.Compare(a.Location, _assemblyPath, StringComparison.Ordinal) == 0) ??
+            //                           _assembly;
+            //            Console.WriteLine("Calling func B");          
             var result = func(_wrappedAssembly);
             // Console.WriteLine("Calling func E");
 

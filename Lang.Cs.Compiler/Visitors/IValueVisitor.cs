@@ -2,7 +2,6 @@
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
-using Lang.Cs.Compiler.Sandbox;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -59,15 +58,18 @@ namespace Lang.Cs.Compiler.Visitors
             var symbolInfo = ModelExtensions.GetSymbolInfo(state.Context.RoslynModel, node);
             if (symbolInfo.Symbol != null)
             {
-                var a = symbolInfo.Symbol;
-                if (a is IMethodSymbol)
+                var symbol = symbolInfo.Symbol;
+                if (symbol is IMethodSymbol)
                 {
-                    var b = a as IMethodSymbol;
-                    var mi = state.Context.Roslyn_ResolveMethod(b);
-                    if (mi is MethodInfo)
-                        operatorMethod = mi as MethodInfo;
-                    else
-                        throw new NotSupportedException("Jest jakiś symbol");
+                    var methodSymbol = symbol as IMethodSymbol;
+                    if (methodSymbol.MethodKind != MethodKind.BuiltinOperator)
+                    {
+                        var mi = state.Context.Roslyn_ResolveMethod(methodSymbol);
+                        if (mi is MethodInfo)
+                            operatorMethod = mi as MethodInfo;
+                        else
+                            throw new NotSupportedException("Jest jakiś symbol");
+                    }
                 }
                 else
                     throw new NotSupportedException("Jest jakiś symbol");
@@ -701,6 +703,11 @@ namespace Lang.Cs.Compiler.Visitors
             return new TypeValue(dot);
         }
 
+        protected override IValue VisitSimpleAssignmentExpression(BinaryExpressionSyntax node)
+        {
+            return internalVisit_AssignWithPrefix(node, ""); // +++ 
+        }
+
         protected override IValue VisitSimpleLambdaExpression(SimpleLambdaExpressionSyntax node)
         {
             FunctionDeclarationParameter a = _VisitParameter(node.Parameter);
@@ -727,6 +734,7 @@ namespace Lang.Cs.Compiler.Visitors
                     if (fieldInfo.IsStatic)
                         return Simplify(new ClassFieldAccessExpression(fieldInfo, true));
                     var _expression = Visit(node.Expression);
+                    if (_expression == null) throw new ArgumentNullException("_expression");
                     return Simplify(new InstanceFieldAccessExpression(fieldInfo, _expression));
                 case SymbolKind.Method:
                     var sss = tt.Symbol as IMethodSymbol;

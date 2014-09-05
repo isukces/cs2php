@@ -159,7 +159,16 @@ namespace Lang.Cs2Php
 
 
                 Swap(comp);
+                {
+                    // ProjectReferences
+                    foreach (var x in comp.CSharpProject.ProjectReferences.ToArray())
+                    {
+                        Console.WriteLine(" " + x.Aliases);
+                        //hack project path
+                        var xx = x.ToString();
+                    }
 
+                }
                 var loadedAssemblies = new List<Assembly>();
                 foreach (var reference in comp.CSharpProject.MetadataReferences)
                 {
