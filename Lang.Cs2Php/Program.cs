@@ -34,8 +34,11 @@ namespace Lang.Cs2Php
                 processingContext.Engine.OutDir = processingContext.files.Last();
 
 
+                using (var a = new AppConfigManipulator())
+                {
+                    DoCompilation(processingContext.Engine, ref showUsage);                    
+                }
 
-                DoCompilation(processingContext.Engine, ref showUsage);
 
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("Success");
