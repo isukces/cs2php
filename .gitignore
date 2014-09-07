@@ -129,3 +129,4 @@ UpgradeLog*.XML
 /Lang.Cs.Compiler/Common.txt
 
 /Lang.Php.Test/php/new
+/CSToPHP.sln.ide

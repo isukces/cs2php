@@ -1,5 +1,4 @@
 ﻿using Lang.Cs.Compiler;
-using Lang.Cs.Compiler.Sandbox;
 using Lang.Php.Compiler.Source;
 using System;
 using System.Collections.Generic;
@@ -249,8 +248,8 @@ namespace Lang.Php.Compiler.Translator
                     var tmp = req.AssemblyInfo.IncludePathConstOrVarName;
                     if (tmp.StartsWith("$"))
                         throw new NotSupportedException();
-                    if (!tmp.StartsWith("\\")) tmp = "\\" + tmp;
                     // leading slash is not necessary -> config is in global namespace
+                    tmp = tmp.TrimStart('\\');
                     var phpModule = CurrentConfigModule();
                     if (phpModule.DefinedConsts.All(i => i.Key != tmp))
                     {
