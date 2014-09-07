@@ -6,7 +6,7 @@ namespace Lang.Cs2Php
 {
     public static class ConfigDataExtension
     {
-        public static void CopyFrom(this IConfigData dst, IConfigData src)
+        public static void CopyFrom(this CompilerEngine dst, IConfigData src)
         {
 
             dst.Configuration = src.Configuration;

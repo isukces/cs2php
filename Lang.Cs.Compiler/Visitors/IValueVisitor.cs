@@ -87,10 +87,14 @@ namespace Lang.Cs.Compiler.Visitors
             return Simplify(tmp);
         }
 
-        //        protected override IValue VisitAddAssignExpression(BinaryExpressionSyntax node)
-        //        {
-        //            return internalVisit_AssignWithPrefix(node, "+");
-        //        }
+        protected override IValue VisitAddAssignmentExpression(BinaryExpressionSyntax node)
+        {
+            return internalVisit_AssignWithPrefix(node, "+");
+        }
+        protected override IValue VisitSubtractAssignmentExpression(BinaryExpressionSyntax node)
+        {
+            return internalVisit_AssignWithPrefix(node, "-");
+        }
         protected override IValue VisitAddExpression(BinaryExpressionSyntax node)
         {
             return internalVisit_BinaryExpressionSyntax(node, "+"); // +++ 
@@ -241,29 +245,32 @@ namespace Lang.Cs.Compiler.Visitors
 
         protected override IValue VisitDivideExpression(BinaryExpressionSyntax node)
         {
-            var symbolInfo = ModelExtensions.GetSymbolInfo(state.Context.RoslynModel, node);
-            if (symbolInfo.Symbol != null)
-                throw new NotSupportedException();
-
-            var left = Visit(node.Left);
-            var right = Visit(node.Right);
-            var typeLeft = left.ValueType;
-            var typeRight = right.ValueType;
-            // var operators = MethodUtils.GetOperators("op_Div", typeLeft, typeRight);
-#warning Not supported
+            return internalVisit_BinaryExpressionSyntax(node, "/");
             /*
-            Type t;
-            if (typeLeft == typeof(double) || typeRight == typeof(double))
-                t = typeof(double);
-            else if (typeLeft == typeof(int) && typeRight == typeof(int))
-                t = typeof(int);
-            else if (typeLeft == typeof(decimal) && typeRight == typeof(int))
-                t = typeof(decimal);
-            else if (typeLeft == typeof(decimal) && typeRight == typeof(decimal))
-                t = typeof(decimal);
-            else */
-            throw new NotSupportedException();
-            // return new BinaryOperatorExpression(left, right, "/", t, null);
+                       var symbolInfo = ModelExtensions.GetSymbolInfo(state.Context.RoslynModel, node);
+                       var type = GetResultTypeForBinaryExpression(symbolInfo);
+
+                       var left = Visit(node.Left);
+                       var right = Visit(node.Right);
+                       var typeLeft = left.ValueType;
+                       var typeRight = right.ValueType;
+                       // var operators = MethodUtils.GetOperators("op_Div", typeLeft, typeRight);
+
+                       if (type == null)
+                       {
+           //                if (typeLeft == typeof (double) || typeRight == typeof (double))
+           //                    type = typeof (double);
+           //                else if (typeLeft == typeof (int) && typeRight == typeof (int))
+           //                    type = typeof (int);
+           //                else if (typeLeft == typeof (decimal) && typeRight == typeof (int))
+           //                    type = typeof (decimal);
+           //                else if (typeLeft == typeof (decimal) && typeRight == typeof (decimal))
+           //                    type = typeof (decimal);
+           //                else
+                               throw new NotSupportedException();
+                       }
+                       return new BinaryOperatorExpression(left, right, "/", type, null);
+             */
         }
 
         protected override IValue VisitElementAccessExpression(ElementAccessExpressionSyntax node)
@@ -529,30 +536,6 @@ namespace Lang.Cs.Compiler.Visitors
         protected override IValue VisitMultiplyExpression(BinaryExpressionSyntax node)
         {
             return internalVisit_BinaryExpressionSyntax(node, "*");
-            //var symbolInfo = state.Context.RoslynModel.GetSymbolInfo(node);
-            //if (symbolInfo.Symbol != null)
-            //    throw new NotSupportedException();
-
-            //var left = Visit(node.Left);
-            //var right = Visit(node.Right);
-            //if (left is UnknownIdentifierValue || right is UnknownIdentifierValue)
-            //    throw new Exception("Invalid arguments");
-            //var typeLeft = left.ValueType;
-            //var typeRight = right.ValueType;
-            //var operators = MethodUtils.GetOperators("op_Mul", typeLeft, typeRight);
-            //Type t;
-
-            //if (typeLeft == typeof(double) || typeRight == typeof(double))
-            //    t = typeof(double);
-            //else if (typeLeft == typeof(int) && typeRight == typeof(int))
-            //    t = typeof(int);
-            //else if (typeLeft == typeof(int) && typeRight == typeof(decimal))
-            //    t = typeof(decimal);
-            //else if (typeLeft == typeof(decimal) && typeRight == typeof(decimal))
-            //    t = typeof(decimal);
-            //else
-            //    throw new NotSupportedException(string.Format("{0} * {1} = ???", typeLeft.FullName, typeRight.FullName));
-            //return new BinaryOperatorExpression(left, right, "*", t, null);
         }
 
         protected override IValue VisitNotEqualsExpression(BinaryExpressionSyntax node)
@@ -969,14 +952,13 @@ namespace Lang.Cs.Compiler.Visitors
         private IValue internalVisit_AssignWithPrefix(BinaryExpressionSyntax node, string _operator)
         {
             var symbolInfo = ModelExtensions.GetSymbolInfo(state.Context.RoslynModel, node);
-            if (symbolInfo.Symbol != null)
-                throw new NotSupportedException();
+            var typex = GetResultTypeForBinaryExpression(symbolInfo);
             //TypeInfo ti = ModelExtensions.GetTypeInfo(state.Context.RoslynModel, node);
 
             //TypeInfo eti = ModelExtensions.GetTypeInfo(state.Context.RoslynModel, node.Expression);
             var eti2 = state.Context.RoslynModel.GetTypeInfo2(node);
 
-            if (!eti2.Conversion1.IsIdentity)
+            if (!eti2.Conversion1.HasValue || !eti2.Conversion1.Value.IsIdentity)
                 throw new NotSupportedException();
             //if (symbolInfo.Symbol.IsImplicitlyDeclared)
             //    throw new Exception();
@@ -984,6 +966,34 @@ namespace Lang.Cs.Compiler.Visitors
             var r = Visit(node.Right);
             var a = new CsharpAssignExpression(l, r, _operator);
             return Simplify(a);
+        }
+
+        /// <summary>
+        /// Checks symbol taken from BinaryExpressionSyntax.
+        /// </summary>
+        /// <remarks>This methd probably is temporary solution because Roslyn is still under development and we cannot predict what will be in the future</remarks>
+        /// <param name="symbolInfo"></param>
+        private Type GetResultTypeForBinaryExpression(SymbolInfo symbolInfo)
+        {
+            if (symbolInfo.Symbol == null) return null;
+            var symbol = symbolInfo.Symbol;
+            switch (symbol.Kind)
+            {
+                case SymbolKind.Method:
+                    var methodSymbol = symbol as IMethodSymbol;
+                    if (methodSymbol == null)
+                        throw new Exception("expected symbol type is IMethodSymbol");
+                    switch (methodSymbol.MethodKind)
+                    {
+                        case MethodKind.BuiltinOperator:
+                            return state.Context.Roslyn_ResolveType(methodSymbol.ReturnType);
+                        default:
+                            throw new NotSupportedException();
+                    }
+                    break;
+                default:
+                    throw new NotSupportedException();
+            }
         }
 
         //private IValue internalVisit_BoolBinaryExpression(BinaryExpressionSyntax node, string _operator)
@@ -1055,19 +1065,24 @@ namespace Lang.Cs.Compiler.Visitors
 
         #endregion Properties
 
+
+
+
+        protected override IValue VisitUnaryMinusExpression(PrefixUnaryExpressionSyntax node)
+        {
+            var operand = Visit(node.Operand);
+            // Debug.Assert(node.OperatorToken.Kind == SyntaxKind.MinusToken);
+            Type t;
+            if (TypesUtil.IsNumberType(operand.ValueType))
+                t = operand.ValueType;
+            else
+                throw new NotSupportedException();
+            var a = new UnaryOperatorExpression(operand, "-", t);
+            return Simplify(a);
+        }
+
         /*
-                protected override IValue VisitNegateExpression(PrefixUnaryExpressionSyntax node)
-                {
-                    var operand = Visit(node.Operand);
-                    Debug.Assert(node.OperatorToken.Kind == SyntaxKind.MinusToken);
-                    Type t;
-                    if (TypesUtil.IsNumberType(operand.ValueType))
-                        t = operand.ValueType;
-                    else
-                        throw new NotSupportedException();
-                    var a = new UnaryOperatorExpression(operand, "-", t);
-                    return Simplify(a);
-                }
+              
         */
         /*
                 protected override IValue VisitSubtractAssignExpression(BinaryExpressionSyntax node)

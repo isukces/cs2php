@@ -155,9 +155,6 @@ namespace Lang.Cs2Php
                 {
                     var g = new MetadataFileReference(fileName, MetadataReferenceProperties.Assembly);
                     comp.AddMetadataReferences(g);
-#if DEBUG
-                    Console.WriteLine("  Add reference     {0}", g.Display);
-#endif
                 }
 
 
@@ -166,8 +163,6 @@ namespace Lang.Cs2Php
                     // ProjectReferences
                     foreach (var x in comp.CSharpProject.ProjectReferences.ToArray())
                     {
-                        Console.WriteLine(" " + x.Aliases);
-                        //hack project path
                         var xx = x.ToString();
                         // comp.RemoveMetadataReferences(remove);
                     }
@@ -267,6 +262,15 @@ namespace Lang.Cs2Php
             }
         }
 */
+
+        public void Set1(string[] referenced, string[] tranlationHelpers, string[] a)
+        {
+            _referenced = referenced.ToList();
+            _tranlationHelpers = tranlationHelpers.ToList();
+            _referencedPhpLibsLocations = (from i in a
+                select i.Split('\n')
+                ).ToDictionary(aa => aa[0], aa => aa[1]);
+        }
     }
 }
 

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Lang.Php.Test.Tests;
 
 namespace Lang.Php.Test
 {
@@ -10,8 +11,8 @@ namespace Lang.Php.Test
     {
         public static void Main(string[] arg)
         {
-            SandboxTest.AdvancedSandbox();
-
+            //SandboxTest.AdvancedSandbox();
+            AppConfigTest.Basic();
             Console.ReadLine();
         }
     }

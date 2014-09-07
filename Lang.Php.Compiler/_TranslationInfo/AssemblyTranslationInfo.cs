@@ -11,26 +11,25 @@ namespace Lang.Php.Compiler
     option NoAdditionalFile
     
     property Assembly Assembly 
-    	access public private private
     	read only
     
     property LibraryName string 
     	read only
     
     property IncludePathConstOrVarName string nazwa stałej lub zmiennej, która oznacza ścieżkę do biblioteki
-    	access public private private
+    	read only
     
     property RootPath string 
     	read only
     
     property PhpPackageSourceUri string 
-    	access public private private
+    	read only
     
     property PhpPackagePathStrip string 
-    	access public private private
+    	read only
     
     property PhpIncludePathExpression IPhpValue 
-    	access public private private
+    	read only
     
     property ConfigModuleName string 
     	init "cs2php"
@@ -40,7 +39,7 @@ namespace Lang.Php.Compiler
     	read only
     smartClassEnd
     */
-
+    
     public partial class AssemblyTranslationInfo
     {
         #region Static Methods
@@ -59,15 +58,15 @@ namespace Lang.Php.Compiler
 
                 var moduleIncludeConst = assembly.GetCustomAttribute<ModuleIncludeConstAttribute>();
                 if (moduleIncludeConst != null)
-                    ati.IncludePathConstOrVarName = moduleIncludeConst.ConstOrVarName;
+                    ati._includePathConstOrVarName = moduleIncludeConst.ConstOrVarName;
                 
                    ati._rootPath =  GetRootPath(assembly);
                 
                 var phpPackageSource = assembly.GetCustomAttribute<PhpPackageSourceAttribute>();
                 if (phpPackageSource != null)
                 {
-                    ati.PhpPackageSourceUri = phpPackageSource.SourceUri;
-                    ati.PhpPackagePathStrip = phpPackageSource.StripArchivePath;
+                    ati._phpPackageSourceUri = phpPackageSource.SourceUri;
+                    ati._phpPackagePathStrip = phpPackageSource.StripArchivePath;
                 }
                 {
                     var configModule = assembly.GetCustomAttribute<ConfigModuleAttribute>();
@@ -81,13 +80,15 @@ namespace Lang.Php.Compiler
                 }
             }
             ati._libraryName = LibNameFromAssembly(assembly);
-            ati.PhpIncludePathExpression = GetDefaultIncludePath(ati, translationInfo);
+            ati._phpIncludePathExpression = GetDefaultIncludePath(ati, translationInfo);
             return ati;
         }
 
         public static string GetRootPath(Assembly assembly)
         {
             var rootPathAttribute = assembly.GetCustomAttribute<RootPathAttribute>();
+            if (rootPathAttribute == null)
+                return null;
             string result = (rootPathAttribute.Path ?? "").Replace("\\", "/").TrimEnd('/').TrimStart('/') + "/";
             while (result.Contains("//"))
                 result = result.Replace("//", "/");
@@ -144,12 +145,12 @@ namespace Lang.Php.Compiler
 }
 
 
-// -----:::::##### smartClass embedded code begin #####:::::----- generated 2014-09-05 17:28
+// -----:::::##### smartClass embedded code begin #####:::::----- generated 2014-09-07 12:40
 // File generated automatically ver 2014-09-01 19:00
 // Smartclass.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0c4d5d36fb5eb4ac
 namespace Lang.Php.Compiler
 {
-    public partial class AssemblyTranslationInfo
+    public partial class AssemblyTranslationInfo 
     {
         /*
         /// <summary>
@@ -235,18 +236,13 @@ namespace Lang.Php.Compiler
         }
         private string _libraryName = string.Empty;
         /// <summary>
-        /// nazwa stałej lub zmiennej, która oznacza ścieżkę do biblioteki
+        /// nazwa stałej lub zmiennej, która oznacza ścieżkę do biblioteki; własność jest tylko do odczytu.
         /// </summary>
         public string IncludePathConstOrVarName
         {
             get
             {
                 return _includePathConstOrVarName;
-            }
-            private set
-            {
-                value = (value ?? String.Empty).Trim();
-                _includePathConstOrVarName = value;
             }
         }
         private string _includePathConstOrVarName = string.Empty;
@@ -262,7 +258,7 @@ namespace Lang.Php.Compiler
         }
         private string _rootPath = string.Empty;
         /// <summary>
-        /// 
+        /// Własność jest tylko do odczytu.
         /// </summary>
         public string PhpPackageSourceUri
         {
@@ -270,15 +266,10 @@ namespace Lang.Php.Compiler
             {
                 return _phpPackageSourceUri;
             }
-            private set
-            {
-                value = (value ?? String.Empty).Trim();
-                _phpPackageSourceUri = value;
-            }
         }
         private string _phpPackageSourceUri = string.Empty;
         /// <summary>
-        /// 
+        /// Własność jest tylko do odczytu.
         /// </summary>
         public string PhpPackagePathStrip
         {
@@ -286,25 +277,16 @@ namespace Lang.Php.Compiler
             {
                 return _phpPackagePathStrip;
             }
-            private set
-            {
-                value = (value ?? String.Empty).Trim();
-                _phpPackagePathStrip = value;
-            }
         }
         private string _phpPackagePathStrip = string.Empty;
         /// <summary>
-        /// 
+        /// Własność jest tylko do odczytu.
         /// </summary>
         public IPhpValue PhpIncludePathExpression
         {
             get
             {
                 return _phpIncludePathExpression;
-            }
-            private set
-            {
-                _phpIncludePathExpression = value;
             }
         }
         private IPhpValue _phpIncludePathExpression;

@@ -76,6 +76,7 @@
       <Private>True</Private>
       <HintPath>..\packages\Microsoft.Bcl.Immutable.1.1.20-beta\lib\portable-net45+win8\System.Collections.Immutable.dll</HintPath>
     </Reference>
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.IO.Compression" />
     <Reference Include="System.IO.Compression.FileSystem" />
@@ -129,6 +130,7 @@
     <Compile Include="Translator\Node\StringExtensionsTranslator.cs" />
     <Compile Include="Translator\Node\TimeSpanTranslator.cs" />
     <Compile Include="Translator\StatementSimplifier.cs" />
+    <Compile Include="AppConfigManipulator.cs" />
     <Compile Include="_CodeRequests\ClassCodeRequest.cs" />
     <Compile Include="_CodeRequests\GlobalVariableRequest.cs" />
     <Compile Include="_CodeRequests\LocalVariableRequest.cs" />

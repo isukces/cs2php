@@ -10,10 +10,14 @@ namespace Lang.Cs.Compiler
     {
         public static MyInfo GetTypeInfo2(this SemanticModel model, ExpressionSyntax expression)
         {
-            var typeInfo = Microsoft.CodeAnalysis.ModelExtensions.GetTypeInfo(model, expression);
+            var typeInfo = ModelExtensions.GetTypeInfo(model, expression);
+            if (typeInfo.ConvertedType == null)
+                System.Diagnostics.Debug.Write("");
             var g = new MyInfo
             {
-                Conversion1 = model.ClassifyConversion(expression, typeInfo.ConvertedType),
+                Conversion1 = typeInfo.ConvertedType != null
+                ? (Conversion?)model.ClassifyConversion(expression, typeInfo.ConvertedType)
+                : null,
                 Conversion2 = model.GetConversion(expression),
                 TypeInfo = typeInfo
             };
@@ -23,14 +27,14 @@ namespace Lang.Cs.Compiler
 
         public class MyInfo
         {
-            public Conversion Conversion1 { get; set; }
+            public Conversion? Conversion1 { get; set; }
             public Conversion Conversion2 { get; set; }
 
             public object ImplicitConversion
             {
                 get
                 {
-                    var myConversions = new[] { Conversion1, Conversion2 }.Where(a => !a.IsIdentity).Distinct().ToArray();
+                    var myConversions = new[] { Conversion1, Conversion2 }.Where(a => a.HasValue && !a.Value.IsIdentity).Distinct().ToArray();
                     return myConversions.Any() ? string.Join("=>", myConversions) : "no conversion";
                 }
             }
@@ -39,7 +43,7 @@ namespace Lang.Cs.Compiler
 
             public IMethodSymbol GetMethodSymbol()
             {
-                var myConversions = new[] { Conversion1, Conversion2 }.Where(a => a.MethodSymbol != null).Distinct().ToArray();
+                var myConversions = new[] { Conversion1, Conversion2 }.Where(a => a.HasValue && a.Value.MethodSymbol != null).Select(a => a.Value).Distinct().ToArray();
                 switch (myConversions.Length)
                 {
                     case 0:

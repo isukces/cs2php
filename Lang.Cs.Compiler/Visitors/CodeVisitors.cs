@@ -310,12 +310,18 @@ namespace Lang.Cs.Compiler.Visitors
                       return VisitNullLiteralExpression(node as LiteralExpressionSyntax);
                 case SyntaxKind.LogicalAndExpression:
                       return VisitLogicalAndExpression(node as BinaryExpressionSyntax);
+                case SyntaxKind.AddAssignmentExpression:
+                      return VisitAddAssignmentExpression(node as BinaryExpressionSyntax);
                 case SyntaxKind.AsExpression:
                       return VisitAsExpression(node as BinaryExpressionSyntax);
                 case SyntaxKind.LogicalNotExpression:
                       return VisitLogicalNotExpression(node as PrefixUnaryExpressionSyntax);
                 case SyntaxKind.SubtractExpression:
                       return VisitSubtractExpression(node as BinaryExpressionSyntax);
+                case SyntaxKind.UnaryMinusExpression:
+                      return VisitUnaryMinusExpression(node as PrefixUnaryExpressionSyntax);
+                case SyntaxKind.SubtractAssignmentExpression:
+                      return VisitSubtractAssignmentExpression(node as BinaryExpressionSyntax);
                 case SyntaxKind.GreaterThanOrEqualExpression:
                       return VisitGreaterThanOrEqualExpression(node as BinaryExpressionSyntax);
                 case SyntaxKind.LessThanOrEqualExpression:
@@ -1401,6 +1407,13 @@ namespace Lang.Cs.Compiler.Visitors
             return default(T);
         }
 
+        protected virtual T VisitAddAssignmentExpression(BinaryExpressionSyntax node)
+        {
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitAddAssignmentExpression", GetType().FullName));
+            return default(T);
+        }
+
         protected virtual T VisitAsExpression(BinaryExpressionSyntax node)
         {
             if (throwNotImplementedException)
@@ -1419,6 +1432,20 @@ namespace Lang.Cs.Compiler.Visitors
         {
             if (throwNotImplementedException)
                 throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitSubtractExpression", GetType().FullName));
+            return default(T);
+        }
+
+        protected virtual T VisitUnaryMinusExpression(PrefixUnaryExpressionSyntax node)
+        {
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitUnaryMinusExpression", GetType().FullName));
+            return default(T);
+        }
+
+        protected virtual T VisitSubtractAssignmentExpression(BinaryExpressionSyntax node)
+        {
+            if (throwNotImplementedException)
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitSubtractAssignmentExpression", GetType().FullName));
             return default(T);
         }
 

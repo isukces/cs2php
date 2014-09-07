@@ -251,8 +251,8 @@ namespace Lang.Php.Compiler.Translator
                         throw new NotSupportedException();
                     if (!tmp.StartsWith("\\")) tmp = "\\" + tmp;
                     // leading slash is not necessary -> config is in global namespace
-                    PhpCodeModule phpModule = CurrentConfigModule();
-                    if (!phpModule.DefinedConsts.Where(i => i.Key == tmp).Any())
+                    var phpModule = CurrentConfigModule();
+                    if (phpModule.DefinedConsts.All(i => i.Key != tmp))
                     {
                         KnownConstInfo value;
                         if (_info.KnownConstsValues.TryGetValue(tmp, out value))

@@ -59,7 +59,7 @@ namespace Lang.Php.Compiler
         #endregion Constructors
 
 
-       
+
         #region Static Methods
 
         // Private Methods 
@@ -134,7 +134,7 @@ namespace Lang.Php.Compiler
             #endregion
         }
 
-       
+
 
         #endregion Static Methods
 
@@ -144,15 +144,15 @@ namespace Lang.Php.Compiler
 
         public void AddMetadataReferences(params MetadataReference[] adds)
         {
-            foreach (var add in adds)
+            foreach (var reference in adds)
             {
-                Console.WriteLine("Add {0}", add.Display);
-                _solution = _solution.AddMetadataReference(_cSharpProject.Id, add);
+                Console.WriteLine("  +ref {0}", reference.Display);
+                _solution = _solution.AddMetadataReference(_cSharpProject.Id, reference);
             }
             _cSharpProject = _solution.Projects.Single(a => a.Id == _cSharpProject.Id);
         }
 
-        public EmitResult Compile2PhpAndEmit(string outDir, string dllFilename,  IEnumerable<Assembly> assToScan, Dictionary<string, string> referencedPhpLibsLocations)
+        public EmitResult Compile2PhpAndEmit(string outDir, string dllFilename, IEnumerable<Assembly> assToScan, Dictionary<string, string> referencedPhpLibsLocations)
         {
             if (_verboseToConsole)
                 Console.WriteLine("Compilation");
@@ -227,7 +227,7 @@ namespace Lang.Php.Compiler
             foreach (var i in _projectCompilation.References)
                 Console.WriteLine("   linked with {0}", i.Display);
             EmitResult result;
- 
+
             var tmp = sandbox.EmitCompiledAssembly(_projectCompilation, out result, dllFilename);
             _compiledAssembly = tmp != null ? tmp.WrappedAssembly : null;
             return result;
@@ -304,10 +304,10 @@ namespace Lang.Php.Compiler
 
         public void RemoveMetadataReferences(params MetadataReference[] removes)
         {
-            foreach (var remove in removes)
+            foreach (var reference in removes)
             {
-                Console.WriteLine("remove {0}", remove.Display);
-                _solution = _solution.RemoveMetadataReference(_cSharpProject.Id, remove);
+                Console.WriteLine("  -ref {0}", reference.Display);
+                _solution = _solution.RemoveMetadataReference(_cSharpProject.Id, reference);
             }
             _cSharpProject = _solution.Projects.Single(a => a.Id == _cSharpProject.Id);
         }
@@ -364,6 +364,8 @@ namespace Lang.Php.Compiler
 
         private void CheckRequiredTranslator(Assembly assembly)
         {
+
+            var a = typeof(RequiredTranslatorAttribute).Assembly.GetName().Version;
             var requiredTranslatorAttribute = assembly.GetCustomAttribute<RequiredTranslatorAttribute>();
             if (requiredTranslatorAttribute == null)
                 return;
@@ -373,12 +375,14 @@ namespace Lang.Php.Compiler
             var guid = Guid.Parse(guidAttribute.Value);
 
             var q = from i in _translationAssemblies
-                from u in i.GetCustomAttributes<PriovidesTranslatorAttribute>()
-                where u.TranslatorForAssembly == guid
-                select u;
+                    from u in i.GetCustomAttributes<PriovidesTranslatorAttribute>()
+                    where u.TranslatorForAssembly == guid
+                    select u;
             if (q.Any())
                 return;
-            throw new Exception(string.Format("There is no tranlation helper for\r\n{0}\r\n\r\n{1}\r\nis suggested.", assembly, requiredTranslatorAttribute.Suggested));
+            throw new Exception(string.Format(
+                "There is no tranlation helper for\r\n{0}\r\n\r\n{1}\r\nis suggested.", assembly,
+                requiredTranslatorAttribute.Suggested));
         }
 
         private Type[] GetKnownTypes()
@@ -631,7 +635,7 @@ namespace Lang.Php.Compiler
             }
         }
 
-       
+
 
         private bool _throwExceptions;
         #endregion Properties

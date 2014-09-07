@@ -20,6 +20,7 @@ namespace Lang.Cs2Php
             Console.Write("C# to Php");
             Console.ResetColor();
             Console.WriteLine(" compiler ver. {0}", typeof(Program).Assembly.GetName().Version);
+            Console.WriteLine(" Lang.Php ver. {0}", typeof(Php.RequiredTranslatorAttribute).Assembly.GetName().Version);
 
             try
             {
@@ -77,10 +78,36 @@ namespace Lang.Cs2Php
 
                 //public static void CopyFrom(ref IConfigData x, IConfigData s)
                 {
-                    ce.CopyFrom(aa);
-                    Debug.Assert(aa.Referenced.Count == ce.Referenced.Count);
-                    Debug.Assert(aa.TranlationHelpers.Count == ce.TranlationHelpers.Count);
-                    Debug.Assert(aa.ReferencedPhpLibsLocations.Count == ce.ReferencedPhpLibsLocations.Count);
+                    {
+                        {
+
+                            ce.Configuration = aa.Configuration;
+                            ce.CsProject = aa.CsProject;
+                            ce.OutDir = aa.OutDir;
+                            ce.Referenced.Clear();
+                            ce.TranlationHelpers.Clear();
+                            ce.ReferencedPhpLibsLocations.Clear();
+
+                            // src and dest can be in different application domain
+                            // we need to add item by item
+                            ce.Set1(aa.Referenced.ToArray(), 
+                                aa.TranlationHelpers.ToArray(),
+                                aa.ReferencedPhpLibsLocations.Select(a=>a.Key+"\n"+a.Value).ToArray()
+                                );
+//                            foreach (var q in aa.Referenced.ToArray())
+//                                ce.Referenced.Add(q);
+//                            foreach (var q in aa.TranlationHelpers.ToArray())
+//                                ce.TranlationHelpers.Add(q);
+                           // foreach (var a in aa.ReferencedPhpLibsLocations)
+                           //     ce.ReferencedPhpLibsLocations.Add(a.Key, a.Value);
+
+                            ce.BinaryOutputDir = aa.BinaryOutputDir;
+                            Debug.Assert(ce.Referenced.Count == aa.Referenced.Count);
+                            Debug.Assert(ce.TranlationHelpers.Count == aa.TranlationHelpers.Count);
+                            Debug.Assert(ce.ReferencedPhpLibsLocations.Count == aa.ReferencedPhpLibsLocations.Count);
+                        }
+                    }
+                    //ce.CopyFrom(aa);
                 }
                 ce.Check();
                 showUsage = false;

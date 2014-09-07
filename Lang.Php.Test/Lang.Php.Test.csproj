@@ -92,6 +92,7 @@
     <Compile Include="ApplicationDomains.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="SandboxTest.cs" />
+    <Compile Include="Tests\AppConfigTest.cs" />
     <Compile Include="Tests\BasicTests.cs" />
     <Compile Include="Tests\Base.cs" />
     <Compile Include="Code\MyCode.cs" />
