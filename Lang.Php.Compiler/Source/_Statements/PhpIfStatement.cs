@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace Lang.Php.Compiler.Source
 {
@@ -20,7 +16,7 @@ namespace Lang.Php.Compiler.Source
     	preprocess value = PhpCodeBlock.Reduce(value);
     smartClassEnd
     */
-
+    
     public partial class PhpIfStatement : IPhpStatementBase
     {
         #region Methods
@@ -31,75 +27,72 @@ namespace Lang.Php.Compiler.Source
         {
             var isBeauty = style == null || style.Compression == EmitStyleCompression.Beauty;
 
-
-            bool ifTrueAny = PhpCodeBlock.HasAny(ifTrue);
-            bool ifFalseAny = PhpCodeBlock.HasAny(ifFalse);
+            var ifTrueAny = PhpCodeBlock.HasAny(_ifTrue);
+            var ifFalseAny = PhpCodeBlock.HasAny(_ifFalse);
             if (!ifTrueAny && !ifFalseAny) return;
 
             writer.OpenLnF("if{1}({0}){2}",
-                condition.GetPhpCode(style),
+                _condition.GetPhpCode(style),
                 isBeauty ? " " : "",
                 ifTrueAny ? "" : "{}");
             if (ifTrueAny)
             {
                 var iStyle = PhpEmitStyle.xClone(style, ShowBracketsEnum.IfManyItems_OR_IfStatement);
-                if (style.UseBracketsEvenIfNotNecessary)
+                if (style != null && style.UseBracketsEvenIfNotNecessary)
                     iStyle.Brackets = ShowBracketsEnum.Always;
-                var bound = PhpCodeBlock.Bound(ifTrue);
+                var bound = PhpCodeBlock.Bound(_ifTrue);
                 bound.Emit(emiter, writer, iStyle);
             }
             writer.DecIndent();
-            if (ifFalseAny)
+            if (!ifFalseAny) return;
+            bool oneLine = _ifFalse is PhpIfStatement;
+            var oldIndent = writer.Intent;
             {
-                bool OneLine = ifFalse is PhpIfStatement;
-                int _oldIndent = writer.Intent;
+                if (oneLine)
                 {
-                    if (OneLine)
-                    {
-                        writer.Write("else ");
-                        writer.SkipIndent = true;
-                    }
-                    else
-                        writer.OpenLn("else");
-                    bool myBracket = style.UseBracketsEvenIfNotNecessary;
+                    writer.Write("else ");
+                    writer.SkipIndent = true;
+                }
+                else
+                    writer.OpenLn("else");
+                var myBracket = style != null && style.UseBracketsEvenIfNotNecessary;
 
-                    var iStyle = PhpEmitStyle.xClone(style,
-                        myBracket
+                var iStyle = PhpEmitStyle.xClone(style,
+                    myBracket
                         ? ShowBracketsEnum.Never
                         : ShowBracketsEnum.IfManyItems_OR_IfStatement);
 
-                    if (!myBracket)
-                    {
-                        var gf = ifFalse.GetStatementEmitInfo(iStyle);
-                        if (gf != StatementEmitInfo.NormalSingleStatement)
-                            myBracket = true;
-                    }
-                    if (myBracket)
-                    {
-                        iStyle.Brackets = ShowBracketsEnum.Never;
-                        writer.OpenLn("{");
-                    }                   
-                    ifFalse.Emit(emiter, writer, iStyle);
-                    if (myBracket)
-                        writer.CloseLn("}");
+                if (!myBracket)
+                {
+                    var gf = _ifFalse.GetStatementEmitInfo(iStyle);
+                    if (gf != StatementEmitInfo.NormalSingleStatement)
+                        myBracket = true;
                 }
-                writer.Intent = _oldIndent;
+                if (myBracket)
+                {
+                    iStyle.Brackets = ShowBracketsEnum.Never;
+                    writer.OpenLn("{");
+                }                   
+                _ifFalse.Emit(emiter, writer, iStyle);
+                if (myBracket)
+                    writer.CloseLn("}");
             }
+            writer.Intent = oldIndent;
         }
 
         public override IEnumerable<ICodeRequest> GetCodeRequests()
         {
-            return GetCodeRequests(condition, ifTrue, ifFalse);
+            return GetCodeRequests(_condition, _ifTrue, _ifFalse);
         }
 
         public override IPhpStatement Simplify(IPhpSimplifier s)
         {
-            var __ifTrue = s.Simplify(ifTrue);
-            var __ifFalse = s.Simplify(ifFalse);
-            var __condition = s.Simplify(condition);
-            if (__ifTrue == ifTrue && __ifFalse == ifFalse && __condition == condition)
+            var newIfTrue = s.Simplify(_ifTrue);
+            var newIfFalse = s.Simplify(_ifFalse);
+            var newCondition = s.Simplify(_condition);
+            if (newIfTrue == _ifTrue && newIfFalse == _ifFalse && newCondition == _condition)
                 return this;
-            return new PhpIfStatement(__condition, __ifTrue, __ifFalse);
+            return new PhpIfStatement(newCondition, newIfTrue, newIfFalse);
         }
 
         #endregion Methods
@@ -107,12 +100,12 @@ namespace Lang.Php.Compiler.Source
 }
 
 
-// -----:::::##### smartClass embedded code begin #####:::::----- generated 2013-11-08 11:40
-// File generated automatically ver 2013-07-10 08:43
+// -----:::::##### smartClass embedded code begin #####:::::----- generated 2014-09-08 14:13
+// File generated automatically ver 2014-09-01 19:00
 // Smartclass.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0c4d5d36fb5eb4ac
 namespace Lang.Php.Compiler.Source
 {
-    public partial class PhpIfStatement
+    public partial class PhpIfStatement 
     {
         /*
         /// <summary>
@@ -121,7 +114,9 @@ namespace Lang.Php.Compiler.Source
         public PhpIfStatement()
         {
         }
+
         Przykłady użycia
+
         implement INotifyPropertyChanged
         implement INotifyPropertyChanged_Passive
         implement ToString ##Condition## ##IfTrue## ##IfFalse##
@@ -130,44 +125,39 @@ namespace Lang.Php.Compiler.Source
         implement equals *
         implement equals *, ~exclude1, ~exclude2
         */
-
-
         #region Constructors
         /// <summary>
         /// Tworzy instancję obiektu
-        /// <param name="Condition"></param>
-        /// <param name="IfTrue"></param>
-        /// <param name="IfFalse"></param>
+        /// <param name="condition"></param>
+        /// <param name="ifTrue"></param>
+        /// <param name="ifFalse"></param>
         /// </summary>
-        public PhpIfStatement(IPhpValue Condition, IPhpStatement IfTrue, IPhpStatement IfFalse)
+        public PhpIfStatement(IPhpValue condition, IPhpStatement ifTrue, IPhpStatement ifFalse)
         {
-            this.Condition = Condition;
-            this.IfTrue = IfTrue;
-            this.IfFalse = IfFalse;
+            Condition = condition;
+            IfTrue = ifTrue;
+            IfFalse = ifFalse;
         }
 
         #endregion Constructors
-
 
         #region Constants
         /// <summary>
         /// Nazwa własności Condition; 
         /// </summary>
-        public const string PROPERTYNAME_CONDITION = "Condition";
+        public const string PropertyNameCondition = "Condition";
         /// <summary>
         /// Nazwa własności IfTrue; 
         /// </summary>
-        public const string PROPERTYNAME_IFTRUE = "IfTrue";
+        public const string PropertyNameIfTrue = "IfTrue";
         /// <summary>
         /// Nazwa własności IfFalse; 
         /// </summary>
-        public const string PROPERTYNAME_IFFALSE = "IfFalse";
+        public const string PropertyNameIfFalse = "IfFalse";
         #endregion Constants
-
 
         #region Methods
         #endregion Methods
-
 
         #region Properties
         /// <summary>
@@ -177,14 +167,14 @@ namespace Lang.Php.Compiler.Source
         {
             get
             {
-                return condition;
+                return _condition;
             }
             set
             {
-                condition = value;
+                _condition = value;
             }
         }
-        private IPhpValue condition;
+        private IPhpValue _condition;
         /// <summary>
         /// 
         /// </summary>
@@ -192,15 +182,15 @@ namespace Lang.Php.Compiler.Source
         {
             get
             {
-                return ifTrue;
+                return _ifTrue;
             }
             set
             {
                 value = PhpCodeBlock.Reduce(value);
-                ifTrue = value;
+                _ifTrue = value;
             }
         }
-        private IPhpStatement ifTrue;
+        private IPhpStatement _ifTrue;
         /// <summary>
         /// 
         /// </summary>
@@ -208,15 +198,16 @@ namespace Lang.Php.Compiler.Source
         {
             get
             {
-                return ifFalse;
+                return _ifFalse;
             }
             set
             {
                 value = PhpCodeBlock.Reduce(value);
-                ifFalse = value;
+                _ifFalse = value;
             }
         }
-        private IPhpStatement ifFalse;
+        private IPhpStatement _ifFalse;
         #endregion Properties
+
     }
 }

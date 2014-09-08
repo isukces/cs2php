@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace Lang.Php.Compiler.Source
 {
@@ -15,48 +11,46 @@ namespace Lang.Php.Compiler.Source
     	read only
     smartClassEnd
     */
-    
+
     public partial class PhpReturnStatement : IPhpStatementBase
     {
-		#region Methods 
+        #region Methods
 
-		// Public Methods 
+        // Public Methods 
 
         public override void Emit(PhpSourceCodeEmiter emiter, PhpSourceCodeWriter writer, PhpEmitStyle style)
         {
-            if (returnValue == null)
+            if (_returnValue == null)
                 writer.WriteLn("return;");
             else
-                writer.WriteLnF("return {0};", returnValue.GetPhpCode(style));
+                writer.WriteLnF("return {0};", _returnValue.GetPhpCode(style));
 
         }
 
         public override IEnumerable<ICodeRequest> GetCodeRequests()
         {
-            return GetCodeRequests(returnValue);
+            return GetCodeRequests(_returnValue);
         }
 
         public override IPhpStatement Simplify(IPhpSimplifier s)
         {
-            if (returnValue == null)
+            if (_returnValue == null)
                 return this;
-            var newReturnValue = s.Simplify(returnValue);
-            if (returnValue == newReturnValue)
-                return this;
-            return new PhpReturnStatement(newReturnValue);
+            var newReturnValue = s.Simplify(_returnValue);
+            return _returnValue == newReturnValue ? this : new PhpReturnStatement(newReturnValue);
         }
 
-		#endregion Methods 
+        #endregion Methods
     }
 }
 
 
-// -----:::::##### smartClass embedded code begin #####:::::----- generated 2013-11-11 18:08
-// File generated automatically ver 2013-07-10 08:43
+// -----:::::##### smartClass embedded code begin #####:::::----- generated 2014-09-08 14:17
+// File generated automatically ver 2014-09-01 19:00
 // Smartclass.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0c4d5d36fb5eb4ac
 namespace Lang.Php.Compiler.Source
 {
-    public partial class PhpReturnStatement 
+    public partial class PhpReturnStatement
     {
         /*
         /// <summary>
@@ -65,7 +59,9 @@ namespace Lang.Php.Compiler.Source
         public PhpReturnStatement()
         {
         }
+
         Przykłady użycia
+
         implement INotifyPropertyChanged
         implement INotifyPropertyChanged_Passive
         implement ToString ##ReturnValue##
@@ -74,32 +70,27 @@ namespace Lang.Php.Compiler.Source
         implement equals *
         implement equals *, ~exclude1, ~exclude2
         */
-
-
         #region Constructors
         /// <summary>
         /// Tworzy instancję obiektu
-        /// <param name="ReturnValue"></param>
+        /// <param name="returnValue"></param>
         /// </summary>
-        public PhpReturnStatement(IPhpValue ReturnValue)
+        public PhpReturnStatement(IPhpValue returnValue)
         {
-            this.returnValue = ReturnValue;
+            _returnValue = returnValue;
         }
 
         #endregion Constructors
-
 
         #region Constants
         /// <summary>
         /// Nazwa własności ReturnValue; 
         /// </summary>
-        public const string PROPERTYNAME_RETURNVALUE = "ReturnValue";
+        public const string PropertyNameReturnValue = "ReturnValue";
         #endregion Constants
-
 
         #region Methods
         #endregion Methods
-
 
         #region Properties
         /// <summary>
@@ -109,10 +100,11 @@ namespace Lang.Php.Compiler.Source
         {
             get
             {
-                return returnValue;
+                return _returnValue;
             }
         }
-        private IPhpValue returnValue;
+        private IPhpValue _returnValue;
         #endregion Properties
+
     }
 }

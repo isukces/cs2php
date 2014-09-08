@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace Lang.Php.Compiler.Source
 {
@@ -16,16 +12,16 @@ namespace Lang.Php.Compiler.Source
     property Statement IPhpStatement 
     smartClassEnd
     */
-
+    
     public partial class PhpWhileStatement : IPhpStatementBase
     {
         public override IPhpStatement Simplify(IPhpSimplifier s)
         {
-            var __condition = s.Simplify(condition);
-            var __statement = s.Simplify(statement);
-            if (__condition == condition && __statement == statement)
+            var newCondition = s.Simplify(_condition);
+            var newStatement = s.Simplify(_statement);
+            if (newCondition == _condition && newStatement == _statement)
                 return this;
-            return new PhpWhileStatement(__condition, __statement);
+            return new PhpWhileStatement(newCondition, newStatement);
         }
         #region Methods
 
@@ -34,13 +30,13 @@ namespace Lang.Php.Compiler.Source
         public override void Emit(PhpSourceCodeEmiter emiter, PhpSourceCodeWriter writer, PhpEmitStyle style)
         {
             style = style ?? new PhpEmitStyle();
-            string header = string.Format("while({0})", condition.GetPhpCode(style));
-            EmitHeaderStatement(emiter, writer, style, header, statement);
+            string header = string.Format("while({0})", _condition.GetPhpCode(style));
+            EmitHeaderStatement(emiter, writer, style, header, _statement);
         }
 
         public override IEnumerable<ICodeRequest> GetCodeRequests()
         {
-            return GetCodeRequests(condition, statement);
+            return GetCodeRequests(_condition, _statement);
         }
 
         #endregion Methods
@@ -48,12 +44,12 @@ namespace Lang.Php.Compiler.Source
 }
 
 
-// -----:::::##### smartClass embedded code begin #####:::::----- generated 2013-11-07 18:04
-// File generated automatically ver 2013-07-10 08:43
+// -----:::::##### smartClass embedded code begin #####:::::----- generated 2014-09-08 14:15
+// File generated automatically ver 2014-09-01 19:00
 // Smartclass.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0c4d5d36fb5eb4ac
 namespace Lang.Php.Compiler.Source
 {
-    public partial class PhpWhileStatement
+    public partial class PhpWhileStatement 
     {
         /*
         /// <summary>
@@ -62,7 +58,9 @@ namespace Lang.Php.Compiler.Source
         public PhpWhileStatement()
         {
         }
+
         Przykłady użycia
+
         implement INotifyPropertyChanged
         implement INotifyPropertyChanged_Passive
         implement ToString ##Condition## ##Statement##
@@ -71,38 +69,33 @@ namespace Lang.Php.Compiler.Source
         implement equals *
         implement equals *, ~exclude1, ~exclude2
         */
-
-
         #region Constructors
         /// <summary>
         /// Tworzy instancję obiektu
-        /// <param name="Condition"></param>
-        /// <param name="Statement"></param>
+        /// <param name="condition"></param>
+        /// <param name="statement"></param>
         /// </summary>
-        public PhpWhileStatement(IPhpValue Condition, IPhpStatement Statement)
+        public PhpWhileStatement(IPhpValue condition, IPhpStatement statement)
         {
-            this.Condition = Condition;
-            this.Statement = Statement;
+            Condition = condition;
+            Statement = statement;
         }
 
         #endregion Constructors
-
 
         #region Constants
         /// <summary>
         /// Nazwa własności Condition; 
         /// </summary>
-        public const string PROPERTYNAME_CONDITION = "Condition";
+        public const string PropertyNameCondition = "Condition";
         /// <summary>
         /// Nazwa własności Statement; 
         /// </summary>
-        public const string PROPERTYNAME_STATEMENT = "Statement";
+        public const string PropertyNameStatement = "Statement";
         #endregion Constants
-
 
         #region Methods
         #endregion Methods
-
 
         #region Properties
         /// <summary>
@@ -112,14 +105,14 @@ namespace Lang.Php.Compiler.Source
         {
             get
             {
-                return condition;
+                return _condition;
             }
             set
             {
-                condition = value;
+                _condition = value;
             }
         }
-        private IPhpValue condition;
+        private IPhpValue _condition;
         /// <summary>
         /// 
         /// </summary>
@@ -127,14 +120,15 @@ namespace Lang.Php.Compiler.Source
         {
             get
             {
-                return statement;
+                return _statement;
             }
             set
             {
-                statement = value;
+                _statement = value;
             }
         }
-        private IPhpStatement statement;
+        private IPhpStatement _statement;
         #endregion Properties
+
     }
 }
