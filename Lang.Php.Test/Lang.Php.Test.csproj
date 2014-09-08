@@ -97,6 +97,7 @@
     <Compile Include="Tests\Base.cs" />
     <Compile Include="Code\MyCode.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Tests\InheritanceTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Lang.Cs.Compiler\Lang.Cs.Compiler.csproj">

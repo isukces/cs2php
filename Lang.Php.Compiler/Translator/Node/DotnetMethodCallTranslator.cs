@@ -88,7 +88,7 @@ namespace Lang.Php.Compiler.Translator.Node
                     var phpMethod = new PhpMethodCallExpression(mti.ScriptName);
                     if (src.MethodInfo.IsStatic)
                     {
-                        phpMethod.ClassName = principles.GetPhpType(src.MethodInfo.DeclaringType, true);
+                        phpMethod.ClassName = principles.GetPhpType(src.MethodInfo.DeclaringType, true, principles.CurrentType);
                     }
                     phpMethod.TargetObject = ctx.TranslateValue(src.TargetObject);
                     CopyArguments(ctx, src.Arguments, phpMethod);

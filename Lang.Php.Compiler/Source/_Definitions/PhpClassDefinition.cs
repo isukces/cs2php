@@ -81,9 +81,9 @@ namespace Lang.Php.Compiler.Source
 
         public IEnumerable<ICodeRequest> GetCodeRequests()
         {
-            var a = IPhpStatementBase.XXX(Name, BaseTypeName);
-            var b = IPhpStatementBase.XXX<PhpClassFieldDefinition>(fields);
-            var c = IPhpStatementBase.XXX<PhpClassMethodDefinition>(methods);
+            var a = IPhpStatementBase.Xxx(Name, BaseTypeName);
+            var b = IPhpStatementBase.Xxx<PhpClassFieldDefinition>(fields);
+            var c = IPhpStatementBase.Xxx<PhpClassMethodDefinition>(methods);
             return a.Union(b).Union(c);
         }
 

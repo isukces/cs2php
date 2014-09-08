@@ -20,14 +20,14 @@ namespace Lang.Php.Compiler.Translator
     	read only
     smartClassEnd
     */
-    
+
     public partial class Translator
     {
         #region Constructors
 
         public Translator(TranslationState translationState)
         {
-            if (translationState == null) 
+            if (translationState == null)
                 throw new ArgumentNullException("translationState");
 #if DEBUG
             if (translationState == null)
@@ -44,12 +44,12 @@ namespace Lang.Php.Compiler.Translator
 
         // Private Methods 
 
-/*
-        static IPhpStatement[] MkArray(IPhpStatement x)
-        {
-            return new IPhpStatement[] { x };
-        }
-*/
+        /*
+                static IPhpStatement[] MkArray(IPhpStatement x)
+                {
+                    return new IPhpStatement[] { x };
+                }
+        */
 
         #endregion Static Methods
 
@@ -64,6 +64,9 @@ namespace Lang.Php.Compiler.Translator
         {
             var classes = _info.GetClasses();
             var classesToTranslate = _info.ClassTranslations.Values.Where(u => u.Type.Assembly.FullName == _info.CurrentAssembly.FullName).ToArray();
+//            classesToTranslate = (from i in _info.ClassTranslations.Values
+//                                      where i.Type.Assembly.FullName == _info.CurrentAssembly.FullName
+//                                      select this.ge.ToArray();
             var interfaces = _info.GetInterfaces();
             //     var interfacesToTranslate = info.ClassTranslations.Values.Where(u => u.Type.Assembly == info.CurrentAssembly).ToArray();
             foreach (var classTranslationInfo in classesToTranslate)
@@ -82,7 +85,8 @@ namespace Lang.Php.Compiler.Translator
                             phpBaseClassName = null;
                         else
                         {
-                            phpBaseClassName = _state.Principles.GetPhpType(netBaseType, true);
+                            // _state.Principles.CurrentTyp is null so we will obtain absolute name
+                            phpBaseClassName = _state.Principles.GetPhpType(netBaseType, true, null); // absolute name
                             var baseTypeTranslationInfo = _state.Principles.GetOrMakeTranslationInfo(netBaseType);
                             if (baseTypeTranslationInfo.Skip)
                                 phpBaseClassName = null;
@@ -100,7 +104,7 @@ namespace Lang.Php.Compiler.Translator
 
                 if (classTranslationInfo.Type.IsInterface)
                 {
-                    FullInterfaceDeclaration[] sources = interfaces.Where(i => i.FullName == classTranslationInfo.Type.FullName).ToArray();
+                    var sources = interfaces.Where(i => i.FullName == classTranslationInfo.Type.FullName).ToArray();
                     members = (from i in sources
                                from j in i.ClassDeclaration.Members
                                select j).ToArray();
@@ -168,7 +172,7 @@ namespace Lang.Php.Compiler.Translator
                             {
                                 // date_default_timezone_set('America/Los_Angeles');
                                 var a = new PhpValueTranslator(_state);
-                                var aa = a.Visit(new ConstValue(ati.DefaultTimezone.Value));                                
+                                var aa = a.Visit(new ConstValue(ati.DefaultTimezone.Value));
                                 var dateDefaultTimezoneSet = new PhpMethodCallExpression("date_default_timezone_set", aa);
                                 phpModule.BottomCode.Statements.Add(new PhpExpressionStatement(dateDefaultTimezoneSet));
                             }
@@ -189,32 +193,33 @@ namespace Lang.Php.Compiler.Translator
                 {
 
 
-                    List<ModuleCodeRequest> uuu = new List<ModuleCodeRequest>();
-                    var cr = (phpModule as ICodeRelated).GetCodeRequests();
-                    var g = cr.ToArray();
+                    var moduleCodeRequests = new List<ModuleCodeRequest>();
+                    var codeRequests = (phpModule as ICodeRelated).GetCodeRequests().ToArray();
                     {
-                        var clas = (from i in g.OfType<ClassCodeRequest>()
-                                    where i.ClassName != null
-                                    select i.ClassName.FullName).Distinct().ToArray();
+                        var classCodeRequests = (from request in codeRequests.OfType<ClassCodeRequest>()
+                                    where request.ClassName != null
+                                    select request.ClassName.FullName)
+                                    .Distinct()
+                                    .ToArray();
 
-                        foreach (var c in clas)
+                        foreach (var req in classCodeRequests)
                         {
-                            var m = _info.ClassTranslations.Values.Where(i => i.ScriptName.FullName == c).ToArray();
+                            var m = _info.ClassTranslations.Values.Where(i => i.ScriptName.FullName == req).ToArray();
                             if (m.Length != 1)
                                 throw new NotSupportedException();
                             var mm = m[0];
-                            var im = mm.IncludeModule;
-                            if (im == null || mm.ModuleName == phpModule.Name)
+                            var includeModule = mm.IncludeModule;
+                            if (includeModule == null || mm.ModuleName == phpModule.Name)
                                 continue;
-                            var h = new ModuleCodeRequest(im);
-                            uuu.Add(h);
+                            var h = new ModuleCodeRequest(includeModule);
+                            moduleCodeRequests.Add(h);
 
                         }
                     }
                     {
-                        var moduleRequests = (from i in g.OfType<ModuleCodeRequest>()
+                        var moduleRequests = (from i in codeRequests.OfType<ModuleCodeRequest>()
                                               where i.ModuleName != null
-                                              select i).Union(uuu).ToArray();
+                                              select i).Union(moduleCodeRequests).ToArray();
                         var moduleNames = (from mReq in moduleRequests
                                            where mReq.ModuleName != phpModule.Name
                                            let mName = mReq.ModuleName
@@ -249,7 +254,7 @@ namespace Lang.Php.Compiler.Translator
                     if (tmp.StartsWith("$"))
                         throw new NotSupportedException();
                     // leading slash is not necessary -> config is in global namespace
-                    tmp = tmp.TrimStart('\\');
+                    // but full name is a key in dictionary
                     var phpModule = CurrentConfigModule();
                     if (phpModule.DefinedConsts.All(i => i.Key != tmp))
                     {
@@ -284,7 +289,7 @@ namespace Lang.Php.Compiler.Translator
                 if (a.Any(i => i == code))
                     return;
             }
-           
+
             // if (fileNameExpression1 !=null)
             {
                 var fileNameExpressionICodeRelated = fileNameExpression as ICodeRelated;
@@ -465,34 +470,34 @@ namespace Lang.Php.Compiler.Translator
                         continue; // don't define
                     case FieldTranslationDestionations.NormalField:
                     case FieldTranslationDestionations.ClassConst:
-                    {
-                        var def = new PhpClassFieldDefinition();
-                        var cti = _state.Principles.GetTi(_state.Principles.CurrentType);
-                        if (cti.IsArray)
-                            continue;
-                        if (field.Modifiers.Has("const") ^ fti.Destination == FieldTranslationDestionations.ClassConst)
-                            throw new Exception("beige lion");
-
-                        def.IsConst = fti.Destination == FieldTranslationDestionations.ClassConst;// field.Modifiers.Has("const");
-                        def.Name = PhpVariableExpression.AddDollar(fti.ScriptName, !def.IsConst);
-
-                        def.IsStatic = def.IsConst || field.Modifiers.Has("static");
-                        if (field.Modifiers.Has("public"))
-                            def.Visibility = Visibility.Public;
-                        else if (field.Modifiers.Has("protected"))
-                            def.Visibility = Visibility.Protected;
-                        else
-                            def.Visibility = Visibility.Private;
-
-                        if (item.Value != null)
                         {
-                            if (phpValueTranslator == null)
-                                phpValueTranslator = new PhpValueTranslator(_state);
-                            def.ConstValue = phpValueTranslator.TransValue(item.Value);
+                            var def = new PhpClassFieldDefinition();
+                            var cti = _state.Principles.GetTi(_state.Principles.CurrentType);
+                            if (cti.IsArray)
+                                continue;
+                            if (field.Modifiers.Has("const") ^ fti.Destination == FieldTranslationDestionations.ClassConst)
+                                throw new Exception("beige lion");
+
+                            def.IsConst = fti.Destination == FieldTranslationDestionations.ClassConst;// field.Modifiers.Has("const");
+                            def.Name = PhpVariableExpression.AddDollar(fti.ScriptName, !def.IsConst);
+
+                            def.IsStatic = def.IsConst || field.Modifiers.Has("static");
+                            if (field.Modifiers.Has("public"))
+                                def.Visibility = Visibility.Public;
+                            else if (field.Modifiers.Has("protected"))
+                                def.Visibility = Visibility.Protected;
+                            else
+                                def.Visibility = Visibility.Private;
+
+                            if (item.Value != null)
+                            {
+                                if (phpValueTranslator == null)
+                                    phpValueTranslator = new PhpValueTranslator(_state);
+                                def.ConstValue = phpValueTranslator.TransValue(item.Value);
+                            }
+                            phpClass.Fields.Add(def);
+                            break;
                         }
-                        phpClass.Fields.Add(def);
-                        break;
-                    }
                     default:
                         throw new NotSupportedException();
                 }
@@ -546,7 +551,7 @@ namespace Lang.Php.Compiler.Translator
 // Smartclass.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0c4d5d36fb5eb4ac
 namespace Lang.Php.Compiler.Translator
 {
-    public partial class Translator 
+    public partial class Translator
     {
         /*
         /// <summary>

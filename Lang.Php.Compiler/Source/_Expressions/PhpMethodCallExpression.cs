@@ -1,9 +1,6 @@
-﻿using Lang.Php.Compiler.Translator;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Lang.Php.Compiler.Source
 {
@@ -19,7 +16,7 @@ namespace Lang.Php.Compiler.Source
     	init #
     
     property IsConstructorCall bool 
-    	read only name == "*"
+    	read only _name == ConstructorMethodName
     
     property TargetObject IPhpValue 
     
@@ -28,12 +25,12 @@ namespace Lang.Php.Compiler.Source
     property IsStandardPhpClass bool 
     smartClassEnd
     */
-
+    
     public partial class PhpMethodCallExpression : IPhpValueBase
     {
         public static PhpMethodCallExpression MakeConstructor(string constructedClassName, params IPhpValue[] args)
         {
-            PhpMethodCallExpression a = new PhpMethodCallExpression("*", args);
+            PhpMethodCallExpression a = new PhpMethodCallExpression(ConstructorMethodName, args);
             a.ClassName = constructedClassName;
             return a;
         }
@@ -42,36 +39,36 @@ namespace Lang.Php.Compiler.Source
 
         /// <summary>
         /// Tworzy instancję obiektu
-        /// <param name="Name"></param>
+        /// <param name="name"></param>
         /// </summary>
-        public PhpMethodCallExpression(string Name, params PhpMethodInvokeValue[] args)
+        public PhpMethodCallExpression(string name, params PhpMethodInvokeValue[] args)
         {
-            this.Name = Name;
-            this.arguments.AddRange(args);
+            _name = name;
+            _arguments.AddRange(args);
         }
 
 
 
         /// <summary>
         /// Tworzy instancję obiektu
-        /// <param name="Name"></param>
+        /// <param name="name"></param>
         /// </summary>
-        public PhpMethodCallExpression(string Name, params IPhpValue[] args)
+        public PhpMethodCallExpression(string name, params IPhpValue[] args)
         {
 
-            this.Name = Name;
-            this.arguments.AddRange(args.Select(i => new PhpMethodInvokeValue(i)));
+            _name = name;
+            _arguments.AddRange(args.Select(i => new PhpMethodInvokeValue(i)));
         }
 
         /// <summary>
         /// Tworzy instancję obiektu
-        /// <param name="Name"></param>
+        /// <param name="name"></param>
         /// </summary>
-        public PhpMethodCallExpression(IPhpValue TargetObject, string Name, params IPhpValue[] args)
+        public PhpMethodCallExpression(IPhpValue targetObject, string name, params IPhpValue[] args)
         {
-            this.Name = Name;
-            this.arguments.AddRange(args.Select(i => new PhpMethodInvokeValue(i)));
-            this.targetObject = TargetObject;
+            _name = name;
+            _arguments.AddRange(args.Select(i => new PhpMethodInvokeValue(i)));
+            _targetObject = targetObject;
         }
 
 
@@ -83,9 +80,9 @@ namespace Lang.Php.Compiler.Source
 
         public override IEnumerable<ICodeRequest> GetCodeRequests()
         {
-            var g = IPhpStatementBase.XXX<IPhpValue>(arguments.Select(i => i.Expression)).ToList();
-            if (className != null && !isStandardPhpClass)
-                g.Add(new ClassCodeRequest(className));
+            var g = IPhpStatementBase.Xxx(_arguments.Select(i => i.Expression)).ToList();
+            if (_className != null && !_isStandardPhpClass)
+                g.Add(new ClassCodeRequest(_className));
             return g;
         }
 
@@ -93,33 +90,34 @@ namespace Lang.Php.Compiler.Source
         {
             string join = style == null || style.Compression == EmitStyleCompression.Beauty ? ", " : ",";
             var xstyle = PhpEmitStyle.xClone(style);
-            var arguments_ = string.Join(join, arguments.Select(i => i.GetPhpCode(xstyle)));
+            var arguments = string.Join(join, _arguments.Select(i => i.GetPhpCode(xstyle)));
             if (IsConstructorCall)
             {
-                var a = string.Format("new {0}({1})", className.NameForEmit(style), arguments_);
+                var a = string.Format("new {0}({1})", _className.NameForEmit(style), arguments);
                 return a;
             }
             else
             {
-                var _name = name;
-                if (!PhpQualifiedName.IsEmpty(className))
-                    _name = className.NameForEmit(style) + "::" + _name;
-                else if (targetObject != null)
+                var name = _name;
+                if (!PhpQualifiedName.IsEmpty(_className))
+                    _name = _className.NameForEmit(style) + "::" + _name;
+                else if (_targetObject != null)
                 {
-                    var to = targetObject;
-                    if (targetObject is PhpMethodCallExpression && (targetObject as PhpMethodCallExpression).IsConstructorCall)
+                    var to = _targetObject;
+                    if (_targetObject is PhpMethodCallExpression && (_targetObject as PhpMethodCallExpression).IsConstructorCall)
                         to = new PhpParenthesizedExpression(to);
-                    _name = to.GetPhpCode(style) + "->" + _name;
+                    name = to.GetPhpCode(style) + "->" + name;
                 }
                 string a;
-                if (_name == "echo")
-                    a = string.Format("{0} {1}", _name, arguments_);
+                if (name == "echo")
+                    a = string.Format("{0} {1}", name, arguments);
                 else
-                    a = string.Format("{0}({1})", _name, arguments_);
+                    a = string.Format("{0}({1})", name, arguments);
                 return a;
             }
         }
 
+        public const string ConstructorMethodName = "*";
 
 
         #endregion Methods
@@ -127,12 +125,12 @@ namespace Lang.Php.Compiler.Source
 }
 
 
-// -----:::::##### smartClass embedded code begin #####:::::----- generated 2013-12-03 09:09
-// File generated automatically ver 2013-07-10 08:43
+// -----:::::##### smartClass embedded code begin #####:::::----- generated 2014-09-08 09:38
+// File generated automatically ver 2014-09-01 19:00
 // Smartclass.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0c4d5d36fb5eb4ac
 namespace Lang.Php.Compiler.Source
 {
-    public partial class PhpMethodCallExpression
+    public partial class PhpMethodCallExpression 
     {
         /*
         /// <summary>
@@ -155,11 +153,11 @@ namespace Lang.Php.Compiler.Source
         #region Constructors
         /// <summary>
         /// Tworzy instancję obiektu
-        /// <param name="Name"></param>
+        /// <param name="name"></param>
         /// </summary>
-        public PhpMethodCallExpression(string Name)
+        public PhpMethodCallExpression(string name)
         {
-            this.Name = Name;
+            Name = name;
         }
 
         #endregion Constructors
@@ -168,27 +166,27 @@ namespace Lang.Php.Compiler.Source
         /// <summary>
         /// Nazwa własności Name; 
         /// </summary>
-        public const string PROPERTYNAME_NAME = "Name";
+        public const string PropertyNameName = "Name";
         /// <summary>
         /// Nazwa własności Arguments; 
         /// </summary>
-        public const string PROPERTYNAME_ARGUMENTS = "Arguments";
+        public const string PropertyNameArguments = "Arguments";
         /// <summary>
         /// Nazwa własności IsConstructorCall; 
         /// </summary>
-        public const string PROPERTYNAME_ISCONSTRUCTORCALL = "IsConstructorCall";
+        public const string PropertyNameIsConstructorCall = "IsConstructorCall";
         /// <summary>
         /// Nazwa własności TargetObject; 
         /// </summary>
-        public const string PROPERTYNAME_TARGETOBJECT = "TargetObject";
+        public const string PropertyNameTargetObject = "TargetObject";
         /// <summary>
         /// Nazwa własności ClassName; Nazwa klasy dla konstruktora lub metody statycznej
         /// </summary>
-        public const string PROPERTYNAME_CLASSNAME = "ClassName";
+        public const string PropertyNameClassName = "ClassName";
         /// <summary>
         /// Nazwa własności IsStandardPhpClass; 
         /// </summary>
-        public const string PROPERTYNAME_ISSTANDARDPHPCLASS = "IsStandardPhpClass";
+        public const string PropertyNameIsStandardPhpClass = "IsStandardPhpClass";
         #endregion Constants
 
         #region Methods
@@ -202,15 +200,15 @@ namespace Lang.Php.Compiler.Source
         {
             get
             {
-                return name;
+                return _name;
             }
             set
             {
                 value = (value ?? String.Empty).Trim();
-                name = value;
+                _name = value;
             }
         }
-        private string name = string.Empty;
+        private string _name = string.Empty;
         /// <summary>
         /// 
         /// </summary>
@@ -218,14 +216,14 @@ namespace Lang.Php.Compiler.Source
         {
             get
             {
-                return arguments;
+                return _arguments;
             }
             set
             {
-                arguments = value;
+                _arguments = value;
             }
         }
-        private List<PhpMethodInvokeValue> arguments = new List<PhpMethodInvokeValue>();
+        private List<PhpMethodInvokeValue> _arguments = new List<PhpMethodInvokeValue>();
         /// <summary>
         /// Własność jest tylko do odczytu.
         /// </summary>
@@ -233,7 +231,7 @@ namespace Lang.Php.Compiler.Source
         {
             get
             {
-                return name == "*";
+                return _name == ConstructorMethodName;
             }
         }
         /// <summary>
@@ -243,14 +241,14 @@ namespace Lang.Php.Compiler.Source
         {
             get
             {
-                return targetObject;
+                return _targetObject;
             }
             set
             {
-                targetObject = value;
+                _targetObject = value;
             }
         }
-        private IPhpValue targetObject;
+        private IPhpValue _targetObject;
         /// <summary>
         /// Nazwa klasy dla konstruktora lub metody statycznej
         /// </summary>
@@ -258,14 +256,14 @@ namespace Lang.Php.Compiler.Source
         {
             get
             {
-                return className;
+                return _className;
             }
             set
             {
-                className = value;
+                _className = value;
             }
         }
-        private PhpQualifiedName className;
+        private PhpQualifiedName _className;
         /// <summary>
         /// 
         /// </summary>
@@ -273,14 +271,14 @@ namespace Lang.Php.Compiler.Source
         {
             get
             {
-                return isStandardPhpClass;
+                return _isStandardPhpClass;
             }
             set
             {
-                isStandardPhpClass = value;
+                _isStandardPhpClass = value;
             }
         }
-        private bool isStandardPhpClass;
+        private bool _isStandardPhpClass;
         #endregion Properties
 
     }

@@ -180,12 +180,12 @@ namespace Lang.Php.Compiler
 
                 foreach (var x in ggg)
                 {
-
                     var definedConstName = x.DefinedConstName;
                     if (definedConstName.StartsWith("$"))
                         throw new NotSupportedException();
                     if (!definedConstName.StartsWith("\\"))
                         definedConstName = "\\" + definedConstName;
+
                     string path;
                     if (!referencedPhpLibsLocations.TryGetValue(x.AssemblyName, out path))
                         continue;

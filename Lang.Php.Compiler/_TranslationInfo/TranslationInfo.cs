@@ -7,7 +7,7 @@ using System.Reflection;
 
 namespace Lang.Php.Compiler
 {
-
+    
     /*
     smartClass
     option NoAdditionalFile
@@ -19,10 +19,7 @@ namespace Lang.Php.Compiler
     property CurrentAssembly Assembly obecnie konwertowane assembly
     
     property CurrentType Type Typ obecnie konwertowany
-    	OnChange _currentTypeTranslationInfo = GetTI(_currentType, false);
-    
-    property CurrentTypeTranslationInfo ClassTranslationInfo 
-    	read only
+    	OnChange _currentTypeTranslationInfo = GetTi(_currentType, false);
     
     property CurrentMethod MethodInfo obecnie konwertowana metoda
     
@@ -40,6 +37,7 @@ namespace Lang.Php.Compiler
     
     property ClassTranslations Dictionary<Type, ClassTranslationInfo> Class translation info collection
     	init #
+    	read only
     
     property AssemblyTranslations Dictionary<Assembly, AssemblyTranslationInfo> Assembly translation info collection
     	init #
@@ -62,7 +60,7 @@ namespace Lang.Php.Compiler
         #region Methods
 
         // Public Methods 
-
+          private ClassTranslationInfo _currentTypeTranslationInfo;
         public void CheckAccesibility(CsharpMethodCallExpression m)
         {
             if (m == null)
@@ -75,45 +73,11 @@ namespace Lang.Php.Compiler
         /// <see cref="ClassTranslations">ClassTranslations</see> dla tych klas
         /// </summary>
         /// <param name="knownTypes"></param>
-        public void FillClassTranslations(Type[] knownTypes)
+        public void FillClassTranslations(IEnumerable<Type> knownTypes)
         {
-#if OLD
-            List<Type> dotnetClasses = new List<Type>();
-
-            {
-                Action<Type[]> searchNested = null;
-                searchNested = (n) =>
-                {
-                    foreach (var i in n)
-                    {
-                        var thisNested = KnownTypes.Where(ii => ii.DeclaringType == i).ToArray();
-                        if (thisNested.Length == 0) continue;
-                        dotnetClasses.AddRange(thisNested);
-                        searchNested(thisNested);
-                    }
-                };
-
-                var classes = GetClasses().Select(i => i.FullName).Distinct().ToArray();
-                foreach (var c in classes)
-                {
-                    var dotNetType = KnownTypes.Where(i => i.FullName == c).FirstOrDefault();
-                    dotnetClasses.Add(dotNetType);
-                }
-                searchNested(dotnetClasses.ToArray());
-            } 
-#endif
-            {
-                _classTranslations.Clear();
-                // var classes = GetClasses().Select(i => i.FullName).Distinct().ToArray();
-
-                foreach (var type in knownTypes.Where(i => !i.IsEnum))
-                    GetOrMakeTranslationInfo(type); // it is created and stored in classTranslations         
-                //var a = KnownTypes.Where(i => i.IsInterface).ToArray();
-                //var ii = GetClasses().Select(i => i.FullName).Distinct().ToArray();
-
-                //foreach (var type in KnownTypes.Where(i => !i.IsEnum))
-                //   GetOrMakeTranslationInfo(type); // it is created and stored in classTranslations        
-            }
+            _classTranslations.Clear();
+            foreach (var type in knownTypes.Where(i => !i.IsEnum))
+                GetOrMakeTranslationInfo(type); // it is created and stored in classTranslations  
         }
 
         public ClassTranslationInfo FindClassTranslationInfo(Type t)
@@ -193,34 +157,36 @@ namespace Lang.Php.Compiler
         }
 
         [Obsolete("maybe will be better to resolve short names while emit proces")]
-        public PhpQualifiedName GetPhpType(Type t, bool doCheckAccesibility)
+        public PhpQualifiedName GetPhpType(Type type, bool doCheckAccesibility, Type relativeTo)
         {
-            if ((object)t == null)
+            if ((object)type == null)
                 return null;
             if (doCheckAccesibility)
-                CheckAccesibility(t);
-            var classTranslationInfo = GetOrMakeTranslationInfo(t);
+                CheckAccesibility(type);
+            var classTranslationInfo = GetOrMakeTranslationInfo(type);
             var phpQualifiedName = classTranslationInfo.ScriptName.XClone();
-            if ((object)_currentType == null) return phpQualifiedName;
-            if (t == _currentType)
+            if ((object)relativeTo == null) 
+                return phpQualifiedName;
+            if (type == relativeTo)
                 phpQualifiedName.CurrentEffectiveName = PhpQualifiedName.SELF;
-            else if (t != typeof(object) && t == _currentType.BaseType)
+            else if (type != typeof(object) && type == relativeTo.BaseType)
                 phpQualifiedName.CurrentEffectiveName = PhpQualifiedName.PARENT;
             else
             {
-                var currentTypePhp = GetPhpType(_currentType, false);
+                var currentTypePhp = GetPhpType(relativeTo, false, null); // recurrence
                 phpQualifiedName.SetEffectiveNameRelatedTo(currentTypePhp);
             }
             return phpQualifiedName;
         }
 
         [Obsolete("I don't think this is best way to obtain info..")]
-        public ClassTranslationInfo GetTi(Type t, bool doCheckAccesibility = true)
+        public ClassTranslationInfo GetTi(Type type, bool doCheckAccesibility = true)
         {
-            if ((object)t == null)
+            if ((object)type == null)
                 return null;
-            var a = GetPhpType(t, doCheckAccesibility);
-            return _classTranslations[t];
+            if (doCheckAccesibility)
+                CheckAccesibility(type);
+            return _classTranslations[type];
         }
 
         public void Log(MessageLevels level, string text)
@@ -234,9 +200,9 @@ namespace Lang.Php.Compiler
         /// </summary>
         public void Prepare()
         {
-            var allTypes = (from a in _translationAssemblies
-                            from t in a.GetTypes()
-                            select t).ToArray();
+            var allTypes = (from assembly in _translationAssemblies
+                            from type in assembly.GetTypes()
+                            select type).ToArray();
             foreach (var type in allTypes)
             {
                 if (type.IsInterface)
@@ -247,11 +213,7 @@ namespace Lang.Php.Compiler
                     var generic = interfaceType.IsGenericType
                         ? interfaceType.GetGenericTypeDefinition()
                         : interfaceType;
-
-#warning 'Not finishied'
-
                     #region IPhpNodeTranslator
-
                     if (generic == typeof(IPhpNodeTranslator<>))
                     {
                         var genericType = interfaceType.GetGenericArguments()[0];
@@ -264,7 +226,6 @@ namespace Lang.Php.Compiler
                         _nodeTranslators.Add(genericType, bound);
                     }
                     #endregion
-
                     #region IModuleProcessor
                     // ReSharper disable once InvertIf
                     if (generic == typeof(IModuleProcessor))
@@ -291,7 +252,7 @@ namespace Lang.Php.Compiler
                 return;
             var tt = GetTi(m.DeclaringType, false);
             if (!tt.IsPage && !tt.IsArray) return;
-            if (tt.ModuleName == CurrentTypeTranslationInfo.ModuleName) return;
+            if (tt.ModuleName == _currentTypeTranslationInfo.ModuleName) return;
             if (m is ConstructorInfo)
                 throw new Exception(string.Format("Constructor {0}.{1} cannot be accessed from {2}.{3}.\r\nType {0} is marked as 'Array' or 'Page'.",
                     m.DeclaringType.FullName,
@@ -312,7 +273,7 @@ namespace Lang.Php.Compiler
             var tt = GetTi(type, false);
             if (!tt.IsPage)
                 return;
-            if (tt.ModuleName != CurrentTypeTranslationInfo.ModuleName)
+            if (tt.ModuleName != _currentTypeTranslationInfo.ModuleName)
                 throw new Exception(string.Format("Type {0} cannot be accessed from {1}.{2}",
                     type.FullName,
                     CurrentType.FullName,
@@ -349,7 +310,7 @@ namespace Lang.Php.Compiler
 }
 
 
-// -----:::::##### smartClass embedded code begin #####:::::----- generated 2014-09-05 17:14
+// -----:::::##### smartClass embedded code begin #####:::::----- generated 2014-09-08 08:33
 // File generated automatically ver 2014-09-01 19:00
 // Smartclass.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0c4d5d36fb5eb4ac
 namespace Lang.Php.Compiler
@@ -368,9 +329,9 @@ namespace Lang.Php.Compiler
 
         implement INotifyPropertyChanged
         implement INotifyPropertyChanged_Passive
-        implement ToString ##Sandbox## ##CurrentAssembly## ##CurrentType## ##CurrentTypeTranslationInfo## ##CurrentMethod## ##Compiled## ##TranslationAssemblies## ##NodeTranslators## ##ModuleProcessors## ##ClassTranslations## ##AssemblyTranslations## ##FieldTranslations## ##State## ##KnownConstsValues## ##Logs##
-        implement ToString Sandbox=##Sandbox##, CurrentAssembly=##CurrentAssembly##, CurrentType=##CurrentType##, CurrentTypeTranslationInfo=##CurrentTypeTranslationInfo##, CurrentMethod=##CurrentMethod##, Compiled=##Compiled##, TranslationAssemblies=##TranslationAssemblies##, NodeTranslators=##NodeTranslators##, ModuleProcessors=##ModuleProcessors##, ClassTranslations=##ClassTranslations##, AssemblyTranslations=##AssemblyTranslations##, FieldTranslations=##FieldTranslations##, State=##State##, KnownConstsValues=##KnownConstsValues##, Logs=##Logs##
-        implement equals Sandbox, CurrentAssembly, CurrentType, CurrentTypeTranslationInfo, CurrentMethod, Compiled, TranslationAssemblies, NodeTranslators, ModuleProcessors, ClassTranslations, AssemblyTranslations, FieldTranslations, State, KnownConstsValues, Logs
+        implement ToString ##Sandbox## ##CurrentAssembly## ##CurrentType## ##CurrentMethod## ##Compiled## ##TranslationAssemblies## ##NodeTranslators## ##ModuleProcessors## ##ClassTranslations## ##AssemblyTranslations## ##FieldTranslations## ##State## ##KnownConstsValues## ##Logs##
+        implement ToString Sandbox=##Sandbox##, CurrentAssembly=##CurrentAssembly##, CurrentType=##CurrentType##, CurrentMethod=##CurrentMethod##, Compiled=##Compiled##, TranslationAssemblies=##TranslationAssemblies##, NodeTranslators=##NodeTranslators##, ModuleProcessors=##ModuleProcessors##, ClassTranslations=##ClassTranslations##, AssemblyTranslations=##AssemblyTranslations##, FieldTranslations=##FieldTranslations##, State=##State##, KnownConstsValues=##KnownConstsValues##, Logs=##Logs##
+        implement equals Sandbox, CurrentAssembly, CurrentType, CurrentMethod, Compiled, TranslationAssemblies, NodeTranslators, ModuleProcessors, ClassTranslations, AssemblyTranslations, FieldTranslations, State, KnownConstsValues, Logs
         implement equals *
         implement equals *, ~exclude1, ~exclude2
         */
@@ -399,10 +360,6 @@ namespace Lang.Php.Compiler
         /// Nazwa własności CurrentType; Typ obecnie konwertowany
         /// </summary>
         public const string PropertyNameCurrentType = "CurrentType";
-        /// <summary>
-        /// Nazwa własności CurrentTypeTranslationInfo; 
-        /// </summary>
-        public const string PropertyNameCurrentTypeTranslationInfo = "CurrentTypeTranslationInfo";
         /// <summary>
         /// Nazwa własności CurrentMethod; obecnie konwertowana metoda
         /// </summary>
@@ -497,17 +454,6 @@ namespace Lang.Php.Compiler
         }
         private Type _currentType;
         /// <summary>
-        /// Własność jest tylko do odczytu.
-        /// </summary>
-        public ClassTranslationInfo CurrentTypeTranslationInfo
-        {
-            get
-            {
-                return _currentTypeTranslationInfo;
-            }
-        }
-        private ClassTranslationInfo _currentTypeTranslationInfo;
-        /// <summary>
         /// obecnie konwertowana metoda
         /// </summary>
         public MethodInfo CurrentMethod
@@ -583,17 +529,13 @@ namespace Lang.Php.Compiler
         }
         private List<IModuleProcessor> _moduleProcessors = new List<IModuleProcessor>();
         /// <summary>
-        /// Class translation info collection
+        /// Class translation info collection; własność jest tylko do odczytu.
         /// </summary>
         public Dictionary<Type, ClassTranslationInfo> ClassTranslations
         {
             get
             {
                 return _classTranslations;
-            }
-            set
-            {
-                _classTranslations = value;
             }
         }
         private Dictionary<Type, ClassTranslationInfo> _classTranslations = new Dictionary<Type, ClassTranslationInfo>();

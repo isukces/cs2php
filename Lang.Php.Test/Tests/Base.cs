@@ -161,7 +161,7 @@ namespace Lang.Php.Test.Tests
                     Console.WriteLine("  Add reference     {0}", g.Display);
                 }
 
-//                using (var sandbox = new AssemblySandbox(null))
+//                using (var sandbox = new AssemblySandbox())
 //                {
 //
 //                    Console.WriteLine("Start compile");

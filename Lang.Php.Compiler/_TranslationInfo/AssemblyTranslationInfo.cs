@@ -58,9 +58,18 @@ namespace Lang.Php.Compiler
 
                 var moduleIncludeConst = assembly.GetCustomAttribute<ModuleIncludeConstAttribute>();
                 if (moduleIncludeConst != null)
-                    ati._includePathConstOrVarName = moduleIncludeConst.ConstOrVarName;
-                
-                   ati._rootPath =  GetRootPath(assembly);
+                {
+                    ati._includePathConstOrVarName = (moduleIncludeConst.ConstOrVarName??"").Trim();
+                    if (ati._includePathConstOrVarName.StartsWith("$"))
+                    {
+
+                    }
+                    else
+                    {
+                        ati._includePathConstOrVarName = "\\" + ati._includePathConstOrVarName.TrimStart('\\');
+                    }
+                }
+                ati._rootPath =  GetRootPath(assembly);
                 
                 var phpPackageSource = assembly.GetCustomAttribute<PhpPackageSourceAttribute>();
                 if (phpPackageSource != null)

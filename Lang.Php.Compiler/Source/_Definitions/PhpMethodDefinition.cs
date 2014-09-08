@@ -53,8 +53,8 @@ namespace Lang.Php.Compiler.Source
 
         public IEnumerable<ICodeRequest> GetCodeRequests()
         {
-            var a = IPhpStatementBase.XXX(arguments);
-            var b = IPhpStatementBase.XXX(statements);
+            var a = IPhpStatementBase.Xxx(arguments);
+            var b = IPhpStatementBase.Xxx(statements);
             return a.Union(b);
         }
         // Protected Methods 

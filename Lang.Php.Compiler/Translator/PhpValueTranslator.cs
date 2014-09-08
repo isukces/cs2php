@@ -137,7 +137,7 @@ namespace Lang.Php.Compiler.Translator
                 var a = new CsharpMethodCallExpression(
                     src.OperatorMethod, null,
                     new[] { new FunctionArgument("", src.Left), new FunctionArgument("", src.Right) },
-                    new Type[0],  false);
+                    new Type[0], false);
                 var trans = TransValue(a);
                 return trans;
 
@@ -163,17 +163,6 @@ namespace Lang.Php.Compiler.Translator
                     return new PhpBinaryOperatorExpression(".", l, r);
                 }
             }
-            //if (src.Operator == "==")
-            //{
-            //    var operators = MethodUtils.GetOperators("op_Equality", t1, t2).Where(i => i.GetParameters().Length == 2).ToArray();
-            //    var matched = MethodUtils.TryMatch(operators, new Type[] { t1, t2 });
-            //    if (matched != null)
-            //    {
-            //        var attribute = matched.GetCustomAttribute<UseOperatorAttribute>();
-            //        if (attribute != null)
-            //            return new PhpBinaryOperatorExpression(attribute.Operator, l, r);
-            //    }
-            //}
             return new PhpBinaryOperatorExpression(src.Operator, l, r);
         }
 
@@ -185,18 +174,19 @@ namespace Lang.Php.Compiler.Translator
 
 
 
-            var r = new PhpMethodCallExpression("*");
+            var r = new PhpMethodCallExpression(PhpMethodCallExpression.ConstructorMethodName);
             if (src.Info.ReflectedType != src.Info.DeclaringType)
                 throw new NotSupportedException();
 
-            r.ClassName = state.Principles.GetPhpType(src.Info.ReflectedType, true);
+            // we can use "state.Principles.CurrentType" as third parameter if we prefer "new self()" or "new parent()" contructor calls
+            r.ClassName = state.Principles.GetPhpType(src.Info.ReflectedType, true, null); // class name for constructor
 
             var cccc = state.Principles.GetTi(src.Info.ReflectedType);
             if (cccc.IsArray)
             {
                 if (src.Initializers != null && src.Initializers.Any())
                 {
-                    var ggg = src.Initializers.Select(i => TransValue(i)).ToArray();
+                    var ggg = src.Initializers.Select(TransValue).ToArray();
                     var h = new PhpArrayCreateExpression(ggg);
                     return SimplifyPhpExpression(h);
                 }
@@ -355,18 +345,22 @@ namespace Lang.Php.Compiler.Translator
                     case FieldTranslationDestionations.NormalField:
                         if (tInfo.IsScriptNamePhpEncoded)
                             throw new Exception("Encoded php values are not supported");
-                        var rr = new PhpClassFieldAccessExpression();
-                        rr.FieldName = tInfo.ScriptName; // : PhpVariableExpression.AddDollar(tInfo.ScriptName);
-                        rr.ClassName = state.Principles.GetPhpType(memberDeclaringType, true);
-                        rr.IsConst = tInfo.Destination == FieldTranslationDestionations.ClassConst;
+                        var rr = new PhpClassFieldAccessExpression
+                        {
+                            FieldName = tInfo.ScriptName,
+                            ClassName = state.Principles.GetPhpType(memberDeclaringType, true, state.Principles.CurrentType),
+                            IsConst = tInfo.Destination == FieldTranslationDestionations.ClassConst
+                        };
                         return SimplifyPhpExpression(rr);
                     case FieldTranslationDestionations.ClassConst:
                         if (tInfo.IsScriptNamePhpEncoded)
                             throw new Exception("Encoded php values are not supported");
-                        rr = new PhpClassFieldAccessExpression();
-                        rr.FieldName = tInfo.ScriptName;
-                        rr.ClassName = state.Principles.GetPhpType(memberDeclaringType, true);
-                        rr.IsConst = true;
+                        rr = new PhpClassFieldAccessExpression
+                        {
+                            FieldName = tInfo.ScriptName,
+                            ClassName = state.Principles.GetPhpType(memberDeclaringType, true, state.Principles.CurrentType),
+                            IsConst = true
+                        };
                         return SimplifyPhpExpression(rr);
                     default:
                         throw new NotSupportedException(string.Format("Unable to translate class field with destination option equal {0}", tInfo.Destination));
@@ -620,9 +614,11 @@ namespace Lang.Php.Compiler.Translator
         {
             if (src.Method.IsStatic)
             {
-                var PhpClassName = state.Principles.GetPhpType(src.Method.DeclaringType, true);
-                PhpClassName.CurrentEffectiveName = "";
-                var className = new PhpConstValue(PhpClassName.FullName);
+                var phpClassName = state.Principles.GetPhpType(src.Method.DeclaringType, true, state.Principles.CurrentType);
+                if (phpClassName == null)
+                    throw new Exception("phpClassName cannot be null");
+                phpClassName.CurrentEffectiveName = "";
+                var className = new PhpConstValue(phpClassName.FullName);
                 var methodTranslationInfo = MethodTranslationInfo.FromMethodInfo(src.Method);
                 var methodName = new PhpConstValue(methodTranslationInfo.ScriptName);
                 var arrayCreation = new PhpArrayCreateExpression(new IPhpValue[] { className, methodName });

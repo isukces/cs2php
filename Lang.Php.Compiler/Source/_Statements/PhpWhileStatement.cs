@@ -40,7 +40,7 @@ namespace Lang.Php.Compiler.Source
 
         public override IEnumerable<ICodeRequest> GetCodeRequests()
         {
-            return XXX(condition, statement);
+            return Xxx(condition, statement);
         }
 
         #endregion Methods

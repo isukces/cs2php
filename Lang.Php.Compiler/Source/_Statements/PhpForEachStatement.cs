@@ -73,7 +73,7 @@ namespace Lang.Php.Compiler.Source
 
         public override IEnumerable<ICodeRequest> GetCodeRequests()
         {
-            var t = XXX(collection, statement).ToList();
+            var t = Xxx(collection, statement).ToList();
             if (!string.IsNullOrEmpty(keyVarname))
             {
                 var a = new LocalVariableRequest(keyVarname, false,

@@ -121,10 +121,7 @@ namespace Lang.Php.Compiler.Source
         public void SetEffectiveNameRelatedTo(PhpQualifiedName other)
         {
             var effectiveNameCandidate = GetNameRelatedTo(other);
-            if (effectiveNameCandidate != fullName)
-                CurrentEffectiveName = effectiveNameCandidate;
-            else
-                CurrentEffectiveName = "";
+            CurrentEffectiveName = effectiveNameCandidate != fullName ? effectiveNameCandidate : "";
         }
 
         public PhpQualifiedName XClone()

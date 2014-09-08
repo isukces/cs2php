@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
+// ReSharper disable once CheckNamespace
 namespace Lang.Php.Compiler.Source
 {
     public abstract class IPhpStatementBase : PhpSourceBase, IPhpStatement, ICodeRelated
@@ -56,36 +55,33 @@ namespace Lang.Php.Compiler.Source
             writer.DecIndent();
 
         }
-        public static IEnumerable<ICodeRequest> XXX(params object[] x)
+        public static IEnumerable<ICodeRequest> Xxx(params object[] x)
         {
-            return XXX<object>(x);
+            return Xxx<object>(x);
         }
-        public static IEnumerable<ICodeRequest> XXX<T>(IEnumerable<T> x)
+        public static IEnumerable<ICodeRequest> Xxx<T>(IEnumerable<T> x)
         {
             if (x == null)
                 return new ICodeRequest[0];
             IEnumerable<ICodeRequest> result = null;
-            foreach (var i in x.Where(i => i != null))
+            foreach (var i in x)
             {
-                IEnumerable<ICodeRequest> append = null;
+                if (i == null) continue;
+                IEnumerable<ICodeRequest> append;
                 if (i is ICodeRelated)
                     append = (i as ICodeRelated).GetCodeRequests();
                 else if (i is IPhpStatement)
                 {
                     throw new Exception();
                 }
-                //else if (i is IPhpValue)
-                //    throw new Exception();
                 else
                     continue;
                 if (result == null)
                     result = append;
                 else if (append != null)
-                    result = result.Union(append);
+                    result = result.Concat(append);
             }
-            if (result == null)
-                return new ICodeRequest[0];
-            return result;
+            return result ?? new ICodeRequest[0];
         }
 
         public abstract void Emit(PhpSourceCodeEmiter emiter, PhpSourceCodeWriter writer, PhpEmitStyle style);

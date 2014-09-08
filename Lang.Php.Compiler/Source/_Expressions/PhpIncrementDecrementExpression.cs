@@ -37,7 +37,7 @@ namespace Lang.Php.Compiler.Source
 
         public override IEnumerable<ICodeRequest> GetCodeRequests()
         {
-            return IPhpStatementBase.XXX(operand);
+            return IPhpStatementBase.Xxx(operand);
         }
 
         #endregion Methods

@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
+// ReSharper disable once CheckNamespace
 namespace Lang.Php.Compiler.Source
 {
-    public abstract class IPhpValueBase : PhpSourceBase, IPhpValue, ICodeRelated
+    public abstract class IPhpValueBase : PhpSourceBase, IPhpValue
     {
         #region Methods
 
@@ -30,23 +28,15 @@ namespace Lang.Php.Compiler.Source
         protected IPhpValue SimplifyForFieldAcces(IPhpValue src, IPhpExpressionSimplifier s)
         {
             src = s.Simplify(src);
-            if (src is PhpParenthesizedExpression)
-            {
-                var inside = (src as PhpParenthesizedExpression).Expression;
-                if (inside is PhpVariableExpression)
-                    return inside;
-                if (inside is PhpMethodCallExpression)
-                {
-                    if ((inside as PhpMethodCallExpression).IsConstructorCall)
-                        return src;
-                    return inside;
-                }
-                if (inside is PhpBinaryOperatorExpression || inside is PhpConditionalExpression)
-                    return src;
-                throw new NotSupportedException();
+            if (!(src is PhpParenthesizedExpression)) return src;
+            var inside = (src as PhpParenthesizedExpression).Expression;
+            if (inside is PhpVariableExpression)
+                return inside;
+            if (inside is PhpMethodCallExpression)
+                return (inside as PhpMethodCallExpression).IsConstructorCall ? src : inside;
+            if (inside is PhpBinaryOperatorExpression || inside is PhpConditionalExpression)
                 return src;
-            }
-            return src;
+            throw new NotSupportedException();
         }
 
         protected IPhpValue StripBracketsAndSimplify(IPhpValue value, IPhpExpressionSimplifier s)
