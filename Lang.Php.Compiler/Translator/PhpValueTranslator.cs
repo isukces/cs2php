@@ -494,7 +494,7 @@ namespace Lang.Php.Compiler.Translator
                             var tmp = ats.MapArray;
                             if (tmp == null || tmp.Length <= 0) 
                                 return phpTargetObject;
-                            if (tmp.Length > 1 || tmp[0] != DirectCallAttribute.THIS)
+                            if (tmp.Length > 1 || tmp[0] != DirectCallAttribute.This)
                                 throw new NotSupportedException(string.Format("Property {1}.{0} has invalid 'Map' parameter in DirectCallAttribute", propertyInfo.Name, propertyInfo.DeclaringType));
                             #endregion
                             return phpTargetObject;

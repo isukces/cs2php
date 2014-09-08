@@ -194,7 +194,7 @@ namespace Lang.Php.Compiler.Translator.Node
                 var ma = directCallAttribute.MapArray;
                 if (ma.Length != 1)
                     throw new NotSupportedException("gray horse 1");
-                if (ma[0] == DirectCallAttribute.THIS)
+                if (ma[0] == DirectCallAttribute.This)
                 {
                     if (targetObject == null)
                         throw new NotSupportedException("gray horse 2");
@@ -222,7 +222,7 @@ namespace Lang.Php.Compiler.Translator.Node
                 phpMethod.Arguments.Clear();
                 foreach (var argNr in directCallAttribute.MapArray)
                 {
-                    if (argNr == DirectCallAttribute.THIS)
+                    if (argNr == DirectCallAttribute.This)
                     {
                         if (targetObject == null)
                             throw new NotSupportedException();

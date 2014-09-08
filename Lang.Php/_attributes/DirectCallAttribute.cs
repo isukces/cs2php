@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 
+// ReSharper disable once CheckNamespace
 namespace Lang.Php
 {
     [AttributeUsage(AttributeTargets.Method | AttributeTargets.Property | AttributeTargets.Constructor, AllowMultiple = false)]
@@ -21,8 +22,8 @@ namespace Lang.Php
         public DirectCallAttribute(string name, string map, int outNr = int.MinValue)
         {
             SetName(name);
-            this.Map = (map ?? "").Trim();
-            this.OutNr = outNr;
+            Map = (map ?? "").Trim();
+            OutNr = outNr;
         }
 
         #endregion Constructors
@@ -55,7 +56,7 @@ namespace Lang.Php
 
         #region Fields
 
-        public const int THIS = int.MinValue;
+        public const int This = int.MinValue;
 
         #endregion Fields
 
@@ -74,7 +75,7 @@ namespace Lang.Php
         /// <summary>
         /// Argument map i.e.   0,1,3,this
         /// </summary>
-        public string Map { get; private set; }
+        private string Map { get; set; }
 
         public int[] MapArray
         {
@@ -85,7 +86,7 @@ namespace Lang.Php
                 return (
                     from item in Map.Split(',')
                     let tmp = item.Trim().ToLower()
-                    select tmp == "this" ? THIS : int.Parse(tmp)
+                    select tmp == "this" ? This : int.Parse(tmp)
                     ).ToArray();
             }
 
@@ -96,7 +97,7 @@ namespace Lang.Php
         /// <summary>
         /// Name in script
         /// </summary>
-        public string Name { get; set; }
+        public string Name { get; private set; }
 
         public int OutNr { get; private set; }
 

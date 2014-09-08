@@ -10,17 +10,17 @@ namespace Lang.Php.Compiler.Translator.Node
     {
         public IPhpValue TranslateToPhp(IExternalTranslationContext ctx, CsharpMethodCallExpression src)
         {
-            if (src.MethodInfo.DeclaringType != typeof (ResponseHeader)) return null;
+            if (src.MethodInfo.DeclaringType != typeof(ResponseHeader)) return null;
             var fn = src.MethodInfo.ToString();
             switch (fn)
             {
                 case "Void Expires(System.DateTime)":
                     return MkHeader(ctx, "Expires", _PhpFormat(src.Arguments[0]));
                 case "Void LastModified(System.DateTime)":
-                    return MkHeader(ctx, "Last-Modified", _PhpFormat(src.Arguments[0]));          
+                    return MkHeader(ctx, "Last-Modified", _PhpFormat(src.Arguments[0]));
                 case "Void ContentType(System.String, Boolean)":
-                    return src.Arguments.Length == 2 
-                        ? MkHeader(ctx, "Last-Modified", src.Arguments[0], src.Arguments[1]) 
+                    return src.Arguments.Length == 2
+                        ? MkHeader(ctx, "Last-Modified", src.Arguments[0], src.Arguments[1])
                         : MkHeader(ctx, "Last-Modified", src.Arguments[0]);
             }
             throw new NotImplementedException();
@@ -32,7 +32,7 @@ namespace Lang.Php.Compiler.Translator.Node
             var methodInfo = typeof(DateTimeExtension)
                 .GetMethods(BindingFlags.Static | BindingFlags.Public)
                 .Single(i => i.ToString() == "System.String PhpFormat(System.DateTime, Lang.Php.DateTimeFormats)");
-            var dmc = new CsharpMethodCallExpression( methodInfo, null, new[] { functionArgument, a2 }, null, false);
+            var dmc = new CsharpMethodCallExpression(methodInfo, null, new[] { functionArgument, a2 }, null, false);
             return dmc;
         }
 
