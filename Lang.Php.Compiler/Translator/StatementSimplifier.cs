@@ -1,13 +1,9 @@
 ﻿using Lang.Php.Compiler.Source;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Lang.Php.Compiler.Translator
 {
-    public class StatementSimplifier : PhpBaseVisitor<IPhpStatement>, IPhpSimplifier, IPhpExpressionSimplifier
+    public class StatementSimplifier : PhpBaseVisitor<IPhpStatement>, IPhpSimplifier
     {
         #region Constructors
 
@@ -22,26 +18,20 @@ namespace Lang.Php.Compiler.Translator
 
         // Protected Methods 
 
-        PhpMethodCallExpression getPHPNativeMethodCall(IPhpStatement s, string name)
+        static PhpMethodCallExpression GetPhpNativeMethodCall(IPhpStatement statement, string name)
         {
-            if (s is PhpExpressionStatement)
-            {
-                var v = s as PhpExpressionStatement;
-                if (v.Expression is PhpMethodCallExpression)
-                {
-                    var m = v.Expression as PhpMethodCallExpression;
-                    if (m.Name == name && m.TargetObject == null && string.IsNullOrEmpty(m.ClassName))
-                        return m;
-                }
-            }
+            var expressionStatement = statement as PhpExpressionStatement;
+            if (expressionStatement == null) return null;
+
+            var methodCall = expressionStatement.Expression as PhpMethodCallExpression;
+            if (methodCall == null) return null;
+            if (methodCall.Name == name && methodCall.CallType == MethodCallStyles.Procedural)
+                return methodCall;
             return null;
         }
 
         protected override IPhpStatement VisitPhpCodeBlock(PhpCodeBlock node)
         {
-
-
-
             PhpCodeBlock newNode = new PhpCodeBlock();
             foreach (var i in node.GetPlain())
             {
@@ -55,32 +45,28 @@ namespace Lang.Php.Compiler.Translator
                 {
                     for (int i = 1; i < newNode.Statements.Count; i++)
                     {
-                        var e1 = getPHPNativeMethodCall(newNode.Statements[i - 1], "echo");
+                        var e1 = GetPhpNativeMethodCall(newNode.Statements[i - 1], "echo");
                         if (e1 == null) continue;
-                        var e2 = getPHPNativeMethodCall(newNode.Statements[i], "echo");
+                        var e2 = GetPhpNativeMethodCall(newNode.Statements[i], "echo");
                         if (e2 == null) continue;
                         IPhpValue e = new PhpBinaryOperatorExpression(".", e1.Arguments[0].Expression, e2.Arguments[0].Expression);
                         e = Simplify(e);
-                        IPhpValue _echo_ = new PhpMethodCallExpression("echo", e);
-                        newNode.Statements[i - 1] = new PhpExpressionStatement(_echo_);
+                        IPhpValue echo = new PhpMethodCallExpression("echo", e);
+                        newNode.Statements[i - 1] = new PhpExpressionStatement(echo);
                         newNode.Statements.RemoveAt(i);
                         i--;
                     }
                 }
             }
             #endregion
-            if (PhpSourceBase.EqualCode_List(node.Statements, newNode.Statements))
-                return node;
-            return newNode;
+            return PhpSourceBase.EqualCode_List(node.Statements, newNode.Statements) ? node : newNode;
         }
 
 
         protected override IPhpStatement VisitPhpExpressionStatement(PhpExpressionStatement node)
         {
             var newExpression = Simplify(node.Expression);
-            if (newExpression == node.Expression)
-                return node;
-            return new PhpExpressionStatement(newExpression);
+            return newExpression == node.Expression ? node : new PhpExpressionStatement(newExpression);
         }
 
         protected override IPhpStatement VisitPhpIfStatement(PhpIfStatement node)

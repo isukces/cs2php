@@ -1,6 +1,5 @@
 ﻿using System.Globalization;
 using Lang.Cs.Compiler;
-using Lang.Cs.Compiler.Sandbox;
 using Lang.Php.Compiler.Source;
 using System;
 using System.Linq;
@@ -80,7 +79,7 @@ namespace Lang.Php.Compiler
 
             return string.Join("",
                     from i in fullName.Replace("+", ".").Split('.')
-                    select PhpQualifiedName.T_NS_SEPARATOR + PhpQualifiedName.SanitizePhpName(i));
+                    select PhpQualifiedName.TokenNsSeparator + PhpQualifiedName.SanitizePhpName(i));
         }
 
         static MethodInfo FindPhpMainMethod(Type type)
@@ -155,24 +154,27 @@ namespace Lang.Php.Compiler
             #region ScriptName
             {
                 if (_ignoreNamespace)
-                    _scriptName = PhpQualifiedName.SanitizePhpName(_type.Name); // only short name without namespace
+                    _scriptName = (PhpQualifiedName)PhpQualifiedName.SanitizePhpName(_type.Name); // only short name without namespace
                 else if (_type.IsGenericType)
-                    _scriptName = DotNetNameToPhpName(_type.FullName ?? _type.Name); // beware of generic types
+                    _scriptName = (PhpQualifiedName)DotNetNameToPhpName(_type.FullName ?? _type.Name); // beware of generic types
                 else
-                    _scriptName = DotNetNameToPhpName(_type.FullName ?? _type.Name);
+                    _scriptName = (PhpQualifiedName)DotNetNameToPhpName(_type.FullName ?? _type.Name);
 
                 var scriptNameAttribute = ats.OfType<ScriptNameAttribute>().FirstOrDefault();
                 if (scriptNameAttribute != null)
                 {
-                    if (scriptNameAttribute.Name.StartsWith(PhpQualifiedName.T_NS_SEPARATOR.ToString(CultureInfo.InvariantCulture)))
-                        _scriptName = scriptNameAttribute.Name;
+                    if (scriptNameAttribute.Name.StartsWith(PhpQualifiedName.TokenNsSeparator.ToString(CultureInfo.InvariantCulture)))
+                        _scriptName = (PhpQualifiedName)scriptNameAttribute.Name;
                     else if (IgnoreNamespace)
-                        _scriptName = PhpQualifiedName.T_NS_SEPARATOR + scriptNameAttribute.Name;
+                        _scriptName = (PhpQualifiedName) (PhpQualifiedName.TokenNsSeparator + scriptNameAttribute.Name);
                     else
-                        _scriptName = DotNetNameToPhpName(_type.FullName) + PhpQualifiedName.T_NS_SEPARATOR + scriptNameAttribute.Name;
+                        _scriptName =
+                            (PhpQualifiedName)
+                                (DotNetNameToPhpName(_type.FullName) + PhpQualifiedName.TokenNsSeparator +
+                                 scriptNameAttribute.Name);                   
                 }
                 if (declaringTypeTranslationInfo != null)
-                    _scriptName = declaringTypeTranslationInfo.ScriptName + "__" + _type.Name; // parent clas followed by __ and short name
+                    _scriptName = (PhpQualifiedName)(declaringTypeTranslationInfo.ScriptName + "__" + _type.Name); // parent clas followed by __ and short name
             }
             #endregion
             #region Module name

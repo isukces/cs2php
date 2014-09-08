@@ -28,14 +28,7 @@ namespace Lang.Php.Compiler.Source
     
     public partial class PhpMethodCallExpression : IPhpValueBase
     {
-        public static PhpMethodCallExpression MakeConstructor(string constructedClassName, params IPhpValue[] args)
-        {
-            PhpMethodCallExpression a = new PhpMethodCallExpression(ConstructorMethodName, args);
-            a.ClassName = constructedClassName;
-            return a;
-        }
-
-        #region Constructors
+		#region Constructors 
 
         /// <summary>
         /// Tworzy instancję obiektu
@@ -46,8 +39,6 @@ namespace Lang.Php.Compiler.Source
             _name = name;
             _arguments.AddRange(args);
         }
-
-
 
         /// <summary>
         /// Tworzy instancję obiektu
@@ -71,19 +62,33 @@ namespace Lang.Php.Compiler.Source
             _targetObject = targetObject;
         }
 
+		#endregion Constructors 
 
-        #endregion Constructors
+		#region Static Methods 
 
-        #region Methods
+		// Public Methods 
 
-        // Public Methods 
+        public static PhpMethodCallExpression MakeConstructor(string constructedClassName, params IPhpValue[] args)
+        {
+            var methodCallExpression = new PhpMethodCallExpression(ConstructorMethodName, args)
+            {
+                ClassName = (PhpQualifiedName)constructedClassName
+            };            
+            return methodCallExpression;
+        }
+
+		#endregion Static Methods 
+
+		#region Methods 
+
+		// Public Methods 
 
         public override IEnumerable<ICodeRequest> GetCodeRequests()
         {
-            var g = IPhpStatementBase.GetCodeRequests(_arguments.Select(i => i.Expression)).ToList();
-            if (_className != null && !_isStandardPhpClass)
-                g.Add(new ClassCodeRequest(_className));
-            return g;
+            var requests = IPhpStatementBase.GetCodeRequests(_arguments.Select(i => i.Expression)).ToList();
+            if (!_className.IsEmpty && !_isStandardPhpClass)
+                requests.Add(new ClassCodeRequest(_className));
+            return requests;
         }
 
         public override string GetPhpCode(PhpEmitStyle style)
@@ -96,31 +101,41 @@ namespace Lang.Php.Compiler.Source
                 var a = string.Format("new {0}({1})", _className.NameForEmit(style), arguments);
                 return a;
             }
-            else
+            var name = _name;
+            if (!_className.IsEmpty)
+                _name = _className.NameForEmit(style) + "::" + _name;
+            else if (_targetObject != null)
             {
-                var name = _name;
-                if (!PhpQualifiedName.IsEmpty(_className))
-                    _name = _className.NameForEmit(style) + "::" + _name;
-                else if (_targetObject != null)
-                {
-                    var to = _targetObject;
-                    if (_targetObject is PhpMethodCallExpression && (_targetObject as PhpMethodCallExpression).IsConstructorCall)
-                        to = new PhpParenthesizedExpression(to);
-                    name = to.GetPhpCode(style) + "->" + name;
-                }
-                string a;
-                if (name == "echo")
-                    a = string.Format("{0} {1}", name, arguments);
-                else
-                    a = string.Format("{0}({1})", name, arguments);
-                return a;
+                var to = _targetObject;
+                if (_targetObject is PhpMethodCallExpression && (_targetObject as PhpMethodCallExpression).IsConstructorCall)
+                    to = new PhpParenthesizedExpression(to);
+                name = to.GetPhpCode(style) + "->" + name;
             }
+            var code = string.Format(name == "echo" ? "{0} {1}" : "{0}({1})", name, arguments);
+            return code;
         }
+
+		#endregion Methods 
+
+		#region Fields 
 
         public const string ConstructorMethodName = "*";
 
+		#endregion Fields 
 
-        #endregion Methods
+		#region Properties 
+
+        public MethodCallStyles CallType
+        {
+            get
+            {
+                if (_targetObject != null)
+                    return MethodCallStyles.Instance;
+                return _className.IsEmpty ? MethodCallStyles.Procedural : MethodCallStyles.Static;
+            }
+        }
+
+		#endregion Properties 
     }
 }
 
@@ -139,9 +154,7 @@ namespace Lang.Php.Compiler.Source
         public PhpMethodCallExpression()
         {
         }
-
         Przykłady użycia
-
         implement INotifyPropertyChanged
         implement INotifyPropertyChanged_Passive
         implement ToString ##Name## ##Arguments## ##IsConstructorCall## ##TargetObject## ##ClassName## ##IsStandardPhpClass##
@@ -150,6 +163,8 @@ namespace Lang.Php.Compiler.Source
         implement equals *
         implement equals *, ~exclude1, ~exclude2
         */
+
+
         #region Constructors
         /// <summary>
         /// Tworzy instancję obiektu
@@ -161,6 +176,7 @@ namespace Lang.Php.Compiler.Source
         }
 
         #endregion Constructors
+
 
         #region Constants
         /// <summary>
@@ -189,8 +205,10 @@ namespace Lang.Php.Compiler.Source
         public const string PropertyNameIsStandardPhpClass = "IsStandardPhpClass";
         #endregion Constants
 
+
         #region Methods
         #endregion Methods
+
 
         #region Properties
         /// <summary>
@@ -280,6 +298,5 @@ namespace Lang.Php.Compiler.Source
         }
         private bool _isStandardPhpClass;
         #endregion Properties
-
     }
 }

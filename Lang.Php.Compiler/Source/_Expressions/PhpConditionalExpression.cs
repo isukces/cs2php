@@ -16,7 +16,7 @@ namespace Lang.Php.Compiler.Source
     property WhenFalse IPhpValue 
     smartClassEnd
     */
-    
+
     public partial class PhpConditionalExpression : IPhpValueBase
     {
         public override IPhpValue Simplify(IPhpExpressionSimplifier s)
@@ -30,8 +30,8 @@ namespace Lang.Php.Compiler.Source
         }
         public override string GetPhpCode(PhpEmitStyle style)
         {
-            string form = style == null || style.Compression == EmitStyleCompression.Beauty 
-                ? "{0} ? {1} : {2}" 
+            string form = style == null || style.Compression == EmitStyleCompression.Beauty
+                ? "{0} ? {1} : {2}"
                 : "{0}?{1}:{2}";
             return string.Format(form, _condition.GetPhpCode(style), _whenTrue.GetPhpCode(style), _whenFalse.GetPhpCode(style));
         }
@@ -49,7 +49,7 @@ namespace Lang.Php.Compiler.Source
 // Smartclass.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0c4d5d36fb5eb4ac
 namespace Lang.Php.Compiler.Source
 {
-    public partial class PhpConditionalExpression 
+    public partial class PhpConditionalExpression
     {
         /*
         /// <summary>

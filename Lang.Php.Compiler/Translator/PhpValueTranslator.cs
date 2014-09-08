@@ -1,15 +1,11 @@
 ﻿using Lang.Cs.Compiler;
-using Lang.Cs.Compiler.Sandbox;
 using Lang.Php.Compiler.Source;
-using Lang.Php;
 using Lang.Php.Runtime;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Lang.Php.Compiler.Translator
 {
@@ -60,11 +56,9 @@ namespace Lang.Php.Compiler.Translator
 
         public IPhpValue ConvertValueToPredefined(object o)
         {
-            if (o is double)
-            {
-                if ((double)o == Math.PI)
-                    return new PhpMethodCallExpression("pi");
-            }
+            if (!(o is double)) return new PhpConstValue(o);
+            if ((double)o == Math.PI)
+                return new PhpMethodCallExpression("pi");
             return new PhpConstValue(o);
         }
 
@@ -194,7 +188,6 @@ namespace Lang.Php.Compiler.Translator
                 {
                     var h = new PhpArrayCreateExpression();
                     return SimplifyPhpExpression(h);
-                    throw new NotImplementedException();
                 }
 
             }
@@ -259,8 +252,7 @@ namespace Lang.Php.Compiler.Translator
                 FieldTranslationInfo tInfo = state.Principles.GetOrMakeTranslationInfo(src.Member);
                 if (tInfo.IsDefinedInNonincludableModule)
                 {
-                    var a = state.Principles.CurrentType;
-                    var b = state.Principles.GetTi(this.state.Principles.CurrentType);
+                    var b = state.Principles.GetTi(state.Principles.CurrentType);
                     if (tInfo.IncludeModule != b.ModuleName)
                         throw new Exception(
                              string.Format(
@@ -273,29 +265,31 @@ namespace Lang.Php.Compiler.Translator
 
                 }
                 var fieldDeclaringType = memberDeclaringType;
-                var fieldDeclaringTypeInfo = state.Principles.GetTi(fieldDeclaringType, false);
+                if (fieldDeclaringType == null) 
+                    throw new Exception("fieldDeclaringType");
+                state.Principles.GetTi(fieldDeclaringType, false);
                 #region Konwersja ENUMA
                 {
                     if (fieldDeclaringType.IsEnum)
                     {
                         if (!isStatic)
                             throw new NotSupportedException();
-                        AsDefinedConstAttribute asDefinedConstAttribute = member.GetCustomAttribute<AsDefinedConstAttribute>();
+                        var asDefinedConstAttribute = member.GetCustomAttribute<AsDefinedConstAttribute>();
                         if (asDefinedConstAttribute != null)
                         {
                             var definedExpression = new PhpDefinedConstExpression(asDefinedConstAttribute.DefinedConstName, tInfo.IncludeModule);
                             return SimplifyPhpExpression(definedExpression);
                         }
-                        var _renderValue = member.GetCustomAttribute<RenderValueAttribute>();
-                        if (_renderValue != null)
+                        var renderValueAttribute = member.GetCustomAttribute<RenderValueAttribute>();
+                        if (renderValueAttribute != null)
                         {
                             string strCandidate;
-                            if (PhpValues.TryGetPhpStringValue(_renderValue.Name, out strCandidate))
+                            if (PhpValues.TryGetPhpStringValue(renderValueAttribute.Name, out strCandidate))
                             {
                                 var valueExpression = new PhpConstValue(strCandidate);
 #if DEBUG
                                 {
-                                    var a1 = _renderValue.Name.Trim();
+                                    var a1 = renderValueAttribute.Name.Trim();
                                     var a2 = valueExpression.ToString();
                                     if (a1 != a2)
                                         throw new InvalidOperationException();
@@ -305,7 +299,7 @@ namespace Lang.Php.Compiler.Translator
                             }
                             else
                             {
-                                var valueExpression = new PhpFreeExpression(_renderValue.Name);
+                                var valueExpression = new PhpFreeExpression(renderValueAttribute.Name);
                                 return SimplifyPhpExpression(valueExpression);
                             }
                         }
@@ -446,27 +440,23 @@ namespace Lang.Php.Compiler.Translator
 
         protected override IPhpValue VisitInstanceMemberAccessExpression(InstanceMemberAccessExpression src)
         {
-
             if (src.Member == null)
                 throw new NotSupportedException();
-            if (src.Member is MethodInfo)
-            {
-                var mi = src.Member as MethodInfo;
-                if (mi.IsStatic)
-                    throw new Exception("Metoda nie może być statyczna");
-                var mmi = MethodTranslationInfo.FromMethodInfo(mi);
-                var a = new PhpConstValue(TransValue(src.Expression));
-                var b = new PhpConstValue(mmi.ScriptName);
-                var o = new PhpArrayCreateExpression(new IPhpValue[] { a, b });
-                return o;
-            }
-            throw new NotSupportedException();
+            if (!(src.Member is MethodInfo)) throw new NotSupportedException();
+            var mi = src.Member as MethodInfo;
+            if (mi.IsStatic)
+                throw new Exception("Metoda nie może być statyczna");
+            var mmi = MethodTranslationInfo.FromMethodInfo(mi);
+            var a = new PhpConstValue(TransValue(src.Expression));
+            var b = new PhpConstValue(mmi.ScriptName);
+            var o = new PhpArrayCreateExpression(new IPhpValue[] { a, b });
+            return o;
         }
 
         protected override IPhpValue VisitInstancePropertyAccessExpression(CsharpInstancePropertyAccessExpression src)
         {
             var pri = PropertyTranslationInfo.FromPropertyInfo(src.Member);
-            var ownerInfo = this.state.Principles.GetOrMakeTranslationInfo(src.Member.DeclaringType);
+            var ownerInfo = state.Principles.GetOrMakeTranslationInfo(src.Member.DeclaringType);
             if (src.TargetObject == null)
                 throw new NotImplementedException("statyczny");
             var translatedByExternalNodeTranslator = state.Principles.NodeTranslators.Translate(state, src);
@@ -502,11 +492,10 @@ namespace Lang.Php.Compiler.Translator
                         {
                             #region Check map parameter
                             var tmp = ats.MapArray;
-                            if (tmp != null && tmp.Length > 0)
-                            {
-                                if (tmp.Length > 1 || tmp[0] != DirectCallAttribute.THIS)
-                                    throw new NotSupportedException(string.Format("Property {1}.{0} has invalid 'Map' parameter in DirectCallAttribute", propertyInfo.Name, propertyInfo.DeclaringType));
-                            }
+                            if (tmp == null || tmp.Length <= 0) 
+                                return phpTargetObject;
+                            if (tmp.Length > 1 || tmp[0] != DirectCallAttribute.THIS)
+                                throw new NotSupportedException(string.Format("Property {1}.{0} has invalid 'Map' parameter in DirectCallAttribute", propertyInfo.Name, propertyInfo.DeclaringType));
                             #endregion
                             return phpTargetObject;
                         }
@@ -555,19 +544,16 @@ namespace Lang.Php.Compiler.Translator
                     var ats = propertyInfo.GetCustomAttribute<UseBinaryExpressionAttribute>(true);
                     if (ats != null)
                     {
-                        IPhpValue l, r;
-                        var x = ats.Left;
-                        l = GetValueForExpression(phpTargetObject, ats.Left);
-                        r = GetValueForExpression(phpTargetObject, ats.Right);
-
-                        var method = new PhpBinaryOperatorExpression(ats.Operator, l, r);
+                        var left = GetValueForExpression(phpTargetObject, ats.Left);
+                        var right = GetValueForExpression(phpTargetObject, ats.Right);
+                        var method = new PhpBinaryOperatorExpression(ats.Operator, left, right);
                         return method;
                     }
                 }
                 #endregion
                 {
                     pri = PropertyTranslationInfo.FromPropertyInfo(src.Member);
-                    var to = this.TransValue(src.TargetObject);
+                    var to = TransValue(src.TargetObject);
                     var a = new PhpPropertyAccessExpression(pri, to);
                     return a;
                 }
@@ -591,13 +577,9 @@ namespace Lang.Php.Compiler.Translator
 
         protected override IPhpValue VisitLocalVariableExpression(LocalVariableExpression src)
         {
-            bool isArgument = false;
-            if (state.Principles.CurrentMethod != null)
-            {
-                var g = state.Principles.CurrentMethod.GetParameters().Where(u => u.Name == src.Name).Any();
-                if (g)
-                    isArgument = true;
-            }
+            if (state.Principles.CurrentMethod == null) 
+                return PhpVariableExpression.MakeLocal(src.Name, false);
+            var isArgument = state.Principles.CurrentMethod.GetParameters().Any(u => u.Name == src.Name);
             return PhpVariableExpression.MakeLocal(src.Name, isArgument);
         }
 
@@ -606,7 +588,7 @@ namespace Lang.Php.Compiler.Translator
             var x = state.Principles.NodeTranslators.Translate(state, src);
             if (x != null)
                 return SimplifyPhpExpression(x);
-            x = state.Principles.NodeTranslators.Translate(state, src);
+            state.Principles.NodeTranslators.Translate(state, src);
             throw new NotSupportedException(src.ToString());
         }
 
@@ -615,9 +597,9 @@ namespace Lang.Php.Compiler.Translator
             if (src.Method.IsStatic)
             {
                 var phpClassName = state.Principles.GetPhpType(src.Method.DeclaringType, true, state.Principles.CurrentType);
-                if (phpClassName == null)
+                if (phpClassName.IsEmpty)
                     throw new Exception("phpClassName cannot be null");
-                phpClassName.CurrentEffectiveName = "";
+                phpClassName = phpClassName.MakeAbsolute();
                 var className = new PhpConstValue(phpClassName.FullName);
                 var methodTranslationInfo = MethodTranslationInfo.FromMethodInfo(src.Method);
                 var methodName = new PhpConstValue(methodTranslationInfo.ScriptName);
@@ -632,7 +614,6 @@ namespace Lang.Php.Compiler.Translator
                 var arrayCreation = new PhpArrayCreateExpression(new IPhpValue[] { targetObject, methodName });
                 return SimplifyPhpExpression(arrayCreation);
             }
-            throw new NotSupportedException();
         }
 
         protected override IPhpValue VisitParenthesizedExpression(ParenthesizedExpression src)
@@ -644,7 +625,7 @@ namespace Lang.Php.Compiler.Translator
 
         protected override IPhpValue VisitStaticMemberAccessExpression(StaticMemberAccessExpression src)
         {
-            var yy = (src.Expression as LangType).DotnetType;
+            var yy = src.Expression.DotnetType;
 
 
             var mem = yy.GetMembers(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic).ToArray().Where(i => i.Name == src.MemberName).ToArray();
@@ -666,7 +647,6 @@ namespace Lang.Php.Compiler.Translator
         protected override IPhpValue VisitTypeOfExpression(TypeOfExpression src)
         {
             return new PhpConstValue(src.DotnetType.Name);
-            throw new NotSupportedException();
         }
 
         protected override IPhpValue VisitTypeValue(TypeValue src)

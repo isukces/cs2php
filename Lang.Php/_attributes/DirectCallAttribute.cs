@@ -37,7 +37,7 @@ namespace Lang.Php
                  .Replace("->", " -> ")
                  .Replace("$", " $ ");
             var tmp = name.Split(' ').Select(i => i.Trim()).Where(i => !string.IsNullOrEmpty(i)).ToArray();
-            this.Name = tmp.Any() ? tmp.Last() : null;
+            Name = tmp.Any() ? tmp.Last() : null;
             tmp = tmp.Take(tmp.Length - 1).Select(i => i.ToLower()).ToArray();
             CallType = MethodCallStyles.Procedural;
             if (tmp.Contains("->") || tmp.Contains("instance"))

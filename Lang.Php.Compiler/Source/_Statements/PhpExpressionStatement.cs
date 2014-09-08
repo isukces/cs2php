@@ -29,16 +29,23 @@ namespace Lang.Php.Compiler.Source
         // Public Methods 
 
 
-        public bool IsEcho
+        private bool IsEcho
         {
             get
             {
-                if (expression is PhpMethodCallExpression)
-                {
-                    PhpMethodCallExpression x = expression as PhpMethodCallExpression;
-                    return x.TargetObject == null && string.IsNullOrEmpty(x.ClassName) && x.Name == "echo";
-                }
-                return false;
+                var callExpression = expression as PhpMethodCallExpression;
+                // ProceduralStyleMethodCall checks if expression is PhpMethodCallExpression
+                // ReSharper disable once PossibleNullReferenceException
+                return IsProceduralStyleMethodCall && callExpression.Name == "echo";
+            }
+        }
+
+        public bool IsProceduralStyleMethodCall
+        {
+            get
+            {
+                var callExpression = expression as PhpMethodCallExpression;
+                return callExpression != null && callExpression.CallType == MethodCallStyles.Procedural;
             }
         }
 
@@ -49,13 +56,11 @@ namespace Lang.Php.Compiler.Source
             var a = GetEchoItems(null);
             if (a.Length == 0)
                 return StatementEmitInfo.Empty;
-            if (a.Length == 1)
-            {
-                if (a[0].PlainHtml)
-                    return StatementEmitInfo.ManyItemsOrPlainHtml;
-                return StatementEmitInfo.NormalSingleStatement;
-            }
-            return StatementEmitInfo.ManyItemsOrPlainHtml;
+            if (a.Length != 1)
+                return StatementEmitInfo.ManyItemsOrPlainHtml;
+            return a[0].PlainHtml
+                ? StatementEmitInfo.ManyItemsOrPlainHtml
+                : StatementEmitInfo.NormalSingleStatement;
         }
 
 
@@ -65,12 +70,11 @@ namespace Lang.Php.Compiler.Source
             if (!style.AsIncrementor)
                 if (expression is PhpMethodCallExpression)
                 {
-                    PhpMethodCallExpression x = expression as PhpMethodCallExpression;
-                    if (x.TargetObject == null && string.IsNullOrEmpty(x.ClassName) && x.Name == "echo")
-                    {
+                    var methodCallExpression = expression as PhpMethodCallExpression;
+                    if (methodCallExpression.CallType == MethodCallStyles.Procedural
+                        && methodCallExpression.Name == "echo")
                         if (EmitInlineHtml(emiter, writer, style))
                             return;
-                    }
                 }
             var code = expression.GetPhpCode(style);
             if (style.AsIncrementor)
@@ -83,21 +87,17 @@ namespace Lang.Php.Compiler.Source
         }
         IPhpValue AAA(IPhpValue x)
         {
-            if (x is PhpDefinedConstExpression)
-            {
-                var g = (x as PhpDefinedConstExpression);
-                if (g.DefinedConstName == "PHP_EOL")
-                    return new PhpConstValue("\r\n");
-            }
-            return x;
+            var constExpression = x as PhpDefinedConstExpression;
+            if (constExpression == null) return x;
+            return constExpression.DefinedConstName == "PHP_EOL" ? new PhpConstValue("\r\n") : x;
         }
 
         public class EchoEmitItem
         {
-            public EchoEmitItem(string Code, bool PlainHtml)
+            public EchoEmitItem(string code, bool plainHtml)
             {
-                this.Code = Code;
-                this.PlainHtml = PlainHtml;
+                Code = code;
+                PlainHtml = plainHtml;
             }
             public override string ToString()
             {
@@ -109,12 +109,12 @@ namespace Lang.Php.Compiler.Source
             public bool PlainHtml { get; private set; }
         }
 
-        string[] SplitToLines(string code)
+        static IEnumerable<string> SplitToLines(string code)
         {
-            List<string> result = new List<string>();
-            while (code.IndexOf("\r\n") > 0)
+            var result = new List<string>();
+            while (code.IndexOf("\r\n", StringComparison.Ordinal) > 0)
             {
-                var idx = code.IndexOf("\r\n") + 2;
+                var idx = code.IndexOf("\r\n", StringComparison.Ordinal) + 2;
                 result.Add(code.Substring(0, idx));
                 code = code.Substring(idx);
             }
@@ -124,54 +124,51 @@ namespace Lang.Php.Compiler.Source
         }
 
 
-        public EchoEmitItem[] GetEchoItems(PhpEmitStyle style)
+        private EchoEmitItem[] GetEchoItems(PhpEmitStyle style)
         {
-            List<IPhpValue> Values = new List<IPhpValue>();
+            var values = new List<IPhpValue>();
             #region Przygotowanie listy elementów do wyświetlenia
             {
                 var methodCall = expression as PhpMethodCallExpression;
                 if (methodCall == null) return
                       null;
-                if (methodCall.TargetObject != null || !string.IsNullOrEmpty(methodCall.ClassName) || methodCall.Name != "echo")
+                if (methodCall.CallType != MethodCallStyles.Procedural || methodCall.Name != "echo")
                     return null;
                 foreach (var xx in methodCall.Arguments)
-                    Values.AddRange(ExpressionSimplifier.ExplodeConcats(xx, "."));
-                Values = Values.Select(i => AAA(i)).ToList();
+                    values.AddRange(ExpressionSimplifier.ExplodeConcats(xx, "."));
+                values = values.Select(AAA).ToList();
+
                 #region Łączenie const string
-                for (int i = 1; i < Values.Count; i++)
+
+                for (var i = 1; i < values.Count; i++)
                 {
-                    var a1 = Values[i - 1];
-                    var a2 = Values[i];
-                    if (a1 is PhpConstValue && a2 is PhpConstValue)
-                    {
-                        var b1 = (a1 as PhpConstValue).Value;
-                        var b2 = (a2 as PhpConstValue).Value;
-                        var c1 = PhpValues.ToPhpCodeValue(b1);
-                        var c2 = PhpValues.ToPhpCodeValue(b2);
-                        if (c1.Kind == PhpCodeValue.Kinds.StringConstant && c1.Kind == PhpCodeValue.Kinds.StringConstant)
-                        {                            
-                            Values[i - 1] = new PhpConstValue((string)c1.SourceValue + (string)c2.SourceValue);
-                            Values.RemoveAt(i);
-                            i--;
-                        }
-                    }
+                    var a1 = values[i - 1];
+                    var a2 = values[i];
+                    if (!(a1 is PhpConstValue) || !(a2 is PhpConstValue)) continue;
+                    var b1 = (a1 as PhpConstValue).Value;
+                    var b2 = (a2 as PhpConstValue).Value;
+                    var c1 = PhpValues.ToPhpCodeValue(b1);
+                    var c2 = PhpValues.ToPhpCodeValue(b2);
+                    if (c1.Kind != PhpCodeValue.Kinds.StringConstant || c1.Kind != PhpCodeValue.Kinds.StringConstant)
+                        continue;
+                    values[i - 1] = new PhpConstValue((string) c1.SourceValue + (string) c2.SourceValue);
+                    values.RemoveAt(i);
+                    i--;
                 }
+
                 #endregion
             }
             #endregion
 
             {
                 IPhpValue v = null;
-                Action<IPhpValue> vv = (u) =>
+                Action<IPhpValue> vv = u =>
                 {
-                    if (v == null)
-                        v = u;
-                    else
-                        v = new PhpBinaryOperatorExpression(".", v, u);
+                    v = v == null ? u : new PhpBinaryOperatorExpression(".", v, u);
                 };
 
-                List<EchoEmitItem> result = new List<EchoEmitItem>();
-                foreach (var value in Values)
+                var result = new List<EchoEmitItem>();
+                foreach (var value in values)
                 {
                     if (value is PhpConstValue)
                     {
@@ -237,7 +234,7 @@ namespace Lang.Php.Compiler.Source
                         }
                         continue;
                     }
-                    #endregion
+                #endregion
                     result.Add(new EEi(code, plainHtml));
                 }
                 return result.ToArray();
@@ -250,13 +247,13 @@ namespace Lang.Php.Compiler.Source
         bool EmitInlineHtml(PhpSourceCodeEmiter emiter, PhpSourceCodeWriter writer, PhpEmitStyle style)
         {
             // return false;
-            var Values = GetEchoItems(style);
+            var values = GetEchoItems(style);
             //if (Values.Length == 1)
             //    return false;
 
             #region Emisja
             {
-                foreach (var i in Values)
+                foreach (var i in values)
                 {
                     if (i.PlainHtml)
                         throw new NotSupportedException();
@@ -325,7 +322,7 @@ namespace Lang.Php.Compiler.Source
 
         public override string ToString()
         {
-            return expression.ToString() + ";";
+            return expression + ";";
         }
         #endregion Methods
     }

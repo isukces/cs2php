@@ -59,10 +59,10 @@ namespace Lang.Php.Compiler.Source
                 if (style.CurrentNamespace != name.Namespace)
                     throw new Exception("Unable to emit class into different namespace");
                 string e = "";
-                if (!PhpQualifiedName.IsEmpty(baseTypeName))
+                if (!baseTypeName.IsEmpty)
                     e = " extends " + baseTypeName.NameForEmit(style);
                 writer.OpenLnF("class {0}{1} {{", Name.ShortName, e);
-                style.CurrentClass = name.XClone(); // do not move this before "class XXX" is emited
+                style.CurrentClass = name; // do not move this before "class XXX" is emited
                 for (int orderGroup = 0; orderGroup < 3; orderGroup++)
                     foreach (var field in fields.Where(_ => FieldOrderGroup(_) == orderGroup))
                         field.Emit(emiter, writer, style);

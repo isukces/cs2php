@@ -80,16 +80,16 @@ namespace Lang.Php.Compiler.Translator
                     PhpQualifiedName phpBaseClassName;
                     #region Szukanie nazwy klasy bazowej
                     {
-                        Type netBaseType = classTranslationInfo.Type.BaseType;
+                        var netBaseType = classTranslationInfo.Type.BaseType;
                         if ((object)netBaseType == null || netBaseType == typeof(object))
-                            phpBaseClassName = null;
+                            phpBaseClassName = PhpQualifiedName.Empty;
                         else
                         {
                             // _state.Principles.CurrentTyp is null so we will obtain absolute name
                             phpBaseClassName = _state.Principles.GetPhpType(netBaseType, true, null); // absolute name
                             var baseTypeTranslationInfo = _state.Principles.GetOrMakeTranslationInfo(netBaseType);
                             if (baseTypeTranslationInfo.Skip)
-                                phpBaseClassName = null;
+                                phpBaseClassName = PhpQualifiedName.Empty;
                         }
                     }
                     #endregion

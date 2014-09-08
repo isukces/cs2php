@@ -57,10 +57,10 @@ namespace Lang.Php.Compiler
     
     public partial class TranslationInfo
     {
-        #region Methods
+		#region Methods 
 
-        // Public Methods 
-          private ClassTranslationInfo _currentTypeTranslationInfo;
+		// Public Methods 
+
         public void CheckAccesibility(CsharpMethodCallExpression m)
         {
             if (m == null)
@@ -156,21 +156,20 @@ namespace Lang.Php.Compiler
             return fti;
         }
 
-        [Obsolete("maybe will be better to resolve short names while emit proces")]
         public PhpQualifiedName GetPhpType(Type type, bool doCheckAccesibility, Type relativeTo)
         {
             if ((object)type == null)
-                return null;
+                return PhpQualifiedName.Empty;
             if (doCheckAccesibility)
                 CheckAccesibility(type);
             var classTranslationInfo = GetOrMakeTranslationInfo(type);
-            var phpQualifiedName = classTranslationInfo.ScriptName.XClone();
+            var phpQualifiedName = classTranslationInfo.ScriptName;
             if ((object)relativeTo == null) 
                 return phpQualifiedName;
             if (type == relativeTo)
-                phpQualifiedName.CurrentEffectiveName = PhpQualifiedName.SELF;
+                phpQualifiedName.ForceName = PhpQualifiedName.ClassnameSelf;
             else if (type != typeof(object) && type == relativeTo.BaseType)
-                phpQualifiedName.CurrentEffectiveName = PhpQualifiedName.PARENT;
+                phpQualifiedName.ForceName = PhpQualifiedName.ClassnameParent;
             else
             {
                 var currentTypePhp = GetPhpType(relativeTo, false, null); // recurrence
@@ -244,7 +243,7 @@ namespace Lang.Php.Compiler
         {
             return string.Format("Conversion {0} => {1}", _currentType, _currentMethod);
         }
-        // Private Methods 
+		// Private Methods 
 
         private void CheckAccesibility(MethodBase m)
         {
@@ -280,22 +279,28 @@ namespace Lang.Php.Compiler
                     CurrentMethod));
         }
 
-        #endregion Methods
+		#endregion Methods 
 
-        #region Delegates and Events
+		#region Fields 
 
-        // Events 
+          private ClassTranslationInfo _currentTypeTranslationInfo;
+
+		#endregion Fields 
+
+		#region Delegates and Events 
+
+		// Events 
 
         public event EventHandler<TranslationInfoCreatedEventArgs> OnTranslationInfoCreated;
 
-        #endregion Delegates and Events
+		#endregion Delegates and Events 
 
-        #region Nested Classes
+		#region Nested Classes 
 
 
         public class TranslationInfoCreatedEventArgs : EventArgs
         {
-            #region Properties
+		#region Properties 
 
             public AssemblyTranslationInfo AssemblyTranslation { get; set; }
 
@@ -303,9 +308,9 @@ namespace Lang.Php.Compiler
 
             public FieldTranslationInfo FieldTranslation { get; set; }
 
-            #endregion Properties
+		#endregion Properties 
         }
-        #endregion Nested Classes
+		#endregion Nested Classes 
     }
 }
 
@@ -324,9 +329,7 @@ namespace Lang.Php.Compiler
         public TranslationInfo()
         {
         }
-
         Przykłady użycia
-
         implement INotifyPropertyChanged
         implement INotifyPropertyChanged_Passive
         implement ToString ##Sandbox## ##CurrentAssembly## ##CurrentType## ##CurrentMethod## ##Compiled## ##TranslationAssemblies## ##NodeTranslators## ##ModuleProcessors## ##ClassTranslations## ##AssemblyTranslations## ##FieldTranslations## ##State## ##KnownConstsValues## ##Logs##
@@ -335,6 +338,8 @@ namespace Lang.Php.Compiler
         implement equals *
         implement equals *, ~exclude1, ~exclude2
         */
+
+
         #region Constructors
         /// <summary>
         /// Tworzy instancję obiektu
@@ -346,6 +351,7 @@ namespace Lang.Php.Compiler
         }
 
         #endregion Constructors
+
 
         #region Constants
         /// <summary>
@@ -406,8 +412,10 @@ namespace Lang.Php.Compiler
         public const string PropertyNameLogs = "Logs";
         #endregion Constants
 
+
         #region Methods
         #endregion Methods
+
 
         #region Properties
         /// <summary>
@@ -615,6 +623,5 @@ namespace Lang.Php.Compiler
         }
         private List<TranslationMessage> _logs = new List<TranslationMessage>();
         #endregion Properties
-
     }
 }

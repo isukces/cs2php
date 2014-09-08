@@ -39,7 +39,7 @@ namespace Lang.Php.Compiler
     	read only
     smartClassEnd
     */
-    
+
     public partial class AssemblyTranslationInfo
     {
         #region Static Methods
@@ -59,7 +59,7 @@ namespace Lang.Php.Compiler
                 var moduleIncludeConst = assembly.GetCustomAttribute<ModuleIncludeConstAttribute>();
                 if (moduleIncludeConst != null)
                 {
-                    ati._includePathConstOrVarName = (moduleIncludeConst.ConstOrVarName??"").Trim();
+                    ati._includePathConstOrVarName = (moduleIncludeConst.ConstOrVarName ?? "").Trim();
                     if (ati._includePathConstOrVarName.StartsWith("$"))
                     {
 
@@ -69,8 +69,8 @@ namespace Lang.Php.Compiler
                         ati._includePathConstOrVarName = "\\" + ati._includePathConstOrVarName.TrimStart('\\');
                     }
                 }
-                ati._rootPath =  GetRootPath(assembly);
-                
+                ati._rootPath = GetRootPath(assembly);
+
                 var phpPackageSource = assembly.GetCustomAttribute<PhpPackageSourceAttribute>();
                 if (phpPackageSource != null)
                 {
@@ -159,7 +159,7 @@ namespace Lang.Php.Compiler
 // Smartclass.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0c4d5d36fb5eb4ac
 namespace Lang.Php.Compiler
 {
-    public partial class AssemblyTranslationInfo 
+    public partial class AssemblyTranslationInfo
     {
         /*
         /// <summary>
