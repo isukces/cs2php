@@ -34,7 +34,7 @@ namespace Lang.Php.Compiler.Source
 
         public override IEnumerable<ICodeRequest> GetCodeRequests()
         {
-            var a =  IPhpStatementBase.Xxx(targetObject).ToList();
+            var a =  IPhpStatementBase.GetCodeRequests(targetObject).ToList();
             if (IncludeModule != null)
                 a.Add(new ModuleCodeRequest(includeModule));
             return a;

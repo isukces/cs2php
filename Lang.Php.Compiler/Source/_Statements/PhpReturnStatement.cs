@@ -33,7 +33,7 @@ namespace Lang.Php.Compiler.Source
 
         public override IEnumerable<ICodeRequest> GetCodeRequests()
         {
-            return Xxx(returnValue);
+            return GetCodeRequests(returnValue);
         }
 
         public override IPhpStatement Simplify(IPhpSimplifier s)

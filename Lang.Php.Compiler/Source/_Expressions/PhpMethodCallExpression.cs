@@ -80,7 +80,7 @@ namespace Lang.Php.Compiler.Source
 
         public override IEnumerable<ICodeRequest> GetCodeRequests()
         {
-            var g = IPhpStatementBase.Xxx(_arguments.Select(i => i.Expression)).ToList();
+            var g = IPhpStatementBase.GetCodeRequests(_arguments.Select(i => i.Expression)).ToList();
             if (_className != null && !_isStandardPhpClass)
                 g.Add(new ClassCodeRequest(_className));
             return g;

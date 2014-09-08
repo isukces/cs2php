@@ -28,7 +28,7 @@ namespace Lang.Php.Compiler.Source
 
         public override IEnumerable<ICodeRequest> GetCodeRequests()
         {
-            return IPhpStatementBase.Xxx(phpArray, index);
+            return IPhpStatementBase.GetCodeRequests(phpArray, index);
         }
     }
 }

@@ -53,7 +53,7 @@ namespace Lang.Php.Compiler.Source
 
         public IEnumerable<ICodeRequest> GetCodeRequests()
         {
-            return IPhpStatementBase.Xxx(constValue);
+            return IPhpStatementBase.GetCodeRequests(constValue);
         }
 
 		#endregion Methods 

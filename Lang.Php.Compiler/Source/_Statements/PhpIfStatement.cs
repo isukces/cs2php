@@ -89,7 +89,7 @@ namespace Lang.Php.Compiler.Source
 
         public override IEnumerable<ICodeRequest> GetCodeRequests()
         {
-            return Xxx(condition, ifTrue, ifFalse);
+            return GetCodeRequests(condition, ifTrue, ifFalse);
         }
 
         public override IPhpStatement Simplify(IPhpSimplifier s)

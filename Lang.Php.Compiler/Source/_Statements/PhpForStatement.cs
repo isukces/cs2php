@@ -95,9 +95,9 @@ namespace Lang.Php.Compiler.Source
 
         public override IEnumerable<ICodeRequest> GetCodeRequests()
         {
-            var a = Xxx<PhpAssignExpression>(initVariables);
-            var b = Xxx<IPhpStatement>(incrementors);
-            var c = Xxx(condition, statement);
+            var a = GetCodeRequests<PhpAssignExpression>(initVariables);
+            var b = GetCodeRequests<IPhpStatement>(incrementors);
+            var c = GetCodeRequests(condition, statement);
             return a.Union(b).Union(c);
         }
 

@@ -1,17 +1,53 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
 // ReSharper disable once CheckNamespace
 namespace Lang.Php.Compiler.Source
 {
-    public abstract class IPhpStatementBase : PhpSourceBase, IPhpStatement, ICodeRelated
+    public abstract class IPhpStatementBase : PhpSourceBase, IPhpStatement
     {
+        #region Static Methods
+
+        // Public Methods 
+
+        public static IEnumerable<ICodeRequest> GetCodeRequests(params object[] x)
+        {
+            return GetCodeRequests<object>(x);
+        }
+
+        public static IEnumerable<ICodeRequest> GetCodeRequests<T>(IEnumerable<T> x)
+        {
+            if (x == null)
+                return new ICodeRequest[0];
+            var requests = from codeRelated in x.OfType<ICodeRelated>()
+                           where codeRelated != null
+                           let append = codeRelated.GetCodeRequests()
+                           where append != null
+                           select append;
+            IEnumerable<ICodeRequest> result = new ICodeRequest[0];
+            return requests.Aggregate(result, (current, request) => current.Concat(request));
+        }
+
+        #endregion Static Methods
+
+        #region Methods
+
+        // Public Methods 
+
+        public abstract void Emit(PhpSourceCodeEmiter emiter, PhpSourceCodeWriter writer, PhpEmitStyle style);
+
+        public abstract IEnumerable<ICodeRequest> GetCodeRequests();
+
+        public virtual StatementEmitInfo GetStatementEmitInfo(PhpEmitStyle style)
+        {
+            return StatementEmitInfo.NormalSingleStatement;
+        }
 
         public virtual IPhpStatement Simplify(IPhpSimplifier s)
         {
             return this;
         }
+        // Protected Methods 
 
         protected void EmitHeaderStatement(PhpSourceCodeEmiter emiter, PhpSourceCodeWriter writer, PhpEmitStyle style, string header, IPhpStatement statement)
         {
@@ -55,44 +91,7 @@ namespace Lang.Php.Compiler.Source
             writer.DecIndent();
 
         }
-        public static IEnumerable<ICodeRequest> Xxx(params object[] x)
-        {
-            return Xxx<object>(x);
-        }
-        public static IEnumerable<ICodeRequest> Xxx<T>(IEnumerable<T> x)
-        {
-            if (x == null)
-                return new ICodeRequest[0];
-            IEnumerable<ICodeRequest> result = null;
-            foreach (var i in x)
-            {
-                if (i == null) continue;
-                IEnumerable<ICodeRequest> append;
-                if (i is ICodeRelated)
-                    append = (i as ICodeRelated).GetCodeRequests();
-                else if (i is IPhpStatement)
-                {
-                    throw new Exception();
-                }
-                else
-                    continue;
-                if (result == null)
-                    result = append;
-                else if (append != null)
-                    result = result.Concat(append);
-            }
-            return result ?? new ICodeRequest[0];
-        }
 
-        public abstract void Emit(PhpSourceCodeEmiter emiter, PhpSourceCodeWriter writer, PhpEmitStyle style);
-
-
-        public abstract IEnumerable<ICodeRequest> GetCodeRequests();
-
-
-        public virtual StatementEmitInfo GetStatementEmitInfo(PhpEmitStyle style)
-        {
-            return StatementEmitInfo.NormalSingleStatement;
-        }
+        #endregion Methods
     }
 }

@@ -45,8 +45,8 @@ namespace Lang.Php.Compiler.Source
 
         public override IEnumerable<ICodeRequest> GetCodeRequests()
         {
-            var a = IPhpStatementBase.Xxx<IPhpValue>(arguments);
-            var b = IPhpStatementBase.Xxx(expression);
+            var a = IPhpStatementBase.GetCodeRequests<IPhpValue>(arguments);
+            var b = IPhpStatementBase.GetCodeRequests(expression);
             return a.Union(b).ToArray();
         }
     }

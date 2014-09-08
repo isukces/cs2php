@@ -141,8 +141,8 @@ namespace Lang.Php.Compiler.Source
 
         public IEnumerable<ICodeRequest> GetCodeRequests()
         {
-            var a = IPhpStatementBase.Xxx(_topCode, _bottomCode);
-            var b = IPhpStatementBase.Xxx(_classes);
+            var a = IPhpStatementBase.GetCodeRequests(_topCode, _bottomCode);
+            var b = IPhpStatementBase.GetCodeRequests(_classes);
             return a.Union(b);
         }
         // Private Methods 

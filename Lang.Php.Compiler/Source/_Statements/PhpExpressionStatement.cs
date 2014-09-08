@@ -320,7 +320,7 @@ namespace Lang.Php.Compiler.Source
 
         public override IEnumerable<ICodeRequest> GetCodeRequests()
         {
-            return Xxx(expression);
+            return GetCodeRequests(expression);
         }
 
         public override string ToString()
