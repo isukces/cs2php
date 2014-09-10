@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Reflection;
 using System.Text;
 
@@ -14,6 +15,17 @@ namespace Lang.Cs.Compiler
                 return "private";
             return "protected";
         }
+
+        public static FileInfo GetCodeLocation(this Assembly a)
+        {
+            var assemblyPath = a.CodeBase;
+            Uri uri;
+            if (!Uri.TryCreate(assemblyPath, UriKind.RelativeOrAbsolute, out uri)) return new FileInfo(assemblyPath);
+            if (uri.Scheme != Uri.UriSchemeFile)
+                throw new Exception(string.Format("Unsupported protocol in URI {0}", assemblyPath));
+            return new FileInfo(uri.LocalPath);
+        } 
+
         public static string GetMethodHeader(this MethodInfo method)
         {
             var builder = new StringBuilder();

@@ -72,7 +72,7 @@ namespace Lang.Php.Webserver
 
         #endregion Static Methods
 
-        private readonly TranslationInfo _translationInfo = new TranslationInfo(new AssemblySandbox());
+        private readonly TranslationInfo _translationInfo = new TranslationInfo(new AssemblySandbox(null));
         #region Methods
 
         // Public Methods 
@@ -241,7 +241,7 @@ namespace Lang.Php.Webserver
         private HttpResponse ProcessRequest(HttpRequest req, Type type)
         {
             var y = new HttpResponse();
-            ClassTranslationInfo ci = _translationInfo.GetOrMakeTranslationInfo(TypeWrapper.Make(type)));
+            ClassTranslationInfo ci = _translationInfo.GetOrMakeTranslationInfo(type);
 
             if (ci.PageMethod == null)
                 throw new Exception(string.Format("Page method not found in type {0}", type.FullName));

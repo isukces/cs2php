@@ -1,15 +1,16 @@
 ﻿#define WRITE_CODE
-using Lang.Php.Compiler;
-using Lang.Php.Compiler.Source;
-using Lang.Php.Compiler.Translator;
 using System;
 using System.IO;
 using System.Linq;
 using System.Text;
+using Lang.Php.Compiler;
+using Lang.Php.Compiler.Source;
+using Lang.Php.Compiler.Translator;
+using Lang.Php.Test.Code;
 using Microsoft.CodeAnalysis;
 using Xunit;
 
-namespace Lang.Php.Test.Tests
+namespace Lang.Php.XUnitTests
 {
 #if !CS2PHP
     public class Base
@@ -27,16 +28,17 @@ namespace Lang.Php.Test.Tests
             return writer.GetCode(true).Trim();
         }
 
-        protected static void MethodTranslation(string module, string xClass, string methodName)
+
+        protected void MethodTranslation(string module, string xClass, string methodName, Translator translator)
         {
             if (methodName == null) throw new ArgumentNullException("methodName");
             string expectedCode, translatedCode, shortFilename;
             {
-                var translator = PrepareTranslator();
+                //  translator = PrepareTranslator();
                 Console.WriteLine("We have module " + translator.Modules.First().Name.Name);
                 var mod = translator.Modules.First(i => i.Name.Name == module);
                 var cl = mod.Classes[0];
-                Assert.True(cl.Name == xClass, "Invalid class name translation - attribute ScriptName");
+                Assert.True(cl.Name.FullName == xClass, "Invalid class name translation - attribute ScriptName");
                 var method = cl.Methods.First(i => i.Name == methodName);
                 translatedCode = GetCode(method);
             }
@@ -48,7 +50,7 @@ namespace Lang.Php.Test.Tests
                 {
                     using (var ms = new MemoryStream())
                     {
-                        using (var src = typeof(Base).Assembly.GetManifestResourceStream(resourceName))
+                        using (var src = typeof(MyCode).Assembly.GetManifestResourceStream(resourceName))
                         {
                             if (src == null)
                                 throw new Exception("Unable to load resource " + resourceName);
@@ -88,13 +90,13 @@ namespace Lang.Php.Test.Tests
         {
             if (_translator != null)
                 return _translator;
-            var csProject = CsProj;
+            var csProject = LangPhpTestCsProj;
             using (var comp = new Cs2PhpCompiler { VerboseToConsole = true, ThrowExceptions = true })
             {
                 Console.WriteLine("Try to load " + csProject);
 
 #if DEBUG
-            comp.LoadProject(csProject, "DEBUG");
+                comp.LoadProject(csProject, "DEBUG");
 #else
                 comp.LoadProject(csProject, "RELEASE");
 #endif
@@ -161,18 +163,18 @@ namespace Lang.Php.Test.Tests
                     Console.WriteLine("  Add reference     {0}", g.Display);
                 }
 
-//                using (var sandbox = new AssemblySandbox())
-//                {
-//
-//                    Console.WriteLine("Start compile");
-//                    var result = comp.CompileCSharpProject(sandbox, comp.DllFileName);
-//                    if (!result.Success)
-//                    {
-//                        foreach (var i in result.Diagnostics)
-//                            Console.WriteLine(i);
-//                    }
-//                    Assert.True(result.Success, "Compilation failed");
-//                }
+                //                using (var sandbox = new AssemblySandbox())
+                //                {
+                //                //
+                //                Console.WriteLine("Start compile");
+                //                var result = comp.CompileCSharpProject(sandbox, comp.DllFileName);
+                //                if (!result.Success)
+                //                {
+                //                    foreach (var i in result.Diagnostics)
+                //                        Console.WriteLine(i);
+                //                }
+                //                Assert.True(result.Success, "Compilation failed");
+                //                }
                 TranslationInfo translationInfo = comp.ParseCsSource();
 
 
@@ -199,17 +201,15 @@ namespace Lang.Php.Test.Tests
 
         #region Static Properties
 
-        protected static string CsProj
+        protected static string LangPhpTestCsProj
         {
             get
             {
                 // C:\programs\_CS2PHP\PUBLIC\Lang.Php.Test\bin\Debug
-                var directoryInfo = new DirectoryInfo(Directory.GetCurrentDirectory()).Parent;
-                if (directoryInfo == null) return null;
-                var dir = directoryInfo.Parent;
-                if (dir == null) return null;
-                var proj = Path.Combine(dir.FullName, "Lang.Php.Test.csproj");
-                return proj;
+                var directoryInfo = new DirectoryInfo(Directory.GetCurrentDirectory());
+                var proj = Path.Combine(directoryInfo.FullName, "..", "..", "..", "Lang.Php.Test", "Lang.Php.Test.csproj");
+                directoryInfo = new DirectoryInfo(proj);
+                return directoryInfo.FullName;
             }
         }
 

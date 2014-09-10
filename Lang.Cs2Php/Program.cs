@@ -36,7 +36,7 @@ namespace Lang.Cs2Php
 
                 using (var a = new AppConfigManipulator())
                 {
-                    DoCompilation(processingContext.Engine, ref showUsage);                    
+                    DoCompilation(processingContext.Engine, ref showUsage);
                 }
 
 
@@ -63,63 +63,35 @@ namespace Lang.Cs2Php
             Console.ReadKey();
         }
 
-        private static void DoCompilation(ConfigData aa, ref  bool showUsage)
+        private static void DoCompilation(ConfigData cfg, ref  bool showUsage)
         {
-            string domainName = "sandbox" + Guid.NewGuid();
-            var domainSetup = new AppDomainSetup
-            {
-                ApplicationName = domainName,
-                ApplicationBase = Environment.CurrentDirectory
-            };
-            var appDomain = AppDomain.CreateDomain(domainName, null, domainSetup);
-            try
-            {
-                var wrapperType = typeof(CompilerEngine);
-                var ce = (CompilerEngine)appDomain.CreateInstanceFrom(
-                    wrapperType.Assembly.Location,
-                    wrapperType.FullName).Unwrap();
-
-                //public static void CopyFrom(ref IConfigData x, IConfigData s)
+            var showUsage1 = showUsage;
+            CompilerEngine.ExecuteInSeparateAppDomain(
+                ce =>
                 {
-                    {
-                        {
+                    ce.Configuration = cfg.Configuration;
+                    ce.CsProject = cfg.CsProject;
+                    ce.OutDir = cfg.OutDir;
+                    ce.Referenced.Clear();
+                    ce.TranlationHelpers.Clear();
+                    ce.ReferencedPhpLibsLocations.Clear();
 
-                            ce.Configuration = aa.Configuration;
-                            ce.CsProject = aa.CsProject;
-                            ce.OutDir = aa.OutDir;
-                            ce.Referenced.Clear();
-                            ce.TranlationHelpers.Clear();
-                            ce.ReferencedPhpLibsLocations.Clear();
-
-                            // src and dest can be in different application domain
-                            // we need to add item by item
-                            ce.Set1(aa.Referenced.ToArray(), 
-                                aa.TranlationHelpers.ToArray(),
-                                aa.ReferencedPhpLibsLocations.Select(a=>a.Key+"\n"+a.Value).ToArray()
-                                );
-//                            foreach (var q in aa.Referenced.ToArray())
-//                                ce.Referenced.Add(q);
-//                            foreach (var q in aa.TranlationHelpers.ToArray())
-//                                ce.TranlationHelpers.Add(q);
-                           // foreach (var a in aa.ReferencedPhpLibsLocations)
-                           //     ce.ReferencedPhpLibsLocations.Add(a.Key, a.Value);
-
-                            ce.BinaryOutputDir = aa.BinaryOutputDir;
-                            Debug.Assert(ce.Referenced.Count == aa.Referenced.Count);
-                            Debug.Assert(ce.TranlationHelpers.Count == aa.TranlationHelpers.Count);
-                            Debug.Assert(ce.ReferencedPhpLibsLocations.Count == aa.ReferencedPhpLibsLocations.Count);
-                        }
-                    }
+                    // src and dest can be in different application domain
+                    // we need to add item by item
+                    ce.Set1(cfg.Referenced.ToArray(),
+                        cfg.TranlationHelpers.ToArray(),
+                        cfg.ReferencedPhpLibsLocations.Select(a => a.Key + "\n" + a.Value).ToArray()
+                        );
+                    ce.BinaryOutputDir = cfg.BinaryOutputDir;
+                    Debug.Assert(ce.Referenced.Count == cfg.Referenced.Count);
+                    Debug.Assert(ce.TranlationHelpers.Count == cfg.TranlationHelpers.Count);
+                    Debug.Assert(ce.ReferencedPhpLibsLocations.Count == cfg.ReferencedPhpLibsLocations.Count);
                     //ce.CopyFrom(aa);
-                }
-                ce.Check();
-                showUsage = false;
-                ce.Compile();
-            }
-            finally
-            {
-
-            }
+                    ce.Check();
+                    showUsage1 = false;
+                    ce.Compile();
+                });
+            showUsage = showUsage1;
         }
 
         static void Usage()

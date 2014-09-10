@@ -35,6 +35,9 @@ namespace Lang.Php.Compiler
     property ProjectCompilation Compilation 
     	read only
     
+    property ReferencedAssemblies List<Assembly> 
+    	init #
+    
     property TranslationAssemblies List<Assembly> 
     	init #
     
@@ -47,7 +50,8 @@ namespace Lang.Php.Compiler
     smartClassEnd
     */
 
-    public sealed partial class Cs2PhpCompiler : IDisposable
+    [Serializable]
+    public partial class Cs2PhpCompiler : MarshalByRefObject, IDisposable
     {
         #region Constructors
 
@@ -152,7 +156,7 @@ namespace Lang.Php.Compiler
             _cSharpProject = _solution.Projects.Single(a => a.Id == _cSharpProject.Id);
         }
 
-        public EmitResult Compile2PhpAndEmit(string outDir, string dllFilename, IEnumerable<Assembly> assToScan, Dictionary<string, string> referencedPhpLibsLocations)
+        public EmitResult Compile2PhpAndEmit(string outDir, string dllFilename, Dictionary<string, string> referencedPhpLibsLocations)
         {
             if (_verboseToConsole)
                 Console.WriteLine("Compilation");
@@ -167,7 +171,7 @@ namespace Lang.Php.Compiler
                 var realOutputDir = Path.Combine(outDir, AssemblyTranslationInfo.GetRootPath(CompiledAssembly));
 
 
-                var ggg = (from assembly in assToScan
+                var ggg = (from assembly in _referencedAssemblies
                            let moduleIncludeConst = assembly.GetCustomAttribute<ModuleIncludeConstAttribute>()
                            where moduleIncludeConst != null
                            let assemblyName = assembly.GetName().Name
@@ -211,11 +215,13 @@ namespace Lang.Php.Compiler
                         Console.WriteLine("  ProjectReferences {0}", i.ProjectId);
                 }
         */
+
         /// <summary>
         /// Runs C# project compilation and fills <see cref="ProjectCompilation">ProjectCompilation</see>
         /// and <see cref="CompiledAssembly">CompiledAssembly</see>.
         /// </summary>
         /// <param name="sandbox"></param>
+        /// <param name="dllFilename"></param>
         /// <returns></returns>
         public EmitResult CompileCSharpProject(AssemblySandbox sandbox, string dllFilename)
         {
@@ -256,8 +262,6 @@ namespace Lang.Php.Compiler
                 _solution = _solution.WithProjectParseOptions(_cSharpProject.Id, parseOptions);
                 _cSharpProject = _solution.Projects.Single(a => a.Id == _cSharpProject.Id);
             }
-            //var co = new CompilationOptions(OutputKind.DynamicallyLinkedLibrary);
-            // var aa = project.ParseOptions.PreprocessorSymbolNames.ToArray();
             GreenOk();
         }
 
@@ -364,8 +368,6 @@ namespace Lang.Php.Compiler
 
         private void CheckRequiredTranslator(Assembly assembly)
         {
-
-            var a = typeof(RequiredTranslatorAttribute).Assembly.GetName().Version;
             var requiredTranslatorAttribute = assembly.GetCustomAttribute<RequiredTranslatorAttribute>();
             if (requiredTranslatorAttribute == null)
                 return;
@@ -463,12 +465,12 @@ namespace Lang.Php.Compiler
 }
 
 
-// -----:::::##### smartClass embedded code begin #####:::::----- generated 2014-09-05 17:15
+// -----:::::##### smartClass embedded code begin #####:::::----- generated 2014-09-09 09:04
 // File generated automatically ver 2014-09-01 19:00
 // Smartclass.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0c4d5d36fb5eb4ac
 namespace Lang.Php.Compiler
 {
-    public sealed partial class Cs2PhpCompiler
+    public partial class Cs2PhpCompiler
     {
         /*
         /// <summary>
@@ -482,9 +484,9 @@ namespace Lang.Php.Compiler
 
         implement INotifyPropertyChanged
         implement INotifyPropertyChanged_Passive
-        implement ToString ##Sandbox## ##Solution## ##CSharpProject## ##ProjectCompilation## ##TranslationAssemblies## ##CompiledAssembly## ##VerboseToConsole## ##ThrowExceptions##
-        implement ToString Sandbox=##Sandbox##, Solution=##Solution##, CSharpProject=##CSharpProject##, ProjectCompilation=##ProjectCompilation##, TranslationAssemblies=##TranslationAssemblies##, CompiledAssembly=##CompiledAssembly##, VerboseToConsole=##VerboseToConsole##, ThrowExceptions=##ThrowExceptions##
-        implement equals Sandbox, Solution, CSharpProject, ProjectCompilation, TranslationAssemblies, CompiledAssembly, VerboseToConsole, ThrowExceptions
+        implement ToString ##Sandbox## ##Solution## ##CSharpProject## ##ProjectCompilation## ##ReferencedAssemblies## ##TranslationAssemblies## ##CompiledAssembly## ##VerboseToConsole## ##ThrowExceptions##
+        implement ToString Sandbox=##Sandbox##, Solution=##Solution##, CSharpProject=##CSharpProject##, ProjectCompilation=##ProjectCompilation##, ReferencedAssemblies=##ReferencedAssemblies##, TranslationAssemblies=##TranslationAssemblies##, CompiledAssembly=##CompiledAssembly##, VerboseToConsole=##VerboseToConsole##, ThrowExceptions=##ThrowExceptions##
+        implement equals Sandbox, Solution, CSharpProject, ProjectCompilation, ReferencedAssemblies, TranslationAssemblies, CompiledAssembly, VerboseToConsole, ThrowExceptions
         implement equals *
         implement equals *, ~exclude1, ~exclude2
         */
@@ -505,6 +507,10 @@ namespace Lang.Php.Compiler
         /// Nazwa własności ProjectCompilation; 
         /// </summary>
         public const string PropertyNameProjectCompilation = "ProjectCompilation";
+        /// <summary>
+        /// Nazwa własności ReferencedAssemblies; 
+        /// </summary>
+        public const string PropertyNameReferencedAssemblies = "ReferencedAssemblies";
         /// <summary>
         /// Nazwa własności TranslationAssemblies; 
         /// </summary>
@@ -582,6 +588,21 @@ namespace Lang.Php.Compiler
         /// <summary>
         /// 
         /// </summary>
+        public List<Assembly> ReferencedAssemblies
+        {
+            get
+            {
+                return _referencedAssemblies;
+            }
+            set
+            {
+                _referencedAssemblies = value;
+            }
+        }
+        private List<Assembly> _referencedAssemblies = new List<Assembly>();
+        /// <summary>
+        /// 
+        /// </summary>
         public List<Assembly> TranslationAssemblies
         {
             get
@@ -634,9 +655,6 @@ namespace Lang.Php.Compiler
                 _throwExceptions = value;
             }
         }
-
-
-
         private bool _throwExceptions;
         #endregion Properties
 

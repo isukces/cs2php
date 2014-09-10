@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Lang.Php;
@@ -9,7 +8,7 @@ namespace Lang.Php.Test.Code
 {
     [IgnoreNamespace]
     [ScriptName("MyCodePhp")]
-    class MyCode
+    public class MyCode
     {
         public static void BasicMath1()
         {

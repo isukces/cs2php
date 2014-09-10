@@ -1,4 +1,5 @@
-﻿using Lang.Php.Compiler;
+﻿using Lang.Cs.Compiler;
+using Lang.Php.Compiler;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -37,6 +38,39 @@ namespace Lang.Cs2Php
     {
         #region Static Methods
 
+        // Public Methods 
+
+        public static void ExecuteInSeparateAppDomain(Action<CompilerEngine> compilerEngineAction, AppDomain forceDomain = null)
+        {
+
+            if (compilerEngineAction == null)
+                throw new ArgumentNullException("compilerEngineAction");
+
+            var appDomain = forceDomain;
+            if (appDomain == null)
+            {
+                var domainName = "sandbox" + Guid.NewGuid();
+                var domainSetup = new AppDomainSetup
+                {
+                    ApplicationName = domainName,
+                    ApplicationBase = Environment.CurrentDirectory
+                };
+                appDomain = AppDomain.CreateDomain(domainName, null, domainSetup);
+            }
+            try
+            {
+                var wrapperType = typeof(CompilerEngine);
+                var compilerEngine = (CompilerEngine)appDomain.CreateInstanceFrom(
+                    wrapperType.Assembly.Location,
+                    wrapperType.FullName).Unwrap();
+                compilerEngineAction(compilerEngine);
+            }
+            finally
+            {
+                if (forceDomain == null)
+                    AppDomain.Unload(appDomain);
+            }
+        }
         // Private Methods 
 
         /// <summary>
@@ -109,100 +143,9 @@ namespace Lang.Cs2Php
 
         public void Compile()
         {
-            using (var comp = new Cs2PhpCompiler
+            using (var comp = PreparePhpCompiler())
             {
-                VerboseToConsole = true,
-                ThrowExceptions = true
-            })
-            {
-                // Console.WriteLine("Try to load " + csProject);
-                comp.LoadProject(_csProject, _configuration);
-
-                Console.WriteLine("Preparing before compilation");
-
-                #region Remove Lang.Php reference
-
-                {
-                    // ... will be replaced by reference to dll from compiler base dir
-                    // I know - compilation libraries should be loaded into separate application domain
-                    var remove =
-                        comp.CSharpProject.MetadataReferences.FirstOrDefault(i => i.Display.EndsWith("Lang.Php.dll"));
-                    if (remove != null)
-                        comp.RemoveMetadataReferences(remove);
-                }
-
-                #endregion
-
-                string[] filenames;
-
-                #region We have to remove and add again references - strange
-
-                {
-                    // in other cases some referenced libraries are ignored
-                    List<MetadataFileReference> refToRemove =
-                        comp.CSharpProject.MetadataReferences.OfType<MetadataFileReference>().ToList();
-                    foreach (var i in refToRemove)
-                        comp.RemoveMetadataReferences(i);
-                    var ref1 = refToRemove.Select(i => i.FilePath).Union(_referenced).ToList();
-                    ref1.Add(Path.Combine(ExeDir, "Lang.Php.dll"));
-                    ref1.AddRange(Referenced);
-                    filenames = ref1.Distinct().ToArray();
-                }
-
-                #endregion
-
-                foreach (var fileName in filenames)
-                {
-                    var g = new MetadataFileReference(fileName, MetadataReferenceProperties.Assembly);
-                    comp.AddMetadataReferences(g);
-                }
-
-
-                Swap(comp);
-                {
-                    // ProjectReferences
-                    foreach (var x in comp.CSharpProject.ProjectReferences.ToArray())
-                    {
-                        var xx = x.ToString();
-                        // comp.RemoveMetadataReferences(remove);
-                    }
-
-                }
-                var loadedAssemblies = new List<Assembly>();
-                foreach (var reference in comp.CSharpProject.MetadataReferences)
-                {
-                    // var assemblyName = AssemblyName.GetAssemblyName(reference.Display);
-
-                    // var assembly = Assembly.LoadFrom(reference.Display);
-                    var assembly = comp.Sandbox.LoadByFullFilename(reference.Display);
-                    loadedAssemblies.Add(assembly.WrappedAssembly);
-                }
-
-
-                {
-                    foreach (var fileName in _tranlationHelpers)
-                    {
-                        var assembly = comp.Sandbox.LoadByFullFilename(fileName).WrappedAssembly;
-                        /*
-                            var a = Assembly.LoadFile(i);
-                             */
-                        // ReSharper disable once UnusedVariable
-                        var an = assembly.GetName();
-                        Console.WriteLine(" Add translation helper {0}", assembly.FullName);
-                        comp.TranslationAssemblies.Add(assembly);
-                    }
-                }
-
-                comp.TranslationAssemblies.Add(typeof(Php.Framework.Extension).Assembly);
-                comp.TranslationAssemblies.Add(typeof(Php.Compiler.Translator.Translator).Assembly);
-
-
-                //  comp.TranslationAssemblies.Add(typeof(Lang.Php.Wp.Compile.ModuleProcessor).Assembly);
-
-                // DebugDisplayReferences(comp);
-                var emitResult = comp.Compile2PhpAndEmit(_outDir, DllFilename, loadedAssemblies, _referencedPhpLibsLocations);
-
-
+                var emitResult = comp.Compile2PhpAndEmit(_outDir, DllFilename, _referencedPhpLibsLocations);
                 if (emitResult.Success) return;
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine("Compilation errors:");
@@ -210,6 +153,86 @@ namespace Lang.Cs2Php
                 foreach (var i in emitResult.Diagnostics)
                     WriteCompileError(i);
             }
+        }
+
+        /// <summary>
+        /// Loads csproj, prepares references and loads assemblies
+        /// </summary>
+        /// <returns></returns>
+        public Cs2PhpCompiler PreparePhpCompiler()
+        {
+            var comp = new Cs2PhpCompiler
+            {
+                VerboseToConsole = true,
+                ThrowExceptions = true
+            };
+
+            // Console.WriteLine("Try to load " + csProject);
+            comp.LoadProject(_csProject, _configuration);
+
+            Console.WriteLine("Preparing before compilation");
+
+            #region Remove Lang.Php reference
+
+            {
+                // ... will be replaced by reference to dll from compiler base dir
+                // I know - compilation libraries should be loaded into separate application domain
+                var remove =
+                    comp.CSharpProject.MetadataReferences.FirstOrDefault(i => i.Display.EndsWith("Lang.Php.dll"));
+                if (remove != null)
+                    comp.RemoveMetadataReferences(remove);
+            }
+
+            #endregion
+
+            string[] filenames;
+
+            #region We have to remove and add again references - strange
+
+            {
+                // in other cases some referenced libraries are ignored
+                var refToRemove =
+                    comp.CSharpProject.MetadataReferences.OfType<MetadataFileReference>().ToList();
+                foreach (var i in refToRemove)
+                    comp.RemoveMetadataReferences(i);
+                var ref1 = refToRemove.Select(i => i.FilePath).Union(_referenced).ToList();
+                ref1.Add(typeof(Php.PhpDummy).Assembly.GetCodeLocation().FullName);
+                ref1.AddRange(Referenced);
+                filenames = ref1.Distinct().ToArray();
+            }
+
+            #endregion
+
+            foreach (var fileName in filenames)
+                comp.AddMetadataReferences(new MetadataFileReference(fileName, MetadataReferenceProperties.Assembly));
+
+
+            Swap(comp);
+            comp.ReferencedAssemblies = comp.CSharpProject.MetadataReferences
+                .Select(reference => comp.Sandbox.LoadByFullFilename(reference.Display).WrappedAssembly)
+                .ToList();
+            foreach (var fileName in _tranlationHelpers)
+            {
+                var assembly = comp.Sandbox.LoadByFullFilename(fileName).WrappedAssembly;
+                // ReSharper disable once UnusedVariable
+                var an = assembly.GetName();
+                Console.WriteLine(" Add translation helper {0}", assembly.FullName);
+                comp.TranslationAssemblies.Add(assembly);
+            }
+
+            comp.TranslationAssemblies.Add(typeof(Php.Framework.Extension).Assembly);
+            comp.TranslationAssemblies.Add(typeof(Php.Compiler.Translator.Translator).Assembly);
+
+            return comp;
+        }
+
+        public void Set1(string[] referenced, string[] tranlationHelpers, string[] a)
+        {
+            _referenced = referenced.ToList();
+            _tranlationHelpers = tranlationHelpers.ToList();
+            _referencedPhpLibsLocations = (from i in a
+                                           select i.Split('\n')
+                ).ToDictionary(aa => aa[0], aa => aa[1]);
         }
 
         #endregion Methods
@@ -236,7 +259,7 @@ namespace Lang.Cs2Php
 
         #region Properties
 
-        private string DllFilename
+        public string DllFilename
         {
             get
             {
@@ -249,28 +272,6 @@ namespace Lang.Cs2Php
         }
 
         #endregion Properties
-
-        /*
-        public static string SlnDir
-        {
-            get
-            {
-                var di = new DirectoryInfo(ExeDir);
-                return di.Parent != null && di.Parent.Parent != null && di.Parent.Parent.Parent != null
-                    ? di.Parent.Parent.Parent.FullName
-                    : null;
-            }
-        }
-*/
-
-        public void Set1(string[] referenced, string[] tranlationHelpers, string[] a)
-        {
-            _referenced = referenced.ToList();
-            _tranlationHelpers = tranlationHelpers.ToList();
-            _referencedPhpLibsLocations = (from i in a
-                select i.Split('\n')
-                ).ToDictionary(aa => aa[0], aa => aa[1]);
-        }
     }
 }
 

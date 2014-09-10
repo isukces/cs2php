@@ -97,7 +97,7 @@ namespace Lang.Php.Compiler
         {
             var rootPathAttribute = assembly.GetCustomAttribute<RootPathAttribute>();
             if (rootPathAttribute == null)
-                return null;
+                return string.Empty;
             string result = (rootPathAttribute.Path ?? "").Replace("\\", "/").TrimEnd('/').TrimStart('/') + "/";
             while (result.Contains("//"))
                 result = result.Replace("//", "/");

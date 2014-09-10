@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace Lang.Php.Compiler.Source
 {
@@ -12,29 +8,36 @@ namespace Lang.Php.Compiler.Source
     implement Constructor *
     
     property Operand IPhpValue 
+    	read only
     
     property Operator string 
+    	read only
     smartClassEnd
     */
     
-    public partial class PhpUnaryOperatorExpression : IPhpValueBase 
+    public partial class PhpUnaryOperatorExpression : IPhpValueBase
     {
- 
-        public override string GetPhpCode(PhpEmitStyle style)
-        {
-            return string.Format("{0}{1}", _operator, operand.GetPhpCode(style));
-        }
+        #region Methods
+
+        // Public Methods 
 
         public override IEnumerable<ICodeRequest> GetCodeRequests()
         {
-            return operand == null ? new ICodeRequest[0] : operand.GetCodeRequests();
+            return _operand == null ? new ICodeRequest[0] : _operand.GetCodeRequests();
         }
+
+        public override string GetPhpCode(PhpEmitStyle style)
+        {
+            return string.Format("{0}{1}", _operator, _operand.GetPhpCode(style));
+        }
+
+        #endregion Methods
     }
 }
 
 
-// -----:::::##### smartClass embedded code begin #####:::::----- generated 2013-11-06 18:43
-// File generated automatically ver 2013-07-10 08:43
+// -----:::::##### smartClass embedded code begin #####:::::----- generated 2014-09-09 07:46
+// File generated automatically ver 2014-09-01 19:00
 // Smartclass.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0c4d5d36fb5eb4ac
 namespace Lang.Php.Compiler.Source
 {
@@ -61,13 +64,13 @@ namespace Lang.Php.Compiler.Source
         #region Constructors
         /// <summary>
         /// Tworzy instancję obiektu
-        /// <param name="Operand"></param>
-        /// <param name="Operator"></param>
+        /// <param name="operand"></param>
+        /// <param name="_operator"></param>
         /// </summary>
-        public PhpUnaryOperatorExpression(IPhpValue Operand, string Operator)
+        public PhpUnaryOperatorExpression(IPhpValue operand, string _operator)
         {
-            this.Operand = Operand;
-            this.Operator = Operator;
+            _operand = operand;
+            this._operator = _operator;
         }
 
         #endregion Constructors
@@ -76,11 +79,11 @@ namespace Lang.Php.Compiler.Source
         /// <summary>
         /// Nazwa własności Operand; 
         /// </summary>
-        public const string PROPERTYNAME_OPERAND = "Operand";
+        public const string PropertyNameOperand = "Operand";
         /// <summary>
         /// Nazwa własności Operator; 
         /// </summary>
-        public const string PROPERTYNAME_OPERATOR = "Operator";
+        public const string PropertyNameOperator = "Operator";
         #endregion Constants
 
         #region Methods
@@ -88,33 +91,24 @@ namespace Lang.Php.Compiler.Source
 
         #region Properties
         /// <summary>
-        /// 
+        /// Własność jest tylko do odczytu.
         /// </summary>
         public IPhpValue Operand
         {
             get
             {
-                return operand;
-            }
-            set
-            {
-                operand = value;
+                return _operand;
             }
         }
-        private IPhpValue operand;
+        private IPhpValue _operand;
         /// <summary>
-        /// 
+        /// Własność jest tylko do odczytu.
         /// </summary>
         public string Operator
         {
             get
             {
                 return _operator;
-            }
-            set
-            {
-                value = (value ?? String.Empty).Trim();
-                _operator = value;
             }
         }
         private string _operator = string.Empty;
