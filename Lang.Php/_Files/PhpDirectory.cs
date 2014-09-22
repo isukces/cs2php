@@ -1,9 +1,7 @@
 ﻿using Lang.Php.Runtime;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
+// ReSharper disable once CheckNamespace
 namespace Lang.Php
 {
 
@@ -47,6 +45,12 @@ namespace Lang.Php
         public void Close()
         {
 
+        }
+
+        [DirectCall("opendir", "0")]
+        public static PhpDirectory Open(string dirName)
+        {
+            throw new NotImplementedException();
         }
     }
 

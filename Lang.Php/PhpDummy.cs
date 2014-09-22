@@ -15,6 +15,13 @@ namespace Lang.Php
 
         // Public Methods 
 
+        [DirectCall("decoct")]
+        public static string decoct(int x)
+        {
+            throw new NotImplementedException();
+        }
+
+
         [DirectCall("_htmlspecialchars_")]
         public static string _htmlspecialchars_(string _string)
         {
@@ -464,18 +471,34 @@ namespace Lang.Php
         }
 
         [DirectCall("ob_get_clean")]
+        [Obsolete("Use OutputBuffer.GetClean()")]
         public static string ob_get_clean()
         {
             throw new NotImplementedException();
         }
 
+        [DirectCall("ob_end_clean")]
+        [Obsolete("Use OutputBuffer.EndClean()")]
+        public static string ob_end_clean()
+        {
+            throw new NotImplementedException();
+        }
+        [DirectCall("ob_end_flush")]
+        [Obsolete("Use OutputBuffer.EndFlush()")]
+        public static string ob_end_flush()
+        {
+            throw new NotImplementedException();
+        }
+
         [DirectCall("ob_start")]
+        [Obsolete("Use OutputBuffer.Start()")]
         public static void ob_start()
         {
             // bool ob_start ([ callable $output_callback = NULL [, int $chunk_size = 0 [, int $flags = PHP_OUTPUT_HANDLER_STDFLAGS ]]] )
         }
 
         [DirectCall("ob_start")]
+        [Obsolete("Use OutputBuffer.Start(callback)")]
         public static void ob_start(Func<string, string> callback)
         {
             // bool ob_start ([ callable $output_callback = NULL [, int $chunk_size = 0 [, int $flags = PHP_OUTPUT_HANDLER_STDFLAGS ]]] )

@@ -182,7 +182,7 @@ namespace Lang.Php
         /// bool mkdir ( string $pathname [, int $mode = 0777 [, bool $recursive = false [, resource $context ]]] )
         /// </summary>
         [DirectCall("mkdir")]
-        public static bool MkDir(string pathname, UnixFilePermissions mode = UnixFilePermissions.Common_777)
+        public static bool MkDir(string pathname, UnixFilePermissions mode = CommonUnixFilePermissions.Perm0777)
         {
             try
             {

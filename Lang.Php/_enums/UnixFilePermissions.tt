@@ -1,0 +1,74 @@
+﻿<#@ template debug="false" hostspecific="false" language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ output extension=".cs" #>
+using System;
+
+namespace Lang.Php
+{
+    [Flags]
+    [EnumRender(EnumRenderOptions.OctalNumbers, false)]
+    public enum UnixFilePermissions
+    {
+        None = 0,
+
+        OtherRead = 4,
+        OtherWrite = 2,
+        OtherExec = 1,
+
+        GroupRead = 32,
+        GroupWrite = 16,
+        GroupExec = 8,
+
+        OwnerRead = 256,
+        OwnerWrite = 128,
+        OwnerExec = 64,
+
+    }
+    public static class CommonUnixFilePermissions {
+    <#
+   
+              var dictionary = new Dictionary<int, string>
+            {
+                {4, "OtherRead"},
+                {2, "OtherWrite"},
+                {1, "OtherExec"},
+
+                {32, "GroupRead"},
+                {16, "GroupWrite"},
+                {8, "GroupExec"},
+
+                {256, "OwnerRead"},
+                {128, "OwnerWrite"},
+                {64, "OwnerExec"},
+
+            
+            };
+            for (int i = 0; i < 512; i++)
+            {
+                Write("\r\n        [AsValue]\r\n");
+                var x = new List<string>();
+                var j = i;
+                var m = 256;
+                while (m > 0)
+                {
+                    if (j >= m)
+                    {
+                        x.Add("UnixFilePermissions." + dictionary[m]);
+                        j -= m;
+                    }
+                    m /= 2;
+                }
+                var txt = string.Join("|", x);
+                if (string.IsNullOrEmpty(txt)) 
+                    txt="UnixFilePermissions.None";
+                Write(string.Format("        public const UnixFilePermissions Perm0{1} = {0};", 
+                    txt, 
+                    Convert.ToString(i, 8)));
+            }
+
+#>
+    }
+    }

@@ -72,9 +72,13 @@
     <Compile Include="Html.cs" />
     <Compile Include="Filters\FilterInput.cs" />
     <Compile Include="MbPhpString.cs" />
+    <Compile Include="OutputBuffer.cs" />
     <Compile Include="PhpErrorTable.cs" />
     <Compile Include="PhpIni.cs" />
     <Compile Include="PhpVersions.cs" />
+    <Compile Include="_Posix\Posix.cs" />
+    <Compile Include="_Posix\PosixGroupInfo.cs" />
+    <Compile Include="_Posix\PosixUserInfo.cs" />
     <Compile Include="Runtime\PhpCodeValue.cs" />
     <Compile Include="Runtime\RuntimeMySQLiResult.cs" />
     <Compile Include="Runtime\RuntimePhpDirectory.cs" />
@@ -88,6 +92,11 @@
     <Compile Include="_enums\ClassMembers.cs" />
     <Compile Include="_enums\MethodCallStyles.cs" />
     <Compile Include="_enums\Timezones.cs" />
+    <Compile Include="_enums\UnixFilePermissions.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>UnixFilePermissions.tt</DependentUpon>
+    </Compile>
     <Compile Include="_Files\PhpDirectoryEntry.cs" />
     <Compile Include="_Files\PhpDirectory.cs" />
     <Compile Include="PhpMath.cs" />
@@ -132,6 +141,7 @@
     <Compile Include="PhpFileStream.cs" />
     <Compile Include="_attributes\UseOperatorAttribute.cs" />
     <Compile Include="_enums\Charsets.cs" />
+    <Compile Include="_Files\PhpFile.cs" />
     <Compile Include="_Files\PhpFiles.cs" />
     <Compile Include="GlobalMethods.cs" />
     <Compile Include="HtmlEntitiesFlags.cs" />
@@ -169,7 +179,10 @@
     <Compile Include="_attributes\SinceAttribute.cs" />
     <Compile Include="_attributes\SkipAttribute.cs" />
     <Compile Include="_enums\UnixFileGroupPermissions.cs" />
-    <Compile Include="_enums\UnixFilePermissions.cs" />
+    <None Include="_enums\UnixFilePermissions.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>UnixFilePermissions.cs</LastGenOutput>
+    </None>
     <Compile Include="_exceptions\MockMethodException.cs" />
     <Compile Include="_ResponseHeader\ResponseHeader.cs" />
     <Compile Include="_Server.cs" />
