@@ -7,13 +7,11 @@ namespace Lang.Cs.Compiler
 {
     public static class _ReflectionExtensions
     {
-        public static string GetVisibility(bool isPublic, bool isPrivate)
+        private static string GetVisibility(bool isPublic, bool isPrivate)
         {
             if (isPublic)
                 return "public";
-            if (isPrivate)
-                return "private";
-            return "protected";
+            return isPrivate ? "private" : "protected";
         }
 
         public static FileInfo GetCodeLocation(this Assembly a)
