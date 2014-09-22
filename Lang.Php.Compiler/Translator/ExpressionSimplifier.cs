@@ -1,4 +1,5 @@
-﻿using Lang.Php.Compiler.Source;
+﻿using System.Web.UI;
+using Lang.Php.Compiler.Source;
 using Lang.Php.Runtime;
 using System;
 using System.Collections.Generic;
@@ -69,60 +70,81 @@ namespace Lang.Php.Compiler.Translator
 
         protected override IPhpValue VisitPhpBinaryOperatorExpression(PhpBinaryOperatorExpression node)
         {
-            if (node.Operator == ".")
+            switch (node.Operator)
             {
-                var _left = Simplify(node.Left);
-                var _right = Simplify(node.Right);
-                var n = new PhpBinaryOperatorExpression(node.Operator, _left, _right);
-                var c = ExplodeConcats(n, ".").ToList();
-
-
-
-                for (int i = 1; i < c.Count; i++)
-                {
-                    var L = c[i - 1];
-                    var R = c[i];
-                    if (L is PhpConstValue && R is PhpConstValue)
+                case ".":
                     {
-                        var LValue = (L as PhpConstValue).Value;
-                        var RValue = (R as PhpConstValue).Value;
-                        if (LValue is string && RValue is string)
-                        {
-                            c[i - 1] = new PhpConstValue((string)LValue + (string)RValue);
-                            c.RemoveAt(i);
-                            i--;
-                            continue;
-                        }
-                        var LCode = PhpValues.ToPhpCodeValue(LValue);
-                        var RCode = PhpValues.ToPhpCodeValue(RValue);
-                        string left, right;
-                        if (LCode.TryGetPhpString(out left) && RCode.TryGetPhpString(out right))
-                        {
-                            c[i - 1] = new PhpConstValue(left + right);
-                            c.RemoveAt(i);
-                            i--;
-                            continue;
-                        }
+                        var _left = Simplify(node.Left);
+                        var _right = Simplify(node.Right);
+                        var n = new PhpBinaryOperatorExpression(node.Operator, _left, _right);
+                        var c = ExplodeConcats(n, ".").ToList();
 
-                        var msg = string.Format("left={0}, right={1} '{2}+{3}'", LValue, RValue, LValue == null ? null : LValue.GetType().FullName, RValue == null ? null : RValue.GetType().FullName);
+
+
+                        for (int i = 1; i < c.Count; i++)
+                        {
+                            var L = c[i - 1];
+                            var R = c[i];
+                            if (L is PhpConstValue && R is PhpConstValue)
+                            {
+                                var LValue = (L as PhpConstValue).Value;
+                                var RValue = (R as PhpConstValue).Value;
+                                if (LValue is string && RValue is string)
+                                {
+                                    c[i - 1] = new PhpConstValue((string)LValue + (string)RValue);
+                                    c.RemoveAt(i);
+                                    i--;
+                                    continue;
+                                }
+                                var LCode = PhpValues.ToPhpCodeValue(LValue);
+                                var RCode = PhpValues.ToPhpCodeValue(RValue);
+                                string left, right;
+                                if (LCode.TryGetPhpString(out left) && RCode.TryGetPhpString(out right))
+                                {
+                                    c[i - 1] = new PhpConstValue(left + right);
+                                    c.RemoveAt(i);
+                                    i--;
+                                    continue;
+                                }
+
+                                var msg = string.Format("left={0}, right={1} '{2}+{3}'", LValue, RValue, LValue == null ? null : LValue.GetType().FullName, RValue == null ? null : RValue.GetType().FullName);
 
 #if DEBUG
-                        throw new NotImplementedException(msg);
+                                throw new NotImplementedException(msg);
 #else
                         Console.WriteLine(msg);
                         Console.WriteLine(L.GetPhpCode(null));
                         Console.WriteLine(R.GetPhpCode(null));
                         continue;
 #endif
+                            }
+                        }
+                        IPhpValue result = c[0];
+                        if (c.Count > 1)
+                            foreach (var x2 in c.Skip(1))
+                                result = new PhpBinaryOperatorExpression(".", result, x2);
+                        return ReturnSubst(node, result);
                     }
-                }
-                IPhpValue result = c[0];
-                if (c.Count > 1)
-                {
-                    foreach (var x2 in c.Skip(1))
-                        result = new PhpBinaryOperatorExpression(".", result, x2);
-                }
-                return ReturnSubst(node, result);
+                case "|":
+                    {
+                        //                    var aLeft = node.Left as PhpConstValue;
+                        //                    var aRight = node.Right as PhpConstValue;
+                        //                    if (aLeft != null && aRight != null && aLeft.Value!=null && aRight.Value!=null)
+                        //                    {
+                        //                        var typeLeft = aLeft.Value.GetType();
+                        //                        var typeRight = aRight.Value.GetType();
+                        //                        if (typeLeft.IsEnum && typeLeft == typeRight)
+                        //                        {
+                        //                            var leftValue = (int)aLeft.Value;
+                        //                            var rightValue = (int)aRight.Value;
+                        //                            var c = leftValue | rightValue;
+                        //                            var dd = PhpCodeValue.FromInt(c, true);
+                        //                            var d = new PhpConstValue(c, false);
+                        //                            return d;
+                        //                        }
+                        //                    }
+                    }
+                    break;
             }
             return node;
         }

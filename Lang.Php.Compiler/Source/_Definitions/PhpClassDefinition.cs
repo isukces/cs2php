@@ -48,8 +48,8 @@ namespace Lang.Php.Compiler.Source
 
         public void Emit(PhpSourceCodeEmiter emiter, PhpSourceCodeWriter writer, PhpEmitStyle style)
         {
-            var save_styleCurrentClass = style.CurrentClass;
-            var save_styleCurrentNamespace = style.CurrentNamespace;
+            var saveStyleCurrentClass = style.CurrentClass;
+            var saveStyleCurrentNamespace = style.CurrentNamespace;
             try
             {
                 if (IsEmpty)
@@ -74,8 +74,8 @@ namespace Lang.Php.Compiler.Source
             }
             finally
             {
-                style.CurrentClass = save_styleCurrentClass;
-                style.CurrentNamespace = save_styleCurrentNamespace;
+                style.CurrentClass = saveStyleCurrentClass;
+                style.CurrentNamespace = saveStyleCurrentNamespace;
             }
         }
 

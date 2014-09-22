@@ -424,7 +424,7 @@ namespace Lang.Php.Compiler
             if (!string.IsNullOrEmpty(assemblyTi.PhpPackageSourceUri))
             {
                 DownloadAndUnzip(assemblyTi.PhpPackageSourceUri, ecBaseDir, assemblyTi.PhpPackagePathStrip);
-                //      return;
+                return; //??? czy return?
             }
             var translationState = new TranslationState(translationInfo);
             var translator = new Translator.Translator(translationState);
@@ -444,7 +444,6 @@ namespace Lang.Php.Compiler
                 translationInfo.CurrentAssembly = _compiledAssembly;// dla pewności
                 foreach (var module in translator.Modules.Where(i => i.Name.Library == libName && !i.IsEmpty))
                 {
-
                     string fileName = module.Name.MakeEmitPath(ecBaseDir, 1);
                     foreach (var modProcessor in translationInfo.ModuleProcessors)
                     {

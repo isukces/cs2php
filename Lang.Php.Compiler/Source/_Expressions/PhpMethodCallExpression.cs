@@ -91,6 +91,11 @@ namespace Lang.Php.Compiler.Source
             return requests;
         }
 
+        public override string ToString()
+        {
+            return GetPhpCode(new PhpEmitStyle());
+        }
+
         public override string GetPhpCode(PhpEmitStyle style)
         {
             string join = style == null || style.Compression == EmitStyleCompression.Beauty ? ", " : ",";
@@ -103,7 +108,7 @@ namespace Lang.Php.Compiler.Source
             }
             var name = _name;
             if (!_className.IsEmpty)
-                _name = _className.NameForEmit(style) + "::" + _name;
+                name = _className.NameForEmit(style) + "::" + name;
             else if (_targetObject != null)
             {
                 var to = _targetObject;
