@@ -1,0 +1,6 @@
+public static function StringConcats() {
+    $x = 3;
+    $a = 'ab';
+    $b = 'a' . ($x / 2 < 10 ? 'b' : 'c');
+    $c = 'a' . ($x / 2 < 10 ? 'b' : 'c') . 'd';
+}

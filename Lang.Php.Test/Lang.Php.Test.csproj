@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{8BE2B47E-389A-433D-BEA1-CB7655B8D1DC}</ProjectGuid>
+    <ProjectGuid>{524926F6-8C8E-4FDC-9C18-0D9E3C9A8794}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Lang.Php.Test</RootNamespace>
@@ -58,6 +58,9 @@
   <ItemGroup>
     <EmbeddedResource Include="php\MyCodePhp_BasicMath1.txt" />
     <EmbeddedResource Include="php\MyCodePhp_Collections.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="php\MyCodePhp_StringConcats.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

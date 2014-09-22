@@ -55,5 +55,18 @@ namespace Lang.Php.Test.Code
             var s2 = stack.Pop();
             count = stack.Count;
         }
+
+        public static void StringConcats()
+        {
+            int x = 3;
+            var a = "a" + "b";
+            var b = "a" + (x / 2 < 10 ? "b" : "c");
+            var c = "a" + (x/2 < 10 ? "b" : "c") + "d";
+        }
+
+        public static void SimpleEquations()
+        {
+            
+        }
     }
 }
