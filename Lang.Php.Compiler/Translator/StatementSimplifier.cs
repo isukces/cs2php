@@ -49,12 +49,32 @@ namespace Lang.Php.Compiler.Translator
                         if (e1 == null) continue;
                         var e2 = GetPhpNativeMethodCall(newNode.Statements[i], "echo");
                         if (e2 == null) continue;
-                        IPhpValue e = new PhpBinaryOperatorExpression(".", e1.Arguments[0].Expression, e2.Arguments[0].Expression);
+
+                        Func<IPhpValue, IPhpValue> AddBracketsIfNecessary = (ee) =>
+                        {
+                            if (ee is PhpParenthesizedExpression || ee is PhpConstValue || ee is PhpPropertyAccessExpression)
+                                return ee;
+
+                            if (ee is PhpBinaryOperatorExpression && ((PhpBinaryOperatorExpression)ee).Operator == ".")
+                                return ee;
+                            return new PhpParenthesizedExpression(ee);
+                        };
+
+                        var a1 = AddBracketsIfNecessary(e1.Arguments[0].Expression);
+                        var a2 = AddBracketsIfNecessary(e2.Arguments[0].Expression);
+
+                        IPhpValue e = new PhpBinaryOperatorExpression(".", a1, a2);
                         e = Simplify(e);
                         IPhpValue echo = new PhpMethodCallExpression("echo", e);
                         newNode.Statements[i - 1] = new PhpExpressionStatement(echo);
                         newNode.Statements.RemoveAt(i);
                         i--;
+                    }
+                    for (var i = 0; i < newNode.Statements.Count; i++)
+                    {
+                        var a = newNode.Statements[i];
+                        if (a is PhpSourceBase)
+                            newNode.Statements[i] = this.Visit(a as PhpSourceBase);
                     }
                 }
             }

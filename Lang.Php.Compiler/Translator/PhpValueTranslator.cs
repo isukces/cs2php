@@ -79,7 +79,10 @@ namespace Lang.Php.Compiler.Translator
             if (value == null)
                 return null;
             if (value is CSharpBase)
-                return Visit(value as CSharpBase);
+            {
+                var tmp = Visit(value as CSharpBase);
+                return SimplifyPhpExpression(tmp);
+            }
             throw new NotSupportedException();
         }
         // Protected Methods 
@@ -93,7 +96,7 @@ namespace Lang.Php.Compiler.Translator
         {
             var a = new PhpArrayCreateExpression();
             if (src.Initializers != null && src.Initializers.Any())
-                a.Initializers = src.Initializers.Select(i => TransValue(i)).ToArray();
+                a.Initializers = src.Initializers.Select(TransValue).ToArray();
             return SimplifyPhpExpression(a);
         }
 
@@ -115,14 +118,8 @@ namespace Lang.Php.Compiler.Translator
 
         protected override IPhpValue VisitBinaryOperatorExpression(BinaryOperatorExpression src)
         {
-            var t1 = src.Left.ValueType;
-            var t2 = src.Right.ValueType;
-            //if (t1 == null && src.Left is PhpConstValue && (src.Left as PhpConstValue).Value == null)
-            //    t1 = typeof(object);
-
-            //if (t2 == null && src.Right is PhpConstValue && (src.Right as PhpConstValue).Value == null)
-            //    t2 = typeof(object);
-
+            var leftType = src.Left.ValueType;
+            var rightType = src.Right.ValueType;
             if (src.OperatorMethod != null)
             {
                 if (!src.OperatorMethod.IsStatic)
@@ -136,28 +133,54 @@ namespace Lang.Php.Compiler.Translator
                 return trans;
 
             }
-            var l = TransValue(src.Left);
+            var leftValue = TransValue(src.Left);
             if (src.Operator == "as")
+                return leftValue;
+
+            var rightValue = TransValue(src.Right);
+
+            var ss1 = leftValue as PhpConstValue;
+            var ss2 = rightValue as PhpConstValue;
+            var isConst = ss1 != null && ss2 != null;
+
+            //            if (isConst)
+            //                return new PhpBinaryOperatorExpression(src.Operator, leftValue, rightValue);
+
+
+            if (leftType == typeof(string) || rightType == typeof(string))
             {
-                return l;
+                var phpOperator = src.Operator == "+" ? "." : src.Operator;
+                return src.Operator == "+" && isConst
+                    ? (IPhpValue)new PhpConstValue(ss1.Value as string + ss2.Value as string)
+                    : new PhpBinaryOperatorExpression(phpOperator, leftValue, rightValue);
             }
-
-
-            var r = TransValue(src.Right);
-            if (t1 == typeof(string) || t2 == typeof(string))
+            if (isConst)
             {
-                if (src.Operator == "+")
+                if (leftType == typeof(int) && rightType == (typeof(int)))
                 {
-                    if (l is PhpConstValue && r is PhpConstValue)
+                    var s1 = (int)ss1.Value;
+                    var s2 = (int)ss2.Value;
+                    switch (src.Operator)
                     {
-                        var s1 = (l as PhpConstValue).Value as string;
-                        var s2 = (r as PhpConstValue).Value as string;
-                        return new PhpConstValue(s1 + s2);
+                        case "+":
+                            return new PhpConstValue(s1 + s2);
+                        case "-":
+                            return new PhpConstValue(s1 - s2);
+                        case "*":
+                            return new PhpConstValue(s1 * s2);
+                        case "/":
+                            return new PhpConstValue(s1 / s2);
                     }
-                    return new PhpBinaryOperatorExpression(".", l, r);
+
+                }
+                if (leftType.IsEnum && rightType.IsEnum && src.Operator == "|")
+                {
+                    var s1 = (int)ss1.Value;
+                    var s2 = (int)ss2.Value;
+                    return new PhpConstValue(Enum.ToObject(leftType, s1 | s2));
                 }
             }
-            return new PhpBinaryOperatorExpression(src.Operator, l, r);
+            return new PhpBinaryOperatorExpression(src.Operator, leftValue, rightValue);
         }
 
         protected override IPhpValue VisitCallConstructor(CallConstructor src)
@@ -265,7 +288,7 @@ namespace Lang.Php.Compiler.Translator
 
                 }
                 var fieldDeclaringType = memberDeclaringType;
-                if (fieldDeclaringType == null) 
+                if (fieldDeclaringType == null)
                     throw new Exception("fieldDeclaringType");
                 state.Principles.GetTi(fieldDeclaringType, false);
                 #region Konwersja ENUMA
@@ -492,7 +515,7 @@ namespace Lang.Php.Compiler.Translator
                         {
                             #region Check map parameter
                             var tmp = ats.MapArray;
-                            if (tmp == null || tmp.Length <= 0) 
+                            if (tmp == null || tmp.Length <= 0)
                                 return phpTargetObject;
                             if (tmp.Length > 1 || tmp[0] != DirectCallAttribute.This)
                                 throw new NotSupportedException(string.Format("Property {1}.{0} has invalid 'Map' parameter in DirectCallAttribute", propertyInfo.Name, propertyInfo.DeclaringType));
@@ -577,7 +600,7 @@ namespace Lang.Php.Compiler.Translator
 
         protected override IPhpValue VisitLocalVariableExpression(LocalVariableExpression src)
         {
-            if (state.Principles.CurrentMethod == null) 
+            if (state.Principles.CurrentMethod == null)
                 return PhpVariableExpression.MakeLocal(src.Name, false);
             var isArgument = state.Principles.CurrentMethod.GetParameters().Any(u => u.Name == src.Name);
             return PhpVariableExpression.MakeLocal(src.Name, isArgument);

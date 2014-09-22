@@ -31,9 +31,13 @@ namespace Lang.Php.Compiler
         public static PropertyTranslationInfo FromPropertyInfo(PropertyInfo propInfo)
         {
             var result = new PropertyTranslationInfo();
-            result._isStatic = (propInfo.CanRead && propInfo.GetGetMethod().IsStatic)
-                || (propInfo.CanWrite && propInfo.GetSetMethod().IsStatic);
             var autoImplemented = IsAutoProperty(propInfo);
+            var gm = propInfo.GetGetMethod();
+            var sm = propInfo.GetSetMethod();
+            if (gm == null && sm == null)
+                throw new Exception(string.Format("Unable to get getter or setter for {0}", propInfo));
+            result._isStatic = (gm != null && gm.IsStatic)
+                               || (sm != null && sm.IsStatic);
             if (autoImplemented)
                 result.FieldScriptName = propInfo.Name; // just field with the same name 
             else
