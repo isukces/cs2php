@@ -78,7 +78,7 @@ namespace Lang.Php.XUnitTests
         private static void Save(string translatedCode, string shortFilename)
         {
 #if WRITE_CODE
-            var fi = new FileInfo(Path.Combine(Directory.GetCurrentDirectory(), "..\\..\\php\\new\\" + shortFilename));
+            var fi = new FileInfo(Path.Combine(Directory.GetCurrentDirectory(), "..\\..\\..\\Lang.Php.Test\\php\\new\\" + shortFilename));
             if (fi.Directory != null)
                 fi.Directory.Create();
             File.WriteAllText(fi.FullName, translatedCode);

@@ -33,34 +33,29 @@ namespace E04_Graphics
                 compression = 0;
             else if (compression > 100)
                 compression = 100;
-            if (jpg)
-                header(Image.HEADER_CONTENT_TYPE_JPG);
-            else
-                header(Image.HEADER_CONTENT_TYPE_PNG);
+            header(jpg ? Image.HEADER_CONTENT_TYPE_JPG : Image.HEADER_CONTENT_TYPE_PNG);
 
             var myImage = Image.CreateTrueColor(WIDTH, HEIGHT);
-            if (Image.IsValid(myImage))
+            if (!Image.IsValid(myImage)) return;
+            var color = myImage.ColorAllocate(255, 0, 0); // first call is background
+            for (var i = 0; i < WIDTH; i++)
             {
-                Color color = myImage.ColorAllocate(255, 0, 0); // first call is background
-                for (int i = 0; i < WIDTH; i++)
-                {
-                    color = myImage.ColorAllocate(i, 255 - i, 0);
-                    if (Color.IsValid(color))
-                        myImage.DrawLine(0, HEIGHT - 1, i, 0, color);
-                    color = myImage.ColorAllocate(i, 0, 255 - i);
-                    if (Color.IsValid(color))
-                        myImage.DrawLine(WIDTH - 1, 0, WIDTH - 1 - i, HEIGHT - 1, color);
-                }
-                color = myImage.ColorAllocate(0, 0, 255);
-                myImage.DrawString(Font.Font4, 10, 30, "Hello", color);
-                color = myImage.ColorAllocate(255, 255, 255);
-                myImage.DrawString(Font.Font4, 10, 50, "C# to PHP is fantastic", color);
-                if (jpg)
-                    myImage.Jpeg(null, compression);
-                else
-                    myImage.Png();
-                myImage.Destroy();
+                color = myImage.ColorAllocate(i, 255 - i, 0);
+                if (Color.IsValid(color))
+                    myImage.DrawLine(0, HEIGHT - 1, i, 0, color);
+                color = myImage.ColorAllocate(i, 0, 255 - i);
+                if (Color.IsValid(color))
+                    myImage.DrawLine(WIDTH - 1, 0, WIDTH - 1 - i, HEIGHT - 1, color);
             }
+            color = myImage.ColorAllocate(0, 0, 255);
+            myImage.DrawString(Font.Font4, 10, 30, "Hello", color);
+            color = myImage.ColorAllocate(255, 255, 255);
+            myImage.DrawString(Font.Font4, 10, 50, "C# to PHP is fantastic", color);
+            if (jpg)
+                myImage.Jpeg(null, compression);
+            else
+                myImage.Png();
+            myImage.Destroy();
         }
 
         #endregion Static Methods

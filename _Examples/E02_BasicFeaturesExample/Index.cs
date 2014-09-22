@@ -13,7 +13,7 @@ namespace Lang.Php.Examples.BasicFeaturesExample
         [ScriptName("h")]
         public static void Header(string title)
         {
-            Response.Echo(Doctypes.XHTML_Transitional);
+            Response.Echo(Doctypes.XhtmlTransitional);
             echo(PHP_EOL);
             Html.EchoTagOpen(Tags.Html);
             echo(PHP_EOL);

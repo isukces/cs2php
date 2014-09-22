@@ -89,7 +89,9 @@ namespace Lang.Php.XUnitTests
                             MethodTranslation(ModuleMycode, ClassMycode, "BasicMath1", translator);
                             MethodTranslation(ModuleMycode, ClassMycode, "Collections", translator);
                             MethodTranslation(ModuleMycode, ClassMycode, "CostantsAndVariables", translator);
+                            MethodTranslation(ModuleMycode, ClassMycode, "StringConcats", translator);
 
+                            
                         }
                         ;
 

@@ -13,7 +13,7 @@ namespace E04_Graphics
     {
         public static void PhpMain()
         {
-            echo(Doctypes.XHTML_Transitional + PHP_EOL);
+            echo(Doctypes.XhtmlTransitional + PHP_EOL);
             Html.EchoTagOpen(Tags.Html);
             {
                 Html.EchoTagOpen(Tags.Head);
