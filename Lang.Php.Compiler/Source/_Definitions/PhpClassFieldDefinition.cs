@@ -41,7 +41,7 @@ namespace Lang.Php.Compiler.Source
                 return;
             }
 
-            string a = string.Format("{0}{1} {2}",
+            string a = string.Format("{0}{1} ${2}",
                 visibility.ToString().ToLower(),
                 isStatic ? " static" : "",
                 name
