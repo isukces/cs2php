@@ -112,6 +112,9 @@
     <Compile Include="Source\_Statements\PhpSwitchStatement.cs" />
     <Compile Include="Translator\ExpressionSimplifier.cs" />
     <Compile Include="Translator\Node\BasicTranslator_ClassField.cs" />
+    <Compile Include="Translator\Node\BasicTranslator_ClassPropertyAccess.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Translator\Node\BasicTranslator_Constructor.cs" />
     <Compile Include="Translator\Node\BasicTranslator_Methods.cs" />
     <Compile Include="Translator\Node\BasicTranslator_Property.cs" />

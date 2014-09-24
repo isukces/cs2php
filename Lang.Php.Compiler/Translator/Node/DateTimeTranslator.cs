@@ -1,9 +1,5 @@
 ﻿using Lang.Cs.Compiler;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Lang.Php.Compiler.Source;
 
 namespace Lang.Php.Compiler.Translator.Node
@@ -27,40 +23,41 @@ namespace Lang.Php.Compiler.Translator.Node
         {
             if (src.Info.DeclaringType != typeof(DateTime))
                 return null;
-            if (src.Info.ToString() == "Void .ctor(Int32, Int32, Int32)")
+            switch (src.Info.ToString())
             {
-                //                $date = new DateTime();
-                //$date->setDate(2001, 2, 3);
-                var dtObject = PhpMethodCallExpression.MakeConstructor("DateTime");
-                dtObject.IsStandardPhpClass = true;
-                // date_date_set 
-                var b = new PhpMethodCallExpression("date_date_set ",
+                case "Void .ctor(Int32, Int32, Int32)":
+                {
+                    //                $date = new DateTime();
+                    //$date->setDate(2001, 2, 3);
+                    var dtObject = PhpMethodCallExpression.MakeConstructor("DateTime");
+                    dtObject.IsStandardPhpClass = true;
+                    // date_date_set 
+                    var b = new PhpMethodCallExpression("date_date_set ",
                         dtObject,
                         ctx.TranslateValue(src.Arguments[0]),
                         ctx.TranslateValue(src.Arguments[1]),
                         ctx.TranslateValue(src.Arguments[2])
-                    );
-                var c = new PhpMethodCallExpression("date_time_set ",
+                        );
+                    var c = new PhpMethodCallExpression("date_time_set ",
                         b,
                         new PhpConstValue(0),
                         new PhpConstValue(0),
                         new PhpConstValue(0)
-                    );
-                var mktime = new PhpMethodCallExpression("mktime",
+                        );
+                    var mktime = new PhpMethodCallExpression("mktime",
                         new PhpConstValue(0),
                         new PhpConstValue(0),
                         new PhpConstValue(0),
                         ctx.TranslateValue(src.Arguments[1]), //month
                         ctx.TranslateValue(src.Arguments[2]),// day
                         ctx.TranslateValue(src.Arguments[0]) // year
-                    );
-                var epoch = new PhpBinaryOperatorExpression(".", new PhpConstValue("@"), mktime);
-                dtObject.Arguments.Add(new PhpMethodInvokeValue(epoch));
-                return dtObject;
-                // int mktime ([ int $hour = date("H") [, int $minute = date("i") [, int $second = date("s") [, int $month = date("n") [, int $day = date("j") [, int $year = date("Y") [, int $is_dst = -1 ]]]]]]] )
-                // $datetimeobject = new DateTime(mktime(0, 0, 0, $data[$j]['month'], $data[$j]['day'],$data[$j]['year']));
-                return c;
-                throw new NotImplementedException();
+                        );
+                    var epoch = new PhpBinaryOperatorExpression(".", new PhpConstValue("@"), mktime);
+                    dtObject.Arguments.Add(new PhpMethodInvokeValue(epoch));
+                    return dtObject;
+                    // int mktime ([ int $hour = date("H") [, int $minute = date("i") [, int $second = date("s") [, int $month = date("n") [, int $day = date("j") [, int $year = date("Y") [, int $is_dst = -1 ]]]]]]] )
+                    // $datetimeobject = new DateTime(mktime(0, 0, 0, $data[$j]['month'], $data[$j]['day'],$data[$j]['year']));
+                }
             }
             throw new NotImplementedException();
         }
@@ -69,13 +66,17 @@ namespace Lang.Php.Compiler.Translator.Node
         {
             if (src.Member.DeclaringType != typeof(DateTime))
                 return null;
-            if (src.Member.Name == "Now")
+            switch (src.Member.Name)
             {
-                // $date = new DateTime('2000-01-01');
-                var c = PhpMethodCallExpression.MakeConstructor("DateTime");
-                c.IsStandardPhpClass = true;
-                return c;
+                case "Now":
+                {
+                    // $date = new DateTime('2000-01-01');
+                    var c = PhpMethodCallExpression.MakeConstructor("DateTime");
+                    c.IsStandardPhpClass = true;
+                    return c;
+                }
             }
+         
             throw new NotImplementedException();
         }
 
@@ -197,18 +198,16 @@ namespace Lang.Php.Compiler.Translator.Node
                     iphp = ctx.TranslateValue(cs);
                     return iphp;
                 }
-                else if (vv is int)
+                if (vv is int)
                 {
                     var phpString = mk((int)vv * mnoznik);
                     IValue cs = new ConstValue(phpString);
                     iphp = ctx.TranslateValue(cs);
                     return iphp;
                 }
-                else
-                    throw new NotSupportedException();
-            }
-            else
                 throw new NotSupportedException();
+            }
+            throw new NotSupportedException();
         }
 
         IPhpValue MakeInt(IPhpValue x)
@@ -218,7 +217,7 @@ namespace Lang.Php.Compiler.Translator.Node
 
         string mk(double sec)
         {
-            int sec1 = (int)Math.Round(sec);
+            var sec1 = (int)Math.Round(sec);
             if (sec1 % SEC_PER_DAY == 0)
                 return string.Format("P{0}D", sec1 / SEC_PER_DAY);
             if (sec1 % SEC_PER_HOUR == 0)
