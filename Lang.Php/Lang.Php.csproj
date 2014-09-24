@@ -76,6 +76,10 @@
     <Compile Include="PhpErrorTable.cs" />
     <Compile Include="PhpIni.cs" />
     <Compile Include="PhpVersions.cs" />
+    <Compile Include="_enums\ErrorLevel.cs" />
+    <Compile Include="_Firebird\Firebird.cs" />
+    <Compile Include="_Firebird\FirebirdResult.cs" />
+    <Compile Include="_Firebird\IbaseTransactionOptions.cs" />
     <Compile Include="_Posix\Posix.cs" />
     <Compile Include="_Posix\PosixGroupInfo.cs" />
     <Compile Include="_Posix\PosixUserInfo.cs" />

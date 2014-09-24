@@ -122,7 +122,7 @@ namespace Lang.Php
         /// </summary>
         /// <param name="?"></param>
         /// <returns></returns>
-        [DirectCall("mysql_query", "0,this")]
+        [DirectCall("mysql_query", "this,0")]
         public MysqlResult Query(string query)
         {
             var cmd = new MySqlCommand(query, _connection);
@@ -174,12 +174,10 @@ namespace Lang.Php
         }
         // Protected Methods 
 
-        protected void Dispose(bool disposing)
+        private void Dispose(bool disposing)
         {
             if (disposing && (_connection != null))
                 _connection.Dispose();
-
-
         }
         // Private Methods 
 

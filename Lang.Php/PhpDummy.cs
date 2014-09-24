@@ -21,6 +21,12 @@ namespace Lang.Php
             throw new NotImplementedException();
         }
 
+        [DirectCall("error_reporting")]
+        public static int error_reporting(ErrorLevel level)
+        {
+            throw new NotImplementedException();
+        }
+
 
         [DirectCall("_htmlspecialchars_")]
         public static string _htmlspecialchars_(string _string)

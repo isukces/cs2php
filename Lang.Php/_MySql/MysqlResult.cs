@@ -90,6 +90,7 @@ mysql_query() will also fail and return FALSE if the user does not have permissi
         [DirectCall("mysql_free_result", "this")]
         public void FreeResult()
         {
+            // bool ibase_free_result ( resource $result_identifier )
             _phpLevelDisposed = true;
         }
         // Protected Methods 

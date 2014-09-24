@@ -1,19 +1,18 @@
 ﻿using System.Reflection;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices; 
+using System.Runtime.InteropServices;
 
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Lang.Php")]
-[assembly: AssemblyDescription("Native PHP functions")]
+[assembly: AssemblyTitle("E05_Firebird")]
+[assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Internet Sukces Piotr Stęclik")]
-[assembly: AssemblyProduct("C# to PHP package")]
-[assembly: AssemblyCopyright("Copyright © Internet Sukces Piotr Stęclik 2013")]
+[assembly: AssemblyCompany("")]
+[assembly: AssemblyProduct("E05_Firebird")]
+[assembly: AssemblyCopyright("Copyright ©  2014")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
-
 
 // Setting ComVisible to false makes the types in this assembly not visible 
 // to COM components.  If you need to access a type in this assembly from 
@@ -21,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("61730a60-ae60-4620-8de1-28660d5e5cc9")]
+[assembly: Guid("17a39d61-70d3-4cba-be6f-b8bdfda543c7")]
 
 // Version information for an assembly consists of the following four values:
 //
@@ -33,5 +32,5 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.0.5380.511")]
-[assembly: AssemblyFileVersion("1.0.5380.511")]
+[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyFileVersion("1.0.0.0")]
