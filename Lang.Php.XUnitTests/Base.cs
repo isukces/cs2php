@@ -17,49 +17,15 @@ namespace Lang.Php.XUnitTests
     {
         #region Static Methods
 
-        // Protected Methods 
+        // Private Methods 
 
-        private static string GetCode(PhpClassMethodDefinition method)
+        private static string GetCode(IEmitable method)
         {
             var emiter = new PhpSourceCodeEmiter();
             var writer = new PhpSourceCodeWriter();
             writer.Clear();
             method.Emit(emiter, writer, new PhpEmitStyle());
             return writer.GetCode(true).Trim();
-        }
-        private static string GetCode(PhpCodeModule module)
-        {
-            var emiter = new PhpSourceCodeEmiter();
-            var writer = new PhpSourceCodeWriter();
-            writer.Clear();
-            module.Emit(emiter, writer, new PhpEmitStyle());
-            return writer.GetCode(true).Trim();
-        }
-
-        protected void ModuleTranslation(string module,   Translator translator)
-        {
-            if (module == null) throw new ArgumentNullException("module");
-            if (translator == null) throw new ArgumentNullException("translator");
-
-            string expectedCode, translatedCode, shortFilename;
-            {
-                //  translator = PrepareTranslator();
-                Console.WriteLine("We have module " + translator.Modules.First().Name.Name);
-                PhpCodeModule mod = translator.Modules.First(i => i.Name.Name == module);
-                var cl = mod.Classes[0];
-                // var method = cl.Methods.First(i => i.Name == methodName);
-                translatedCode = GetCode(mod);
-            }
-
-            {
-                shortFilename = string.Format("module-{0}.txt", module);
-                expectedCode = GetExpectedCode(shortFilename, translatedCode);
-            }
-
-            if (expectedCode != translatedCode)
-                Save(translatedCode, shortFilename);
-
-            Assert.True(expectedCode == translatedCode, "Invalid translation");
         }
 
         private static string GetExpectedCode(string shortFilename, string translatedCode)
@@ -88,33 +54,6 @@ namespace Lang.Php.XUnitTests
             }
             return expectedCode;
         }
-
-
-        protected void MethodTranslation(string module, string xClass, string methodName, Translator translator)
-        {
-            if (methodName == null) throw new ArgumentNullException("methodName");
-            string expectedCode, translatedCode, shortFilename;
-            {
-                //  translator = PrepareTranslator();
-                Console.WriteLine("We have module " + translator.Modules.First().Name.Name);
-                var mod = translator.Modules.First(i => i.Name.Name == module);
-                var cl = mod.Classes[0];
-                Assert.True(cl.Name.FullName == xClass, "Invalid class name translation - attribute ScriptName");
-                var method = cl.Methods.First(i => i.Name == methodName);
-                translatedCode = GetCode(method);
-            }
-
-            {
-                shortFilename = string.Format("{0}_{1}.txt", xClass.Replace("\\", ""), methodName);
-                expectedCode = GetExpectedCode(shortFilename, translatedCode);
-            }
-
-            if (expectedCode != translatedCode)
-                Save(translatedCode, shortFilename);
-
-            Assert.True(expectedCode == translatedCode, "Invalid translation");
-        }
-        // Private Methods 
 
         private static void Save(string translatedCode, string shortFilename)
         {
@@ -233,6 +172,63 @@ namespace Lang.Php.XUnitTests
         }
 
         #endregion Static Methods
+
+        #region Methods
+
+        // Protected Methods 
+
+        protected void MethodTranslation(string module, string xClass, string methodName, Translator translator)
+        {
+            if (methodName == null) throw new ArgumentNullException("methodName");
+            string expectedCode, translatedCode, shortFilename;
+            {
+                //  translator = PrepareTranslator();
+                Console.WriteLine("We have module " + translator.Modules.First().Name.Name);
+                var mod = translator.Modules.First(i => i.Name.Name == module);
+                var cl = mod.Classes[0];
+                Assert.True(cl.Name.FullName == xClass, "Invalid class name translation - attribute ScriptName");
+                PhpClassMethodDefinition method = cl.Methods.First(i => i.Name == methodName);
+                translatedCode = GetCode(method);
+            }
+
+            {
+                shortFilename = string.Format("{0}_{1}.txt", xClass.Replace("\\", ""), methodName);
+                expectedCode = GetExpectedCode(shortFilename, translatedCode);
+            }
+
+            if (expectedCode != translatedCode)
+                Save(translatedCode, shortFilename);
+
+            Assert.True(expectedCode == translatedCode, "Invalid translation");
+        }
+
+        protected void ModuleTranslation(string module, Translator translator)
+        {
+            if (module == null) throw new ArgumentNullException("module");
+            if (translator == null) throw new ArgumentNullException("translator");
+
+            string expectedCode, translatedCode, shortFilename;
+            {
+                //  translator = PrepareTranslator();
+                Console.WriteLine("We have module " + translator.Modules.First().Name.Name);
+                PhpCodeModule mod = translator.Modules.First(i => i.Name.Name == module);
+                var cl = mod.Classes[0];
+                // var method = cl.Methods.First(i => i.Name == methodName);
+                translatedCode = GetCode(mod);
+            }
+
+            {
+                shortFilename = string.Format("module-{0}.txt", module);
+                expectedCode = GetExpectedCode(shortFilename, translatedCode);
+            }
+
+            if (expectedCode != translatedCode)
+                Save(translatedCode, shortFilename);
+
+            Assert.True(expectedCode == translatedCode, "Invalid translation");
+        }
+
+        #endregion Methods
 
         #region Static Fields
 

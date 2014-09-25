@@ -17,7 +17,7 @@ namespace Lang.Php.Compiler.Source
     smartClassEnd
     */
 
-    public partial class PhpClassMethodDefinition : PhpMethodDefinition, IClassMember
+    public partial class PhpClassMethodDefinition : PhpMethodDefinition, IClassMember, IEmitable
     {
         #region Constructors
 

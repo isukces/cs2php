@@ -38,7 +38,7 @@ namespace Lang.Php.Compiler.Source
     smartClassEnd
     */
 
-    public partial class PhpCodeModule : ICodeRelated
+    public partial class PhpCodeModule : ICodeRelated, IEmitable
     {
         #region Static Methods
 
