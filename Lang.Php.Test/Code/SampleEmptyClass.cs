@@ -12,6 +12,13 @@
         [ScriptName("classField2")]
         public static int ClassField2;
 
+        [GlobalVariable]
+        public static int ClassField3;
+        [GlobalVariable]
+        [ScriptName("classField4")]
+        public static int ClassField4;
+
+
         public const string Const1 = "1";
         [AsDefinedConst]
         public const string Const2 = "2";
@@ -41,6 +48,13 @@
 
             var c = ClassField1;
             c = ClassField2;
+            c = ClassField3;
+            c = ClassField4;
+
+            ClassField1 = 1;
+            ClassField2 = 2;
+            ClassField3 = 3;
+            ClassField4 = 4;
         }
     }
 }
