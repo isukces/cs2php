@@ -22,7 +22,7 @@ namespace Lang.Php.XUnitTests
 
 
         [Fact]
-        public   void Compile()
+        public void Compile()
         {
             using (new AppConfigManipulator())
             {
@@ -84,22 +84,20 @@ namespace Lang.Php.XUnitTests
 
                             // =============
                             var m = string.Join(", ", translator.Modules.Select(i => i.Name.Name).OrderBy(i => i));
-                            Assert.True(m == "Lang_Php_Test_Code_MyCode", m);
+                            Assert.True(m == "Lang_Php_Test_Code_MyCode, Lang_Php_Test_Code_SampleEmptyClass", m);
 
                             MethodTranslation(ModuleMycode, ClassMycode, "BasicMath1", translator);
                             MethodTranslation(ModuleMycode, ClassMycode, "Collections", translator);
                             MethodTranslation(ModuleMycode, ClassMycode, "CostantsAndVariables", translator);
                             MethodTranslation(ModuleMycode, ClassMycode, "StringConcats", translator);
 
-                            
+                            ModuleTranslation("Lang_Php_Test_Code_SampleEmptyClass", translator);
                         }
                         ;
-
-
-
                     }, AppDomain.CurrentDomain);
             }
         }
+
 
         [Fact]
         public static string CSharpProject()

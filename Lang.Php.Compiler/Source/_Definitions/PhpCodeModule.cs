@@ -37,79 +37,17 @@ namespace Lang.Php.Compiler.Source
     	read only
     smartClassEnd
     */
-    
+
     public partial class PhpCodeModule : ICodeRelated
     {
-        #region Methods
+        #region Static Methods
 
-        // Public Methods 
-
-        public void Emit(PhpSourceCodeEmiter emiter, PhpEmitStyle style, string filename)
-        {
-
-            if (string.IsNullOrEmpty(filename))
-                throw new ArgumentNullException("filename");
-
-            var writer = new PhpSourceCodeWriter();
-            var styleCurrentNamespace = style.CurrentNamespace;
-            try
-            {
-                var nsManager = new PhpModuleNamespaceManager();
-                style.CurrentNamespace = null;
-                if (!string.IsNullOrEmpty(_topComments))
-                    writer.WriteLn("/*\r\n" + _topComments.Trim() + "\r\n*/");
-                var module = this;
-                {
-                    // var noBracketStyle = PhpEmitStyle.xClone(style, ShowBracketsEnum.Never);
-                    #region Top code
-                    {
-                        // top code
-                        var collectedTopCodeBlock = new PhpCodeBlock();
-                        collectedTopCodeBlock.Statements.AddRange(ConvertRequestedToCode());
-                        collectedTopCodeBlock.Statements.AddRange(ConvertDefinedConstToCode());
-                        if (_topCode != null)
-                            collectedTopCodeBlock.Statements.AddRange(_topCode.Statements);
-                        nsManager.Add(collectedTopCodeBlock.Statements);
-                    }
-                    #endregion
-                    {
-                        var classesGbNamespace = module.Classes.GroupBy(u => u.Name.Namespace);
-                        foreach (var classesInNamespace in classesGbNamespace.OrderBy(i => !i.Key.IsRoot))
-                            foreach (var c in classesInNamespace)
-                                nsManager.Add(c);
-                    }
-                    if (_bottomCode != null)
-                        nsManager.Add(_bottomCode.Statements);
-                    if (nsManager.Container.Any())
-                    {
-                        if (nsManager.OnlyOneRootStatement)
-                            foreach (var cl in nsManager.Container[0].Items)
-                                cl.Emit(emiter, writer, style);
-                        else
-                            foreach (var ns in nsManager.Container)
-                                EmitWithNamespace(ns.Name, emiter, writer, style, ns.Items);
-                    }
-                }
-                #region Save to file
-                {
-                    var fi = new FileInfo(filename);
-                    if (fi.Directory != null) fi.Directory.Create();
-                    var codeStr = writer.GetCode();
-                    var binary = Encoding.UTF8.GetBytes(codeStr);
-                    File.WriteAllBytes(fi.FullName, binary);
-                }
-                #endregion
-            }
-            finally
-            {
-                style.CurrentNamespace = styleCurrentNamespace;
-            }
-        }
+        // Private Methods 
 
         private static void EmitWithNamespace(PhpNamespace ns, PhpSourceCodeEmiter emiter, PhpSourceCodeWriter writer, PhpEmitStyle style, IEnumerable<IEmitable> classesInNamespace)
         {
-            if (classesInNamespace==null)
-                return;            
+            if (classesInNamespace == null)
+                return;
             var inNamespace = classesInNamespace as IEmitable[] ?? classesInNamespace.ToArray();
             if (!inNamespace.Any())
                 return;
@@ -127,6 +65,97 @@ namespace Lang.Php.Compiler.Source
             finally
             {
                 style.CurrentNamespace = null;
+            }
+        }
+
+        static string GetNamespace(string name)
+        {
+            var a = PathUtil.MakeUnixPath(PathUtil.UNIX_SEP + name);
+            var g = a.LastIndexOf(PathUtil.UNIX_SEP, StringComparison.Ordinal);
+            return a.Substring(0, g);
+        }
+
+        static string GetShortName(string name)
+        {
+            var a = PathUtil.MakeUnixPath(PathUtil.UNIX_SEP + name);
+            var g = a.LastIndexOf(PathUtil.UNIX_SEP, StringComparison.Ordinal);
+            return a.Substring(g + 1);
+        }
+
+        #endregion Static Methods
+
+        #region Methods
+
+        // Public Methods 
+
+        public void Emit(PhpSourceCodeEmiter emiter, PhpEmitStyle style, string filename)
+        {
+
+            if (string.IsNullOrEmpty(filename))
+                throw new ArgumentNullException("filename");
+
+            var writer = new PhpSourceCodeWriter();
+            var styleCurrentNamespace = style.CurrentNamespace;
+            try
+            {
+                Emit(emiter, writer, style);
+
+                #region Save to file
+                {
+                    var fi = new FileInfo(filename);
+                    if (fi.Directory != null) fi.Directory.Create();
+                    var codeStr = writer.GetCode();
+                    var binary = Encoding.UTF8.GetBytes(codeStr);
+                    File.WriteAllBytes(fi.FullName, binary);
+                }
+                #endregion
+            }
+            finally
+            {
+                style.CurrentNamespace = styleCurrentNamespace;
+            }
+        }
+
+        public void Emit(PhpSourceCodeEmiter emiter, PhpSourceCodeWriter writer, PhpEmitStyle style)
+        {
+            var nsManager = new PhpModuleNamespaceManager();
+            style.CurrentNamespace = null;
+            if (!string.IsNullOrEmpty(_topComments))
+                writer.WriteLn("/*\r\n" + _topComments.Trim() + "\r\n*/");
+            var module = this;
+            {
+                // var noBracketStyle = PhpEmitStyle.xClone(style, ShowBracketsEnum.Never);
+
+                #region Top code
+
+                {
+                    // top code
+                    var collectedTopCodeBlock = new PhpCodeBlock();
+                    collectedTopCodeBlock.Statements.AddRange(ConvertRequestedToCode());
+                    collectedTopCodeBlock.Statements.AddRange(ConvertDefinedConstToCode());
+                    if (_topCode != null)
+                        collectedTopCodeBlock.Statements.AddRange(_topCode.Statements);
+                    nsManager.Add(collectedTopCodeBlock.Statements);
+                }
+
+                #endregion
+
+                {
+                    var classesGbNamespace = module.Classes.GroupBy(u => u.Name.Namespace);
+                    foreach (var classesInNamespace in classesGbNamespace.OrderBy(i => !i.Key.IsRoot))
+                        foreach (var c in classesInNamespace)
+                            nsManager.Add(c);
+                }
+                if (_bottomCode != null)
+                    nsManager.Add(_bottomCode.Statements);
+                if (!nsManager.Container.Any()) 
+                    return;
+                if (nsManager.OnlyOneRootStatement)
+                    foreach (var cl in nsManager.Container[0].Items)
+                        cl.Emit(emiter, writer, style);
+                else
+                    foreach (var ns in nsManager.Container)
+                        EmitWithNamespace(ns.Name, emiter, writer, style, ns.Items);
             }
         }
 
@@ -199,20 +228,6 @@ namespace Lang.Php.Compiler.Source
             return result.ToArray();
         }
 
-        static string GetNamespace(string name)
-        {
-            var a = PathUtil.MakeUnixPath(PathUtil.UNIX_SEP + name);
-            var g = a.LastIndexOf(PathUtil.UNIX_SEP, StringComparison.Ordinal);
-            return a.Substring(0, g);
-        }
-
-        static string GetShortName(string name)
-        {
-            var a = PathUtil.MakeUnixPath(PathUtil.UNIX_SEP + name);
-            var g = a.LastIndexOf(PathUtil.UNIX_SEP, StringComparison.Ordinal);
-            return a.Substring(g + 1);
-        }
-
         #endregion Methods
 
         #region Properties
@@ -237,7 +252,7 @@ namespace Lang.Php.Compiler.Source
 // Smartclass.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0c4d5d36fb5eb4ac
 namespace Lang.Php.Compiler.Source
 {
-    public partial class PhpCodeModule 
+    public partial class PhpCodeModule
     {
         /*
         /// <summary>
@@ -395,14 +410,14 @@ namespace Lang.Php.Compiler.Source
         /// <summary>
         /// Własność jest tylko do odczytu.
         /// </summary>
-        public List<KeyValuePair<string,IPhpValue>> DefinedConsts
+        public List<KeyValuePair<string, IPhpValue>> DefinedConsts
         {
             get
             {
                 return _definedConsts;
             }
         }
-        private List<KeyValuePair<string,IPhpValue>> _definedConsts = new List<KeyValuePair<string,IPhpValue>>();
+        private List<KeyValuePair<string, IPhpValue>> _definedConsts = new List<KeyValuePair<string, IPhpValue>>();
         #endregion Properties
 
     }

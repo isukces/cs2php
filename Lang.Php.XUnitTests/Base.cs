@@ -27,6 +27,67 @@ namespace Lang.Php.XUnitTests
             method.Emit(emiter, writer, new PhpEmitStyle());
             return writer.GetCode(true).Trim();
         }
+        private static string GetCode(PhpCodeModule module)
+        {
+            var emiter = new PhpSourceCodeEmiter();
+            var writer = new PhpSourceCodeWriter();
+            writer.Clear();
+            module.Emit(emiter, writer, new PhpEmitStyle());
+            return writer.GetCode(true).Trim();
+        }
+
+        protected void ModuleTranslation(string module,   Translator translator)
+        {
+            if (module == null) throw new ArgumentNullException("module");
+            if (translator == null) throw new ArgumentNullException("translator");
+
+            string expectedCode, translatedCode, shortFilename;
+            {
+                //  translator = PrepareTranslator();
+                Console.WriteLine("We have module " + translator.Modules.First().Name.Name);
+                PhpCodeModule mod = translator.Modules.First(i => i.Name.Name == module);
+                var cl = mod.Classes[0];
+                // var method = cl.Methods.First(i => i.Name == methodName);
+                translatedCode = GetCode(mod);
+            }
+
+            {
+                shortFilename = string.Format("module-{0}.txt", module);
+                expectedCode = GetExpectedCode(shortFilename, translatedCode);
+            }
+
+            if (expectedCode != translatedCode)
+                Save(translatedCode, shortFilename);
+
+            Assert.True(expectedCode == translatedCode, "Invalid translation");
+        }
+
+        private static string GetExpectedCode(string shortFilename, string translatedCode)
+        {
+            string expectedCode;
+            var resourceName = "Lang.Php.Test.php." + shortFilename;
+            try
+            {
+                using (var ms = new MemoryStream())
+                {
+                    using (var src = typeof(MyCode).Assembly.GetManifestResourceStream(resourceName))
+                    {
+                        if (src == null)
+                            throw new Exception("Unable to load resource " + resourceName);
+                        src.CopyTo(ms);
+                        var b = ms.ToArray();
+                        expectedCode = Encoding.UTF8.GetString(b);
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Save(translatedCode, shortFilename);
+                Console.WriteLine(e.Message + "\r\n" + e.StackTrace);
+                throw;
+            }
+            return expectedCode;
+        }
 
 
         protected void MethodTranslation(string module, string xClass, string methodName, Translator translator)
@@ -45,27 +106,7 @@ namespace Lang.Php.XUnitTests
 
             {
                 shortFilename = string.Format("{0}_{1}.txt", xClass.Replace("\\", ""), methodName);
-                var resourceName = "Lang.Php.Test.php." + shortFilename;
-                try
-                {
-                    using (var ms = new MemoryStream())
-                    {
-                        using (var src = typeof(MyCode).Assembly.GetManifestResourceStream(resourceName))
-                        {
-                            if (src == null)
-                                throw new Exception("Unable to load resource " + resourceName);
-                            src.CopyTo(ms);
-                            var b = ms.ToArray();
-                            expectedCode = Encoding.UTF8.GetString(b);
-                        }
-                    }
-                }
-                catch (Exception e)
-                {
-                    Save(translatedCode, shortFilename);
-                    Console.WriteLine(e.Message + "\r\n" + e.StackTrace);
-                    throw;
-                }
+                expectedCode = GetExpectedCode(shortFilename, translatedCode);
             }
 
             if (expectedCode != translatedCode)

@@ -54,7 +54,7 @@ namespace Lang.Php.Compiler
         {
             if (pure)
                 return code.ToString();
-            return code.ToString() + "?>";
+            return code + "?>";
         }
 
         public void IncIndent()

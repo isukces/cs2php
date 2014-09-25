@@ -1,0 +1,27 @@
+/*
+Generated with CS2PHP
+*/
+if (!defined('Const2'))
+    define('Const2', '2');
+if (!defined('xConst5'))
+    define('xConst5', '5');
+class SampleEmptyClass {
+    const Const1 = '1';
+    const xConst4 = '4';
+    public static $ClassField1;
+    public static $classField2;
+    public $InstanceField1;
+    public $instanceField2;
+    public function Test1() {
+        $co = self::Const1;
+        $co = Const2;
+        $co = '3';
+        $co = self::xConst4;
+        $co = xConst5;
+        $co = '6';
+        $i = $this->InstanceField1;
+        $i = $this->instanceField2;
+        $c = self::$ClassField1;
+        $c = self::$classField2;
+    }
+}
