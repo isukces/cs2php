@@ -637,23 +637,19 @@ namespace Lang.Cs.Compiler.Visitors
             var ct = state.Context.Roslyn_ResolveType(info.ConvertedType);
             if (!ct.BaseType.IsMulticastDelegate())
                 throw new NotImplementedException();
-            LangVisitor lv = new LangVisitor(state);
+            var lv = new LangVisitor(state);
             var pl = lv.rVisit(node.ParameterList);
             var body = lv.Visit(node.Body);
             if (!(body is IStatement))
-                throw new Exception("body is not IStatement");
-            //for (int i = 0; i < pl.Length; i++)
-            //{
-            //    var p = pl[i];
-            //    var gta = ct.GenericTypeArguments[i];
+            {
+                var iv = body as IValue;
+                if (iv != null)
+                    body = new ReturnStatement(iv);
 
-            //    if (p.Type == null || p.Type.DotnetType == null)
-            //    {
-            //        pl[i] = new FunctionDeclarationParameter(p.Name, p.Modifiers, new LangType(gta), p.Initial);
-            //    }
-            //    else if (p.Type.DotnetType != gta)
-            //        throw new NotSupportedException();
-            //}
+                if (!(body is IStatement))
+                    throw new Exception("body is not IStatement");
+            }
+ 
             var h = new LambdaExpression(ct, pl, body as IStatement);
             return Simplify(h);
             // throw new NotSupportedException();
