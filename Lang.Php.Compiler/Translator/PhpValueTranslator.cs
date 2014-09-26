@@ -688,8 +688,9 @@ namespace Lang.Php.Compiler.Translator
         IPhpValue SimplifyPhpExpression(IPhpValue v)
         {
             var s = new ExpressionSimplifier(new OptimizeOptions());
-            return s.Visit(v as PhpSourceBase);
-
+            if (v is PhpSourceBase)
+                return s.Visit(v as PhpSourceBase);
+            return v;
         }
 
         #endregion Methods

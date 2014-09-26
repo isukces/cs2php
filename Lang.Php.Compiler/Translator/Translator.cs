@@ -71,6 +71,8 @@ namespace Lang.Php.Compiler.Translator
             //     var interfacesToTranslate = info.ClassTranslations.Values.Where(u => u.Type.Assembly == info.CurrentAssembly).ToArray();
             foreach (var classTranslationInfo in classesToTranslate)
             {
+                if (classTranslationInfo.Skip)
+                    continue;                        
                 PhpClassDefinition phpClass;
                 var phpModule = GetOrMakeModuleByName(classTranslationInfo.ModuleName);
                 // var assemblyTI = _info.GetOrMakeTranslationInfo(_info.CurrentAssembly);
@@ -208,6 +210,8 @@ namespace Lang.Php.Compiler.Translator
                             if (m.Length != 1)
                                 throw new NotSupportedException();
                             var mm = m[0];
+                            if(mm.DontInclude)
+                                continue;                        
                             var includeModule = mm.IncludeModule;
                             if (includeModule == null || mm.ModuleName == phpModule.Name)
                                 continue;
@@ -479,7 +483,7 @@ namespace Lang.Php.Compiler.Translator
                                 throw new Exception("beige lion");
 
                             def.IsConst = fti.Destination == FieldTranslationDestionations.ClassConst;// field.Modifiers.Has("const");
-                            def.Name = PhpVariableExpression.AddDollar(fti.ScriptName, !def.IsConst);
+                            def.Name = fti.ScriptName;
 
                             def.IsStatic = def.IsConst || field.Modifiers.Has("static");
                             if (field.Modifiers.Has("public"))

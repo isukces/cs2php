@@ -287,7 +287,9 @@ namespace Lang.Php.Compiler.Translator
         {
             if (src == null)
                 return null;
-            return Visit(src as PhpSourceBase);
+            if (src is PhpSourceBase)
+                return Visit(src as PhpSourceBase);
+            return src;
         }
 
         protected override IPhpValue VisitPhpPropertyAccessExpression(PhpPropertyAccessExpression node)
