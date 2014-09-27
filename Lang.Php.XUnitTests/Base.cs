@@ -212,7 +212,7 @@ namespace Lang.Php.XUnitTests
                 //  translator = PrepareTranslator();
                 Console.WriteLine("We have module " + translator.Modules.First().Name.Name);
                 PhpCodeModule mod = translator.Modules.First(i => i.Name.Name == module);
-                var cl = mod.Classes[0];
+                // var cl = mod.Classes[0];
                 // var method = cl.Methods.First(i => i.Name == methodName);
                 translatedCode = GetCode(mod);
             }

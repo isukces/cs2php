@@ -1,10 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-using Lang.Cs.Compiler.Sandbox;
 
 namespace Lang.Php.Compiler
 {
@@ -14,31 +9,40 @@ namespace Lang.Php.Compiler
     option NoAdditionalFile
     
     property ScriptName string 
+    	access public public private
+    
+    property ClassTi ClassTranslationInfo 
+    	read only
     smartClassEnd
     */
-    
+
     public partial class MethodTranslationInfo
     {
-        public static MethodTranslationInfo FromMethodInfo(MethodInfo methodInfo)
+
+        public static MethodTranslationInfo FromMethodInfo(MethodBase methodInfo, ClassTranslationInfo classTranslationInfo)
         {
-            var result = new MethodTranslationInfo {ScriptName = methodInfo.Name};
+            var result = new MethodTranslationInfo
             {
-                var attr = methodInfo.GetCustomAttribute<ScriptNameAttribute>();
-                if (attr != null)
-                    result._scriptName = attr.Name;
-            }
+                _scriptName = methodInfo.Name,
+                _classTi = classTranslationInfo
+            };
+            var scriptNameAttribute = methodInfo.GetCustomAttribute<ScriptNameAttribute>();
+            if (scriptNameAttribute != null)
+                result._scriptName = scriptNameAttribute.Name.Trim();
+            if (string.IsNullOrEmpty(result._scriptName))
+                throw new Exception("Method name is empty");
             return result;
         }
     }
 }
 
 
-// -----:::::##### smartClass embedded code begin #####:::::----- generated 2014-09-03 18:00
+// -----:::::##### smartClass embedded code begin #####:::::----- generated 2014-09-26 19:25
 // File generated automatically ver 2014-09-01 19:00
 // Smartclass.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0c4d5d36fb5eb4ac
 namespace Lang.Php.Compiler
 {
-    public partial class MethodTranslationInfo 
+    public partial class MethodTranslationInfo
     {
         /*
         /// <summary>
@@ -52,9 +56,9 @@ namespace Lang.Php.Compiler
 
         implement INotifyPropertyChanged
         implement INotifyPropertyChanged_Passive
-        implement ToString ##ScriptName##
-        implement ToString ScriptName=##ScriptName##
-        implement equals ScriptName
+        implement ToString ##ScriptName## ##ClassTi##
+        implement ToString ScriptName=##ScriptName##, ClassTi=##ClassTi##
+        implement equals ScriptName, ClassTi
         implement equals *
         implement equals *, ~exclude1, ~exclude2
         */
@@ -63,6 +67,10 @@ namespace Lang.Php.Compiler
         /// Nazwa własności ScriptName; 
         /// </summary>
         public const string PropertyNameScriptName = "ScriptName";
+        /// <summary>
+        /// Nazwa własności ClassTi; 
+        /// </summary>
+        public const string PropertyNameClassTi = "ClassTi";
         #endregion Constants
 
         #region Methods
@@ -70,7 +78,7 @@ namespace Lang.Php.Compiler
 
         #region Properties
         /// <summary>
-        /// 
+        /// Własność jest tylko do odczytu.
         /// </summary>
         public string ScriptName
         {
@@ -78,13 +86,19 @@ namespace Lang.Php.Compiler
             {
                 return _scriptName;
             }
-            set
-            {
-                value = (value ?? String.Empty).Trim();
-                _scriptName = value;
-            }
         }
         private string _scriptName = string.Empty;
+        /// <summary>
+        /// Własność jest tylko do odczytu.
+        /// </summary>
+        public ClassTranslationInfo ClassTi
+        {
+            get
+            {
+                return _classTi;
+            }
+        }
+        private ClassTranslationInfo _classTi;
         #endregion Properties
 
     }

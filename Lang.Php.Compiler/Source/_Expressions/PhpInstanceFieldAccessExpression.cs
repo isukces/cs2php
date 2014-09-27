@@ -32,11 +32,16 @@ namespace Lang.Php.Compiler.Source
             return string.Format("{0}->{1}", targetObject.GetPhpCode(style), fieldName);
         }
 
+        public override string ToString()
+        {
+            return GetPhpCode(new PhpEmitStyle());
+        }
+
         public override IEnumerable<ICodeRequest> GetCodeRequests()
         {
             var a =  IPhpStatementBase.GetCodeRequests(targetObject).ToList();
             if (IncludeModule != null)
-                a.Add(new ModuleCodeRequest(includeModule));
+                a.Add(new ModuleCodeRequest(includeModule, string.Format("instance field {0}",this)));
             return a;
         }
 

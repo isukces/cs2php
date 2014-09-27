@@ -1,0 +1,8 @@
+/*
+Generated with CS2PHP
+*/
+class IncludeShouldNotIncludeOther {
+    public function X() {
+        $a = PHP_EOL;
+    }
+}

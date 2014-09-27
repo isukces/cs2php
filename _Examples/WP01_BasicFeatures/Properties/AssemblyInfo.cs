@@ -1,17 +1,16 @@
-﻿using Lang.Php;
-using System.Reflection;
+﻿using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Lang.Php.Wp.Compile")]
-[assembly: AssemblyDescription("WordPress API compile time support")]
+[assembly: AssemblyTitle("WP01_BasicFeatures")]
+[assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Internet Sukces Piotr Stęclik")]
-[assembly: AssemblyProduct("C# to PHP package")]
-[assembly: AssemblyCopyright("Copyright © Internet Sukces Piotr Stęclik 2013")]
+[assembly: AssemblyCompany("")]
+[assembly: AssemblyProduct("WP01_BasicFeatures")]
+[assembly: AssemblyCopyright("Copyright ©  2014")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -21,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("f14561b9-6d7f-4d84-8da2-43abf8a41fdc")]
+[assembly: Guid("583eeb91-7651-46e7-86b6-21f5126943b8")]
 
 // Version information for an assembly consists of the following four values:
 //
@@ -33,6 +32,5 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.0.5383.49")]
-[assembly: AssemblyFileVersion("1.0.5383.49")]
-[assembly: PriovidesTranslatorAttribute("57940af0-aef9-4c95-936f-9cf2e33a90df")]
+[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyFileVersion("1.0.0.0")]

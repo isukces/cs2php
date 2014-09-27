@@ -16,6 +16,7 @@ namespace Lang.Php.Compiler.Source
     	read only
     
     property ModuleName PhpCodeModuleName 
+    	read only
     smartClassEnd
     */
 
@@ -23,20 +24,20 @@ namespace Lang.Php.Compiler.Source
     {
         public override string GetPhpCode(PhpEmitStyle style)
         {
-            return definedConstName;
+            return _definedConstName;
         }
 
         public override IEnumerable<ICodeRequest> GetCodeRequests()
         {
-            if (moduleName != null)
-                yield return new ModuleCodeRequest(moduleName);
+            if (_moduleName != null)
+                yield return new ModuleCodeRequest(_moduleName, "defined const " + DefinedConstName);
         }
     }
 }
 
 
-// -----:::::##### smartClass embedded code begin #####:::::----- generated 2013-11-11 19:52
-// File generated automatically ver 2013-07-10 08:43
+// -----:::::##### smartClass embedded code begin #####:::::----- generated 2014-09-27 14:13
+// File generated automatically ver 2014-09-01 19:00
 // Smartclass.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0c4d5d36fb5eb4ac
 namespace Lang.Php.Compiler.Source
 {
@@ -63,13 +64,15 @@ namespace Lang.Php.Compiler.Source
         #region Constructors
         /// <summary>
         /// Tworzy instancję obiektu
-        /// <param name="DefinedConstName"></param>
-        /// <param name="ModuleName"></param>
+        /// <param name="definedConstName"></param>
+        /// <param name="moduleName"></param>
         /// </summary>
-        public PhpDefinedConstExpression(string DefinedConstName, PhpCodeModuleName ModuleName)
+        public PhpDefinedConstExpression(string definedConstName, PhpCodeModuleName moduleName)
         {
-            this.definedConstName = DefinedConstName;
-            this.ModuleName = ModuleName;
+            if (definedConstName == "PHP_EOL" && moduleName != null)
+                throw new Exception("PHP_EOL is built in");
+            _definedConstName = definedConstName;
+            _moduleName = moduleName;
         }
 
         #endregion Constructors
@@ -78,11 +81,11 @@ namespace Lang.Php.Compiler.Source
         /// <summary>
         /// Nazwa własności DefinedConstName; 
         /// </summary>
-        public const string PROPERTYNAME_DEFINEDCONSTNAME = "DefinedConstName";
+        public const string PropertyNameDefinedConstName = "DefinedConstName";
         /// <summary>
         /// Nazwa własności ModuleName; 
         /// </summary>
-        public const string PROPERTYNAME_MODULENAME = "ModuleName";
+        public const string PropertyNameModuleName = "ModuleName";
         #endregion Constants
 
         #region Methods
@@ -96,25 +99,21 @@ namespace Lang.Php.Compiler.Source
         {
             get
             {
-                return definedConstName;
+                return _definedConstName;
             }
         }
-        private string definedConstName = string.Empty;
+        private string _definedConstName = string.Empty;
         /// <summary>
-        /// 
+        /// Własność jest tylko do odczytu.
         /// </summary>
         public PhpCodeModuleName ModuleName
         {
             get
             {
-                return moduleName;
-            }
-            set
-            {
-                moduleName = value;
+                return _moduleName;
             }
         }
-        private PhpCodeModuleName moduleName;
+        private PhpCodeModuleName _moduleName;
         #endregion Properties
 
     }

@@ -8,7 +8,7 @@ using System.Text.RegularExpressions;
 namespace Lang.Php
 {
 
-    [Skip]
+    [BuiltIn]
     public class PhpDummy
     {
         #region Static Methods

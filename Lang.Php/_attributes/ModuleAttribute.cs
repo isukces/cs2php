@@ -5,6 +5,7 @@ namespace Lang.Php
 
     /*
     smartClass
+    template attribute
     option NoAdditionalFile
     implement Constructor ModuleShortName
     
@@ -14,19 +15,20 @@ namespace Lang.Php
     smartClassEnd
     */
     
+    [AttributeUsage(AttributeTargets.All, AllowMultiple = false)]
     public partial class ModuleAttribute : Attribute
     {
 		#region Constructors 
 
         /// <summary>
         /// Tworzy instancję obiektu
-        /// <param name="ModuleShortName">Module short name i.e "hello-page" or "mynamespace/hello-class"</param>
-        /// <param name="IncludePathPrefix"></param>
+        /// <param name="moduleShortName">Module short name i.e "hello-page" or "mynamespace/hello-class"</param>
+        /// <param name="includePathPrefix"></param>
         /// </summary>
-        public ModuleAttribute(string ModuleShortName, params string[] IncludePathPrefix)
+        public ModuleAttribute(string moduleShortName, params string[] includePathPrefix)
         {
-            this.ModuleShortName = ModuleShortName;
-            this.IncludePathPrefix = IncludePathPrefix;
+            _moduleShortName = moduleShortName;
+            _includePathPrefix = includePathPrefix;
         }
 
 		#endregion Constructors 
@@ -34,8 +36,8 @@ namespace Lang.Php
 }
 
 
-// -----:::::##### smartClass embedded code begin #####:::::----- generated 2013-12-26 10:23
-// File generated automatically ver 2013-07-10 08:43
+// -----:::::##### smartClass embedded code begin #####:::::----- generated 2014-09-27 10:51
+// File generated automatically ver 2014-09-01 19:00
 // Smartclass.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0c4d5d36fb5eb4ac
 namespace Lang.Php
 {
@@ -62,61 +64,41 @@ namespace Lang.Php
         #region Constructors
         /// <summary>
         /// Tworzy instancję obiektu
-        /// <param name="ModuleShortName">Module short name i.e "hello-page" or "mynamespace/hello-class"</param>
+        /// <param name="moduleShortName">Module short name i.e "hello-page" or "mynamespace/hello-class"</param>
         /// </summary>
-        public ModuleAttribute(string ModuleShortName)
+        public ModuleAttribute(string moduleShortName)
         {
-            this.ModuleShortName = ModuleShortName;
+            _moduleShortName = moduleShortName;
         }
 
         #endregion Constructors
-
-        #region Constants
-        /// <summary>
-        /// Nazwa własności ModuleShortName; Module short name i.e "hello-page" or "mynamespace/hello-class"
-        /// </summary>
-        public const string PROPERTYNAME_MODULESHORTNAME = "ModuleShortName";
-        /// <summary>
-        /// Nazwa własności IncludePathPrefix; 
-        /// </summary>
-        public const string PROPERTYNAME_INCLUDEPATHPREFIX = "IncludePathPrefix";
-        #endregion Constants
 
         #region Methods
         #endregion Methods
 
         #region Properties
         /// <summary>
-        /// Module short name i.e "hello-page" or "mynamespace/hello-class"
+        /// Module short name i.e "hello-page" or "mynamespace/hello-class"; własność jest tylko do odczytu.
         /// </summary>
         public string ModuleShortName
         {
             get
             {
-                return moduleShortName;
-            }
-            set
-            {
-                value = (value ?? String.Empty).Trim();
-                moduleShortName = value;
+                return _moduleShortName;
             }
         }
-        private string moduleShortName = string.Empty;
+        private readonly string _moduleShortName = string.Empty;
         /// <summary>
-        /// 
+        /// Własność jest tylko do odczytu.
         /// </summary>
         public string[] IncludePathPrefix
         {
             get
             {
-                return includePathPrefix;
-            }
-            set
-            {
-                includePathPrefix = value;
+                return _includePathPrefix;
             }
         }
-        private string[] includePathPrefix;
+        private readonly string[] _includePathPrefix;
         #endregion Properties
 
     }

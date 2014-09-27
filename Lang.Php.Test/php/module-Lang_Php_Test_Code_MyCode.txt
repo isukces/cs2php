@@ -1,0 +1,45 @@
+/*
+Generated with CS2PHP
+*/
+class MyCodePhp {
+    public static function BasicMath1() {
+        $a = 1;
+        $b = 2;
+        $d = ($a + $b) / M_PI;
+    }
+    public static function CostantsAndVariables() {
+        $a = null;
+        $b = 18;
+        $c = 1.2;
+        $pi = M_PI;
+        $h = 'Some text backslash\\ quote" single\' dollar$';
+    }
+    public static function Collections() {
+        $list = array();
+        foreach($list as $i)
+            echo $i;
+        $count = count($list);
+        $dict = array();
+        foreach($dict as $i__Key => $i__Value)
+            echo $i__Key . ' ' . $i__Value;
+        foreach(array_values($dict) as $i)
+            echo $i;
+        foreach(array_keys($dict) as $i)
+            echo $i;
+        $count = count($dict);
+        $stack = array();
+        array_push($stack, 'X');
+        array_push($stack, 'Y');
+        $s1 = $stack[count($stack) - 1];
+        $s2 = array_pop($stack);
+        $count = count($stack);
+    }
+    public static function StringConcats() {
+        $x = 3;
+        $a = 'ab';
+        $b = 'a' . ($x / 2 < 10 ? 'b' : 'c');
+        $c = 'a' . ($x / 2 < 10 ? 'b' : 'c') . 'd';
+    }
+    public static function SimpleEquations() {
+    }
+}

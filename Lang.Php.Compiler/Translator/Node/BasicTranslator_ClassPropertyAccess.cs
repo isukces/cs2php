@@ -22,16 +22,33 @@ namespace Lang.Php.Compiler.Translator.Node
         public IPhpValue TranslateToPhp(IExternalTranslationContext ctx, ClassPropertyAccessExpression src)
         {
             var da = src.Member.GetCustomAttribute(typeof(DirectCallAttribute), true) as DirectCallAttribute;
-            if (da == null) return null;
-            if (da.MapArray != null && da.MapArray.Length != 0)
-                throw new NotSupportedException();
-            switch (da.CallType)
+            if (da != null)
             {
-                case MethodCallStyles.Procedural:
-                    return new PhpMethodCallExpression(da.Name);
-                default:
+                if (da.MapArray != null && da.MapArray.Length != 0)
                     throw new NotSupportedException();
+                switch (da.CallType)
+                {
+                    case MethodCallStyles.Procedural:
+                        return new PhpMethodCallExpression(da.Name);
+                    default:
+                        throw new NotSupportedException();
+                }
             }
+            var pti = PropertyTranslationInfo.FromPropertyInfo(src.Member);
+            //ctx.GetTranslationInfo().GetOrMakeTranslationInfo(src.Member);
+            if (!pti.GetSetByMethod)
+            {
+                var fieldAccessExpression = new PhpClassFieldAccessExpression()
+                {
+                    FieldName = pti.FieldScriptName
+                };
+                var principles = ctx.GetTranslationInfo();
+                var phpClassName = principles.GetPhpType(src.Member.DeclaringType, true, principles.CurrentType);
+                var classTi = principles.GetOrMakeTranslationInfo(src.Member.DeclaringType);
+                fieldAccessExpression.SetClassName(phpClassName, classTi);
+                return fieldAccessExpression;
+            }
+            throw new NotImplementedException();
         }
 
         #endregion Methods

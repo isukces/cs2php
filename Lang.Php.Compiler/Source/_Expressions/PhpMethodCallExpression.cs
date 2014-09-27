@@ -21,24 +21,19 @@ namespace Lang.Php.Compiler.Source
     property TargetObject IPhpValue 
     
     property ClassName PhpQualifiedName Nazwa klasy dla konstruktora lub metody statycznej
+    	read only
     
-    property IsStandardPhpClass bool 
+    property DontIncludeClass bool indicates that method is from standard PHP class or other framework i.e. Wordpress
+    
+    property TranslationInfo MethodTranslationInfo 
     smartClassEnd
     */
-    
+
     public partial class PhpMethodCallExpression : IPhpValueBase
     {
-		#region Constructors 
+        #region Constructors
 
-        /// <summary>
-        /// Tworzy instancję obiektu
-        /// <param name="name"></param>
-        /// </summary>
-        public PhpMethodCallExpression(string name, params PhpMethodInvokeValue[] args)
-        {
-            _name = name;
-            _arguments.AddRange(args);
-        }
+
 
         /// <summary>
         /// Tworzy instancję obiektu
@@ -46,7 +41,6 @@ namespace Lang.Php.Compiler.Source
         /// </summary>
         public PhpMethodCallExpression(string name, params IPhpValue[] args)
         {
-
             _name = name;
             _arguments.AddRange(args.Select(i => new PhpMethodInvokeValue(i)));
         }
@@ -62,31 +56,35 @@ namespace Lang.Php.Compiler.Source
             _targetObject = targetObject;
         }
 
-		#endregion Constructors 
+        #endregion Constructors
 
-		#region Static Methods 
+        #region Static Methods
 
-		// Public Methods 
+        // Public Methods 
 
-        public static PhpMethodCallExpression MakeConstructor(string constructedClassName, params IPhpValue[] args)
+
+        public static PhpMethodCallExpression MakeConstructor(string constructedClassName, MethodTranslationInfo translationInfo, params IPhpValue[] args)
         {
-            var methodCallExpression = new PhpMethodCallExpression(ConstructorMethodName, args)
-            {
-                ClassName = (PhpQualifiedName)constructedClassName
-            };            
+            var methodCallExpression = new PhpMethodCallExpression(ConstructorMethodName, args);
+            methodCallExpression.SetClassName((PhpQualifiedName)constructedClassName, translationInfo);
             return methodCallExpression;
         }
 
-		#endregion Static Methods 
+        public void SetClassName(PhpQualifiedName className, MethodTranslationInfo translationInfo)
+        {
+            _className = className.MakeAbsolute();
+            _translationInfo = translationInfo;
+        }
+        #endregion Static Methods
 
-		#region Methods 
+        #region Methods
 
-		// Public Methods 
+        // Public Methods 
 
         public override IEnumerable<ICodeRequest> GetCodeRequests()
         {
             var requests = IPhpStatementBase.GetCodeRequests(_arguments.Select(i => i.Expression)).ToList();
-            if (!_className.IsEmpty && !_isStandardPhpClass)
+            if (!_className.IsEmpty && !_dontIncludeClass && _className.EmitName != PhpQualifiedName.ClassnameSelf)
                 requests.Add(new ClassCodeRequest(_className));
             return requests;
         }
@@ -120,15 +118,15 @@ namespace Lang.Php.Compiler.Source
             return code;
         }
 
-		#endregion Methods 
+        #endregion Methods
 
-		#region Fields 
+        #region Fields
 
         public const string ConstructorMethodName = "*";
 
-		#endregion Fields 
+        #endregion Fields
 
-		#region Properties 
+        #region Properties
 
         public MethodCallStyles CallType
         {
@@ -140,17 +138,17 @@ namespace Lang.Php.Compiler.Source
             }
         }
 
-		#endregion Properties 
+        #endregion Properties
     }
 }
 
 
-// -----:::::##### smartClass embedded code begin #####:::::----- generated 2014-09-08 09:38
+// -----:::::##### smartClass embedded code begin #####:::::----- generated 2014-09-26 17:26
 // File generated automatically ver 2014-09-01 19:00
 // Smartclass.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0c4d5d36fb5eb4ac
 namespace Lang.Php.Compiler.Source
 {
-    public partial class PhpMethodCallExpression 
+    public partial class PhpMethodCallExpression
     {
         /*
         /// <summary>
@@ -159,17 +157,17 @@ namespace Lang.Php.Compiler.Source
         public PhpMethodCallExpression()
         {
         }
+
         Przykłady użycia
+
         implement INotifyPropertyChanged
         implement INotifyPropertyChanged_Passive
-        implement ToString ##Name## ##Arguments## ##IsConstructorCall## ##TargetObject## ##ClassName## ##IsStandardPhpClass##
-        implement ToString Name=##Name##, Arguments=##Arguments##, IsConstructorCall=##IsConstructorCall##, TargetObject=##TargetObject##, ClassName=##ClassName##, IsStandardPhpClass=##IsStandardPhpClass##
-        implement equals Name, Arguments, IsConstructorCall, TargetObject, ClassName, IsStandardPhpClass
+        implement ToString ##Name## ##Arguments## ##IsConstructorCall## ##TargetObject## ##ClassName## ##DontIncludeClass## ##TranslationInfo##
+        implement ToString Name=##Name##, Arguments=##Arguments##, IsConstructorCall=##IsConstructorCall##, TargetObject=##TargetObject##, ClassName=##ClassName##, DontIncludeClass=##DontIncludeClass##, TranslationInfo=##TranslationInfo##
+        implement equals Name, Arguments, IsConstructorCall, TargetObject, ClassName, DontIncludeClass, TranslationInfo
         implement equals *
         implement equals *, ~exclude1, ~exclude2
         */
-
-
         #region Constructors
         /// <summary>
         /// Tworzy instancję obiektu
@@ -181,7 +179,6 @@ namespace Lang.Php.Compiler.Source
         }
 
         #endregion Constructors
-
 
         #region Constants
         /// <summary>
@@ -205,15 +202,17 @@ namespace Lang.Php.Compiler.Source
         /// </summary>
         public const string PropertyNameClassName = "ClassName";
         /// <summary>
-        /// Nazwa własności IsStandardPhpClass; 
+        /// Nazwa własności DontIncludeClass; indicates that method is from standard PHP class or other framework i.e. Wordpress
         /// </summary>
-        public const string PropertyNameIsStandardPhpClass = "IsStandardPhpClass";
+        public const string PropertyNameDontIncludeClass = "DontIncludeClass";
+        /// <summary>
+        /// Nazwa własności TranslationInfo; 
+        /// </summary>
+        public const string PropertyNameTranslationInfo = "TranslationInfo";
         #endregion Constants
-
 
         #region Methods
         #endregion Methods
-
 
         #region Properties
         /// <summary>
@@ -273,7 +272,7 @@ namespace Lang.Php.Compiler.Source
         }
         private IPhpValue _targetObject;
         /// <summary>
-        /// Nazwa klasy dla konstruktora lub metody statycznej
+        /// Nazwa klasy dla konstruktora lub metody statycznej; własność jest tylko do odczytu.
         /// </summary>
         public PhpQualifiedName ClassName
         {
@@ -281,27 +280,39 @@ namespace Lang.Php.Compiler.Source
             {
                 return _className;
             }
-            set
-            {
-                _className = value;
-            }
         }
         private PhpQualifiedName _className;
         /// <summary>
-        /// 
+        /// indicates that method is from standard PHP class or other framework i.e. Wordpress
         /// </summary>
-        public bool IsStandardPhpClass
+        public bool DontIncludeClass
         {
             get
             {
-                return _isStandardPhpClass;
+                return _dontIncludeClass;
             }
             set
             {
-                _isStandardPhpClass = value;
+                _dontIncludeClass = value;
             }
         }
-        private bool _isStandardPhpClass;
+        private bool _dontIncludeClass;
+        /// <summary>
+        /// 
+        /// </summary>
+        public MethodTranslationInfo TranslationInfo
+        {
+            get
+            {
+                return _translationInfo;
+            }
+            set
+            {
+                _translationInfo = value;
+            }
+        }
+        private MethodTranslationInfo _translationInfo;
         #endregion Properties
+
     }
 }

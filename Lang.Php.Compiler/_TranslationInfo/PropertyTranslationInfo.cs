@@ -21,23 +21,23 @@ namespace Lang.Php.Compiler
     property IsStatic bool 
     smartClassEnd
     */
-    
+
     public partial class PropertyTranslationInfo
     {
-		#region Static Methods 
+        #region Static Methods
 
-		// Public Methods 
+        // Public Methods 
 
         public static PropertyTranslationInfo FromPropertyInfo(PropertyInfo propInfo)
         {
             var result = new PropertyTranslationInfo();
-            var autoImplemented = IsAutoProperty(propInfo);
             var gm = propInfo.GetGetMethod();
             var sm = propInfo.GetSetMethod();
             if (gm == null && sm == null)
                 throw new Exception(string.Format("Unable to get getter or setter for {0}", propInfo));
             result._isStatic = (gm != null && gm.IsStatic)
                                || (sm != null && sm.IsStatic);
+            var autoImplemented = IsAutoProperty(propInfo, result._isStatic);
             if (autoImplemented)
                 result.FieldScriptName = propInfo.Name; // just field with the same name 
             else
@@ -70,13 +70,16 @@ namespace Lang.Php.Compiler
         /// </summary>
         /// <param name="prop"></param>
         /// <returns></returns>
-        public static bool IsAutoProperty(PropertyInfo prop)
+        public static bool IsAutoProperty(PropertyInfo prop, bool isStatic)
         {
-            return prop.DeclaringType.GetFields(BindingFlags.NonPublic | BindingFlags.Instance)
+            var d = isStatic
+                ? BindingFlags.NonPublic | BindingFlags.Static
+                : BindingFlags.NonPublic | BindingFlags.Instance;
+            return prop.DeclaringType.GetFields(d)
                                      .Any(f => f.Name.Contains("<" + prop.Name + ">"));
         }
 
-		#endregion Static Methods 
+        #endregion Static Methods
     }
 }
 
@@ -86,7 +89,7 @@ namespace Lang.Php.Compiler
 // Smartclass.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0c4d5d36fb5eb4ac
 namespace Lang.Php.Compiler
 {
-    public partial class PropertyTranslationInfo 
+    public partial class PropertyTranslationInfo
     {
         /*
         /// <summary>

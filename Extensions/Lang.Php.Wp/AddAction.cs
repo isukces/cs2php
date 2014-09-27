@@ -14,7 +14,7 @@ namespace Lang.Php.Wp
         /// </summary>
         /// <param name="function_to_add"></param>
         /// <param name="priority"></param>
-        [HookAttribute(Hooks.admin_init)]
+        [HookAttribute(Hooks.AdminInit)]
         public static void AdminInit(Action function_to_add, int priority = 10)
         {
             throw new MockMethodException();
@@ -26,21 +26,21 @@ namespace Lang.Php.Wp
         /// </summary>
         /// <param name="function_to_add"></param>
         /// <param name="priority"></param>
-        [HookAttribute(Hooks.admin_menu)]
+        [HookAttribute(Hooks.AdminMenu)]
         public static void AdminMenu(Action function_to_add, int priority = 10)
         {
             throw new MockMethodException();
         }
 
     
-        [HookAttribute(Hooks.admin_head)]
+        [HookAttribute(Hooks.AdminHead)]
         public static void AdminHead(Action function_to_add, int priority = 10)
         {
             throw new MockMethodException();
         }
 
 
-        [HookAttribute(Hooks.wp_head)]
+        [HookAttribute(Hooks.WpHead)]
         public static void WpHead(Action function_to_add, int priority = 10)
         {
             throw new MockMethodException();
@@ -50,16 +50,16 @@ namespace Lang.Php.Wp
         /// <summary>
         /// This hook is fired once WP, all plugins, and the theme are fully loaded and instantiated. 
         /// </summary>
-        /// <param name="function_to_add"></param>
+        /// <param name="functionToAdd"></param>
         /// <param name="priority"></param>
-        [HookAttribute(Hooks.wp_loaded)]
-        public static void WpLoaded(Action function_to_add, int priority = 10)
+        [HookAttribute(Hooks.WpLoaded)]
+        public static void WpLoaded(Action functionToAdd, int priority = 10)
         {
             throw new MockMethodException();
         }
 
-        [HookAttribute(Hooks.admin_enqueue_scripts)]
-        public static void AdminEnqueueScripts(Action function_to_add, int priority = 10)
+        [HookAttribute(Hooks.AdminEnqueueScripts)]
+        public static void AdminEnqueueScripts(Action functionToAdd, int priority = 10)
         {
             throw new MockMethodException();
         }
@@ -73,14 +73,14 @@ namespace Lang.Php.Wp
         /// Runs whenever a post or page is created or updated, which could be from an import, post/page edit form, xmlrpc, or post by email. 
         /// Action function arguments: post ID and post object.
         /// </summary>
-        [HookAttribute(Hooks.save_post)]
+        [HookAttribute(Hooks.SavePost)]
         public static void SavePost(Action<int> function_to_add, int priority = 10)
         {
             throw new MockMethodException();
         }
 
 
-        [HookAttribute(Hooks.save_page)]
+        [HookAttribute(Hooks.SavePage)]
         public static void SavePage(Action<int> function_to_add, int priority = 10)
         {
             throw new MockMethodException();

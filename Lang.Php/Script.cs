@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Lang.Php
 {
-    [Skip]
+    [BuiltIn]
     public class Script
     {
         //[ScriptName("PHP_EOL")]

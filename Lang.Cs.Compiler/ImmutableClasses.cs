@@ -1,7 +1,8 @@
 ﻿
 using System;
 using System.Reflection;
-
+using Lang.Cs.Compiler.Sandbox;
+    
 namespace Lang.Cs.Compiler
 {
     public interface IStatement {
@@ -773,8 +774,6 @@ namespace Lang.Cs.Compiler
         this.arguments = Arguments;
         this.genericTypes = GenericTypes;
         this.isDelegate = IsDelegate;
-          if (methodInfo.Name=="op_GreaterThanOrEqual")
-              Console.WriteLine("=");
       }
       public MethodInfo MethodInfo {
         get {
@@ -929,8 +928,6 @@ namespace Lang.Cs.Compiler
         this._operator = Operator;
         this.forceType = ForceType;
         this.operatorMethod = OperatorMethod;
-          if (operatorMethod!=null)
-              Console.WriteLine("=");
       }
       public IValue Left {
         get {
@@ -1264,6 +1261,7 @@ namespace Lang.Cs.Compiler
       private bool isDefault;
     } // end of CsharpSwichLabel
 public class CSharpBase {
+
     public CSharpBaseKinds TokenKind
     {
         get

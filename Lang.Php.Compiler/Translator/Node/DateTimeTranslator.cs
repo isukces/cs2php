@@ -26,38 +26,38 @@ namespace Lang.Php.Compiler.Translator.Node
             switch (src.Info.ToString())
             {
                 case "Void .ctor(Int32, Int32, Int32)":
-                {
-                    //                $date = new DateTime();
-                    //$date->setDate(2001, 2, 3);
-                    var dtObject = PhpMethodCallExpression.MakeConstructor("DateTime");
-                    dtObject.IsStandardPhpClass = true;
-                    // date_date_set 
-                    var b = new PhpMethodCallExpression("date_date_set ",
-                        dtObject,
-                        ctx.TranslateValue(src.Arguments[0]),
-                        ctx.TranslateValue(src.Arguments[1]),
-                        ctx.TranslateValue(src.Arguments[2])
-                        );
-                    var c = new PhpMethodCallExpression("date_time_set ",
-                        b,
-                        new PhpConstValue(0),
-                        new PhpConstValue(0),
-                        new PhpConstValue(0)
-                        );
-                    var mktime = new PhpMethodCallExpression("mktime",
-                        new PhpConstValue(0),
-                        new PhpConstValue(0),
-                        new PhpConstValue(0),
-                        ctx.TranslateValue(src.Arguments[1]), //month
-                        ctx.TranslateValue(src.Arguments[2]),// day
-                        ctx.TranslateValue(src.Arguments[0]) // year
-                        );
-                    var epoch = new PhpBinaryOperatorExpression(".", new PhpConstValue("@"), mktime);
-                    dtObject.Arguments.Add(new PhpMethodInvokeValue(epoch));
-                    return dtObject;
-                    // int mktime ([ int $hour = date("H") [, int $minute = date("i") [, int $second = date("s") [, int $month = date("n") [, int $day = date("j") [, int $year = date("Y") [, int $is_dst = -1 ]]]]]]] )
-                    // $datetimeobject = new DateTime(mktime(0, 0, 0, $data[$j]['month'], $data[$j]['day'],$data[$j]['year']));
-                }
+                    {
+                        //                $date = new DateTime();
+                        //$date->setDate(2001, 2, 3);
+                        var dtObject = PhpMethodCallExpression.MakeConstructor("DateTime", null);
+                        dtObject.DontIncludeClass = true;
+                        // date_date_set 
+                        var b = new PhpMethodCallExpression("date_date_set",
+                            dtObject,
+                            ctx.TranslateValue(src.Arguments[0]),
+                            ctx.TranslateValue(src.Arguments[1]),
+                            ctx.TranslateValue(src.Arguments[2])
+                            );
+                        var c = new PhpMethodCallExpression("date_time_set",
+                            b,
+                            new PhpConstValue(0),
+                            new PhpConstValue(0),
+                            new PhpConstValue(0)
+                            );
+                        var mktime = new PhpMethodCallExpression("mktime",
+                            new PhpConstValue(0),
+                            new PhpConstValue(0),
+                            new PhpConstValue(0),
+                            ctx.TranslateValue(src.Arguments[1]), //month
+                            ctx.TranslateValue(src.Arguments[2]),// day
+                            ctx.TranslateValue(src.Arguments[0]) // year
+                            );
+                        var epoch = new PhpBinaryOperatorExpression(".", new PhpConstValue("@"), mktime);
+                        dtObject.Arguments.Add(new PhpMethodInvokeValue(epoch));
+                        return dtObject;
+                        // int mktime ([ int $hour = date("H") [, int $minute = date("i") [, int $second = date("s") [, int $month = date("n") [, int $day = date("j") [, int $year = date("Y") [, int $is_dst = -1 ]]]]]]] )
+                        // $datetimeobject = new DateTime(mktime(0, 0, 0, $data[$j]['month'], $data[$j]['day'],$data[$j]['year']));
+                    }
             }
             throw new NotImplementedException();
         }
@@ -69,14 +69,14 @@ namespace Lang.Php.Compiler.Translator.Node
             switch (src.Member.Name)
             {
                 case "Now":
-                {
-                    // $date = new DateTime('2000-01-01');
-                    var c = PhpMethodCallExpression.MakeConstructor("DateTime");
-                    c.IsStandardPhpClass = true;
-                    return c;
-                }
+                    {
+                        // $date = new DateTime('2000-01-01');
+                        var c = PhpMethodCallExpression.MakeConstructor("DateTime", null);
+                        c.DontIncludeClass = true;
+                        return c;
+                    }
             }
-         
+
             throw new NotImplementedException();
         }
 
@@ -112,9 +112,9 @@ namespace Lang.Php.Compiler.Translator.Node
                       ctx.TranslateValue(src.Arguments[1]));
 
             if (fn == "System.DateTime AddDays(Double)")
-                return TranslateAddInterval(ctx, src, SEC_PER_DAY);
+                return TranslateAddInterval(ctx, src, SecPerDay);
             if (fn == "System.DateTime AddHours(Double)")
-                return TranslateAddInterval(ctx, src, SEC_PER_HOUR);
+                return TranslateAddInterval(ctx, src, SecPerHour);
 
             throw new NotImplementedException(fn);
         }
@@ -136,14 +136,15 @@ namespace Lang.Php.Compiler.Translator.Node
                 if (to.ToString() == "new DateTime()")
                 {
                     // echo 'Current time: ' . date('Y-m-d H:i:s') . "\n";
-                    var co = new PhpMethodCallExpression("date", new PhpConstValue(DATE_ONLY));
-                    var co1 = new PhpMethodCallExpression("date_create_from_format ", new PhpConstValue(DATE_ONLY), co);
+                    var co = new PhpMethodCallExpression("date", new PhpConstValue(DateOnly));
+                    var co1 = new PhpMethodCallExpression("date_create_from_format", new PhpConstValue(DateOnly), co);
                     return co1;
                 }
                 else
                 {
-                    var _for = new PhpMethodCallExpression(to, "format", new PhpConstValue(DATE_ONLY));
-                    var co = new PhpMethodCallExpression("date_create_from_format", _for, new PhpConstValue(DATE_ONLY));
+                    var _for = new PhpMethodCallExpression(to, "format", new PhpConstValue(DateOnly));
+                    var co = new PhpMethodCallExpression("date_create_from_format",
+                        _for, new PhpConstValue(DateOnly));
                     return co;
                 }
             }
@@ -171,9 +172,9 @@ namespace Lang.Php.Compiler.Translator.Node
             {
                 throw new NotImplementedException();
                 // echo 'Current time: ' . date('Y-m-d H:i:s') . "\n";
-                var co = new PhpMethodCallExpression("date", new PhpConstValue(DATE_ONLY));
-                var co1 = new PhpMethodCallExpression("date_create_from_format ", new PhpConstValue(DATE_ONLY), co);
-                return co1;
+                //                var co = new PhpMethodCallExpression("date", new PhpConstValue(DATE_ONLY));
+                //                var co1 = new PhpMethodCallExpression("date_create_from_format ", new PhpConstValue(DATE_ONLY), co);
+                //                return co1;
             }
             else
             {
@@ -218,22 +219,22 @@ namespace Lang.Php.Compiler.Translator.Node
         string mk(double sec)
         {
             var sec1 = (int)Math.Round(sec);
-            if (sec1 % SEC_PER_DAY == 0)
-                return string.Format("P{0}D", sec1 / SEC_PER_DAY);
-            if (sec1 % SEC_PER_HOUR == 0)
-                return string.Format("PT{0}H", sec1 / SEC_PER_HOUR);
+            if (sec1 % SecPerDay == 0)
+                return string.Format("P{0}D", sec1 / SecPerDay);
+            if (sec1 % SecPerHour == 0)
+                return string.Format("PT{0}H", sec1 / SecPerHour);
             if (sec1 % 60 == 0)
-                return string.Format("PT{0}M", sec1 / SEC_PER_MIN);
+                return string.Format("PT{0}M", sec1 / SecPerMin);
             return string.Format("PT{0}S", sec1);
         }
 
         private IPhpValue TranslateAddInterval(IExternalTranslationContext ctx, CsharpMethodCallExpression src, int mnoznik)
         {
             var intervalString = GetIntervalString(ctx, src.Arguments[0], mnoznik);
-            var interval = PhpMethodCallExpression.MakeConstructor("DateInterval", intervalString);
-            interval.IsStandardPhpClass = true;
+            var interval = PhpMethodCallExpression.MakeConstructor("DateInterval", null, intervalString);
+            interval.DontIncludeClass = true;
             var targetObject = ctx.TranslateValue(src.TargetObject);
-            var methd = new PhpMethodCallExpression("date_add", targetObject, interval);
+            var methd = new PhpMethodCallExpression("date_add", null, targetObject, interval);
             return methd;
         }
 
@@ -241,10 +242,10 @@ namespace Lang.Php.Compiler.Translator.Node
 
         #region Fields
 
-        const string DATE_ONLY = "Y-m-d";
-        const int SEC_PER_DAY = 24 * 3600;
-        const int SEC_PER_HOUR = 3600;
-        const int SEC_PER_MIN = 60;
+        const string DateOnly = "Y-m-d";
+        const int SecPerDay = 24 * 3600;
+        const int SecPerHour = 3600;
+        const int SecPerMin = 60;
 
         #endregion Fields
     }

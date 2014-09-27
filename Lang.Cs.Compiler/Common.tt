@@ -112,6 +112,10 @@
 		public void MakeClassBase()
         {
             WLF("public class {0} {{", baseClass);
+
+
+			
+
             WLF("    public {0}Kinds TokenKind", baseClass);
             WLF("    {{");
             WLF("        get");

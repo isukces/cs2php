@@ -7,59 +7,59 @@ using System.Reflection;
 
 namespace Lang.Php.Compiler
 {
-    
+
     /*
     smartClass
     option NoAdditionalFile
     implement Constructor Sandbox
     
     property Sandbox AssemblySandbox 
-    	read only
+        read only
     
     property CurrentAssembly Assembly obecnie konwertowane assembly
     
     property CurrentType Type Typ obecnie konwertowany
-    	OnChange _currentTypeTranslationInfo = GetTi(_currentType, false);
+        OnChange _currentTypeTranslationInfo = GetTi(_currentType, false);
     
     property CurrentMethod MethodInfo obecnie konwertowana metoda
     
     property Compiled List<CompilationUnit> 
-    	init #
+        init #
     
     property TranslationAssemblies List<Assembly> 
-    	init #
+        init #
     
     property NodeTranslators NodeTranslatorsContainer 
-    	init #
+        init #
     
     property ModuleProcessors List<IModuleProcessor> 
-    	init #
+        init #
     
     property ClassTranslations Dictionary<Type, ClassTranslationInfo> Class translation info collection
-    	init #
-    	read only
+        init #
+        read only
     
     property AssemblyTranslations Dictionary<Assembly, AssemblyTranslationInfo> Assembly translation info collection
-    	init #
+        init #
     
     property FieldTranslations Dictionary<FieldInfo, FieldTranslationInfo> Field translation info collection
-    	init #
+        init #
     
     property State CompileState 
     
     property KnownConstsValues Dictionary<string, KnownConstInfo> Values of known constants i.e. paths to referenced libraries
-    	init #
+        init #
     
     property Logs List<TranslationMessage> 
-    	init #
+        init #
     smartClassEnd
     */
-    
+
     public partial class TranslationInfo
     {
-		#region Methods 
+        #region Methods
 
-		// Public Methods 
+        // Public Methods 
 
         public void CheckAccesibility(CsharpMethodCallExpression m)
         {
@@ -114,6 +114,13 @@ namespace Lang.Php.Compiler
             return q.ToArray();
         }
 
+
+        public MethodTranslationInfo GetOrMakeTranslationInfo(MethodBase methodInfo)
+        {
+            var cti = GetOrMakeTranslationInfo(methodInfo.DeclaringType);
+            return MethodTranslationInfo.FromMethodInfo(methodInfo, cti);
+        }
+
         public ClassTranslationInfo GetOrMakeTranslationInfo(Type type)
         {
             if ((object)type == null)
@@ -144,9 +151,11 @@ namespace Lang.Php.Compiler
         public FieldTranslationInfo GetOrMakeTranslationInfo(FieldInfo fieldInfo)
         {
             if (fieldInfo == null)
-                throw new ArgumentNullException("fieldInfo");
+                throw new ArgumentNullException("fieldInfo");            
             FieldTranslationInfo fti;
             if (_fieldTranslations.TryGetValue(fieldInfo, out fti)) return fti;
+            if (fieldInfo.Name == "PHP_EOL")
+                System.Diagnostics.Debug.Write("");
             fti = _fieldTranslations[fieldInfo] = FieldTranslationInfo.FromFieldInfo(fieldInfo, this);
             if (OnTranslationInfoCreated != null)
                 OnTranslationInfoCreated(this, new TranslationInfoCreatedEventArgs
@@ -164,7 +173,7 @@ namespace Lang.Php.Compiler
                 CheckAccesibility(type);
             var classTranslationInfo = GetOrMakeTranslationInfo(type);
             var phpQualifiedName = classTranslationInfo.ScriptName;
-            if ((object)relativeTo == null) 
+            if ((object)relativeTo == null)
                 return phpQualifiedName;
             if (type == relativeTo)
                 phpQualifiedName.ForceName = PhpQualifiedName.ClassnameSelf;
@@ -179,7 +188,7 @@ namespace Lang.Php.Compiler
         }
 
         [Obsolete("I don't think this is best way to obtain info..")]
-        public ClassTranslationInfo GetTi(Type type, bool doCheckAccesibility = true)
+        public ClassTranslationInfo GetTi(Type type, bool doCheckAccesibility)
         {
             if ((object)type == null)
                 return null;
@@ -243,7 +252,7 @@ namespace Lang.Php.Compiler
         {
             return string.Format("Conversion {0} => {1}", _currentType, _currentMethod);
         }
-		// Private Methods 
+        // Private Methods 
 
         private void CheckAccesibility(MethodBase m)
         {
@@ -254,12 +263,12 @@ namespace Lang.Php.Compiler
             if (tt.ModuleName == _currentTypeTranslationInfo.ModuleName) return;
             if (m is ConstructorInfo)
                 throw new Exception(string.Format("Constructor {0}.{1} cannot be accessed from {2}.{3}.\r\nType {0} is marked as 'Array' or 'Page'.",
-                    m.DeclaringType.FullName,
+                    m.DeclaringType == null ? "?" : (m.DeclaringType.FullName ?? m.DeclaringType.Name),
                     m,
                     CurrentType.FullName,
                     CurrentMethod));
             throw new Exception(string.Format("Method {0}.{1} cannot be accessed from {2}.{3}.\r\nType {0} is marked as 'Array' or 'Page'.",
-                m.DeclaringType.FullName,
+                m.DeclaringType == null ? "?" : (m.DeclaringType.FullName ?? m.DeclaringType.Name),
                 m,
                 CurrentType.FullName,
                 CurrentMethod));
@@ -279,28 +288,28 @@ namespace Lang.Php.Compiler
                     CurrentMethod));
         }
 
-		#endregion Methods 
+        #endregion Methods
 
-		#region Fields 
+        #region Fields
 
-          private ClassTranslationInfo _currentTypeTranslationInfo;
+        private ClassTranslationInfo _currentTypeTranslationInfo;
 
-		#endregion Fields 
+        #endregion Fields
 
-		#region Delegates and Events 
+        #region Delegates and Events
 
-		// Events 
+        // Events 
 
         public event EventHandler<TranslationInfoCreatedEventArgs> OnTranslationInfoCreated;
 
-		#endregion Delegates and Events 
+        #endregion Delegates and Events
 
-		#region Nested Classes 
+        #region Nested Classes
 
 
         public class TranslationInfoCreatedEventArgs : EventArgs
         {
-		#region Properties 
+            #region Properties
 
             public AssemblyTranslationInfo AssemblyTranslation { get; set; }
 
@@ -308,9 +317,9 @@ namespace Lang.Php.Compiler
 
             public FieldTranslationInfo FieldTranslation { get; set; }
 
-		#endregion Properties 
+            #endregion Properties
         }
-		#endregion Nested Classes 
+        #endregion Nested Classes
     }
 }
 
@@ -320,7 +329,7 @@ namespace Lang.Php.Compiler
 // Smartclass.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0c4d5d36fb5eb4ac
 namespace Lang.Php.Compiler
 {
-    public partial class TranslationInfo 
+    public partial class TranslationInfo
     {
         /*
         /// <summary>

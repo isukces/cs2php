@@ -13,10 +13,11 @@
         public static int ClassField2;
 
         [GlobalVariable]
-        public static int ClassField3;
+        public static int ClassField3AsGlobalVariable;
         [GlobalVariable]
         [ScriptName("classField4")]
-        public static int ClassField4;
+        [Module("settings.php")]
+        public static int ClassField4AsGlobalVariable;
 
 
         public const string Const1 = "1";
@@ -48,13 +49,13 @@
 
             var c = ClassField1;
             c = ClassField2;
-            c = ClassField3;
-            c = ClassField4;
+            c = ClassField3AsGlobalVariable;
+            c = ClassField4AsGlobalVariable;
 
             ClassField1 = 1;
             ClassField2 = 2;
-            ClassField3 = 3;
-            ClassField4 = 4;
+            ClassField3AsGlobalVariable = 3;
+            ClassField4AsGlobalVariable = 4;
         }
     }
 }

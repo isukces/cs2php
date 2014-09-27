@@ -1,0 +1,9 @@
+/*
+Generated with CS2PHP
+*/
+require_once(dirname(__FILE__) . '/Lang_Php_Test_Code_BusinessClass.php');
+class IncludeClassPropertyAccess {
+    public function X() {
+        $a = BusinessClass::$ClassProperty;
+    }
+}

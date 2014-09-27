@@ -2,9 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-using Lang.Cs.Compiler.Sandbox;
 
 namespace Lang.Php.Compiler.Source
 {
@@ -31,6 +28,9 @@ namespace Lang.Php.Compiler.Source
     	init ".php"
     
     property PhpIncludePathExpression IPhpValue Expression with complete path to this module
+    
+    property IsEmpty bool Indicated that name is empty
+    	read only String.IsNullOrEmpty(_name)
     smartClassEnd
     */
 
@@ -54,8 +54,8 @@ namespace Lang.Php.Compiler.Source
             if (name == null)
                 throw new ArgumentNullException("name");
 
-            this.assemblyInfo = assemblyInfo;
-            this.Name = name;
+            _assemblyInfo = assemblyInfo;
+            Name = name;
         }
         public PhpCodeModuleName(Type type, AssemblyTranslationInfo assemblyInfo, ClassTranslationInfo declaringTypeInfo)
         {
@@ -66,7 +66,7 @@ namespace Lang.Php.Compiler.Source
             if ((object)type.DeclaringType != null && declaringTypeInfo == null)
                 throw new ArgumentNullException("declaringTypeInfo");
 
-            this.assemblyInfo = assemblyInfo;
+            _assemblyInfo = assemblyInfo;
 
             {
                 if (type.FullName == null)
@@ -74,25 +74,25 @@ namespace Lang.Php.Compiler.Source
                 else
                     Name = type.FullName.Replace(".", "_").Replace("+", "__").Replace("<", "__").Replace(">", "__");
                 // take module name from parent, this can be overrided if nested class is decorated with attributes
-                if (declaringTypeInfo != null)
+                if (declaringTypeInfo != null && declaringTypeInfo.ModuleName != null)
                     Name = declaringTypeInfo.ModuleName.Name;
                 var ats = type.GetCustomAttributes(false);
 
                 #region ModuleAttribute
                 {
-                    ModuleAttribute _module = type.GetCustomAttribute<ModuleAttribute>();
-                    if (_module != null)
+                    var moduleAttribute = type.GetCustomAttribute<ModuleAttribute>();
+                    if (moduleAttribute != null)
                     {
-                        Name = _module.ModuleShortName;
-                        OptionalIncludePathPrefix = _module.IncludePathPrefix;
+                        Name = moduleAttribute.ModuleShortName;
+                        OptionalIncludePathPrefix = moduleAttribute.IncludePathPrefix;
                     }
                 }
                 #endregion
                 #region PageAttribute
                 {
-                    var _page = type.GetCustomAttribute<PageAttribute>();
-                    if (_page != null)
-                        Name = _page.ModuleShortName;
+                    var pageAttribute = type.GetCustomAttribute<PageAttribute>();
+                    if (pageAttribute != null)
+                        Name = pageAttribute.ModuleShortName;
                 }
                 #endregion
             }
@@ -101,26 +101,26 @@ namespace Lang.Php.Compiler.Source
 
         private void UpdateIncludePathExpression()
         {
-            if (assemblyInfo == null)
+            if (_assemblyInfo == null)
             {
                 PhpIncludePathExpression = null;
                 return;
             }
             List<IPhpValue> pathItems = new List<IPhpValue>();
             {
-                IPhpValue assemblyPath = assemblyInfo.PhpIncludePathExpression;
+                IPhpValue assemblyPath = _assemblyInfo.PhpIncludePathExpression;
                 if (assemblyPath != null)
                     pathItems.Add(assemblyPath);
             }
-            if (optionalIncludePathPrefix != null && optionalIncludePathPrefix.Any())
-                foreach (var n in optionalIncludePathPrefix)
+            if (_optionalIncludePathPrefix != null && _optionalIncludePathPrefix.Any())
+                foreach (var n in _optionalIncludePathPrefix)
                 {
                     if (n.StartsWith("$"))
                         pathItems.Add(new PhpVariableExpression(n, PhpVariableKind.Global));
                     else
                         pathItems.Add(new PhpDefinedConstExpression(n, null));
                 }
-            pathItems.Add(new PhpConstValue(name + Extension));
+            pathItems.Add(new PhpConstValue(_name + Extension));
             PhpIncludePathExpression = PhpBinaryOperatorExpression.ConcatStrings(pathItems.ToArray());
         }
 
@@ -146,7 +146,7 @@ namespace Lang.Php.Compiler.Source
 
         public string MakeEmitPath(string basePath, int dupa)
         {
-            var p = System.IO.Path.Combine(basePath, Name.Replace("/", "\\") + extension);
+            var p = System.IO.Path.Combine(basePath, Name.Replace("/", "\\") + _extension);
             return p;
         }
 
@@ -163,7 +163,7 @@ namespace Lang.Php.Compiler.Source
         {
             if (relatedTo.Library == Library)
             {
-                var knownPath = ProcessPath(name + extension, relatedTo.name + extension);
+                var knownPath = ProcessPath(_name + _extension, relatedTo._name + _extension);
                 //dirname(__FILE__)
                 var __FILE__ = new PhpDefinedConstExpression("__FILE__", null);
                 var dirname = new PhpMethodCallExpression("dirname", __FILE__);
@@ -175,17 +175,17 @@ namespace Lang.Php.Compiler.Source
             {
                 string path = null;
                 string pathRelTo = null;
-                if (phpIncludePathExpression is PhpConstValue)
+                if (_phpIncludePathExpression is PhpConstValue)
                 {
-                    path = (phpIncludePathExpression as PhpConstValue).Value as string;
+                    path = (_phpIncludePathExpression as PhpConstValue).Value as string;
                     if (path == null)
                         throw new NotSupportedException();
                 }
                 else
-                    return phpIncludePathExpression; // assume expression like MPDF_LIB_PATH . 'lib/mpdf/mpdf.php'
-                if (relatedTo.phpIncludePathExpression is PhpConstValue)
+                    return _phpIncludePathExpression; // assume expression like MPDF_LIB_PATH . 'lib/mpdf/mpdf.php'
+                if (relatedTo._phpIncludePathExpression is PhpConstValue)
                 {
-                    pathRelTo = (relatedTo.phpIncludePathExpression as PhpConstValue).Value as string;
+                    pathRelTo = (relatedTo._phpIncludePathExpression as PhpConstValue).Value as string;
                     if (pathRelTo == null)
                         throw new NotSupportedException();
                 }
@@ -217,7 +217,7 @@ namespace Lang.Php.Compiler.Source
         /// <returns>Tekstowa reprezentacja obiektu</returns>
         public override string ToString()
         {
-            return string.Format("{0}@{1}", name, Library);
+            return string.Format("{0}@{1}", _name, Library);
         }
         // Private Methods 
 
@@ -274,8 +274,8 @@ namespace Lang.Php.Compiler.Source
 }
 
 
-// -----:::::##### smartClass embedded code begin #####:::::----- generated 2013-12-25 13:50
-// File generated automatically ver 2013-07-10 08:43
+// -----:::::##### smartClass embedded code begin #####:::::----- generated 2014-09-27 09:59
+// File generated automatically ver 2014-09-01 19:00
 // Smartclass.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0c4d5d36fb5eb4ac
 namespace Lang.Php.Compiler.Source
 {
@@ -293,9 +293,9 @@ namespace Lang.Php.Compiler.Source
 
         implement INotifyPropertyChanged
         implement INotifyPropertyChanged_Passive
-        implement ToString ##AssemblyInfo## ##Library## ##Name## ##OptionalIncludePathPrefix## ##Extension## ##PhpIncludePathExpression##
-        implement ToString AssemblyInfo=##AssemblyInfo##, Library=##Library##, Name=##Name##, OptionalIncludePathPrefix=##OptionalIncludePathPrefix##, Extension=##Extension##, PhpIncludePathExpression=##PhpIncludePathExpression##
-        implement equals AssemblyInfo, Library, Name, OptionalIncludePathPrefix, Extension, PhpIncludePathExpression
+        implement ToString ##AssemblyInfo## ##Library## ##Name## ##OptionalIncludePathPrefix## ##Extension## ##PhpIncludePathExpression## ##IsEmpty##
+        implement ToString AssemblyInfo=##AssemblyInfo##, Library=##Library##, Name=##Name##, OptionalIncludePathPrefix=##OptionalIncludePathPrefix##, Extension=##Extension##, PhpIncludePathExpression=##PhpIncludePathExpression##, IsEmpty=##IsEmpty##
+        implement equals AssemblyInfo, Library, Name, OptionalIncludePathPrefix, Extension, PhpIncludePathExpression, IsEmpty
         implement equals *
         implement equals *, ~exclude1, ~exclude2
         */
@@ -303,34 +303,38 @@ namespace Lang.Php.Compiler.Source
         /// <summary>
         /// Nazwa własności AssemblyInfo; 
         /// </summary>
-        public const string PROPERTYNAME_ASSEMBLYINFO = "AssemblyInfo";
+        public const string PropertyNameAssemblyInfo = "AssemblyInfo";
         /// <summary>
         /// Nazwa własności Library; Library name for containing assembly
         /// </summary>
-        public const string PROPERTYNAME_LIBRARY = "Library";
+        public const string PropertyNameLibrary = "Library";
         /// <summary>
         /// Nazwa własności Name; Module name without library prefix
         /// </summary>
-        public const string PROPERTYNAME_NAME = "Name";
+        public const string PropertyNameName = "Name";
         /// <summary>
         /// Nazwa własności OptionalIncludePathPrefix; defined const or variables to include before module name
         /// </summary>
-        public const string PROPERTYNAME_OPTIONALINCLUDEPATHPREFIX = "OptionalIncludePathPrefix";
+        public const string PropertyNameOptionalIncludePathPrefix = "OptionalIncludePathPrefix";
         /// <summary>
         /// Nazwa własności Extension; rozszerzenie nazwy pliku
         /// </summary>
-        public const string PROPERTYNAME_EXTENSION = "Extension";
+        public const string PropertyNameExtension = "Extension";
         /// <summary>
         /// Nazwa własności PhpIncludePathExpression; Expression with complete path to this module
         /// </summary>
-        public const string PROPERTYNAME_PHPINCLUDEPATHEXPRESSION = "PhpIncludePathExpression";
+        public const string PropertyNamePhpIncludePathExpression = "PhpIncludePathExpression";
+        /// <summary>
+        /// Nazwa własności IsEmpty; Indicated that name is empty
+        /// </summary>
+        public const string PropertyNameIsEmpty = "IsEmpty";
         #endregion Constants
 
         #region Methods
         /// <summary>
         /// Sprawdza, czy wskazany obiekt jest równy bieżącemu
         /// </summary>
-        /// <param name="obj">obiekt do porównania z obiektem bieżącym</param>
+        /// <param name="other">obiekt do porównania z obiektem bieżącym</param>
         /// <returns><c>true</c> jeśli wskazany obiekt jest równy bieżącemu; w przeciwnym wypadku<c>false</c></returns>
         public bool Equals(PhpCodeModuleName other)
         {
@@ -340,7 +344,7 @@ namespace Lang.Php.Compiler.Source
         /// <summary>
         /// Sprawdza, czy wskazany obiekt jest równy bieżącemu
         /// </summary>
-        /// <param name="obj">obiekt do porównania z obiektem bieżącym</param>
+        /// <param name="other">obiekt do porównania z obiektem bieżącym</param>
         /// <returns><c>true</c> jeśli wskazany obiekt jest równy bieżącemu; w przeciwnym wypadku<c>false</c></returns>
         public override bool Equals(object other)
         {
@@ -357,7 +361,7 @@ namespace Lang.Php.Compiler.Source
             // Good implementation suggested by Josh Bloch
             int _hash_ = 17;
             _hash_ = _hash_ * 31 + ((Library == (object)null) ? 0 : Library.GetHashCode());
-            _hash_ = _hash_ * 31 + name.GetHashCode();
+            _hash_ = _hash_ * 31 + _name.GetHashCode();
             return _hash_;
         }
 
@@ -374,7 +378,7 @@ namespace Lang.Php.Compiler.Source
         {
             if (left == (object)null && right == (object)null) return true;
             if (left == (object)null || right == (object)null) return false;
-            return left.Library == right.Library && left.name == right.name;
+            return left.Library == right.Library && left._name == right._name;
         }
 
         /// <summary>
@@ -387,7 +391,7 @@ namespace Lang.Php.Compiler.Source
         {
             if (left == (object)null && right == (object)null) return false;
             if (left == (object)null || right == (object)null) return true;
-            return left.Library != right.Library || left.name != right.name;
+            return left.Library != right.Library || left._name != right._name;
         }
 
         #endregion Operators
@@ -400,10 +404,10 @@ namespace Lang.Php.Compiler.Source
         {
             get
             {
-                return assemblyInfo;
+                return _assemblyInfo;
             }
         }
-        private AssemblyTranslationInfo assemblyInfo;
+        private AssemblyTranslationInfo _assemblyInfo;
         /// <summary>
         /// Library name for containing assembly; własność dopuszcza wartości NULL i jest tylko do odczytu.
         /// </summary>
@@ -411,7 +415,7 @@ namespace Lang.Php.Compiler.Source
         {
             get
             {
-                return assemblyInfo == null ? null : assemblyInfo.LibraryName;
+                return _assemblyInfo == null ? null : _assemblyInfo.LibraryName;
             }
         }
         /// <summary>
@@ -421,18 +425,18 @@ namespace Lang.Php.Compiler.Source
         {
             get
             {
-                return name;
+                return _name;
             }
             set
             {
                 value = (value ?? String.Empty).Trim();
                 value = value.Replace("\\", "/");
-                if (value == name) return;
-                name = value;
+                if (value == _name) return;
+                _name = value;
                 UpdateIncludePathExpression();
             }
         }
-        private string name = string.Empty;
+        private string _name = string.Empty;
         /// <summary>
         /// defined const or variables to include before module name
         /// </summary>
@@ -440,14 +444,14 @@ namespace Lang.Php.Compiler.Source
         {
             get
             {
-                return optionalIncludePathPrefix;
+                return _optionalIncludePathPrefix;
             }
             set
             {
-                optionalIncludePathPrefix = value;
+                _optionalIncludePathPrefix = value;
             }
         }
-        private string[] optionalIncludePathPrefix;
+        private string[] _optionalIncludePathPrefix;
         /// <summary>
         /// rozszerzenie nazwy pliku
         /// </summary>
@@ -455,15 +459,15 @@ namespace Lang.Php.Compiler.Source
         {
             get
             {
-                return extension;
+                return _extension;
             }
             set
             {
                 value = (value ?? String.Empty).Trim();
-                extension = value;
+                _extension = value;
             }
         }
-        private string extension = ".php";
+        private string _extension = ".php";
         /// <summary>
         /// Expression with complete path to this module
         /// </summary>
@@ -471,14 +475,24 @@ namespace Lang.Php.Compiler.Source
         {
             get
             {
-                return phpIncludePathExpression;
+                return _phpIncludePathExpression;
             }
             set
             {
-                phpIncludePathExpression = value;
+                _phpIncludePathExpression = value;
             }
         }
-        private IPhpValue phpIncludePathExpression;
+        private IPhpValue _phpIncludePathExpression;
+        /// <summary>
+        /// Indicated that name is empty; własność jest tylko do odczytu.
+        /// </summary>
+        public bool IsEmpty
+        {
+            get
+            {
+                return String.IsNullOrEmpty(_name);
+            }
+        }
         #endregion Properties
 
     }

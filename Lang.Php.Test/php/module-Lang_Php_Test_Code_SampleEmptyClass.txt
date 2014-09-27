@@ -13,7 +13,7 @@ class SampleEmptyClass {
     public $InstanceField1;
     public $instanceField2;
     public function Test1() {
-        global $ClassField3, $classField4;
+        global $ClassField3AsGlobalVariable, $classField4;
         $co = self::Const1;
         $co = Const2;
         $co = '3';
@@ -24,11 +24,11 @@ class SampleEmptyClass {
         $i = $this->instanceField2;
         $c = self::$ClassField1;
         $c = self::$classField2;
-        $c = $ClassField3;
+        $c = $ClassField3AsGlobalVariable;
         $c = $classField4;
         self::$ClassField1 = 1;
         self::$classField2 = 2;
-        $ClassField3 = 3;
+        $ClassField3AsGlobalVariable = 3;
         $classField4 = 4;
     }
 }

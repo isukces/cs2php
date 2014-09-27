@@ -31,14 +31,22 @@ namespace Lang.Php.Compiler
     {
         public IPhpValue Translate(IExternalTranslationContext ctx, object node)
         {
-            return method.Invoke(targetObject, new object[] { ctx, node }) as IPhpValue;
+            return _method.Invoke(_targetObject, new[] { ctx, node }) as IPhpValue;
+        }
+
+        public override string ToString()
+        {
+            return string.Format("NodeTranslatorBound {0} {1} for {2}", 
+                Priority, 
+                TargetObject.GetType().ExcName(),
+                _method.GetParameters()[1].ParameterType.ExcName());
         }
 
         int GetPriority()
         {
             if (!priority.HasValue)
             {
-                priority = (int)gPMethod.Invoke(targetObject, new object[0]);
+                priority = (int)_gPMethod.Invoke(_targetObject, new object[0]);
             }
             return priority.Value;
             //   return method.Invoke(targetObject, new object[] { ctx, node }) as IPhpValue;
@@ -119,14 +127,14 @@ namespace Lang.Php.Compiler
         {
             get
             {
-                return method;
+                return _method;
             }
             set
             {
-                method = value;
+                _method = value;
             }
         }
-        private MethodInfo method;
+        private MethodInfo _method;
         /// <summary>
         /// 
         /// </summary>
@@ -134,14 +142,14 @@ namespace Lang.Php.Compiler
         {
             get
             {
-                return gPMethod;
+                return _gPMethod;
             }
             set
             {
-                gPMethod = value;
+                _gPMethod = value;
             }
         }
-        private MethodInfo gPMethod;
+        private MethodInfo _gPMethod;
         /// <summary>
         /// 
         /// </summary>
@@ -149,14 +157,14 @@ namespace Lang.Php.Compiler
         {
             get
             {
-                return targetObject;
+                return _targetObject;
             }
             set
             {
-                targetObject = value;
+                _targetObject = value;
             }
         }
-        private object targetObject;
+        private object _targetObject;
         /// <summary>
         /// Własność jest tylko do odczytu.
         /// </summary>

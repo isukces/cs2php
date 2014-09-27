@@ -1,20 +1,19 @@
 ﻿using Lang.Php.Compiler.Source;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Lang.Php.Compiler 
+namespace Lang.Php.Compiler
 {
 
     /*
     smartClass
     option NoAdditionalFile
     implement Constructor *
+    implement ToString ##ModuleName##
     
     property ModuleName PhpCodeModuleName 
+    	read only
     
+    property Why string Why this Module is requested
+    	read only
     smartClassEnd
     */
     
@@ -24,8 +23,8 @@ namespace Lang.Php.Compiler
 }
 
 
-// -----:::::##### smartClass embedded code begin #####:::::----- generated 2013-11-11 18:40
-// File generated automatically ver 2013-07-10 08:43
+// -----:::::##### smartClass embedded code begin #####:::::----- generated 2014-09-27 14:02
+// File generated automatically ver 2014-09-01 19:00
 // Smartclass.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0c4d5d36fb5eb4ac
 namespace Lang.Php.Compiler
 {
@@ -43,20 +42,22 @@ namespace Lang.Php.Compiler
 
         implement INotifyPropertyChanged
         implement INotifyPropertyChanged_Passive
-        implement ToString ##ModuleName##
-        implement ToString ModuleName=##ModuleName##
-        implement equals ModuleName
+        implement ToString ##ModuleName## ##Why##
+        implement ToString ModuleName=##ModuleName##, Why=##Why##
+        implement equals ModuleName, Why
         implement equals *
         implement equals *, ~exclude1, ~exclude2
         */
         #region Constructors
         /// <summary>
         /// Tworzy instancję obiektu
-        /// <param name="ModuleName"></param>
+        /// <param name="moduleName"></param>
+        /// <param name="why">Why this Module is requested</param>
         /// </summary>
-        public ModuleCodeRequest(PhpCodeModuleName ModuleName)
+        public ModuleCodeRequest(PhpCodeModuleName moduleName, string why)
         {
-            this.ModuleName = ModuleName;
+            _moduleName = moduleName;
+            _why = why;
         }
 
         #endregion Constructors
@@ -65,28 +66,48 @@ namespace Lang.Php.Compiler
         /// <summary>
         /// Nazwa własności ModuleName; 
         /// </summary>
-        public const string PROPERTYNAME_MODULENAME = "ModuleName";
+        public const string PropertyNameModuleName = "ModuleName";
+        /// <summary>
+        /// Nazwa własności Why; Why this Module is requested
+        /// </summary>
+        public const string PropertyNameWhy = "Why";
         #endregion Constants
 
         #region Methods
+        /// <summary>
+        /// Zwraca tekstową reprezentację obiektu
+        /// </summary>
+        /// <returns>Tekstowa reprezentacja obiektu</returns>
+        public override string ToString()
+        {
+            return string.Format("{0}", _moduleName);
+        }
+
         #endregion Methods
 
         #region Properties
         /// <summary>
-        /// 
+        /// Własność jest tylko do odczytu.
         /// </summary>
         public PhpCodeModuleName ModuleName
         {
             get
             {
-                return moduleName;
-            }
-            set
-            {
-                moduleName = value;
+                return _moduleName;
             }
         }
-        private PhpCodeModuleName moduleName;
+        private PhpCodeModuleName _moduleName;
+        /// <summary>
+        /// Why this Module is requested; własność jest tylko do odczytu.
+        /// </summary>
+        public string Why
+        {
+            get
+            {
+                return _why;
+            }
+        }
+        private string _why = string.Empty;
         #endregion Properties
 
     }

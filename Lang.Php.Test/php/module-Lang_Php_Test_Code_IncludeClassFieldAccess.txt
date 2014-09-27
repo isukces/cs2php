@@ -1,0 +1,15 @@
+/*
+Generated with CS2PHP
+*/
+require_once(dirname(__FILE__) . '/Lang_Php_Test_Code_BusinessClassDefinedConst.php');
+require_once(dirname(__FILE__) . '/other-module-BusinessClassDefinedConst.php');
+require_once(dirname(__FILE__) . '/Lang_Php_Test_Code_BusinessClass.php');
+class IncludeClassFieldAccess {
+    public function X() {
+        global $ClassFieldGlobalVariable;
+        $a = BusinessClass::$ClassField;
+        $b1 = ClassFieldDefinedConst;
+        $b2 = ClassFieldDefinedConstInOtherModule;
+        $c = $ClassFieldGlobalVariable;
+    }
+}

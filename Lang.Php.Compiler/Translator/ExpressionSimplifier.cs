@@ -198,19 +198,18 @@ namespace Lang.Php.Compiler.Translator
                 }
             }
             {
-                var list1 = node.Arguments.Select(i => Simplify(i)).Cast<PhpMethodInvokeValue>().ToList();
+                var list1 = node.Arguments.Select(Simplify).Cast<PhpMethodInvokeValue>().ToList();
                 IPhpValue to = node.TargetObject == null ? null : Simplify(node.TargetObject);
                 if (PhpSourceBase.EqualCode_List(list1, node.Arguments) && PhpSourceBase.EqualCode(to, node.TargetObject))
                     return node;
-                return new PhpMethodCallExpression(node.Name)
+                var xx = new PhpMethodCallExpression(node.Name)
                 {
                     Arguments = list1,
-                    ClassName = node.ClassName,
-                    IsStandardPhpClass = node.IsStandardPhpClass,
+                    DontIncludeClass = node.DontIncludeClass,
                     TargetObject = to
                 };
-                throw new NotImplementedException();
-
+                xx.SetClassName(node.ClassName, node.TranslationInfo);
+                return xx;
             }
             return node;
         }

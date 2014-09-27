@@ -12,7 +12,7 @@ namespace Lang.Php.Wp
     public class WP_Http
     {
 
-        public Request_Object request(string url, Dictionary<string, object> pp)
+        public Request_Array request(string url, Dictionary<string, object> pp)
         {
             throw new NotSupportedException();
         }
@@ -21,16 +21,37 @@ namespace Lang.Php.Wp
         [AsArray]
         public class Request_Array
         {
-            public Response response;
-            public string body;
-            public Dictionary<string, string> headers;
-            public Dictionary<string, string> cookies;
-            public string filename;
+            [ScriptName("response")]
+            public Response Response;
+
+            [ScriptName("body")]
+            public string Body;
+
+            [ScriptName("headers")]
+            public Dictionary<string, string> Headers;
+
+            [ScriptName("cookies")]
+            public Dictionary<string, string> Cookies;
+
+            [ScriptName("filename")]
+            public string Filename;
+
+            [ScriptName("errors")]
+            public object[] Errors;
+
+            public Request_Array(Response response)
+            {
+                this.Response = response;
+            }
         }
         [AsArray]
         public class Response
         {
-            public int code;
+            [ScriptName("code")]
+            public int Code;
+
+            [ScriptName("message")] 
+            public string Message;
 
         }
         [Skip]

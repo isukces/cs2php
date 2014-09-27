@@ -42,7 +42,7 @@ namespace Lang.Php.Compiler.Source
         /// <summary>
         /// Własność jest tylko do odczytu.
         /// </summary>
-        private string EmitName
+        public string EmitName
         {
             get
             {

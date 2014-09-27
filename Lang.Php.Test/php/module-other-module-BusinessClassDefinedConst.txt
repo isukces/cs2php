@@ -1,0 +1,5 @@
+/*
+Generated with CS2PHP
+*/
+if (!defined('ClassFieldDefinedConstInOtherModule'))
+    define('ClassFieldDefinedConstInOtherModule', 3);

@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Lang.Php.Wp
 {
-    [Skip]
+    [BuiltIn]
     public class Wp
     {
 

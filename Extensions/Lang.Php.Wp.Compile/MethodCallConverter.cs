@@ -64,7 +64,7 @@ namespace Lang.Php.Wp.Compile
 
         private static IPhpValue _WpPost(CsharpMethodCallExpression src)
         {
-            if (src.MethodInfo.Name == "post_type")
+            if (src.MethodInfo.Name == "PostType")
             {
                 var a1 = new PhpVariableExpression("$_POST", PhpVariableKind.Global);
                 var a2 = new PhpArrayAccessExpression(a1, new PhpConstValue("post_type"));

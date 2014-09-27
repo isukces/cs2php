@@ -29,6 +29,12 @@ namespace Lang.Php.Compiler
     property Skip bool czy pominąć generowanie klasy
     	read only GetSkip()
     
+    property BuildIn bool class from host application i.e. wordpress
+    	read only GetBuildIn()
+    
+    property DontIncludeModuleForClassMembers bool czy pominąć includowanie modułu z klasą
+    	read only GetDontIncludeModuleForClassMembers()
+    
     property PageMethod MethodInfo metoda generowana jako kod strony
     	read only GetPageMethod()
     
@@ -40,7 +46,6 @@ namespace Lang.Php.Compiler
     
     property IsReflected bool Infomacja pochodzi jedynie z refleksji a nie z kodu tłumaczonego (prawdopodobnie dotyczy typu z referencyjnej biblioteki)
     	read only GetIsReflected()
-    	attribute Obsolete
     
     property IsArray bool Czy klasa posiada atrybut ARRAY
     	read only GetIsArray()
@@ -50,11 +55,7 @@ namespace Lang.Php.Compiler
     public partial class ClassTranslationInfo
     {
         #region Constructors
-        private PhpCodeModuleName GetModuleName()
-        {
-            Update();
-            return _moduleName;
-        }
+
         /// <summary>
         /// Tworzy instancję obiektu
         /// <param name="type"></param>
@@ -107,6 +108,18 @@ namespace Lang.Php.Compiler
         }
         // Private Methods 
 
+        private bool GetDontIncludeModuleForClassMembers()
+        {
+            Update();
+            return _skip || _isArray || _type.IsEnum;
+        }
+
+        bool GetBuildIn()
+        {
+            Update();
+            return _buildIn;
+        }
+
         bool GetIgnoreNamespace()
         {
             Update();
@@ -115,6 +128,7 @@ namespace Lang.Php.Compiler
 
         private PhpCodeModuleName GetIncluideModule()
         {
+            Update();
             return _isArray || _skip ? null : _moduleName;
         }
 
@@ -128,6 +142,30 @@ namespace Lang.Php.Compiler
         {
             Update();
             return _isPage;
+        }
+
+        private bool GetIsReflected()
+        {
+            Update();
+            return _isReflected;
+        }
+
+        private PhpCodeModuleName GetModuleName()
+        {
+            Update();
+            return _moduleName;
+        }
+
+        private MethodInfo GetPageMethod()
+        {
+            Update();
+            return _pageMethod;
+        }
+
+        private PhpQualifiedName GetScriptName()
+        {
+            Update();
+            return _scriptName;
         }
 
         bool GetSkip()
@@ -166,12 +204,12 @@ namespace Lang.Php.Compiler
                     if (scriptNameAttribute.Name.StartsWith(PhpQualifiedName.TokenNsSeparator.ToString(CultureInfo.InvariantCulture)))
                         _scriptName = (PhpQualifiedName)scriptNameAttribute.Name;
                     else if (IgnoreNamespace)
-                        _scriptName = (PhpQualifiedName) (PhpQualifiedName.TokenNsSeparator + scriptNameAttribute.Name);
+                        _scriptName = (PhpQualifiedName)(PhpQualifiedName.TokenNsSeparator + scriptNameAttribute.Name);
                     else
                         _scriptName =
                             (PhpQualifiedName)
                                 (DotNetNameToPhpName(_type.FullName) + PhpQualifiedName.TokenNsSeparator +
-                                 scriptNameAttribute.Name);                   
+                                 scriptNameAttribute.Name);
                 }
                 if (declaringTypeTranslationInfo != null)
                     _scriptName = (PhpQualifiedName)(declaringTypeTranslationInfo.ScriptName + "__" + _type.Name); // parent clas followed by __ and short name
@@ -179,6 +217,7 @@ namespace Lang.Php.Compiler
             #endregion
             #region Module name
             {
+                //if (declaringTypeTranslationInfo != null && declaringTypeTranslationInfo.ModuleName != null)
                 _moduleName = new PhpCodeModuleName(_type, ati, declaringTypeTranslationInfo);
             }
             #endregion
@@ -202,50 +241,46 @@ namespace Lang.Php.Compiler
                     _skip = true;
             }
             #endregion
+            #region BuiltInAttribute
+            {
+                var builtInAttribute = ats.OfType<BuiltInAttribute>().FirstOrDefault();
+                if (builtInAttribute != null)
+                    _buildIn = true;
+            }
+            #endregion
 
+            if (_skip && _buildIn)
+                throw new Exception("Don't mix SkipAttribute and BuiltInAttribute for type " + _type.ExcName());
+            if (_buildIn)
+                _skip = true;
             if (_type.IsGenericParameter)
+                _skip = true;
+            if (_isArray)
                 _skip = true;
         }
 
-        #endregion Methods
+            #endregion Methods
 
         #region Fields
 
+        private bool _buildIn;
         private bool _ignoreNamespace;
-        private TranslationInfo _info;
+        private readonly TranslationInfo _info;
         bool _initialized;
         private bool _isArray;
         private bool _isPage;
-        private bool _skip;
+        private bool _isReflected;
         private PhpCodeModuleName _moduleName;
         private MethodInfo _pageMethod;
-        private bool _isReflected;
         private PhpQualifiedName _scriptName;
+        private bool _skip;
 
         #endregion Fields
-
-        private MethodInfo GetPageMethod()
-        {
-            Update();
-            return _pageMethod;
-        }
-
-        private bool GetIsReflected()
-        {
-            Update();
-            return _isReflected;
-        }
-
-        private PhpQualifiedName GetScriptName()
-        {
-            Update();
-            return _scriptName;
-        }
     }
 }
 
 
-// -----:::::##### smartClass embedded code begin #####:::::----- generated 2014-09-05 12:08
+// -----:::::##### smartClass embedded code begin #####:::::----- generated 2014-09-27 11:28
 // File generated automatically ver 2014-09-01 19:00
 // Smartclass.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0c4d5d36fb5eb4ac
 namespace Lang.Php.Compiler
@@ -259,17 +294,17 @@ namespace Lang.Php.Compiler
         public ClassTranslationInfo()
         {
         }
-
         Przykłady użycia
-
         implement INotifyPropertyChanged
         implement INotifyPropertyChanged_Passive
-        implement ToString ##Type## ##ParsedCode## ##IgnoreNamespace## ##ScriptName## ##IsPage## ##Skip## ##PageMethod## ##ModuleName## ##IncludeModule## ##IsReflected## ##IsArray##
-        implement ToString Type=##Type##, ParsedCode=##ParsedCode##, IgnoreNamespace=##IgnoreNamespace##, ScriptName=##ScriptName##, IsPage=##IsPage##, Skip=##Skip##, PageMethod=##PageMethod##, ModuleName=##ModuleName##, IncludeModule=##IncludeModule##, IsReflected=##IsReflected##, IsArray=##IsArray##
-        implement equals Type, ParsedCode, IgnoreNamespace, ScriptName, IsPage, Skip, PageMethod, ModuleName, IncludeModule, IsReflected, IsArray
+        implement ToString ##Type## ##ParsedCode## ##IgnoreNamespace## ##ScriptName## ##IsPage## ##Skip## ##BuildIn## ##DontIncludeModuleForClassMembers## ##PageMethod## ##ModuleName## ##IncludeModule## ##IsReflected## ##IsArray##
+        implement ToString Type=##Type##, ParsedCode=##ParsedCode##, IgnoreNamespace=##IgnoreNamespace##, ScriptName=##ScriptName##, IsPage=##IsPage##, Skip=##Skip##, BuildIn=##BuildIn##, DontIncludeModuleForClassMembers=##DontIncludeModuleForClassMembers##, PageMethod=##PageMethod##, ModuleName=##ModuleName##, IncludeModule=##IncludeModule##, IsReflected=##IsReflected##, IsArray=##IsArray##
+        implement equals Type, ParsedCode, IgnoreNamespace, ScriptName, IsPage, Skip, BuildIn, DontIncludeModuleForClassMembers, PageMethod, ModuleName, IncludeModule, IsReflected, IsArray
         implement equals *
         implement equals *, ~exclude1, ~exclude2
         */
+
+
         #region Constants
         /// <summary>
         /// Nazwa własności Type; 
@@ -296,6 +331,14 @@ namespace Lang.Php.Compiler
         /// </summary>
         public const string PropertyNameSkip = "Skip";
         /// <summary>
+        /// Nazwa własności BuildIn; class from host application i.e. wordpress
+        /// </summary>
+        public const string PropertyNameBuildIn = "BuildIn";
+        /// <summary>
+        /// Nazwa własności DontIncludeModuleForClassMembers; czy pominąć includowanie modułu z klasą
+        /// </summary>
+        public const string PropertyNameDontIncludeModuleForClassMembers = "DontIncludeModuleForClassMembers";
+        /// <summary>
         /// Nazwa własności PageMethod; metoda generowana jako kod strony
         /// </summary>
         public const string PropertyNamePageMethod = "PageMethod";
@@ -317,8 +360,10 @@ namespace Lang.Php.Compiler
         public const string PropertyNameIsArray = "IsArray";
         #endregion Constants
 
+
         #region Methods
         #endregion Methods
+
 
         #region Properties
         /// <summary>
@@ -388,6 +433,26 @@ namespace Lang.Php.Compiler
             }
         }
         /// <summary>
+        /// class from host application i.e. wordpress; własność jest tylko do odczytu.
+        /// </summary>
+        public bool BuildIn
+        {
+            get
+            {
+                return GetBuildIn();
+            }
+        }
+        /// <summary>
+        /// czy pominąć includowanie modułu z klasą; własność jest tylko do odczytu.
+        /// </summary>
+        public bool DontIncludeModuleForClassMembers
+        {
+            get
+            {
+                return GetDontIncludeModuleForClassMembers();
+            }
+        }
+        /// <summary>
         /// metoda generowana jako kod strony; własność jest tylko do odczytu.
         /// </summary>
         public MethodInfo PageMethod
@@ -420,7 +485,6 @@ namespace Lang.Php.Compiler
         /// <summary>
         /// Infomacja pochodzi jedynie z refleksji a nie z kodu tłumaczonego (prawdopodobnie dotyczy typu z referencyjnej biblioteki); własność jest tylko do odczytu.
         /// </summary>
-        [Obsolete]
         public bool IsReflected
         {
             get
@@ -439,6 +503,5 @@ namespace Lang.Php.Compiler
             }
         }
         #endregion Properties
-
     }
 }

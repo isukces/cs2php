@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{524926F6-8C8E-4FDC-9C18-0D9E3C9A8794}</ProjectGuid>
+    <ProjectGuid>{8BE2B47E-389A-433D-BEA1-CB7655B8D1DC}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Lang.Php.Test</RootNamespace>
@@ -37,6 +37,7 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Code\Includes.cs" />
     <Compile Include="Code\MyCode.cs" />
     <Compile Include="Code\SampleEmptyClass.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -65,6 +66,36 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="php\module-Lang_Php_Test_Code_SampleEmptyClass.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="php\module-Lang_Php_Test_Code_IncludeClassFieldAccess.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="php\module-Lang_Php_Test_Code_IncludeClassPropertyAccess.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="php\module-Lang_Php_Test_Code_IncludeInstanceFieldAccess.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="php\module-Lang_Php_Test_Code_IncludeInstancePropertyAccess.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="php\module-Lang_Php_Test_Code_BusinessClass.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="php\module-Lang_Php_Test_Code_BusinessClassDefinedConst.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="php\module-Lang_Php_Test_Code_MyCode.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="php\module-Lang_Php_Test_Code_BusinessClassGlobalVariable.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="php\module-other-module-BusinessClassDefinedConst.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="php\module-Lang_Php_Test_Code_IncludeShouldNotIncludeOther.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

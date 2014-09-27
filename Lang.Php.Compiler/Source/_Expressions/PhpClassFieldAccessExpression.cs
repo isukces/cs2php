@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Lang.Php.Compiler.Source
 {
@@ -12,11 +9,15 @@ namespace Lang.Php.Compiler.Source
     option NoAdditionalFile
     
     property ClassName PhpQualifiedName 
+    	read only
     
     property FieldName string 
     	preprocess while (value.StartsWith("$")) value = value.Substring(1);
     
     property IsConst bool 
+    
+    property ClassTi ClassTranslationInfo 
+    	read only
     smartClassEnd
     */
     
@@ -25,21 +26,29 @@ namespace Lang.Php.Compiler.Source
         public override string GetPhpCode(PhpEmitStyle style)
         {
             return string.Format("{0}::{1}{2}",
-                className.NameForEmit(style),
-                isConst ? "" : "$",
-                fieldName);
+                _className.NameForEmit(style),
+                _isConst ? "" : "$",
+                _fieldName);
         }
 
         public override IEnumerable<ICodeRequest> GetCodeRequests()
         {
-            yield return new ClassCodeRequest(className);
+            if (_className.EmitName != PhpQualifiedName.ClassnameSelf)
+                yield return new ClassCodeRequest(_className);
+        }
+
+        public void SetClassName(PhpQualifiedName phpClassName, ClassTranslationInfo classTi )
+        {
+            _className = phpClassName;
+            _classTi = classTi;
+            
         }
     }
 }
 
 
-// -----:::::##### smartClass embedded code begin #####:::::----- generated 2014-01-04 15:04
-// File generated automatically ver 2013-07-10 08:43
+// -----:::::##### smartClass embedded code begin #####:::::----- generated 2014-09-26 23:46
+// File generated automatically ver 2014-09-01 19:00
 // Smartclass.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0c4d5d36fb5eb4ac
 namespace Lang.Php.Compiler.Source
 {
@@ -57,9 +66,9 @@ namespace Lang.Php.Compiler.Source
 
         implement INotifyPropertyChanged
         implement INotifyPropertyChanged_Passive
-        implement ToString ##ClassName## ##FieldName## ##IsConst##
-        implement ToString ClassName=##ClassName##, FieldName=##FieldName##, IsConst=##IsConst##
-        implement equals ClassName, FieldName, IsConst
+        implement ToString ##ClassName## ##FieldName## ##IsConst## ##ClassTi##
+        implement ToString ClassName=##ClassName##, FieldName=##FieldName##, IsConst=##IsConst##, ClassTi=##ClassTi##
+        implement equals ClassName, FieldName, IsConst, ClassTi
         implement equals *
         implement equals *, ~exclude1, ~exclude2
         */
@@ -67,15 +76,19 @@ namespace Lang.Php.Compiler.Source
         /// <summary>
         /// Nazwa własności ClassName; 
         /// </summary>
-        public const string PROPERTYNAME_CLASSNAME = "ClassName";
+        public const string PropertyNameClassName = "ClassName";
         /// <summary>
         /// Nazwa własności FieldName; 
         /// </summary>
-        public const string PROPERTYNAME_FIELDNAME = "FieldName";
+        public const string PropertyNameFieldName = "FieldName";
         /// <summary>
         /// Nazwa własności IsConst; 
         /// </summary>
-        public const string PROPERTYNAME_ISCONST = "IsConst";
+        public const string PropertyNameIsConst = "IsConst";
+        /// <summary>
+        /// Nazwa własności ClassTi; 
+        /// </summary>
+        public const string PropertyNameClassTi = "ClassTi";
         #endregion Constants
 
         #region Methods
@@ -83,20 +96,16 @@ namespace Lang.Php.Compiler.Source
 
         #region Properties
         /// <summary>
-        /// 
+        /// Własność jest tylko do odczytu.
         /// </summary>
         public PhpQualifiedName ClassName
         {
             get
             {
-                return className;
-            }
-            set
-            {
-                className = value;
+                return _className;
             }
         }
-        private PhpQualifiedName className;
+        private PhpQualifiedName _className;
         /// <summary>
         /// 
         /// </summary>
@@ -104,16 +113,16 @@ namespace Lang.Php.Compiler.Source
         {
             get
             {
-                return fieldName;
+                return _fieldName;
             }
             set
             {
                 value = (value ?? String.Empty).Trim();
                 while (value.StartsWith("$")) value = value.Substring(1);
-                fieldName = value;
+                _fieldName = value;
             }
         }
-        private string fieldName = string.Empty;
+        private string _fieldName = string.Empty;
         /// <summary>
         /// 
         /// </summary>
@@ -121,14 +130,25 @@ namespace Lang.Php.Compiler.Source
         {
             get
             {
-                return isConst;
+                return _isConst;
             }
             set
             {
-                isConst = value;
+                _isConst = value;
             }
         }
-        private bool isConst;
+        private bool _isConst;
+        /// <summary>
+        /// Własność jest tylko do odczytu.
+        /// </summary>
+        public ClassTranslationInfo ClassTi
+        {
+            get
+            {
+                return _classTi;
+            }
+        }
+        private ClassTranslationInfo _classTi;
         #endregion Properties
 
     }

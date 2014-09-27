@@ -23,8 +23,7 @@ namespace Lang.Php.Compiler.Translator.Node
         {
             if (src.TargetObject == null)
                 throw new NotSupportedException();
-            List<IPhpValue> args = new List<IPhpValue>();
-            args.Add(ctx.TranslateValue(src.TargetObject));
+            var args = new List<IPhpValue> {ctx.TranslateValue(src.TargetObject)};
             foreach (var i in src.Arguments)
                 args.Add(ctx.TranslateValue(i.MyValue));
 
@@ -32,7 +31,7 @@ namespace Lang.Php.Compiler.Translator.Node
             return a;
         }
 
-    
+
 
         #endregion Static Methods
 
@@ -70,30 +69,23 @@ namespace Lang.Php.Compiler.Translator.Node
             #endregion
 
             ctx.GetTranslationInfo().CheckAccesibility(src);
-            MethodTranslationInfo mti = MethodTranslationInfo.FromMethodInfo(src.MethodInfo);
-            ClassTranslationInfo cti = principles.FindClassTranslationInfo(src.MethodInfo.DeclaringType);
+            var cti = principles.FindClassTranslationInfo(src.MethodInfo.DeclaringType);
             if (cti == null)
                 throw new NotSupportedException();
-
-
+            var mti = principles.GetOrMakeTranslationInfo(src.MethodInfo);
             {
-
-                if (cti == null)
-                    cti = principles.GetTi(src.MethodInfo.DeclaringType);
-                if (cti != null)
+                var phpMethod = new PhpMethodCallExpression(mti.ScriptName);
+                if (src.MethodInfo.IsStatic)
                 {
-                    //if (MethodUtils.IsExtensionMethod(src.MethodInfo))
-                    //    throw new NotSupportedException();
-
-                    var phpMethod = new PhpMethodCallExpression(mti.ScriptName);
-                    if (src.MethodInfo.IsStatic)
-                    {
-                        phpMethod.ClassName = principles.GetPhpType(src.MethodInfo.DeclaringType, true, principles.CurrentType);
-                    }
-                    phpMethod.TargetObject = ctx.TranslateValue(src.TargetObject);
-                    CopyArguments(ctx, src.Arguments, phpMethod);
-                    return phpMethod;
+                    var a = principles.GetPhpType(src.MethodInfo.DeclaringType, true, principles.CurrentType);
+                    phpMethod.SetClassName(a, mti);
                 }
+                phpMethod.TargetObject = ctx.TranslateValue(src.TargetObject);
+                CopyArguments(ctx, src.Arguments, phpMethod);
+
+                if (cti.DontIncludeModuleForClassMembers)
+                    phpMethod.DontIncludeClass = true;
+                return phpMethod;
             }
 
             throw new Exception(string.Format("bright cow, {0}", src.MethodInfo.DeclaringType.FullName));

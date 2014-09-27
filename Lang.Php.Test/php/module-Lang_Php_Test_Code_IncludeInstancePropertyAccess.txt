@@ -1,0 +1,8 @@
+/*
+Generated with CS2PHP
+*/
+class IncludeInstancePropertyAccess {
+    public function X() {
+        $a = new BusinessClass()->InstanceProperty;
+    }
+}

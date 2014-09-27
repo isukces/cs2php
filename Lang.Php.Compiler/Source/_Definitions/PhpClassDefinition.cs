@@ -13,10 +13,10 @@ namespace Lang.Php.Compiler.Source
     implement Constructor Name
     implement Constructor Name, BaseTypeName
     
-    property Name PhpClassName Nazwa klasy
+    property Name PhpQualifiedName Nazwa klasy
     	read only
     
-    property BaseTypeName PhpClassName Nazwa klasy
+    property BaseTypeName PhpQualifiedName Nazwa klasy
     	read only
     
     property Methods List<PhpClassMethodDefinition> 
@@ -26,18 +26,16 @@ namespace Lang.Php.Compiler.Source
     	init #
     smartClassEnd
     */
-
+    
     public partial class PhpClassDefinition : ICodeRelated, IEmitable
     {
         #region Static Methods
 
         // Private Methods 
 
-        static int FieldOrderGroup(PhpClassFieldDefinition a)
+        static int FieldOrderGroup(PhpClassFieldDefinition fieldDefinition)
         {
-            if (a.IsConst) return 0;
-            if (a.IsStatic) return 1;
-            return 2;
+            return fieldDefinition.IsConst ? 0 : (fieldDefinition.IsStatic ? 1 : 2);
         }
 
         #endregion Static Methods
@@ -56,16 +54,18 @@ namespace Lang.Php.Compiler.Source
                     return;
                 if (style.CurrentNamespace == null)
                     style.CurrentNamespace = PhpNamespace.Root;
-                if (style.CurrentNamespace != name.Namespace)
+                if (style.CurrentNamespace != _name.Namespace)
                     throw new Exception("Unable to emit class into different namespace");
                 string e = "";
-                if (!baseTypeName.IsEmpty)
-                    e = " extends " + baseTypeName.NameForEmit(style);
+                if (!_baseTypeName.IsEmpty)
+                    e = " extends " + _baseTypeName.NameForEmit(style);
                 writer.OpenLnF("class {0}{1} {{", Name.ShortName, e);
-                style.CurrentClass = name; // do not move this before "class XXX" is emited
+                style.CurrentClass = _name; // do not move this before "class XXX" is emited
                 for (int orderGroup = 0; orderGroup < 3; orderGroup++)
-                    foreach (var field in fields.Where(_ => FieldOrderGroup(_) == orderGroup))
+                    foreach (var field in _fields.Where(_ => FieldOrderGroup(_) == orderGroup))
+                    {
                         field.Emit(emiter, writer, style);
+                    }
                 foreach (var me in Methods)
                 {
                     me.Emit(emiter, writer, style);
@@ -82,8 +82,8 @@ namespace Lang.Php.Compiler.Source
         public IEnumerable<ICodeRequest> GetCodeRequests()
         {
             var a = IPhpStatementBase.GetCodeRequests(Name, BaseTypeName);
-            var b = IPhpStatementBase.GetCodeRequests<PhpClassFieldDefinition>(fields);
-            var c = IPhpStatementBase.GetCodeRequests<PhpClassMethodDefinition>(methods);
+            var b = IPhpStatementBase.GetCodeRequests<PhpClassFieldDefinition>(_fields);
+            var c = IPhpStatementBase.GetCodeRequests<PhpClassMethodDefinition>(_methods);
             return a.Union(b).Union(c);
         }
 
@@ -95,7 +95,7 @@ namespace Lang.Php.Compiler.Source
         {
             get
             {
-                return methods.Count == 0 && fields.Count == 0;
+                return _methods.Count == 0 && _fields.Count == 0;
             }
         }
 
@@ -104,12 +104,12 @@ namespace Lang.Php.Compiler.Source
 }
 
 
-// -----:::::##### smartClass embedded code begin #####:::::----- generated 2013-11-10 18:17
-// File generated automatically ver 2013-07-10 08:43
+// -----:::::##### smartClass embedded code begin #####:::::----- generated 2014-09-26 09:51
+// File generated automatically ver 2014-09-01 19:00
 // Smartclass.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0c4d5d36fb5eb4ac
 namespace Lang.Php.Compiler.Source
 {
-    public partial class PhpClassDefinition
+    public partial class PhpClassDefinition 
     {
         /*
         /// <summary>
@@ -118,7 +118,9 @@ namespace Lang.Php.Compiler.Source
         public PhpClassDefinition()
         {
         }
+
         Przykłady użycia
+
         implement INotifyPropertyChanged
         implement INotifyPropertyChanged_Passive
         implement ToString ##Name## ##BaseTypeName## ##Methods## ##Fields##
@@ -127,55 +129,50 @@ namespace Lang.Php.Compiler.Source
         implement equals *
         implement equals *, ~exclude1, ~exclude2
         */
-
-
         #region Constructors
         /// <summary>
         /// Tworzy instancję obiektu
-        /// <param name="Name">Nazwa klasy</param>
+        /// <param name="name">Nazwa klasy</param>
         /// </summary>
-        public PhpClassDefinition(PhpQualifiedName Name)
+        public PhpClassDefinition(PhpQualifiedName name)
         {
-            this.name = Name;
+            _name = name;
         }
 
         /// <summary>
         /// Tworzy instancję obiektu
-        /// <param name="Name">Nazwa klasy</param>
-        /// <param name="BaseTypeName">Nazwa klasy</param>
+        /// <param name="name">Nazwa klasy</param>
+        /// <param name="baseTypeName">Nazwa klasy</param>
         /// </summary>
-        public PhpClassDefinition(PhpQualifiedName Name, PhpQualifiedName BaseTypeName)
+        public PhpClassDefinition(PhpQualifiedName name, PhpQualifiedName baseTypeName)
         {
-            this.name = Name;
-            this.baseTypeName = BaseTypeName;
+            _name = name;
+            _baseTypeName = baseTypeName;
         }
 
         #endregion Constructors
-
 
         #region Constants
         /// <summary>
         /// Nazwa własności Name; Nazwa klasy
         /// </summary>
-        public const string PROPERTYNAME_NAME = "Name";
+        public const string PropertyNameName = "Name";
         /// <summary>
         /// Nazwa własności BaseTypeName; Nazwa klasy
         /// </summary>
-        public const string PROPERTYNAME_BASETYPENAME = "BaseTypeName";
+        public const string PropertyNameBaseTypeName = "BaseTypeName";
         /// <summary>
         /// Nazwa własności Methods; 
         /// </summary>
-        public const string PROPERTYNAME_METHODS = "Methods";
+        public const string PropertyNameMethods = "Methods";
         /// <summary>
         /// Nazwa własności Fields; 
         /// </summary>
-        public const string PROPERTYNAME_FIELDS = "Fields";
+        public const string PropertyNameFields = "Fields";
         #endregion Constants
-
 
         #region Methods
         #endregion Methods
-
 
         #region Properties
         /// <summary>
@@ -185,10 +182,10 @@ namespace Lang.Php.Compiler.Source
         {
             get
             {
-                return name;
+                return _name;
             }
         }
-        private PhpQualifiedName name;
+        private PhpQualifiedName _name;
         /// <summary>
         /// Nazwa klasy; własność jest tylko do odczytu.
         /// </summary>
@@ -196,10 +193,10 @@ namespace Lang.Php.Compiler.Source
         {
             get
             {
-                return baseTypeName;
+                return _baseTypeName;
             }
         }
-        private PhpQualifiedName baseTypeName;
+        private PhpQualifiedName _baseTypeName;
         /// <summary>
         /// 
         /// </summary>
@@ -207,14 +204,14 @@ namespace Lang.Php.Compiler.Source
         {
             get
             {
-                return methods;
+                return _methods;
             }
             set
             {
-                methods = value;
+                _methods = value;
             }
         }
-        private List<PhpClassMethodDefinition> methods = new List<PhpClassMethodDefinition>();
+        private List<PhpClassMethodDefinition> _methods = new List<PhpClassMethodDefinition>();
         /// <summary>
         /// 
         /// </summary>
@@ -222,14 +219,15 @@ namespace Lang.Php.Compiler.Source
         {
             get
             {
-                return fields;
+                return _fields;
             }
             set
             {
-                fields = value;
+                _fields = value;
             }
         }
-        private List<PhpClassFieldDefinition> fields = new List<PhpClassFieldDefinition>();
+        private List<PhpClassFieldDefinition> _fields = new List<PhpClassFieldDefinition>();
         #endregion Properties
+
     }
 }

@@ -5,6 +5,7 @@ using System.Text;
 
 namespace Lang.Php.Wp
 {
+    [BuiltIn]
     public class Post
     {
         [GlobalVariable("$post")]

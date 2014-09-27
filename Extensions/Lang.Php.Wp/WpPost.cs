@@ -5,6 +5,7 @@ using System.Text;
 
 namespace Lang.Php.Wp
 {
+    [BuiltIn]
     public class WpPost
     {
         public static PostTypes PostType()

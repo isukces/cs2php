@@ -1,0 +1,4 @@
+/*
+Generated with CS2PHP
+*/
+$ClassFieldGlobalVariable = 3;

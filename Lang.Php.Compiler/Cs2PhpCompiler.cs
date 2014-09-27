@@ -448,7 +448,6 @@ namespace Lang.Php.Compiler
                     foreach (var modProcessor in translationInfo.ModuleProcessors)
                     {
                         modProcessor.BeforeEmit(module, translationInfo);
-
                     }
                     var emiter = new PhpSourceCodeEmiter();
                     module.Emit(emiter, emitStyle, fileName);

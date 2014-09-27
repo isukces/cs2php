@@ -1,0 +1,9 @@
+/*
+Generated with CS2PHP
+*/
+class BusinessClass {
+    public static $ClassProperty;
+    public static $ClassField;
+    public $InstanceProperty;
+    public $InstanceField;
+}

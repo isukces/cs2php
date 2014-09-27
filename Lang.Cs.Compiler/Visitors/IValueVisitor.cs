@@ -649,7 +649,7 @@ namespace Lang.Cs.Compiler.Visitors
                 if (!(body is IStatement))
                     throw new Exception("body is not IStatement");
             }
- 
+
             var h = new LambdaExpression(ct, pl, body as IStatement);
             return Simplify(h);
             // throw new NotSupportedException();
@@ -712,9 +712,9 @@ namespace Lang.Cs.Compiler.Visitors
                     var fieldInfo = context.Roslyn_ResolveField(fieldSymbol);
                     if (fieldInfo.IsStatic)
                         return Simplify(new ClassFieldAccessExpression(fieldInfo, true));
-                    var _expression = Visit(node.Expression);
-                    if (_expression == null) throw new ArgumentNullException("_expression");
-                    return Simplify(new InstanceFieldAccessExpression(fieldInfo, _expression));
+                    var visitedExpression = Visit(node.Expression);
+                    if (visitedExpression == null) throw new ArgumentNullException("visitedExpression");
+                    return Simplify(new InstanceFieldAccessExpression(fieldInfo, visitedExpression));
                 case SymbolKind.Method:
                     var sss = tt.Symbol as IMethodSymbol;
                     var methodInfo = context.Roslyn_ResolveMethod(sss);
@@ -738,13 +738,12 @@ namespace Lang.Cs.Compiler.Visitors
                 if (fullName.IsGeneric)
                 {
                     var arity = fullName.Generics.Length;
-                    var gg1 = typeInfo2.Type.GetMembers()
+                    ISymbol[] gg1 = typeInfo2.Type.GetMembers()
                         .AsEnumerable()
                         .OfType<IMethodSymbol>()
                         .Where(i => i.Name == fullName.BaseName && i.Arity == arity)
                         .ToArray();
                     gg = gg1;
-                    // throw new NotSupportedException();
                 }
                 else
                     gg = typeInfo2.Type.GetMembers(fullName.GetNonGeneric()).ToArray();
@@ -755,6 +754,8 @@ namespace Lang.Cs.Compiler.Visitors
                     {
                         case SymbolKind.Property:
                             var propertySymbol = ggg as IPropertySymbol;
+                            if (propertySymbol == null)
+                                throw new Exception("propertySymbol is null");
                             var pi = context.Roslyn_ResolveProperty(propertySymbol);
                             if (propertySymbol.IsStatic)
                             {
@@ -809,12 +810,12 @@ namespace Lang.Cs.Compiler.Visitors
 
 
 
+            // ReSharper disable once InvertIf
             if (expression is ThisExpression)
             {
                 if (fullName.IsGeneric)
                     throw new NotSupportedException();
                 var name = fullName.BaseName;
-                var xx = expression as ThisExpression;
                 if (member == null)
                     throw new NotSupportedException();
                 var tmp = new InstanceMemberAccessExpression(name, expression, member);
@@ -875,12 +876,12 @@ namespace Lang.Cs.Compiler.Visitors
 
             if (mi.IsGenericMethod)
             {
-                Type[] g = mi.GetGenericArguments();
-                if (!mi.IsGenericMethodDefinition && (genericTypes == null || genericTypes.Length != g.Length))
-                    genericTypes = g;
-                if (genericTypes == null || genericTypes.Length != g.Length)
+                var genericArguments = mi.GetGenericArguments();
+                if (!mi.IsGenericMethodDefinition && (genericTypes == null || genericTypes.Length != genericArguments.Length))
+                    genericTypes = genericArguments;
+                if (genericTypes == null || genericTypes.Length != genericArguments.Length)
                     throw new NotSupportedException("Brak automatycznego rozpoznawania typów generycznych (na razie)");
-                var pa = mi.GetParameters();
+                // var pa = mi.GetParameters();
             }
             else
                 genericTypes = new Type[0];
@@ -903,6 +904,7 @@ namespace Lang.Cs.Compiler.Visitors
             }
             else if (mi is ConstructorInfo)
             {
+                // ReSharper disable once UnusedVariable
                 var mii = mi as ConstructorInfo;
                 throw new NotSupportedException();
             }
@@ -912,12 +914,7 @@ namespace Lang.Cs.Compiler.Visitors
             return result;
         }
 
-        string _Name(SyntaxToken a)
-        {
-            return a.ValueText;
-        }
-
-        Type GT(TypeSyntax s)
+        Type Gt(TypeSyntax s)
         {
             var identifierNameSyntax = s as IdentifierNameSyntax;
             if (identifierNameSyntax == null)
@@ -948,7 +945,7 @@ namespace Lang.Cs.Compiler.Visitors
         private IValue internalVisit_AssignWithPrefix(BinaryExpressionSyntax node, string _operator)
         {
             var symbolInfo = ModelExtensions.GetSymbolInfo(state.Context.RoslynModel, node);
-            var typex = GetResultTypeForBinaryExpression(symbolInfo);
+            // var typex = GetResultTypeForBinaryExpression(symbolInfo);
             //TypeInfo ti = ModelExtensions.GetTypeInfo(state.Context.RoslynModel, node);
 
             //TypeInfo eti = ModelExtensions.GetTypeInfo(state.Context.RoslynModel, node.Expression);
@@ -986,7 +983,6 @@ namespace Lang.Cs.Compiler.Visitors
                         default:
                             throw new NotSupportedException();
                     }
-                    break;
                 default:
                     throw new NotSupportedException();
             }
