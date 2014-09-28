@@ -8,12 +8,11 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("E02_BasicFeaturesExample")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("E02_BasicFeaturesExample")]
-[assembly: AssemblyCopyright("Copyright ©  2013")]
+[assembly: AssemblyCompany("Internet Sukces Piotr Stęclik")]
+[assembly: AssemblyProduct("C# to PHP package")]
+[assembly: AssemblyCopyright("Copyright © Internet Sukces Piotr Stęclik 2014")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
-
 // Setting ComVisible to false makes the types in this assembly not visible 
 // to COM components.  If you need to access a type in this assembly from 
 // COM, set the ComVisible attribute to true on that type.
@@ -32,5 +31,5 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyFileVersion("1.0.0.0")]
+[assembly: AssemblyVersion("1.0.5384.5")]
+[assembly: AssemblyFileVersion("1.0.5384.5")]

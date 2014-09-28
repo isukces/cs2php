@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Internet Sukces Piotr Stęclik")]
 [assembly: AssemblyProduct("C# to PHP package")]
-[assembly: AssemblyCopyright("Copyright © Internet Sukces Piotr Stęclik 2013")]
+[assembly: AssemblyCopyright("Copyright © Internet Sukces Piotr Stęclik 2014")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -32,5 +32,5 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.0.5383.279")]
-[assembly: AssemblyFileVersion("1.0.5383.279")]
+[assembly: AssemblyVersion("1.1.5384.285")]
+[assembly: AssemblyFileVersion("1.1.5384.285")]
