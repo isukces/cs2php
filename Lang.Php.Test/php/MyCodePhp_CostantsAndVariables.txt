@@ -4,4 +4,5 @@ public static function CostantsAndVariables() {
     $c = 1.2;
     $pi = M_PI;
     $h = 'Some text backslash\\ quote" single\' dollar$';
+    $jacob = '\\anything';
 }

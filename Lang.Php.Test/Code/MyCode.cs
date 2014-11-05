@@ -24,8 +24,10 @@ namespace Lang.Php.Test.Code
             double c = 1.2;
             double pi = Math.PI;
             string h = "Some text backslash\\ quote\" single' dollar$";
+            string jacob = @"\anything";
 
-        }
+
+        }        
 
         public static void Collections()
         {
@@ -68,5 +70,6 @@ namespace Lang.Php.Test.Code
         {
             
         }
+ 
     }
 }

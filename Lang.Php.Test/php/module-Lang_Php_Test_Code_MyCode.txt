@@ -13,6 +13,7 @@ class MyCodePhp {
         $c = 1.2;
         $pi = M_PI;
         $h = 'Some text backslash\\ quote" single\' dollar$';
+        $jacob = '\\anything';
     }
     public static function Collections() {
         $list = array();

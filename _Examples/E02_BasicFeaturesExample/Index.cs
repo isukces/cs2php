@@ -40,7 +40,6 @@ namespace Lang.Php.Examples.BasicFeaturesExample
             Header("Welcome to CS2PHP");
             echo("<p>You can use echo just like in PHP</p>");
             Html.EchoTagBound(Tags.P, "Or use some helpers.");
-
             MultiplicationTable.ShowMultiplicationTable(10, 12);
             Footer();
         }
