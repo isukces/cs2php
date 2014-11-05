@@ -4,6 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Web;
+using Lang.Php.Graph;
 
 namespace Lang.Php
 {
@@ -31,7 +33,7 @@ namespace Lang.Php
         [DirectCall("_htmlspecialchars_")]
         public static string _htmlspecialchars_(string _string)
         {
-            return System.Web.HttpUtility.HtmlEncode(_string);
+            return HttpUtility.HtmlEncode(_string);
         }
 
         [DirectCall("_urlencode_")]
@@ -51,14 +53,13 @@ namespace Lang.Php
         public static Dictionary<TKey, TValue> array_merge<TKey, TValue>(params Dictionary<TKey, TValue>[] arrays)
         {
             var r = new Dictionary<TKey, TValue>();
-            foreach (var i in arrays.Where(u => u != null))
+            foreach (var i in arrays)
             {
+                if (i == null) continue;
                 foreach (var j in i)
                     r[j.Key] = j.Value;
             }
             return r;
-            // array array_merge ( array $array1 [, array $... ] )
-            throw new NotImplementedException();
         }
 
         [DirectCall("array_merge")]
@@ -176,7 +177,7 @@ namespace Lang.Php
         [DirectCall("file_exists")]
         public static bool file_exists(string x)
         {
-            return System.IO.File.Exists(x);
+            return File.Exists(x);
         }
 
         [DirectCall("file_get_contents")]
@@ -191,7 +192,7 @@ namespace Lang.Php
             try
             {
                 var a = File.ReadAllBytes(filename);
-                return System.Text.Encoding.UTF8.GetString(a);
+                return Encoding.UTF8.GetString(a);
             }
             catch
             {
@@ -249,7 +250,7 @@ namespace Lang.Php
         }
 
         [DirectCall("getimagesize")]
-        public static Graph.ImageInfo GetImageSize(string filename)
+        public static ImageInfo GetImageSize(string filename)
         {
             // array getimagesize ( string $filename [, array &$imageinfo ] )
             throw new NotImplementedException();
@@ -298,14 +299,14 @@ namespace Lang.Php
         [DirectCall("htmlentities")]
         public static string htmlentities(string _string)
         {
-            return System.Web.HttpUtility.HtmlEncode(_string);
+            return HttpUtility.HtmlEncode(_string);
         }
 
         [DirectCall("htmlspecialchars")]
         public static string htmlspecialchars(string _string)
         {
             //  string htmlspecialchars ( string $string [, int $flags = ENT_COMPAT | ENT_HTML401 [, string $encoding = 'UTF-8' [, bool $double_encode = true ]]] )
-            return System.Web.HttpUtility.HtmlEncode(_string);
+            return HttpUtility.HtmlEncode(_string);
         }
 
         [Obsolete("nie skończone")]
@@ -320,7 +321,7 @@ namespace Lang.Php
         public static string htmlspecialchars(string _string, HtmlEntitiesFlags flags = HtmlEntitiesFlags.COMPAT | HtmlEntitiesFlags.HTML401, Charsets encoding = Charsets.UTF_8)
         {
             //  string htmlspecialchars ( string $string [, int $flags = ENT_COMPAT | ENT_HTML401 [, string $encoding = 'UTF-8' [, bool $double_encode = true ]]] )
-            return System.Web.HttpUtility.HtmlEncode(_string);
+            return HttpUtility.HtmlEncode(_string);
         }
 
         [DirectCall("iconv")]
@@ -331,9 +332,9 @@ namespace Lang.Php
         }
 
         [DirectCall("imagecreate")]
-        public static Graph.Image imagecreate(int width, int height)
+        public static Image imagecreate(int width, int height)
         {
-            return Graph.Image.Create(width, height);
+            return Image.Create(width, height);
         }
 
         [DirectCall("include")]
@@ -565,7 +566,7 @@ namespace Lang.Php
         [DirectCall("readfile")]
         public static Falsable<int> readfile(string filename, bool use_include_path = false)
         {
-            return Lang.Php.PhpFiles.ReadFile(filename, use_include_path);
+            return PhpFiles.ReadFile(filename, use_include_path);
         }
 
         [DirectCall("require_once")]

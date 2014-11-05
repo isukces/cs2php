@@ -98,7 +98,7 @@ namespace Lang.Php.Compiler
             var rootPathAttribute = assembly.GetCustomAttribute<RootPathAttribute>();
             if (rootPathAttribute == null)
                 return string.Empty;
-            string result = (rootPathAttribute.Path ?? "").Replace("\\", "/").TrimEnd('/').TrimStart('/') + "/";
+            var result = (rootPathAttribute.Path ?? "").Replace("\\", "/").TrimEnd('/').TrimStart('/') + "/";
             while (result.Contains("//"))
                 result = result.Replace("//", "/");
             return result;
@@ -145,7 +145,7 @@ namespace Lang.Php.Compiler
             //        pathElements.Add(new PhpConstValue(ati.RootPath));
             //}
             //#endregion
-            IPhpValue result = PhpBinaryOperatorExpression.ConcatStrings(pathElements.ToArray());
+            var result = PhpBinaryOperatorExpression.ConcatStrings(pathElements.ToArray());
             return result;
         }
 

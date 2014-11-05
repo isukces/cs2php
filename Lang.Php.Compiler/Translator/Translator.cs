@@ -1,4 +1,5 @@
-﻿using Lang.Cs.Compiler;
+﻿using System.Diagnostics;
+using Lang.Cs.Compiler;
 using Lang.Php.Compiler.Source;
 using System;
 using System.Collections.Generic;
@@ -72,7 +73,7 @@ namespace Lang.Php.Compiler.Translator
             foreach (var classTranslationInfo in classesToTranslate)
             {
                 if (classTranslationInfo.Skip)
-                    System.Diagnostics.Debug.Write("");
+                    Debug.Write("");
                 PhpClassDefinition phpClass;
                 var phpModule = GetOrMakeModuleByName(classTranslationInfo.ModuleName);
                 // var assemblyTI = _info.GetOrMakeTranslationInfo(_info.CurrentAssembly);
@@ -121,7 +122,7 @@ namespace Lang.Php.Compiler.Translator
                 }
                 else
                 {
-                    FullClassDeclaration[] sources = classes.Where(i => i.FullName == classTranslationInfo.Type.FullName).ToArray();
+                    var sources = classes.Where(i => i.FullName == classTranslationInfo.Type.FullName).ToArray();
                     members = (from i in sources
                                from j in i.ClassDeclaration.Members
                                select j).ToArray();
@@ -169,7 +170,7 @@ namespace Lang.Php.Compiler.Translator
                     {
                         #region Timezone
                         {
-                            AssemblyTranslationInfo ati = _info.GetOrMakeTranslationInfo(_info.CurrentAssembly);
+                            var ati = _info.GetOrMakeTranslationInfo(_info.CurrentAssembly);
                             if (ati.DefaultTimezone.HasValue)
                             {
                                 // date_default_timezone_set('America/Los_Angeles');
@@ -255,7 +256,7 @@ namespace Lang.Php.Compiler.Translator
                 return;
             if (req.Name == PhpCodeModuleName.CS2PHP_CONFIG_MODULE_NAME)
             {
-                PhpCodeModule phpModule = CurrentConfigModule();
+                var phpModule = CurrentConfigModule();
                 req = phpModule.Name;
             }
 
@@ -293,7 +294,7 @@ namespace Lang.Php.Compiler.Translator
                 }
             }
 
-            IPhpValue fileNameExpression = req.MakeIncludePath(current.Name);
+            var fileNameExpression = req.MakeIncludePath(current.Name);
             if (fileNameExpression == null) return;
             if (current.RequiredFiles.Any())
             {
@@ -360,7 +361,7 @@ namespace Lang.Php.Compiler.Translator
             _state.Principles.CurrentMethod = info;
             try
             {
-                MethodTranslationInfo mti = _state.Principles.GetOrMakeTranslationInfo(info);
+                var mti = _state.Principles.GetOrMakeTranslationInfo(info);
                 var phpMethod = new PhpClassMethodDefinition(string.IsNullOrEmpty(overrideName) ? mti.ScriptName : overrideName);
                 phpClass.Methods.Add(phpMethod);
 
@@ -376,7 +377,7 @@ namespace Lang.Php.Compiler.Translator
                     var declaredParameters = info.GetParameters();
                     foreach (var parameter in declaredParameters)
                     {
-                        PhpMethodArgument phpParameter = new PhpMethodArgument();
+                        var phpParameter = new PhpMethodArgument();
                         phpParameter.Name = parameter.Name;
                         phpMethod.Arguments.Add(phpParameter);
                         if (parameter.HasDefaultValue)
@@ -417,7 +418,7 @@ namespace Lang.Php.Compiler.Translator
                     var declaredParameters = md.Info.GetParameters();
                     foreach (var parameter in declaredParameters)
                     {
-                        PhpMethodArgument phpParameter = new PhpMethodArgument();
+                        var phpParameter = new PhpMethodArgument();
                         phpParameter.Name = parameter.Name;
                         phpMethod.Arguments.Add(phpParameter);
                         if (parameter.HasDefaultValue)
@@ -450,7 +451,7 @@ namespace Lang.Php.Compiler.Translator
                             throw new NotSupportedException();
                         if (phpValueTranslator == null)
                             phpValueTranslator = new PhpValueTranslator(_state);
-                        IPhpValue definedValue = phpValueTranslator.TransValue(item.Value);
+                        var definedValue = phpValueTranslator.TransValue(item.Value);
                         {
                             if (fti.IncludeModule != module.Name)
                             {

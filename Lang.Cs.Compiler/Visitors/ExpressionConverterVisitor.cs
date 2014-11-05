@@ -55,12 +55,13 @@ namespace Lang.Cs.Compiler.Visitors
                     return Visit(tmp);
 
                 }
+                /*
                 if (xx.Expression is LangType)
                 {
                     var yy = xx.Expression as LangType;
                     var tmp = new StaticMemberAccessExpression(xx.MemberName, yy);
                     return Visit(tmp);
-                }
+                } */
             }
             if (src is UnknownIdentifierValue)
             {

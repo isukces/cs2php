@@ -14,7 +14,7 @@ namespace Lang.Php
     {
         public RootPathAttribute(string path)
         {
-            this.Path = path;
+            Path = path;
         }
         public string Path { get; private set; }
     }

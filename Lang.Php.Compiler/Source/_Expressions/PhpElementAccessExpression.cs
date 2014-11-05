@@ -86,8 +86,8 @@ namespace Lang.Php.Compiler.Source
         /// </summary>
         public PhpElementAccessExpression(IPhpValue Expression, IPhpValue[] Arguments)
         {
-            this.expression = Expression;
-            this.arguments = Arguments;
+            expression = Expression;
+            arguments = Arguments;
         }
 
         #endregion Constructors

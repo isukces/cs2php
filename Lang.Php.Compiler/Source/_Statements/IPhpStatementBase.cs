@@ -69,7 +69,7 @@ namespace Lang.Php.Compiler.Source
             if (emptyStatement) return;
 
 
-            bool myBracket = style.UseBracketsEvenIfNotNecessary;
+            var myBracket = style.UseBracketsEvenIfNotNecessary;
             if (!myBracket)
             {
                 var gf = statementToEmit.GetStatementEmitInfo(iStyle);

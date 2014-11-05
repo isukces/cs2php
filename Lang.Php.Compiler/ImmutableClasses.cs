@@ -13,9 +13,9 @@ namespace Lang.Php.Compiler
     {
         public FullClassDeclaration(string FullName, ClassDeclaration ClassDeclaration, NamespaceDeclaration NamespaceDeclaration)
         {
-            this.fullName = FullName;
-            this.classDeclaration = ClassDeclaration;
-            this.namespaceDeclaration = NamespaceDeclaration;
+            fullName = FullName;
+            classDeclaration = ClassDeclaration;
+            namespaceDeclaration = NamespaceDeclaration;
         }
         public string FullName
         {
@@ -46,9 +46,9 @@ namespace Lang.Php.Compiler
     {
         public FullInterfaceDeclaration(string FullName, InterfaceDeclaration ClassDeclaration, NamespaceDeclaration NamespaceDeclaration)
         {
-            this.fullName = FullName;
-            this.classDeclaration = ClassDeclaration;
-            this.namespaceDeclaration = NamespaceDeclaration;
+            fullName = FullName;
+            classDeclaration = ClassDeclaration;
+            namespaceDeclaration = NamespaceDeclaration;
         }
         public string FullName
         {

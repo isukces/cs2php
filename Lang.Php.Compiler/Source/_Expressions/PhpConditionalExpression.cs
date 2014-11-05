@@ -30,7 +30,7 @@ namespace Lang.Php.Compiler.Source
         }
         public override string GetPhpCode(PhpEmitStyle style)
         {
-            string form = style == null || style.Compression == EmitStyleCompression.Beauty
+            var form = style == null || style.Compression == EmitStyleCompression.Beauty
                 ? "{0} ? {1} : {2}"
                 : "{0}?{1}:{2}";
             return string.Format(form, _condition.GetPhpCode(style), _whenTrue.GetPhpCode(style), _whenFalse.GetPhpCode(style));

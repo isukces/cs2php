@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 
@@ -35,7 +36,7 @@ namespace Lang.Php.Runtime
 
         public static PhpCodeValue FromDouble(double v)
         {
-            var txt = v.ToString(System.Globalization.CultureInfo.InvariantCulture);
+            var txt = v.ToString(CultureInfo.InvariantCulture);
             return new PhpCodeValue(txt, v, Kinds.Double);
         }
 
@@ -61,7 +62,7 @@ namespace Lang.Php.Runtime
             switch (kind)
             {
                 case Kinds.StringConstant:
-                    if (PhpValues.TryGetPhpStringValue(this.phpValue, out txt))
+                    if (PhpValues.TryGetPhpStringValue(phpValue, out txt))
                         return true;
                     throw new NotSupportedException();
                 case Kinds.Bool:

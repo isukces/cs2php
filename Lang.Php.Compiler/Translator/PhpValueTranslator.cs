@@ -74,7 +74,7 @@ namespace Lang.Php.Compiler.Translator
 
         public void CopyArguments(IEnumerable<FunctionArgument> srcParameters, PhpMethodCallExpression dstMethod)
         {
-            foreach (FunctionArgument functionArgument in srcParameters)
+            foreach (var functionArgument in srcParameters)
                 dstMethod.Arguments.Add(VisitFunctionArgument(functionArgument) as PhpMethodInvokeValue);
         }
 
@@ -114,7 +114,7 @@ namespace Lang.Php.Compiler.Translator
         {
             var l = TransValue(src.Left);
             var r = TransValue(src.Right);
-            string op = src.OptionalOperator;
+            var op = src.OptionalOperator;
             if (op == "+")
             {
                 var vt = (src as IValue).ValueType;
@@ -280,13 +280,13 @@ namespace Lang.Php.Compiler.Translator
             if (tmp != null)
                 return SimplifyPhpExpression(tmp);
 
-            bool isStatic = src.IsStatic;
-            FieldInfo member = src.Member;
+            var isStatic = src.IsStatic;
+            var member = src.Member;
             var memberName = member.Name;
             var memberDeclaringType = member.DeclaringType;
 
             {
-                FieldTranslationInfo tInfo = state.Principles.GetOrMakeTranslationInfo(src.Member);
+                var tInfo = state.Principles.GetOrMakeTranslationInfo(src.Member);
                 if (tInfo.IsDefinedInNonincludableModule)
                 {
                     var b = state.Principles.GetTi(state.Principles.CurrentType, true);
@@ -342,7 +342,7 @@ namespace Lang.Php.Compiler.Translator
                         }
                         {
                             // object v1 = ReadEnumValueAndProcessForPhp(member);
-                            object v1 = member.GetValue(null);
+                            var v1 = member.GetValue(null);
                             var g = new PhpConstValue(v1);
                             return SimplifyPhpExpression(g);
                         }
@@ -351,7 +351,7 @@ namespace Lang.Php.Compiler.Translator
                 }
                 #endregion
 
-                TranslationInfo principles = state.Principles;
+                var principles = state.Principles;
                 switch (tInfo.Destination)
                 {
                     case FieldTranslationDestionations.DefinedConst:
@@ -371,7 +371,7 @@ namespace Lang.Php.Compiler.Translator
                     case FieldTranslationDestionations.JustValue:
                         if (!member.IsStatic)
                             throw new NotSupportedException("Unable to convert instance field into compile-time value");
-                        object constValue = member.GetValue(null);
+                        var constValue = member.GetValue(null);
                         var phpConstValue = new PhpConstValue(constValue, tInfo.UsGlueForValue);
                         return SimplifyPhpExpression(phpConstValue);
                     case FieldTranslationDestionations.NormalField:
@@ -508,7 +508,7 @@ namespace Lang.Php.Compiler.Translator
                 return SimplifyPhpExpression(translatedByExternalNodeTranslator);
 
 
-            IPhpValue phpTargetObject = TransValue(src.TargetObject);
+            var phpTargetObject = TransValue(src.TargetObject);
             if (ownerInfo.IsArray)
             {
                 var idx = new PhpConstValue(pri.FieldScriptName);
@@ -516,7 +516,7 @@ namespace Lang.Php.Compiler.Translator
                 return arrayExpr;
             }
             {
-                PropertyInfo propertyInfo = src.Member;
+                var propertyInfo = src.Member;
                 var classReplacer = state.FindOneClassReplacer(propertyInfo.DeclaringType);
                 if (classReplacer != null)
                 {
@@ -611,7 +611,7 @@ namespace Lang.Php.Compiler.Translator
             a.Statements.AddRange(T.TranslateStatement(src.Body));
             foreach (var p in src.Parameters)
             {
-                PhpMethodArgument phpParameter = new PhpMethodArgument();
+                var phpParameter = new PhpMethodArgument();
                 phpParameter.Name = p.Name;
                 a.Arguments.Add(phpParameter);
             }

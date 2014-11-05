@@ -1,4 +1,5 @@
-﻿using Lang.Php.Runtime;
+﻿using System.Data;
+using Lang.Php.Runtime;
 using MySql.Data.MySqlClient;
 using System;
 using System.Collections.Generic;
@@ -167,7 +168,7 @@ namespace Lang.Php
             return _internalExecuteNonQuery("SET NAMES " + charset);
         }
 
-        [UseBinaryExpressionAttribute("!==", "false", "$0")]
+        [UseBinaryExpression("!==", "false", "$0")]
         public bool ValidRow<T>(T obj)
         {
             throw new MockMethodException();
@@ -212,7 +213,7 @@ namespace Lang.Php
         {
             get
             {
-                return this._connection != null && this._connection.State == System.Data.ConnectionState.Open;
+                return _connection != null && _connection.State == ConnectionState.Open;
             }
         }
 

@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace Lang.Php
 {
@@ -27,8 +24,8 @@ namespace Lang.Php
 }
 
 
-// -----:::::##### smartClass embedded code begin #####:::::----- generated 2013-11-05 12:04
-// File generated automatically ver 2013-07-10 08:43
+// -----:::::##### smartClass embedded code begin #####:::::----- generated 2014-11-05 18:35
+// File generated automatically ver 2014-09-01 19:00
 // Smartclass.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0c4d5d36fb5eb4ac
 namespace Lang.Php
 {
@@ -55,22 +52,22 @@ namespace Lang.Php
         #region Constructors
         /// <summary>
         /// Tworzy instancję obiektu
-        /// <param name="Operator">operator, którym zostanie zastąpiony sugerowany</param>
+        /// <param name="_operator">operator, którym zostanie zastąpiony sugerowany</param>
         /// </summary>
-        public UseOperatorAttribute(string Operator)
+        public UseOperatorAttribute(string _operator)
         {
-            this._operator = Operator;
+            this._operator = _operator;
         }
 
         /// <summary>
         /// Tworzy instancję obiektu
-        /// <param name="Operator">operator, którym zostanie zastąpiony sugerowany</param>
-        /// <param name="Map"></param>
+        /// <param name="_operator">operator, którym zostanie zastąpiony sugerowany</param>
+        /// <param name="map"></param>
         /// </summary>
-        public UseOperatorAttribute(string Operator, string Map)
+        public UseOperatorAttribute(string _operator, string map)
         {
-            this._operator = Operator;
-            this.map = Map;
+            this._operator = _operator;
+            _map = map;
         }
 
         #endregion Constructors
@@ -79,11 +76,11 @@ namespace Lang.Php
         /// <summary>
         /// Nazwa własności Operator; operator, którym zostanie zastąpiony sugerowany
         /// </summary>
-        public const string PROPERTYNAME_OPERATOR = "Operator";
+        public const string PropertyNameOperator = "Operator";
         /// <summary>
         /// Nazwa własności Map; 
         /// </summary>
-        public const string PROPERTYNAME_MAP = "Map";
+        public const string PropertyNameMap = "Map";
         #endregion Constants
 
         #region Methods
@@ -108,10 +105,10 @@ namespace Lang.Php
         {
             get
             {
-                return map;
+                return _map;
             }
         }
-        private string map = string.Empty;
+        private string _map = string.Empty;
         #endregion Properties
 
     }

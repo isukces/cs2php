@@ -55,7 +55,7 @@ namespace Lang.Php
         /// </summary>
         public ReplaceAttribute(Type ReplacedType)
         {
-            this.replacedType = ReplacedType;
+            replacedType = ReplacedType;
         }
 
         #endregion Constructors

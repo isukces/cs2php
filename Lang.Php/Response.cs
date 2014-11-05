@@ -2,14 +2,15 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Lang.Php.Runtime;
 
 namespace Lang.Php
 {
     [Skip]
     public class Response
     {
-        public static Runtime.HttpResponse RuntimeResponse;
-        internal static Runtime.HttpResponse GetRuntime()
+        public static HttpResponse RuntimeResponse;
+        internal static HttpResponse GetRuntime()
         {
             if (RuntimeResponse == null)
                 throw new Exception("Runtime response is not set, unable to simpulate PHP envirnoment");

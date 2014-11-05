@@ -56,7 +56,7 @@ namespace Lang.Cs.Compiler.Visitors
         public FunctionDeclarationParameter[] rVisit(ParameterListSyntax s)
         {
             IParameterSymbol[] symbols = (from i in s.Parameters
-                                          let symbol = Microsoft.CodeAnalysis.ModelExtensions.GetDeclaredSymbol(context.RoslynModel, i) as IParameterSymbol
+                                          let symbol = ModelExtensions.GetDeclaredSymbol(context.RoslynModel, i) as IParameterSymbol
                                           select symbol
                          ).ToArray();
             if (symbols.Length == 0)
@@ -136,7 +136,7 @@ namespace Lang.Cs.Compiler.Visitors
 
         protected override object VisitInterfaceDeclaration(InterfaceDeclarationSyntax node)
         {
-            var aaa = Microsoft.CodeAnalysis.ModelExtensions.GetDeclaredSymbol(context.RoslynModel, node);
+            var aaa = ModelExtensions.GetDeclaredSymbol(context.RoslynModel, node);
             var name = _Name(node.Identifier);
             context.ClassNames.Push(name);
             try
@@ -166,7 +166,7 @@ namespace Lang.Cs.Compiler.Visitors
         protected override object VisitClassDeclaration(ClassDeclarationSyntax node)
         {
             // MemberDeclarationSyntax
-            var aaa = Microsoft.CodeAnalysis.ModelExtensions.GetDeclaredSymbol(context.RoslynModel, node);
+            var aaa = ModelExtensions.GetDeclaredSymbol(context.RoslynModel, node);
             // var literalInfo = model.GetTypeInfo(helloWorldString);
 
             //if (context.ClassNames.Count != 0)
@@ -219,7 +219,7 @@ namespace Lang.Cs.Compiler.Visitors
             // FunctionDeclarationParameter[] Parameters;
             // throw new NotSupportedException();
 
-            var methodSymbol = (IMethodSymbol)Microsoft.CodeAnalysis.ModelExtensions.GetDeclaredSymbol(context.RoslynModel, node);
+            var methodSymbol = (IMethodSymbol)ModelExtensions.GetDeclaredSymbol(context.RoslynModel, node);
 
 
             var mi = context.Roslyn_ResolveMethod(methodSymbol) as ConstructorInfo;
@@ -426,7 +426,7 @@ namespace Lang.Cs.Compiler.Visitors
             //    throw new NotSupportedException();
 
 
-            var methodSymbol = (IMethodSymbol)Microsoft.CodeAnalysis.ModelExtensions.GetDeclaredSymbol(context.RoslynModel, node);
+            var methodSymbol = (IMethodSymbol)ModelExtensions.GetDeclaredSymbol(context.RoslynModel, node);
 
 
             var mi = context.Roslyn_ResolveMethod(methodSymbol) as MethodInfo;
@@ -550,7 +550,7 @@ namespace Lang.Cs.Compiler.Visitors
 
         protected override object VisitPropertyDeclaration(PropertyDeclarationSyntax node)
         {
-            var info = Microsoft.CodeAnalysis.ModelExtensions.GetSymbolInfo(context.RoslynModel, node.Type);
+            var info = ModelExtensions.GetSymbolInfo(context.RoslynModel, node.Type);
             var symbol = info.Symbol as ITypeSymbol;
             if (symbol == null)
                 throw new NotSupportedException();
@@ -616,7 +616,7 @@ namespace Lang.Cs.Compiler.Visitors
 
         protected override object VisitVariableDeclarator(VariableDeclaratorSyntax node)
         {
-            var si = (Microsoft.CodeAnalysis.ModelExtensions.GetDeclaredSymbol(state.Context.RoslynModel, node));
+            var si = (ModelExtensions.GetDeclaredSymbol(state.Context.RoslynModel, node));
             // var ti = state.Context.RoslynModel.GetTypeInfo(node);
             FieldInfo fi = null;
             if (si is IFieldSymbol)
@@ -726,7 +726,7 @@ namespace Lang.Cs.Compiler.Visitors
         protected override object VisitOperatorDeclaration(OperatorDeclarationSyntax node)
         {
             var doc = DeclarationItemDescription.Parse(node);
-            var methodSymbol = (IMethodSymbol)Microsoft.CodeAnalysis.ModelExtensions.GetDeclaredSymbol(context.RoslynModel, node);
+            var methodSymbol = (IMethodSymbol)ModelExtensions.GetDeclaredSymbol(context.RoslynModel, node);
 
 
             var mi = context.Roslyn_ResolveMethod(methodSymbol) as MethodInfo;
@@ -743,7 +743,7 @@ namespace Lang.Cs.Compiler.Visitors
         protected override object VisitConversionOperatorDeclaration(ConversionOperatorDeclarationSyntax node)
         {
             var doc = DeclarationItemDescription.Parse(node);
-            var methodSymbol = (IMethodSymbol)Microsoft.CodeAnalysis.ModelExtensions.GetDeclaredSymbol(context.RoslynModel, node);
+            var methodSymbol = (IMethodSymbol)ModelExtensions.GetDeclaredSymbol(context.RoslynModel, node);
 
 
             var mi = context.Roslyn_ResolveMethod(methodSymbol) as MethodInfo;

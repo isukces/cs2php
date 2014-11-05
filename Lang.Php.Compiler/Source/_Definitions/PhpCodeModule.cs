@@ -183,7 +183,7 @@ namespace Lang.Php.Compiler.Source
             if (!_definedConsts.Any()) return result.ToArray();
             var grouped = _definedConsts.GroupBy(u => GetNamespace(u.Key)).ToArray();
 
-            bool useNamespaces = grouped.Length > 1 || grouped[0].Key != PathUtil.UNIX_SEP;
+            var useNamespaces = grouped.Length > 1 || grouped[0].Key != PathUtil.UNIX_SEP;
             foreach (var group in grouped)
             {
                 List<IPhpStatement> container;

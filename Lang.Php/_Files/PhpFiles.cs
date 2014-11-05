@@ -19,7 +19,7 @@ namespace Lang.Php
             try
             {
                 var a = File.ReadAllBytes(filename);
-                return System.Text.Encoding.UTF8.GetString(a);
+                return Encoding.UTF8.GetString(a);
             }
             catch
             {
@@ -35,7 +35,7 @@ namespace Lang.Php
             try
             {
                 var a = File.ReadAllBytes(filename);
-                System.Console.Write(System.Text.Encoding.UTF8.GetString(a));
+                Console.Write(Encoding.UTF8.GetString(a));
                 return a.Length;
             }
             catch
@@ -56,7 +56,7 @@ namespace Lang.Php
         [DirectCall("basename")]
         public static string BaseName(string path)
         {
-            return BaseName(path, System.IO.Path.PathSeparator.ToString());
+            return BaseName(path, Path.PathSeparator.ToString());
         }
 
         /// <summary>
@@ -131,7 +131,7 @@ namespace Lang.Php
         {
             try
             {
-                System.IO.File.Copy(source, dest);
+                File.Copy(source, dest);
             }
             catch
             {
@@ -159,7 +159,7 @@ namespace Lang.Php
         [DirectCall("dirname")]
         public static string Dirname ( string path ) {
             // Returns the path of the parent directory. If there are no slashes in path, a dot ('.') is returned, indicating the current directory. Otherwise, the returned string is path with any trailing /component removed. 
-            var i = path.LastIndexOf(System.IO.Path.DirectorySeparatorChar.ToString());
+            var i = path.LastIndexOf(Path.DirectorySeparatorChar.ToString());
             if (i < 0)
                 return ".";
             return path.Substring(0, i);
@@ -173,9 +173,9 @@ namespace Lang.Php
         [DirectCall("filesize")]
         public static int FileSize(string filename)
         {
-            if (!System.IO.File.Exists(filename))
+            if (!File.Exists(filename))
                 return 0;
-            return (int)new System.IO.FileInfo(filename).Length;
+            return (int)new FileInfo(filename).Length;
         }
 
         /// <summary>
@@ -186,7 +186,7 @@ namespace Lang.Php
         {
             try
             {
-                System.IO.Directory.CreateDirectory(pathname);
+                Directory.CreateDirectory(pathname);
             }
             catch
             {
@@ -206,7 +206,7 @@ namespace Lang.Php
         {
             try
             {
-                System.IO.File.Move(filename, destination);
+                File.Move(filename, destination);
             }
             catch
             {
@@ -244,7 +244,7 @@ namespace Lang.Php
         {
             try
             {
-                System.IO.File.Delete(filename);
+                File.Delete(filename);
             }
             catch
             {

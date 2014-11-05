@@ -87,10 +87,10 @@ namespace Lang.Php.Compiler
 
         public static string MakeRelativePath(string path, string relTo)
         {
-            Uri fromUri = new Uri(new DirectoryInfo(relTo + WIN_SEP).FullName);
-            Uri toUri = new Uri(new DirectoryInfo(path + WIN_SEP).FullName);
-            Uri relativeUri = fromUri.MakeRelativeUri(toUri);
-            String relativePath = Uri.UnescapeDataString(relativeUri.ToString());
+            var fromUri = new Uri(new DirectoryInfo(relTo + WIN_SEP).FullName);
+            var toUri = new Uri(new DirectoryInfo(path + WIN_SEP).FullName);
+            var relativeUri = fromUri.MakeRelativeUri(toUri);
+            var relativePath = Uri.UnescapeDataString(relativeUri.ToString());
             return relativePath;
         }
     }

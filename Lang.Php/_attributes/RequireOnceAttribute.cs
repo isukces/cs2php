@@ -10,7 +10,7 @@ namespace Lang.Php
     {
         public RequireOnceAttribute(string f)
         {
-            this.Filename = f;
+            Filename = f;
         }
         public string Filename { get; private set; }
     }

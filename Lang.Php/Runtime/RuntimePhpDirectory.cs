@@ -12,7 +12,7 @@ namespace Lang.Php.Runtime
 
         public RuntimePhpDirectory(string dirName)
         {
-            dirName = System.IO.Path.Combine(
+            dirName = Path.Combine(
                 Script.Server.ContextDocumentRoot.Replace("/", "\\"),
                 dirName.Replace("\\", "/"));
 

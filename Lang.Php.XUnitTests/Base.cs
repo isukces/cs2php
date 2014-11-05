@@ -6,6 +6,7 @@ using System.Text;
 using Lang.Php.Compiler;
 using Lang.Php.Compiler.Source;
 using Lang.Php.Compiler.Translator;
+using Lang.Php.Framework;
 using Lang.Php.Test.Code;
 using Microsoft.CodeAnalysis;
 using Xunit;
@@ -121,7 +122,7 @@ namespace Lang.Php.XUnitTests
                     //     ref1.Add(Path.Combine(Directory.GetCurrentDirectory(), r + ".dll"));
                     ref1.Add(typeof(DirectCallAttribute).Assembly.Location);
                     ref1.Add(typeof(EmitContext).Assembly.Location);
-                    ref1.Add(typeof(Framework.Extension).Assembly.Location);
+                    ref1.Add(typeof(Extension).Assembly.Location);
                     filenames = ref1.Distinct().ToArray();
                 }
 
@@ -130,7 +131,7 @@ namespace Lang.Php.XUnitTests
                 #region Translation assemblies
 
                 {
-                    comp.TranslationAssemblies.Add(typeof(Framework.Extension).Assembly);
+                    comp.TranslationAssemblies.Add(typeof(Extension).Assembly);
                     comp.TranslationAssemblies.Add(typeof(Translator).Assembly);
                 }
 

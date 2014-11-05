@@ -54,7 +54,7 @@ namespace Lang.Php
         /// </summary>
         public SinceAttribute(string Version)
         {
-            this.version = Version;
+            version = Version;
         }
 
         #endregion Constructors

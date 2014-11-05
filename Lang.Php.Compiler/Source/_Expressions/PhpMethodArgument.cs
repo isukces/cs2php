@@ -27,8 +27,8 @@ namespace Lang.Php.Compiler.Source
         public string GetPhpCode(PhpEmitStyle s)
         {
             s = s ?? new PhpEmitStyle();
-            string eq = s.Compression == EmitStyleCompression.Beauty ? " = " : "=";
-            string d = defaultValue != null ? (eq + defaultValue.GetPhpCode(s)) : "";
+            var eq = s.Compression == EmitStyleCompression.Beauty ? " = " : "=";
+            var d = defaultValue != null ? (eq + defaultValue.GetPhpCode(s)) : "";
             return string.Format("${0}{1}", name, d);
         }
 

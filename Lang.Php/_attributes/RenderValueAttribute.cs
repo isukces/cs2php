@@ -13,7 +13,7 @@ namespace Lang.Php
         /// <param name="name">Name in script</param>
         public RenderValueAttribute(string name)
         {
-            this.Name = name;
+            Name = name;
         }
         /// <summary>
         /// Name in script

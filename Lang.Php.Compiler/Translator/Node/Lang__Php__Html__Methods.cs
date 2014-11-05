@@ -22,7 +22,7 @@ namespace Lang.Php.Compiler.Translator.Node
                 this.ctx = ctx;
                 list = new List<IPhpValue>();
                 var methodName = src.MethodInfo.Name;
-                bool isecho = methodName.StartsWith("Echo");
+                var isecho = methodName.StartsWith("Echo");
                 if (isecho)
                     methodName = methodName.Substring(4);
                 if (methodName == "TagBound")
@@ -34,7 +34,7 @@ namespace Lang.Php.Compiler.Translator.Node
                 }
                 if (methodName == "Attributes")
                 {
-                    for (int i = 1; i < src.Arguments.Length; i += 2)
+                    for (var i = 1; i < src.Arguments.Length; i += 2)
                     {
                         var key = src.Arguments[i - 1];
                         var value = src.Arguments[i];
@@ -89,7 +89,7 @@ namespace Lang.Php.Compiler.Translator.Node
 
                 if (methodName == "Css")
                 {
-                    for (int i = 1; i < src.Arguments.Length; i += 2)
+                    for (var i = 1; i < src.Arguments.Length; i += 2)
                     {
                         var key = src.Arguments[i - 1];
                         var value = src.Arguments[i];
@@ -126,8 +126,8 @@ namespace Lang.Php.Compiler.Translator.Node
         {
             if (list.Count == 1)
                 return list[0];
-            IPhpValue e = list[0];
-            for (int i = 1; i < list.Count; i++)
+            var e = list[0];
+            for (var i = 1; i < list.Count; i++)
             {
                 var a = list[i];
                 e = new PhpBinaryOperatorExpression(".", e, a);
@@ -202,7 +202,7 @@ namespace Lang.Php.Compiler.Translator.Node
             var tagName = src.Arguments[0];
             Append("<");
             Append(tagName);
-            for (int i = argsFrom + 1; i < src.Arguments.Length; i += 2)
+            for (var i = argsFrom + 1; i < src.Arguments.Length; i += 2)
             {
                 var key = src.Arguments[i - 1];
                 var value = src.Arguments[i];

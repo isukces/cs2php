@@ -82,7 +82,7 @@ namespace Lang.Php.Compiler.Source
         /// </summary>
         public PhpParenthesizedExpression(IPhpValue Expression)
         {
-            this.expression = Expression;
+            expression = Expression;
         }
 
         #endregion Constructors

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -131,12 +132,12 @@ namespace Lang.Php.Runtime
         {
             var i = script.LastIndexOf("/");
             if (i < 0)
-                this.server.ContextPrefix = "/";
+                server.ContextPrefix = "/";
             else
                 server.ContextPrefix = script.Substring(0, i + 1);
 
             if (server.DocumentRoot != null)
-                server.ContextDocumentRoot = System.IO.Path.Combine(
+                server.ContextDocumentRoot = Path.Combine(
                     server.DocumentRoot.Replace("/", "\\"),
                     server.ContextPrefix.Substring(1).Replace("/", "\\"))
                     .Replace("\\","/")

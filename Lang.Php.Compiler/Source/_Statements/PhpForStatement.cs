@@ -29,12 +29,12 @@ namespace Lang.Php.Compiler.Source
 
         private static string Collect(PhpSourceCodeEmiter emiter, PhpEmitStyle style, IPhpStatement[] collection)
         {
-            List<string> list = new List<string>();
+            var list = new List<string>();
             var xStyle = PhpEmitStyle.xClone(style);
             xStyle.AsIncrementor = true;
             foreach (var item in collection)
             {
-                PhpSourceCodeWriter writer = new PhpSourceCodeWriter();
+                var writer = new PhpSourceCodeWriter();
                 writer.Clear();
                 item.Emit(emiter, writer, xStyle);
                 list.Add(writer.GetCode(true).Trim());
@@ -44,7 +44,7 @@ namespace Lang.Php.Compiler.Source
 
         private static string Collect(PhpSourceCodeEmiter emiter, PhpEmitStyle style, IPhpValue[] collection)
         {
-            List<string> list = new List<string>();
+            var list = new List<string>();
             var xStyle = PhpEmitStyle.xClone(style);
             xStyle.AsIncrementor = true;
             foreach (var item in collection)
@@ -67,7 +67,7 @@ namespace Lang.Php.Compiler.Source
 
             style = style ?? new PhpEmitStyle();
 
-            string header =
+            var header =
                     style.Compression == EmitStyleCompression.Beauty
                     ? "for({0}; {1}; {2})"
                     : "for({0};{1};{2})";
@@ -103,12 +103,12 @@ namespace Lang.Php.Compiler.Source
 
         public override IPhpStatement Simplify(IPhpSimplifier s)
         {
-            PhpAssignExpression[] _initVariables = initVariables == null
+            var _initVariables = initVariables == null
                 ? null
                 : initVariables.Select(u => s.Simplify(u)).Cast<PhpAssignExpression>().ToArray();
-            IPhpValue _condition = s.Simplify(condition);
-            IPhpStatement _statement = s.Simplify(statement);
-            IPhpStatement[] _incrementors = incrementors == null
+            var _condition = s.Simplify(condition);
+            var _statement = s.Simplify(statement);
+            var _incrementors = incrementors == null
                 ? null
                 : incrementors.Select(u => s.Simplify(u)).ToArray();
             var theSame = EqualCode(_condition, condition) && EqualCode(_statement, statement) && EqualCode_Array(_initVariables, initVariables) && EqualCode_Array(_incrementors, incrementors);

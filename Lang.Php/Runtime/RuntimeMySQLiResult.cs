@@ -42,7 +42,7 @@ namespace Lang.Php.Runtime
                 foreach (var f in fields)
                 {
                     string sn = f.Name;
-                    var _scriptName = f.GetCustomAttributes(true).OfType<Lang.Php.ScriptNameAttribute>().FirstOrDefault();
+                    var _scriptName = f.GetCustomAttributes(true).OfType<ScriptNameAttribute>().FirstOrDefault();
                     if (_scriptName != null)
                         sn = _scriptName.Name;
 
@@ -54,7 +54,7 @@ namespace Lang.Php.Runtime
                 foreach (var f in fields)
                 {
                     string sn = f.Name;
-                    var _scriptName = f.GetCustomAttributes(true).OfType<Lang.Php.ScriptNameAttribute>().FirstOrDefault();
+                    var _scriptName = f.GetCustomAttributes(true).OfType<ScriptNameAttribute>().FirstOrDefault();
                     if (_scriptName != null)
                         sn = _scriptName.Name;
 
@@ -77,7 +77,7 @@ namespace Lang.Php.Runtime
                 }
                 catch (Exception e)
                 {
-                    throw new PlatformImplementationException(this.GetType(), "FetchAssoc", e.Message);
+                    throw new PlatformImplementationException(GetType(), "FetchAssoc", e.Message);
                 }
             }
             if (_cursor >= _results.Count)

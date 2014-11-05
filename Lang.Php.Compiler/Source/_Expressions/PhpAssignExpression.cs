@@ -45,7 +45,7 @@ namespace Lang.Php.Compiler.Source
             var _left = s.Simplify(left);
             if (_left is PhpPropertyAccessExpression)
             {
-                PhpPropertyAccessExpression e = _left as PhpPropertyAccessExpression;
+                var e = _left as PhpPropertyAccessExpression;
                 var a = e.MakeSetValueExpression(_right);
                 if (a is PhpAssignExpression && (a as PhpAssignExpression).left is PhpPropertyAccessExpression)
                     if (EqualCode(a, this))

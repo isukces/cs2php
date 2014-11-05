@@ -43,7 +43,7 @@ namespace Lang.Php.Compiler.Source
 
         public override IEnumerable<ICodeRequest> GetCodeRequests()
         {
-            List<ICodeRequest> result = new List<ICodeRequest>();
+            var result = new List<ICodeRequest>();
             if (expression != null)
                 result.AddRange(expression.GetCodeRequests());
             foreach (var sec in sections)

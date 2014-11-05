@@ -21,7 +21,7 @@ namespace Lang.Php.Compiler.Source
     {
         public IEnumerable<ICodeRequest> GetCodeRequests()
         {
-            List<ICodeRequest> result = new List<ICodeRequest>();
+            var result = new List<ICodeRequest>();
             if (labels != null)
                 foreach (var _label in labels)
                     result.AddRange(_label.GetCodeRequests());
@@ -33,7 +33,7 @@ namespace Lang.Php.Compiler.Source
         public PhpSwitchSection Simplify(IPhpSimplifier s, out bool wasChanged)
         {
             wasChanged = false;
-            List<PhpSwitchLabel> nLabels = new List<PhpSwitchLabel>();
+            var nLabels = new List<PhpSwitchLabel>();
             foreach (var lab in labels)
             {
                 bool labelWasChanged;

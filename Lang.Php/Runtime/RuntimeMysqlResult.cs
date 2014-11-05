@@ -22,29 +22,29 @@ namespace Lang.Php.Runtime
             }
 
             row = Activator.CreateInstance<T>();
-            FieldInfo[] fields = typeof(T).GetFields();
-            Dictionary<string, FieldInfo> fieldMapping = new Dictionary<string, FieldInfo>();
+            var fields = typeof(T).GetFields();
+            var fieldMapping = new Dictionary<string, FieldInfo>();
             foreach (var f in fields)
             {
-                string sn = f.Name;
-                var _scriptName = f.GetCustomAttributes(true).OfType<Lang.Php.ScriptNameAttribute>().FirstOrDefault();
-                if (_scriptName != null)
-                    sn = _scriptName.Name;
+                var sn = f.Name;
+                var scriptName = f.GetCustomAttributes(true).OfType<ScriptNameAttribute>().FirstOrDefault();
+                if (scriptName != null)
+                    sn = scriptName.Name;
 
                 fieldMapping[sn] = f;
             }
-            var _ROW = _results[_cursor++];
-            for (int nr = 0; nr < _fieldNames.Length; nr++)
+            var values = _results[_cursor++];
+            for (var nr = 0; nr < _fieldNames.Length; nr++)
             {
-                FieldInfo ii;
                 try
                 {
-                    if (fieldMapping.TryGetValue(_fieldNames[nr], out ii))
-                        ii.SetValue(row, _ROW[nr]);
+                    FieldInfo fieldInfo;
+                    if (fieldMapping.TryGetValue(_fieldNames[nr], out fieldInfo))
+                        fieldInfo.SetValue(row, values[nr]);
                 }
                 catch (Exception e)
                 {
-                    throw new PlatformImplementationException(this.GetType(), "FetchAssoc", e.Message);
+                    throw new PlatformImplementationException(GetType(), "FetchAssoc", e.Message);
                 }
             }
             return true;
@@ -54,20 +54,19 @@ namespace Lang.Php.Runtime
 
         protected override int getNumRows()
         {
-            if (_ok)
-                return _results.Count;
-            return 0;
+            return _ok ? _results.Count : 0;
         }
+
         // Internal Methods 
 
         internal void _SetFromDR(DbDataReader reader)
         {
             _ok = false;
-            _fieldNames = Enumerable.Range(0, reader.FieldCount).Select(i => reader.GetName(i)).ToArray();
-            _types = Enumerable.Range(0, reader.FieldCount).Select(i => reader.GetDataTypeName(i)).ToArray();
+            _fieldNames = Enumerable.Range(0, reader.FieldCount).Select(reader.GetName).ToArray();
+            _types = Enumerable.Range(0, reader.FieldCount).Select(reader.GetDataTypeName).ToArray();
             while (reader.Read())
             {
-                object[] values = new object[reader.FieldCount];
+                var values = new object[reader.FieldCount];
                 reader.GetValues(values);
                 _results.Add(values);
             }
@@ -79,7 +78,7 @@ namespace Lang.Php.Runtime
 
         #region Fields
 
-        int _cursor = 0;
+        int _cursor;
         private string[] _fieldNames;
         private List<object[]> _results = new List<object[]>();
         private string[] _types;

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Linq;
+using Lang.Php;
 using Lang.Php.Compiler;
 
 namespace Lang.Cs2Php
@@ -20,7 +21,7 @@ namespace Lang.Cs2Php
             Console.Write("C# to Php");
             Console.ResetColor();
             Console.WriteLine(" compiler ver. {0}", typeof(Program).Assembly.GetName().Version);
-            Console.WriteLine(" Lang.Php ver. {0}", typeof(Php.RequiredTranslatorAttribute).Assembly.GetName().Version);
+            Console.WriteLine(" Lang.Php ver. {0}", typeof(RequiredTranslatorAttribute).Assembly.GetName().Version);
 
             try
             {

@@ -5,6 +5,8 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
+using Lang.Php;
+
 [assembly: AssemblyTitle("Lang.Php.Mpdf")]
 [assembly: AssemblyDescription("Simple facade for mPDF library")]
 [assembly: AssemblyConfiguration("")]
@@ -32,11 +34,11 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.0.14309.7")]
-[assembly: AssemblyFileVersion("1.0.14309.7")]
+[assembly: AssemblyVersion("1.0.14309.8")]
+[assembly: AssemblyFileVersion("1.0.14309.8")]
 
 
 
-[assembly: Lang.Php.RootPath("/lib/mpdf")]
-[assembly: Lang.Php.PhpPackageSource("http://mpdf1.com/repos/MPDF57.zip", "MPDF57")]
-[assembly: Lang.Php.ModuleIncludeConst("MPDF_LIB_PATH")]
+[assembly: RootPath("/lib/mpdf")]
+[assembly: PhpPackageSource("http://mpdf1.com/repos/MPDF57.zip", "MPDF57")]
+[assembly: ModuleIncludeConst("MPDF_LIB_PATH")]

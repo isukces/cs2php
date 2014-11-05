@@ -14,10 +14,10 @@ namespace Lang.Cs.Compiler
     } // end of IValue
     public interface INamespaceMember {
     } // end of INamespaceMember
-    public partial class NameType : CSharpBase {
+    public sealed partial class NameType : CSharpBase {
       public NameType(string Name, LangType Type){
-        this.name = Name;
-        this.type = Type;
+        name = Name;
+        type = Type;
       }
       public string Name {
         get {
@@ -32,10 +32,10 @@ namespace Lang.Cs.Compiler
       }
       private LangType type;
     } // end of NameType
-    public partial class CompilationUnit : CSharpBase {
+    public sealed partial class CompilationUnit : CSharpBase {
       public CompilationUnit(ImportNamespace[] ImportNamespaces, NamespaceDeclaration[] NamespaceDeclarations){
-        this.importNamespaces = ImportNamespaces;
-        this.namespaceDeclarations = NamespaceDeclarations;
+        importNamespaces = ImportNamespaces;
+        namespaceDeclarations = NamespaceDeclarations;
       }
       public ImportNamespace[] ImportNamespaces {
         get {
@@ -50,9 +50,9 @@ namespace Lang.Cs.Compiler
       }
       private NamespaceDeclaration[] namespaceDeclarations;
     } // end of CompilationUnit
-    public partial class ImportNamespaceCollection : CSharpBase, IStatement {
+    public sealed partial class ImportNamespaceCollection : CSharpBase, IStatement {
       public ImportNamespaceCollection(ImportNamespace[] Items){
-        this.items = Items;
+        items = Items;
       }
       /// <summary>
       /// Lista definicji
@@ -64,10 +64,10 @@ namespace Lang.Cs.Compiler
       }
       private ImportNamespace[] items;
     } // end of ImportNamespaceCollection
-    public partial class ImportNamespace : CSharpBase, IStatement {
+    public sealed partial class ImportNamespace : CSharpBase, IStatement {
       public ImportNamespace(string Name, string Alias){
-        this.name = Name;
-        this.alias = Alias;
+        name = Name;
+        alias = Alias;
       }
       /// <summary>
       /// Nazwa przestrzeni nazw
@@ -88,10 +88,10 @@ namespace Lang.Cs.Compiler
       }
       private string alias;
     } // end of ImportNamespace
-    public partial class NamespaceDeclaration : CSharpBase {
+    public sealed partial class NamespaceDeclaration : CSharpBase {
       public NamespaceDeclaration(string Name, INamespaceMember[] Members){
-        this.name = Name;
-        this.members = Members;
+        name = Name;
+        members = Members;
       }
       /// <summary>
       /// Nazwa przestrzeni
@@ -112,10 +112,10 @@ namespace Lang.Cs.Compiler
       }
       private INamespaceMember[] members;
     } // end of NamespaceDeclaration
-    public partial class ClassDeclaration : CSharpBase, INamespaceMember,IClassMember {
+    public sealed partial class ClassDeclaration : CSharpBase, INamespaceMember,IClassMember {
       public ClassDeclaration(string Name, IClassMember[] Members){
-        this.name = Name;
-        this.members = Members;
+        name = Name;
+        members = Members;
       }
       /// <summary>
       /// Nazwa klasy
@@ -136,10 +136,10 @@ namespace Lang.Cs.Compiler
       }
       private IClassMember[] members;
     } // end of ClassDeclaration
-    public partial class InterfaceDeclaration : CSharpBase, INamespaceMember,IClassMember {
+    public sealed partial class InterfaceDeclaration : CSharpBase, INamespaceMember,IClassMember {
       public InterfaceDeclaration(string Name, IClassMember[] Members){
-        this.name = Name;
-        this.members = Members;
+        name = Name;
+        members = Members;
       }
       /// <summary>
       /// Nazwa interfejsu
@@ -160,11 +160,11 @@ namespace Lang.Cs.Compiler
       }
       private IClassMember[] members;
     } // end of InterfaceDeclaration
-    public partial class FieldDeclaration : CSharpBase, IClassMember {
+    public sealed partial class FieldDeclaration : CSharpBase, IClassMember {
       public FieldDeclaration(LangType Type, VariableDeclarator[] Items, Modifiers Modifiers){
-        this.type = Type;
-        this.items = Items;
-        this.modifiers = Modifiers;
+        type = Type;
+        items = Items;
+        modifiers = Modifiers;
       }
       public LangType Type {
         get {
@@ -185,11 +185,11 @@ namespace Lang.Cs.Compiler
       }
       private Modifiers modifiers;
     } // end of FieldDeclaration
-    public partial class VariableDeclarator : CSharpBase {
+    public sealed partial class VariableDeclarator : CSharpBase {
       public VariableDeclarator(string Name, IValue Value, FieldInfo OptionalFieldInfo){
-        this.name = Name;
-        this._value = Value;
-        this.optionalFieldInfo = OptionalFieldInfo;
+        name = Name;
+        _value = Value;
+        optionalFieldInfo = OptionalFieldInfo;
       }
       public string Name {
         get {
@@ -210,13 +210,13 @@ namespace Lang.Cs.Compiler
       }
       private FieldInfo optionalFieldInfo;
     } // end of VariableDeclarator
-    public partial class CsharpPropertyDeclaration : CSharpBase, IClassMember {
+    public sealed partial class CsharpPropertyDeclaration : CSharpBase, IClassMember {
       public CsharpPropertyDeclaration(string PropertyName, LangType Type, CsharpPropertyDeclarationAccessor[] Accessors, Modifiers Modifiers, DeclarationItemDescription Description){
-        this.propertyName = PropertyName;
-        this.type = Type;
-        this.accessors = Accessors;
-        this.modifiers = Modifiers;
-        this.description = Description;
+        propertyName = PropertyName;
+        type = Type;
+        accessors = Accessors;
+        modifiers = Modifiers;
+        description = Description;
       }
       public string PropertyName {
         get {
@@ -249,9 +249,9 @@ namespace Lang.Cs.Compiler
       }
       private DeclarationItemDescription description;
     } // end of CsharpPropertyDeclaration
-    public partial class EnumDeclaration : CSharpBase, INamespaceMember,IClassMember {
+    public sealed partial class EnumDeclaration : CSharpBase, INamespaceMember,IClassMember {
       public EnumDeclaration(string Name){
-        this.name = Name;
+        name = Name;
       }
       public string Name {
         get {
@@ -260,11 +260,11 @@ namespace Lang.Cs.Compiler
       }
       private string name;
     } // end of EnumDeclaration
-    public partial class CsharpPropertyDeclarationAccessor : CSharpBase {
+    public sealed partial class CsharpPropertyDeclarationAccessor : CSharpBase {
       public CsharpPropertyDeclarationAccessor(string Name, Modifiers Modifiers, IStatement Statement){
-        this.name = Name;
-        this.modifiers = Modifiers;
-        this.statement = Statement;
+        name = Name;
+        modifiers = Modifiers;
+        statement = Statement;
       }
       public string Name {
         get {
@@ -285,9 +285,9 @@ namespace Lang.Cs.Compiler
       }
       private IStatement statement;
     } // end of CsharpPropertyDeclarationAccessor
-    public partial class ConstValue : CSharpBase, IValue {
+    public sealed partial class ConstValue : CSharpBase, IValue {
       public ConstValue(object MyValue){
-        this.myValue = MyValue;
+        myValue = MyValue;
       }
       /// <summary>
       /// Wartość stała
@@ -299,9 +299,9 @@ namespace Lang.Cs.Compiler
       }
       private object myValue;
     } // end of ConstValue
-    public partial class TypeValue : CSharpBase, IValue {
+    public sealed partial class TypeValue : CSharpBase, IValue {
       public TypeValue(Type DotnetType){
-        this.dotnetType = DotnetType;
+        dotnetType = DotnetType;
       }
       public Type DotnetType {
         get {
@@ -310,9 +310,9 @@ namespace Lang.Cs.Compiler
       }
       private Type dotnetType;
     } // end of TypeValue
-    public partial class TypeOfExpression : CSharpBase, IValue {
+    public sealed partial class TypeOfExpression : CSharpBase, IValue {
       public TypeOfExpression(Type DotnetType){
-        this.dotnetType = DotnetType;
+        dotnetType = DotnetType;
       }
       public Type DotnetType {
         get {
@@ -321,10 +321,10 @@ namespace Lang.Cs.Compiler
       }
       private Type dotnetType;
     } // end of TypeOfExpression
-    public partial class InvocationExpression : CSharpBase, IValue {
+    public sealed partial class InvocationExpression : CSharpBase, IValue {
       public InvocationExpression(IValue Expression, FunctionArgument[] Arguments){
-        this.expression = Expression;
-        this.arguments = Arguments;
+        expression = Expression;
+        arguments = Arguments;
       }
       public IValue Expression {
         get {
@@ -339,10 +339,10 @@ namespace Lang.Cs.Compiler
       }
       private FunctionArgument[] arguments;
     } // end of InvocationExpression
-    public partial class LocalVariableExpression : CSharpBase, IValue {
+    public sealed partial class LocalVariableExpression : CSharpBase, IValue {
       public LocalVariableExpression(string Name, LangType Type){
-        this.name = Name;
-        this.type = Type;
+        name = Name;
+        type = Type;
       }
       public string Name {
         get {
@@ -357,10 +357,10 @@ namespace Lang.Cs.Compiler
       }
       private LangType type;
     } // end of LocalVariableExpression
-    public partial class ArgumentExpression : CSharpBase, IValue {
+    public sealed partial class ArgumentExpression : CSharpBase, IValue {
       public ArgumentExpression(string Name, LangType Type){
-        this.name = Name;
-        this.type = Type;
+        name = Name;
+        type = Type;
       }
       public string Name {
         get {
@@ -375,10 +375,10 @@ namespace Lang.Cs.Compiler
       }
       private LangType type;
     } // end of ArgumentExpression
-    public partial class SimpleLambdaExpression : CSharpBase, IValue {
+    public sealed partial class SimpleLambdaExpression : CSharpBase, IValue {
       public SimpleLambdaExpression(FunctionDeclarationParameter Parameter, IValue Expression){
-        this.parameter = Parameter;
-        this.expression = Expression;
+        parameter = Parameter;
+        expression = Expression;
       }
       public FunctionDeclarationParameter Parameter {
         get {
@@ -393,10 +393,10 @@ namespace Lang.Cs.Compiler
       }
       private IValue expression;
     } // end of SimpleLambdaExpression
-    public partial class CastExpression : CSharpBase, IValue {
+    public sealed partial class CastExpression : CSharpBase, IValue {
       public CastExpression(IValue Expression, Type DotnetType){
-        this.expression = Expression;
-        this.dotnetType = DotnetType;
+        expression = Expression;
+        dotnetType = DotnetType;
       }
       public IValue Expression {
         get {
@@ -411,10 +411,10 @@ namespace Lang.Cs.Compiler
       }
       private Type dotnetType;
     } // end of CastExpression
-    public partial class VariableDeclaration : CSharpBase, IStatement {
+    public sealed partial class VariableDeclaration : CSharpBase, IStatement {
       public VariableDeclaration(LangType Type, VariableDeclarator[] Declarators){
-        this.type = Type;
-        this.declarators = Declarators;
+        type = Type;
+        declarators = Declarators;
       }
       public LangType Type {
         get {
@@ -429,9 +429,9 @@ namespace Lang.Cs.Compiler
       }
       private VariableDeclarator[] declarators;
     } // end of VariableDeclaration
-    public partial class LangType : CSharpBase {
+    public sealed partial class LangType : CSharpBase {
       public LangType(Type DotnetType){
-        this.dotnetType = DotnetType;
+        dotnetType = DotnetType;
       }
       /// <summary>
       /// Typ .NET
@@ -443,11 +443,11 @@ namespace Lang.Cs.Compiler
       }
       private Type dotnetType;
     } // end of LangType
-    public partial class CallConstructor : CSharpBase, IValue {
+    public sealed partial class CallConstructor : CSharpBase, IValue {
       public CallConstructor(ConstructorInfo Info, FunctionArgument[] Arguments, IValue[] Initializers){
-        this.info = Info;
-        this.arguments = Arguments;
-        this.initializers = Initializers;
+        info = Info;
+        arguments = Arguments;
+        initializers = Initializers;
       }
       public ConstructorInfo Info {
         get {
@@ -468,10 +468,10 @@ namespace Lang.Cs.Compiler
       }
       private IValue[] initializers;
     } // end of CallConstructor
-    public partial class FunctionArgument : CSharpBase, IValue {
+    public sealed partial class FunctionArgument : CSharpBase, IValue {
       public FunctionArgument(string RefOrOutKeyword, IValue MyValue){
-        this.refOrOutKeyword = RefOrOutKeyword;
-        this.myValue = MyValue;
+        refOrOutKeyword = RefOrOutKeyword;
+        myValue = MyValue;
       }
       public string RefOrOutKeyword {
         get {
@@ -486,9 +486,9 @@ namespace Lang.Cs.Compiler
       }
       private IValue myValue;
     } // end of FunctionArgument
-    public partial class Modifiers : CSharpBase {
+    public sealed partial class Modifiers : CSharpBase {
       public Modifiers(string[] Items){
-        this.items = Items;
+        items = Items;
       }
       public string[] Items {
         get {
@@ -497,12 +497,12 @@ namespace Lang.Cs.Compiler
       }
       private string[] items;
     } // end of Modifiers
-    public partial class FunctionDeclarationParameter : CSharpBase {
+    public sealed partial class FunctionDeclarationParameter : CSharpBase {
       public FunctionDeclarationParameter(string Name, Modifiers Modifiers, LangType Type, IValue Initial){
-        this.name = Name;
-        this.modifiers = Modifiers;
-        this.type = Type;
-        this.initial = Initial;
+        name = Name;
+        modifiers = Modifiers;
+        type = Type;
+        initial = Initial;
       }
       public string Name {
         get {
@@ -529,9 +529,9 @@ namespace Lang.Cs.Compiler
       }
       private IValue initial;
     } // end of FunctionDeclarationParameter
-    public partial class CodeBlock : CSharpBase, IStatement {
+    public sealed partial class CodeBlock : CSharpBase, IStatement {
       public CodeBlock(IStatement[] Items){
-        this.items = Items;
+        items = Items;
       }
       public IStatement[] Items {
         get {
@@ -540,9 +540,9 @@ namespace Lang.Cs.Compiler
       }
       private IStatement[] items;
     } // end of CodeBlock
-    public partial class ReturnStatement : CSharpBase, IStatement {
+    public sealed partial class ReturnStatement : CSharpBase, IStatement {
       public ReturnStatement(IValue ReturnValue){
-        this.returnValue = ReturnValue;
+        returnValue = ReturnValue;
       }
       public IValue ReturnValue {
         get {
@@ -551,10 +551,10 @@ namespace Lang.Cs.Compiler
       }
       private IValue returnValue;
     } // end of ReturnStatement
-    public partial class MethodDeclaration : CSharpBase, IClassMember {
+    public sealed partial class MethodDeclaration : CSharpBase, IClassMember {
       public MethodDeclaration(MethodInfo Info, IStatement Body){
-        this.info = Info;
-        this.body = Body;
+        info = Info;
+        body = Body;
       }
       public MethodInfo Info {
         get {
@@ -569,10 +569,10 @@ namespace Lang.Cs.Compiler
       }
       private IStatement body;
     } // end of MethodDeclaration
-    public partial class ConstructorDeclaration : CSharpBase, IClassMember {
+    public sealed partial class ConstructorDeclaration : CSharpBase, IClassMember {
       public ConstructorDeclaration(ConstructorInfo Info, IStatement Body){
-        this.info = Info;
-        this.body = Body;
+        info = Info;
+        body = Body;
       }
       public ConstructorInfo Info {
         get {
@@ -587,11 +587,11 @@ namespace Lang.Cs.Compiler
       }
       private IStatement body;
     } // end of ConstructorDeclaration
-    public partial class LocalDeclarationStatement : CSharpBase, IStatement {
+    public sealed partial class LocalDeclarationStatement : CSharpBase, IStatement {
       public LocalDeclarationStatement(bool IsConst, bool IsFixed, VariableDeclaration Declaration){
-        this.isConst = IsConst;
-        this.isFixed = IsFixed;
-        this.declaration = Declaration;
+        isConst = IsConst;
+        isFixed = IsFixed;
+        declaration = Declaration;
       }
       public bool IsConst {
         get {
@@ -612,9 +612,9 @@ namespace Lang.Cs.Compiler
       }
       private VariableDeclaration declaration;
     } // end of LocalDeclarationStatement
-    public partial class ThisExpression : CSharpBase, IValue {
+    public sealed partial class ThisExpression : CSharpBase, IValue {
       public ThisExpression(Type ObjectType){
-        this.objectType = ObjectType;
+        objectType = ObjectType;
       }
       public Type ObjectType {
         get {
@@ -623,10 +623,10 @@ namespace Lang.Cs.Compiler
       }
       private Type objectType;
     } // end of ThisExpression
-    public partial class MemberAccessExpression : CSharpBase, IValue {
+    public sealed partial class MemberAccessExpression : CSharpBase, IValue {
       public MemberAccessExpression(string MemberName, IValue Expression){
-        this.memberName = MemberName;
-        this.expression = Expression;
+        memberName = MemberName;
+        expression = Expression;
       }
       public string MemberName {
         get {
@@ -641,10 +641,10 @@ namespace Lang.Cs.Compiler
       }
       private IValue expression;
     } // end of MemberAccessExpression
-    public partial class ClassFieldAccessExpression : CSharpBase, IValue {
+    public sealed partial class ClassFieldAccessExpression : CSharpBase, IValue {
       public ClassFieldAccessExpression(FieldInfo Member, bool IsStatic){
-        this.member = Member;
-        this.isStatic = IsStatic;
+        member = Member;
+        isStatic = IsStatic;
       }
       public FieldInfo Member {
         get {
@@ -659,9 +659,9 @@ namespace Lang.Cs.Compiler
       }
       private bool isStatic;
     } // end of ClassFieldAccessExpression
-    public partial class ClassPropertyAccessExpression : CSharpBase, IValue {
+    public sealed partial class ClassPropertyAccessExpression : CSharpBase, IValue {
       public ClassPropertyAccessExpression(PropertyInfo Member){
-        this.member = Member;
+        member = Member;
       }
       public PropertyInfo Member {
         get {
@@ -670,10 +670,10 @@ namespace Lang.Cs.Compiler
       }
       private PropertyInfo member;
     } // end of ClassPropertyAccessExpression
-    public partial class InstanceFieldAccessExpression : CSharpBase, IValue {
+    public sealed partial class InstanceFieldAccessExpression : CSharpBase, IValue {
       public InstanceFieldAccessExpression(FieldInfo Member, IValue TargetObject){
-        this.member = Member;
-        this.targetObject = TargetObject;
+        member = Member;
+        targetObject = TargetObject;
       }
       public FieldInfo Member {
         get {
@@ -688,10 +688,10 @@ namespace Lang.Cs.Compiler
       }
       private IValue targetObject;
     } // end of InstanceFieldAccessExpression
-    public partial class ArrayCreateExpression : CSharpBase, IValue {
+    public sealed partial class ArrayCreateExpression : CSharpBase, IValue {
       public ArrayCreateExpression(Type ArrayType, IValue[] Initializers){
-        this.arrayType = ArrayType;
-        this.initializers = Initializers;
+        arrayType = ArrayType;
+        initializers = Initializers;
       }
       public Type ArrayType {
         get {
@@ -706,10 +706,10 @@ namespace Lang.Cs.Compiler
       }
       private IValue[] initializers;
     } // end of ArrayCreateExpression
-    public partial class StaticMemberAccessExpression : CSharpBase, IValue {
+    public sealed partial class StaticMemberAccessExpression : CSharpBase, IValue {
       public StaticMemberAccessExpression(string MemberName, LangType Expression){
-        this.memberName = MemberName;
-        this.expression = Expression;
+        memberName = MemberName;
+        expression = Expression;
       }
       public string MemberName {
         get {
@@ -724,11 +724,11 @@ namespace Lang.Cs.Compiler
       }
       private LangType expression;
     } // end of StaticMemberAccessExpression
-    public partial class InstanceMemberAccessExpression : CSharpBase, IValue {
+    public sealed partial class InstanceMemberAccessExpression : CSharpBase, IValue {
       public InstanceMemberAccessExpression(string MemberName, IValue Expression, MemberInfo Member){
-        this.memberName = MemberName;
-        this.expression = Expression;
-        this.member = Member;
+        memberName = MemberName;
+        expression = Expression;
+        member = Member;
       }
       public string MemberName {
         get {
@@ -749,10 +749,10 @@ namespace Lang.Cs.Compiler
       }
       private MemberInfo member;
     } // end of InstanceMemberAccessExpression
-    public partial class CsharpInstancePropertyAccessExpression : CSharpBase, IValue {
+    public sealed partial class CsharpInstancePropertyAccessExpression : CSharpBase, IValue {
       public CsharpInstancePropertyAccessExpression(PropertyInfo Member, IValue TargetObject){
-        this.member = Member;
-        this.targetObject = TargetObject;
+        member = Member;
+        targetObject = TargetObject;
       }
       public PropertyInfo Member {
         get {
@@ -767,13 +767,13 @@ namespace Lang.Cs.Compiler
       }
       private IValue targetObject;
     } // end of CsharpInstancePropertyAccessExpression
-    public partial class CsharpMethodCallExpression : CSharpBase, IValue, IStatement {
+    public sealed partial class CsharpMethodCallExpression : CSharpBase, IValue, IStatement {
       public CsharpMethodCallExpression(MethodInfo MethodInfo, IValue TargetObject, FunctionArgument[] Arguments, Type[] GenericTypes, bool IsDelegate){
-        this.methodInfo = MethodInfo;
-        this.targetObject = TargetObject;
-        this.arguments = Arguments;
-        this.genericTypes = GenericTypes;
-        this.isDelegate = IsDelegate;
+        methodInfo = MethodInfo;
+        targetObject = TargetObject;
+        arguments = Arguments;
+        genericTypes = GenericTypes;
+        isDelegate = IsDelegate;
       }
       public MethodInfo MethodInfo {
         get {
@@ -806,11 +806,11 @@ namespace Lang.Cs.Compiler
       }
       private bool isDelegate;
     } // end of CsharpMethodCallExpression
-    public partial class IfStatement : CSharpBase, IStatement {
+    public sealed partial class IfStatement : CSharpBase, IStatement {
       public IfStatement(IValue Condition, IStatement IfTrue, IStatement IfFalse){
-        this.condition = Condition;
-        this.ifTrue = IfTrue;
-        this.ifFalse = IfFalse;
+        condition = Condition;
+        ifTrue = IfTrue;
+        ifFalse = IfFalse;
       }
       public IValue Condition {
         get {
@@ -831,10 +831,10 @@ namespace Lang.Cs.Compiler
       }
       private IStatement ifFalse;
     } // end of IfStatement
-    public partial class WhileStatement : CSharpBase, IStatement {
+    public sealed partial class WhileStatement : CSharpBase, IStatement {
       public WhileStatement(IValue Condition, IStatement Statement){
-        this.condition = Condition;
-        this.statement = Statement;
+        condition = Condition;
+        statement = Statement;
       }
       public IValue Condition {
         get {
@@ -849,12 +849,12 @@ namespace Lang.Cs.Compiler
       }
       private IStatement statement;
     } // end of WhileStatement
-    public partial class ForStatement : CSharpBase, IStatement {
+    public sealed partial class ForStatement : CSharpBase, IStatement {
       public ForStatement(VariableDeclaration Declaration, IValue Condition, IStatement Statement, IStatement[] Incrementors){
-        this.declaration = Declaration;
-        this.condition = Condition;
-        this.statement = Statement;
-        this.incrementors = Incrementors;
+        declaration = Declaration;
+        condition = Condition;
+        statement = Statement;
+        incrementors = Incrementors;
       }
       public VariableDeclaration Declaration {
         get {
@@ -881,12 +881,12 @@ namespace Lang.Cs.Compiler
       }
       private IStatement[] incrementors;
     } // end of ForStatement
-    public partial class ForEachStatement : CSharpBase, IStatement {
+    public sealed partial class ForEachStatement : CSharpBase, IStatement {
       public ForEachStatement(LangType ItemType, string VarName, IValue Collection, IStatement Statement){
-        this.itemType = ItemType;
-        this.varName = VarName;
-        this.collection = Collection;
-        this.statement = Statement;
+        itemType = ItemType;
+        varName = VarName;
+        collection = Collection;
+        statement = Statement;
       }
       public LangType ItemType {
         get {
@@ -913,21 +913,21 @@ namespace Lang.Cs.Compiler
       }
       private IStatement statement;
     } // end of ForEachStatement
-    public partial class BreakStatement : CSharpBase, IStatement {
+    public sealed partial class BreakStatement : CSharpBase, IStatement {
       public BreakStatement(){
       }
     } // end of BreakStatement
-    public partial class ContinueStatement : CSharpBase, IStatement {
+    public sealed partial class ContinueStatement : CSharpBase, IStatement {
       public ContinueStatement(){
       }
     } // end of ContinueStatement
-    public partial class BinaryOperatorExpression : CSharpBase, IValue {
+    public sealed partial class BinaryOperatorExpression : CSharpBase, IValue {
       public BinaryOperatorExpression(IValue Left, IValue Right, string Operator, Type ForceType, MethodInfo OperatorMethod){
-        this.left = Left;
-        this.right = Right;
-        this._operator = Operator;
-        this.forceType = ForceType;
-        this.operatorMethod = OperatorMethod;
+        left = Left;
+        right = Right;
+        _operator = Operator;
+        forceType = ForceType;
+        operatorMethod = OperatorMethod;
       }
       public IValue Left {
         get {
@@ -966,11 +966,11 @@ namespace Lang.Cs.Compiler
       }
       private MethodInfo operatorMethod;
     } // end of BinaryOperatorExpression
-    public partial class UnaryOperatorExpression : CSharpBase, IValue {
+    public sealed partial class UnaryOperatorExpression : CSharpBase, IValue {
       public UnaryOperatorExpression(IValue Operand, string Operator, Type ForceType){
-        this.operand = Operand;
-        this._operator = Operator;
-        this.forceType = ForceType;
+        operand = Operand;
+        _operator = Operator;
+        forceType = ForceType;
       }
       public IValue Operand {
         get {
@@ -994,11 +994,11 @@ namespace Lang.Cs.Compiler
       }
       private Type forceType;
     } // end of UnaryOperatorExpression
-    public partial class CsharpAssignExpression : CSharpBase, IValue, IStatement {
+    public sealed partial class CsharpAssignExpression : CSharpBase, IValue, IStatement {
       public CsharpAssignExpression(IValue Left, IValue Right, string OptionalOperator){
-        this.left = Left;
-        this.right = Right;
-        this.optionalOperator = OptionalOperator;
+        left = Left;
+        right = Right;
+        optionalOperator = OptionalOperator;
       }
       public IValue Left {
         get {
@@ -1019,11 +1019,11 @@ namespace Lang.Cs.Compiler
       }
       private string optionalOperator;
     } // end of CsharpAssignExpression
-    public partial class IncrementDecrementExpression : CSharpBase, IValue, IStatement {
+    public sealed partial class IncrementDecrementExpression : CSharpBase, IValue, IStatement {
       public IncrementDecrementExpression(IValue Operand, bool Increment, bool Pre){
-        this.operand = Operand;
-        this.increment = Increment;
-        this.pre = Pre;
+        operand = Operand;
+        increment = Increment;
+        pre = Pre;
       }
       public IValue Operand {
         get {
@@ -1044,11 +1044,11 @@ namespace Lang.Cs.Compiler
       }
       private bool pre;
     } // end of IncrementDecrementExpression
-    public partial class ElementAccessExpression : CSharpBase, IValue {
+    public sealed partial class ElementAccessExpression : CSharpBase, IValue {
       public ElementAccessExpression(IValue Expression, FunctionArgument[] Arguments, Type ElementType){
-        this.expression = Expression;
-        this.arguments = Arguments;
-        this.elementType = ElementType;
+        expression = Expression;
+        arguments = Arguments;
+        elementType = ElementType;
       }
       public IValue Expression {
         get {
@@ -1069,12 +1069,12 @@ namespace Lang.Cs.Compiler
       }
       private Type elementType;
     } // end of ElementAccessExpression
-    public partial class ConditionalExpression : CSharpBase, IValue {
+    public sealed partial class ConditionalExpression : CSharpBase, IValue {
       public ConditionalExpression(IValue Condition, IValue WhenTrue, IValue WhenFalse, Type ResultType){
-        this.condition = Condition;
-        this.whenTrue = WhenTrue;
-        this.whenFalse = WhenFalse;
-        this.resultType = ResultType;
+        condition = Condition;
+        whenTrue = WhenTrue;
+        whenFalse = WhenFalse;
+        resultType = ResultType;
       }
       public IValue Condition {
         get {
@@ -1101,10 +1101,10 @@ namespace Lang.Cs.Compiler
       }
       private Type resultType;
     } // end of ConditionalExpression
-    public partial class CompileResult : CSharpBase {
+    public sealed partial class CompileResult : CSharpBase {
       public CompileResult(string Source, CompilationUnit Compiled){
-        this.source = Source;
-        this.compiled = Compiled;
+        source = Source;
+        compiled = Compiled;
       }
       public string Source {
         get {
@@ -1119,9 +1119,9 @@ namespace Lang.Cs.Compiler
       }
       private CompilationUnit compiled;
     } // end of CompileResult
-    public partial class ParenthesizedExpression : CSharpBase, IValue {
+    public sealed partial class ParenthesizedExpression : CSharpBase, IValue {
       public ParenthesizedExpression(IValue Expression){
-        this.expression = Expression;
+        expression = Expression;
       }
       public IValue Expression {
         get {
@@ -1130,10 +1130,10 @@ namespace Lang.Cs.Compiler
       }
       private IValue expression;
     } // end of ParenthesizedExpression
-    public partial class UnknownIdentifierValue : CSharpBase, IValue {
+    public sealed partial class UnknownIdentifierValue : CSharpBase, IValue {
       public UnknownIdentifierValue(string Identifier, IValue[] OptionalGenericTypes){
-        this.identifier = Identifier;
-        this.optionalGenericTypes = OptionalGenericTypes;
+        identifier = Identifier;
+        optionalGenericTypes = OptionalGenericTypes;
       }
       public string Identifier {
         get {
@@ -1148,9 +1148,9 @@ namespace Lang.Cs.Compiler
       }
       private IValue[] optionalGenericTypes;
     } // end of UnknownIdentifierValue
-    public partial class IValueTable_PseudoValue : CSharpBase, IValue {
+    public sealed partial class IValueTable_PseudoValue : CSharpBase, IValue {
       public IValueTable_PseudoValue(IValue[] Items){
-        this.items = Items;
+        items = Items;
       }
       public IValue[] Items {
         get {
@@ -1159,9 +1159,9 @@ namespace Lang.Cs.Compiler
       }
       private IValue[] items;
     } // end of IValueTable_PseudoValue
-    public partial class IValueTable2_PseudoValue : CSharpBase, IValue {
+    public sealed partial class IValueTable2_PseudoValue : CSharpBase, IValue {
       public IValueTable2_PseudoValue(IValueTable_PseudoValue[] Items){
-        this.items = Items;
+        items = Items;
       }
       public IValueTable_PseudoValue[] Items {
         get {
@@ -1170,9 +1170,9 @@ namespace Lang.Cs.Compiler
       }
       private IValueTable_PseudoValue[] items;
     } // end of IValueTable2_PseudoValue
-    public partial class MethodExpression : CSharpBase, IValue {
+    public sealed partial class MethodExpression : CSharpBase, IValue {
       public MethodExpression(MethodInfo Method){
-        this.method = Method;
+        method = Method;
       }
       public MethodInfo Method {
         get {
@@ -1181,11 +1181,11 @@ namespace Lang.Cs.Compiler
       }
       private MethodInfo method;
     } // end of MethodExpression
-    public partial class LambdaExpression : CSharpBase, IValue {
+    public sealed partial class LambdaExpression : CSharpBase, IValue {
       public LambdaExpression(Type DotnetType, FunctionDeclarationParameter[] Parameters, IStatement Body){
-        this.dotnetType = DotnetType;
-        this.parameters = Parameters;
-        this.body = Body;
+        dotnetType = DotnetType;
+        parameters = Parameters;
+        body = Body;
       }
       public Type DotnetType {
         get {
@@ -1206,10 +1206,10 @@ namespace Lang.Cs.Compiler
       }
       private IStatement body;
     } // end of LambdaExpression
-    public partial class CsharpSwitchStatement : CSharpBase, IStatement {
+    public sealed partial class CsharpSwitchStatement : CSharpBase, IStatement {
       public CsharpSwitchStatement(IValue Expression, CsharpSwichSection[] Sections){
-        this.expression = Expression;
-        this.sections = Sections;
+        expression = Expression;
+        sections = Sections;
       }
       public IValue Expression {
         get {
@@ -1224,10 +1224,10 @@ namespace Lang.Cs.Compiler
       }
       private CsharpSwichSection[] sections;
     } // end of CsharpSwitchStatement
-    public partial class CsharpSwichSection : CSharpBase {
+    public sealed partial class CsharpSwichSection : CSharpBase {
       public CsharpSwichSection(CsharpSwichLabel[] Labels, IStatement[] Statements){
-        this.labels = Labels;
-        this.statements = Statements;
+        labels = Labels;
+        statements = Statements;
       }
       public CsharpSwichLabel[] Labels {
         get {
@@ -1242,10 +1242,10 @@ namespace Lang.Cs.Compiler
       }
       private IStatement[] statements;
     } // end of CsharpSwichSection
-    public partial class CsharpSwichLabel : CSharpBase, IValue {
+    public sealed partial class CsharpSwichLabel : CSharpBase, IValue {
       public CsharpSwichLabel(IValue Expression, bool IsDefault){
-        this.expression = Expression;
-        this.isDefault = IsDefault;
+        expression = Expression;
+        isDefault = IsDefault;
       }
       public IValue Expression {
         get {
@@ -1261,7 +1261,6 @@ namespace Lang.Cs.Compiler
       private bool isDefault;
     } // end of CsharpSwichLabel
 public class CSharpBase {
-
     public CSharpBaseKinds TokenKind
     {
         get

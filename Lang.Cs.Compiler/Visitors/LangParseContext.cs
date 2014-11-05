@@ -210,7 +210,7 @@ namespace Lang.Cs.Compiler.Visitors
                 {
                     m = hostType.GetMethod(method.Name, pTypes);
                 }
-                catch (System.Reflection.AmbiguousMatchException)
+                catch (AmbiguousMatchException)
                 {
                     m = null;
                 }
@@ -438,21 +438,21 @@ namespace Lang.Cs.Compiler.Visitors
                 case SpecialType.System_String:
                     return typeof(string);
                 case SpecialType.System_Double:
-                    return typeof(System.Double);
+                    return typeof(Double);
                 case SpecialType.System_Decimal:
-                    return typeof(System.Decimal);
+                    return typeof(Decimal);
                 case SpecialType.System_Int16:
-                    return typeof(System.Int16);
+                    return typeof(Int16);
                 case SpecialType.System_Int32:
-                    return typeof(System.Int32);
+                    return typeof(Int32);
                 case SpecialType.System_Int64:
-                    return typeof(System.Int64);
+                    return typeof(Int64);
                 case SpecialType.System_Object:
-                    return typeof(System.Object);
+                    return typeof(Object);
                 case SpecialType.System_Boolean:
-                    return typeof(System.Boolean);
+                    return typeof(Boolean);
                 case SpecialType.System_Char:
-                    return typeof(System.Char);
+                    return typeof(Char);
                 case SpecialType.System_Void:
                     return typeof(void);
                 case SpecialType.System_Array:
@@ -507,7 +507,7 @@ namespace Lang.Cs.Compiler.Visitors
                                 var reflectionSearch2 = b.ConstructedFrom.ToDisplayString();
                                 if (reflectionSearch != reflectionSearch2)
                                     reflectionSearch = reflectionSearch2;
-                                reflectionSearch = reflectionSearch.Substring(0, reflectionSearch.IndexOf("<", System.StringComparison.Ordinal)) + "`" + b.Arity.ToString();
+                                reflectionSearch = reflectionSearch.Substring(0, reflectionSearch.IndexOf("<", StringComparison.Ordinal)) + "`" + b.Arity.ToString();
                                 Type reflected = KnownTypes.Single(i => i.FullName == reflectionSearch);
 
 

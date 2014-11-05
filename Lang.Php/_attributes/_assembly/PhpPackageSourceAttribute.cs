@@ -18,13 +18,13 @@ namespace Lang.Php
 
         public PhpPackageSourceAttribute(string sourceUri)
         {
-            this.SourceUri = sourceUri;
+            SourceUri = sourceUri;
         }
 
         public PhpPackageSourceAttribute(string sourceUri, string stripArchivePath)
         {
-            this.SourceUri = sourceUri;
-            this.StripArchivePath = stripArchivePath;
+            SourceUri = sourceUri;
+            StripArchivePath = stripArchivePath;
         }
 
 		#endregion Constructors 

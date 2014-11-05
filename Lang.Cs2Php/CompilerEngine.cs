@@ -1,10 +1,13 @@
 ﻿using Lang.Cs.Compiler;
+using Lang.Php;
 using Lang.Php.Compiler;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using Lang.Php.Compiler.Translator;
+using Lang.Php.Framework;
 using Microsoft.CodeAnalysis;
 
 namespace Lang.Cs2Php
@@ -196,7 +199,7 @@ namespace Lang.Cs2Php
                 foreach (var i in refToRemove)
                     comp.RemoveMetadataReferences(i);
                 var ref1 = refToRemove.Select(i => i.FilePath).Union(_referenced).ToList();
-                ref1.Add(typeof(Php.PhpDummy).Assembly.GetCodeLocation().FullName);
+                ref1.Add(typeof(PhpDummy).Assembly.GetCodeLocation().FullName);
                 ref1.AddRange(Referenced);
                 filenames = ref1.Distinct().ToArray();
             }
@@ -220,8 +223,8 @@ namespace Lang.Cs2Php
                 comp.TranslationAssemblies.Add(assembly);
             }
 
-            comp.TranslationAssemblies.Add(typeof(Php.Framework.Extension).Assembly);
-            comp.TranslationAssemblies.Add(typeof(Php.Compiler.Translator.Translator).Assembly);
+            comp.TranslationAssemblies.Add(typeof(Extension).Assembly);
+            comp.TranslationAssemblies.Add(typeof(Translator).Assembly);
 
             return comp;
         }

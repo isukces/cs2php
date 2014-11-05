@@ -11,9 +11,9 @@ namespace Lang.Php.Compiler.Translator.Node.Linq
     {
         public IPhpValue TranslateToPhp(IExternalTranslationContext ctx, CsharpMethodCallExpression src)
         {
-            if (src.MethodInfo.DeclaringType == typeof(System.Linq.Enumerable))
+            if (src.MethodInfo.DeclaringType == typeof(Enumerable))
             {
-                string fn = src.MethodInfo.ToString();
+                var fn = src.MethodInfo.ToString();
                 if (fn == "System.Collections.Generic.List`1[System.String] ToList[String](System.Collections.Generic.IEnumerable`1[System.String])")
                 {
                     var v = ctx.TranslateValue(src.Arguments[0].MyValue);

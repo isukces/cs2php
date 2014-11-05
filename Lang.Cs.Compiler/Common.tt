@@ -45,7 +45,7 @@
 			else
                 derived = " : " + baseClass;
 
-            Write(string.Format("    public partial class {0}{1} {{\r\n", cn, derived));
+            Write(string.Format("    public sealed partial class {0}{1} {{\r\n", cn, derived));
             var p1 = Convert(properties);
             {
                 var pp = string.Join(", ", p1.Select(q => string.Format("{0} {1}", q.Item1, q.Item2)));

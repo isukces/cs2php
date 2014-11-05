@@ -117,7 +117,7 @@ namespace Lang.Php.Compiler.Translator
         public override int GetHashCode()
         {
             // Good implementation suggested by Josh Bloch
-            int _hash_ = 17;
+            var _hash_ = 17;
             _hash_ = _hash_ * 31 + _sourceType.GetHashCode();
             _hash_ = _hash_ * 31 + _replaceBy.GetHashCode();
             return _hash_;

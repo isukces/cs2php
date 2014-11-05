@@ -65,9 +65,9 @@ namespace Lang.Php
         /// </summary>
         public UseBinaryExpressionAttribute(string Operator, string Left, string Right)
         {
-            this._operator = Operator;
-            this.left = Left;
-            this.right = Right;
+            _operator = Operator;
+            left = Left;
+            right = Right;
         }
 
         #endregion Constructors

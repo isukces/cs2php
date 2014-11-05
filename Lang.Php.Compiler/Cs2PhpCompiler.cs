@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO.Compression;
 using System.Linq;
 using Lang.Cs.Compiler;
 using System.Reflection;
@@ -107,7 +108,7 @@ namespace Lang.Php.Compiler
                 }
 
                 Console.WriteLine("Extracting...");
-                using (var za = System.IO.Compression.ZipFile.OpenRead(tmp))
+                using (var za = ZipFile.OpenRead(tmp))
                 {
                     foreach (var zipArchiveEntry in za.Entries)
                     {
@@ -194,7 +195,7 @@ namespace Lang.Php.Compiler
                     if (!referencedPhpLibsLocations.TryGetValue(x.AssemblyName, out path))
                         continue;
                     path = Path.Combine(path, x.RootPath);
-                    String relativePath = PathUtil.MakeRelativePath(path, realOutputDir);
+                    var relativePath = PathUtil.MakeRelativePath(path, realOutputDir);
                     info.KnownConstsValues[definedConstName] = new KnownConstInfo(definedConstName, relativePath, false);                            //   referencedLibsPaths[definedConstName] = new KnownConstInfo(definedConstName, relativePath, false);
                 }
             }
@@ -417,7 +418,7 @@ namespace Lang.Php.Compiler
                 Console.WriteLine("Translate C# -> Php");
 
             translationInfo.CurrentAssembly = _compiledAssembly;
-            AssemblyTranslationInfo assemblyTi = translationInfo.GetOrMakeTranslationInfo(_compiledAssembly);
+            var assemblyTi = translationInfo.GetOrMakeTranslationInfo(_compiledAssembly);
             var ecBaseDir = Path.Combine(outDir, assemblyTi.RootPath.Replace("/", "\\"));
             Console.WriteLine("Output root {0}", ecBaseDir);
 
@@ -444,7 +445,7 @@ namespace Lang.Php.Compiler
                 translationInfo.CurrentAssembly = _compiledAssembly;// dla pewności
                 foreach (var module in translator.Modules.Where(i => i.Name.Library == libName && !i.IsEmpty))
                 {
-                    string fileName = module.Name.MakeEmitPath(ecBaseDir, 1);
+                    var fileName = module.Name.MakeEmitPath(ecBaseDir, 1);
                     foreach (var modProcessor in translationInfo.ModuleProcessors)
                     {
                         modProcessor.BeforeEmit(module, translationInfo);

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 
@@ -17,9 +18,9 @@ namespace Lang.Php
 
         internal PhpDirectoryEntry(string name, string FullName, bool isDir)
         {
-            this.Name = name;
-            this._FullName = FullName;
-            this._IsDir = _IsDir;
+            Name = name;
+            _FullName = FullName;
+            _IsDir = _IsDir;
         }
 
         #endregion Constructors
@@ -52,8 +53,8 @@ namespace Lang.Php
             get
             {
                 if (_IsDir)
-                    return new System.IO.DirectoryInfo(_FullName).Parent.FullName;
-                return new System.IO.FileInfo(_FullName).Directory.FullName;
+                    return new DirectoryInfo(_FullName).Parent.FullName;
+                return new FileInfo(_FullName).Directory.FullName;
             }
         }
 
@@ -83,7 +84,7 @@ namespace Lang.Php
         {
             get
             {
-                return this.Name == "..";
+                return Name == "..";
             }
         }
 
@@ -92,7 +93,7 @@ namespace Lang.Php
         {
             get
             {
-                return this.Name == ".";
+                return Name == ".";
             }
         }
 

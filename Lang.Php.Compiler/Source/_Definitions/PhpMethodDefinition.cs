@@ -34,15 +34,15 @@ namespace Lang.Php.Compiler.Source
         {
 
             // public function addFunction($function, $namespace = '') 
-            string accessModifiers = GetAccessModifiers();
-            string param = Arguments == null ? "" : string.Join(", ", Arguments.Select(u => u.GetPhpCode(style)));
+            var accessModifiers = GetAccessModifiers();
+            var param = Arguments == null ? "" : string.Join(", ", Arguments.Select(u => u.GetPhpCode(style)));
             code.OpenLnF("{0} function {1}({2}) {{", accessModifiers, Name, param);
             {
                 var g = GetGlobals();
                 if (!string.IsNullOrEmpty(g))
                     code.WriteLnF("global {0};", g);
             }
-            foreach (var statement in this.Statements)
+            foreach (var statement in Statements)
             {
                 var g = PhpEmitStyle.xClone(style);
                 g.Brackets = ShowBracketsEnum.Never;
@@ -66,7 +66,7 @@ namespace Lang.Php.Compiler.Source
 
         protected string GetGlobals()
         {
-            var aa = this.GetCodeRequests()
+            var aa = GetCodeRequests()
                 .OfType<GlobalVariableRequest>()
                 .Where(i => !string.IsNullOrEmpty(i.VariableName))
                 .Select(i => PhpVariableExpression.AddDollar(i.VariableName)).Distinct();

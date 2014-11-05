@@ -54,29 +54,29 @@ namespace Lang.Php.Compiler.Translator.Node
                 {
                     #region BindParams
                     var a = src.MethodInfo.GetParameters();
-                    StringBuilder phptypes = new StringBuilder(a.Length);
+                    var phptypes = new StringBuilder(a.Length);
                     foreach (var i in a)
                     {
                         var j = i.ParameterType;
                         var t = j.GetGenericArguments()[0];
                         if (t == typeof(string))
                             phptypes.Append("s");
-                        else if (t == typeof(System.Double)
-                                || t == typeof(System.Single)
-                                || t == typeof(System.Decimal))
+                        else if (t == typeof(Double)
+                                || t == typeof(Single)
+                                || t == typeof(Decimal))
                             phptypes.Append("d");
-                        else if (t == typeof(System.Int64)
-                                || t == typeof(System.Int32)
-                                || t == typeof(System.Byte)
-                                || t == typeof(System.UInt64)
-                                || t == typeof(System.UInt32)
-                                || t == typeof(System.UInt16))
+                        else if (t == typeof(Int64)
+                                || t == typeof(Int32)
+                                || t == typeof(Byte)
+                                || t == typeof(UInt64)
+                                || t == typeof(UInt32)
+                                || t == typeof(UInt16))
                             phptypes.Append("i");
                         else if (t == typeof(byte[]))
                             phptypes.Append("b");
                         else throw new NotSupportedException(string.Format("Type {0} is not supported by MySQLiStatement.BindParams", t));
                     }
-                    List<IPhpValue> values = new List<IPhpValue>();
+                    var values = new List<IPhpValue>();
                     values.Add(new PhpConstValue(phptypes.ToString()));
                     foreach (var i in src.Arguments)
                         values.Add(ctx.TranslateValue(i.MyValue));
@@ -89,7 +89,7 @@ namespace Lang.Php.Compiler.Translator.Node
                 {
                     #region BindResult
                     var a = src.MethodInfo.GetParameters();                     
-                    List<IPhpValue> values = new List<IPhpValue>();
+                    var values = new List<IPhpValue>();
                     foreach (var i in src.Arguments)
                         values.Add(ctx.TranslateValue(i.MyValue));
                     var result = new PhpMethodCallExpression("bind_result", values.ToArray());

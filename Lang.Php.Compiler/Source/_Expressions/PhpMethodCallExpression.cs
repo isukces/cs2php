@@ -96,7 +96,7 @@ namespace Lang.Php.Compiler.Source
 
         public override string GetPhpCode(PhpEmitStyle style)
         {
-            string join = style == null || style.Compression == EmitStyleCompression.Beauty ? ", " : ",";
+            var join = style == null || style.Compression == EmitStyleCompression.Beauty ? ", " : ",";
             var xstyle = PhpEmitStyle.xClone(style);
             var arguments = string.Join(join, _arguments.Select(i => i.GetPhpCode(xstyle)));
             if (IsConstructorCall)

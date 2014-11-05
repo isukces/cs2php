@@ -93,210 +93,210 @@ namespace Lang.Php.Compiler.Translator
         protected virtual T VisitPhpCodeBlock(PhpCodeBlock node)
         {
             if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitPhpCodeBlock", this.GetType().FullName));
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitPhpCodeBlock", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitPhpArrayCreateExpression(PhpArrayCreateExpression node)
         {
             if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitPhpArrayCreateExpression", this.GetType().FullName));
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitPhpArrayCreateExpression", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitPhpDefinedConstExpression(PhpDefinedConstExpression node)
         {
             if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitPhpDefinedConstExpression", this.GetType().FullName));
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitPhpDefinedConstExpression", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitPhpFreeExpression(PhpFreeExpression node)
         {
             if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitPhpFreeExpression", this.GetType().FullName));
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitPhpFreeExpression", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitPhpBreakStatement(PhpBreakStatement node)
         {
             if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitPhpBreakStatement", this.GetType().FullName));
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitPhpBreakStatement", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitPhpCodeModuleName(PhpCodeModuleName node)
         {
             if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitPhpCodeModuleName", this.GetType().FullName));
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitPhpCodeModuleName", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitPhpArrayAccessExpression(PhpArrayAccessExpression node)
         {
             if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitPhpArrayAccessExpression", this.GetType().FullName));
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitPhpArrayAccessExpression", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitPhpAssignExpression(PhpAssignExpression node)
         {
             if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitPhpAssignExpression", this.GetType().FullName));
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitPhpAssignExpression", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitPhpClassFieldAccessExpression(PhpClassFieldAccessExpression node)
         {
             if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitPhpClassFieldAccessExpression", this.GetType().FullName));
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitPhpClassFieldAccessExpression", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitPhpBinaryOperatorExpression(PhpBinaryOperatorExpression node)
         {
             if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitPhpBinaryOperatorExpression", this.GetType().FullName));
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitPhpBinaryOperatorExpression", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitPhpConditionalExpression(PhpConditionalExpression node)
         {
             if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitPhpConditionalExpression", this.GetType().FullName));
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitPhpConditionalExpression", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitPhpConstValue(PhpConstValue node)
         {
             if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitPhpConstValue", this.GetType().FullName));
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitPhpConstValue", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitPhpElementAccessExpression(PhpElementAccessExpression node)
         {
             if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitPhpElementAccessExpression", this.GetType().FullName));
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitPhpElementAccessExpression", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitPhpContinueStatement(PhpContinueStatement node)
         {
             if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitPhpContinueStatement", this.GetType().FullName));
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitPhpContinueStatement", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitPhpExpressionStatement(PhpExpressionStatement node)
         {
             if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitPhpExpressionStatement", this.GetType().FullName));
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitPhpExpressionStatement", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitPhpForEachStatement(PhpForEachStatement node)
         {
             if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitPhpForEachStatement", this.GetType().FullName));
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitPhpForEachStatement", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitPhpForStatement(PhpForStatement node)
         {
             if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitPhpForStatement", this.GetType().FullName));
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitPhpForStatement", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitPhpIfStatement(PhpIfStatement node)
         {
             if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitPhpIfStatement", this.GetType().FullName));
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitPhpIfStatement", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitPhpIncrementDecrementExpression(PhpIncrementDecrementExpression node)
         {
             if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitPhpIncrementDecrementExpression", this.GetType().FullName));
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitPhpIncrementDecrementExpression", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitPhpInstanceFieldAccessExpression(PhpInstanceFieldAccessExpression node)
         {
             if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitPhpInstanceFieldAccessExpression", this.GetType().FullName));
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitPhpInstanceFieldAccessExpression", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitPhpPropertyAccessExpression(PhpPropertyAccessExpression node)
         {
             if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitPhpPropertyAccessExpression", this.GetType().FullName));
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitPhpPropertyAccessExpression", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitPhpMethodInvokeValue(PhpMethodInvokeValue node)
         {
             if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitPhpMethodInvokeValue", this.GetType().FullName));
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitPhpMethodInvokeValue", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitPhpMethodCallExpression(PhpMethodCallExpression node)
         {
             if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitPhpMethodCallExpression", this.GetType().FullName));
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitPhpMethodCallExpression", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitPhpParenthesizedExpression(PhpParenthesizedExpression node)
         {
             if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitPhpParenthesizedExpression", this.GetType().FullName));
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitPhpParenthesizedExpression", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitPhpReturnStatement(PhpReturnStatement node)
         {
             if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitPhpReturnStatement", this.GetType().FullName));
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitPhpReturnStatement", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitPhpThisExpression(PhpThisExpression node)
         {
             if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitPhpThisExpression", this.GetType().FullName));
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitPhpThisExpression", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitPhpUnaryOperatorExpression(PhpUnaryOperatorExpression node)
         {
             if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitPhpUnaryOperatorExpression", this.GetType().FullName));
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitPhpUnaryOperatorExpression", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitPhpVariableExpression(PhpVariableExpression node)
         {
             if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitPhpVariableExpression", this.GetType().FullName));
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitPhpVariableExpression", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitPhpWhileStatement(PhpWhileStatement node)
         {
             if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitPhpWhileStatement", this.GetType().FullName));
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitPhpWhileStatement", GetType().FullName));
             return default(T);
         }
 
         protected virtual T VisitPhpSwitchStatement(PhpSwitchStatement node)
         {
             if (ThrowNotImplementedException)
-                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitPhpSwitchStatement", this.GetType().FullName));
+                throw new NotImplementedException(string.Format("Method {0} is not supported in class {1}", "VisitPhpSwitchStatement", GetType().FullName));
             return default(T);
         }
 		public static PhpSourceItems GetKind(PhpSourceBase x) {

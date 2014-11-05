@@ -34,7 +34,7 @@ namespace Lang.Php.Compiler.Source
             var m = Regex.Match(code, "^(-?\\d)+$");
             if (m.Success)
             {
-                int value = int.Parse(code);
+                var value = int.Parse(code);
                 return new PhpConstValue(value);
             }
             throw new NotImplementedException("Only integer values are supported. Sorry.");
@@ -62,7 +62,7 @@ namespace Lang.Php.Compiler.Source
 
         public override string GetPhpCode(PhpEmitStyle style)
         {
-            bool b = style != null && style.Compression != EmitStyleCompression.Beauty;
+            var b = style != null && style.Compression != EmitStyleCompression.Beauty;
             var a = PhpValues.ToPhpCodeValue(_value, b);
             switch (a.Kind)
             {

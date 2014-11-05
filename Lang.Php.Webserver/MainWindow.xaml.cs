@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Path = System.IO.Path;
 
 namespace Lang.Php.Webserver
 {
@@ -28,7 +29,7 @@ namespace Lang.Php.Webserver
             }
             {
                 ServerEngine e = ServerEngine.Instance;
-                e.DocumentRoot = System.IO.Path.Combine(
+                e.DocumentRoot = Path.Combine(
                      Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                     "cs2php",
                     "webserver");

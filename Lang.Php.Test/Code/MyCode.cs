@@ -26,7 +26,7 @@ namespace Lang.Php.Test.Code
             string h = "Some text backslash\\ quote\" single' dollar$";
             string jacob = @"\anything";
 
-
+            var x = "test {h}";
         }        
 
         public static void Collections()

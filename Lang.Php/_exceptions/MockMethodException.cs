@@ -5,6 +5,7 @@ using System.Text;
 
 namespace Lang.Php
 {
+    [Serializable]
     public class MockMethodException : Exception
     {
         public MockMethodException() :

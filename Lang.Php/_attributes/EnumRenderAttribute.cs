@@ -9,7 +9,7 @@ namespace Lang.Php
     {
         public EnumRenderAttribute(EnumRenderOptions o, bool DefinedConst)
         {
-            this.Option = o;
+            Option = o;
             this.DefinedConst = DefinedConst;
         }
         public EnumRenderOptions Option { get; private set; }

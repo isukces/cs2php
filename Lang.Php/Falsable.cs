@@ -29,20 +29,20 @@ namespace Lang.Php
         }
 
 
-        [UseBinaryExpressionAttribute("===", "false", "$0")]
+        [UseBinaryExpression("===", "false", "$0")]
         public static bool CheckIsFalse(T obj)
         {
             throw new MockMethodException();
         }
 
-        [UseBinaryExpressionAttribute("!==", "false", "$0")]
+        [UseBinaryExpression("!==", "false", "$0")]
         public static bool CheckIsNotFalse(T obj)
         {
             throw new MockMethodException();
         }
 
 
-        [UseBinaryExpressionAttribute("===", "this", "false")]
+        [UseBinaryExpression("===", "this", "false")]
         public bool IsFalse
         {
             get
@@ -50,7 +50,7 @@ namespace Lang.Php
                 return isFalse;
             }
         }
-        [UseBinaryExpressionAttribute("!==", "this", "false")]
+        [UseBinaryExpression("!==", "this", "false")]
         public bool IsNotFalse
         {
             get

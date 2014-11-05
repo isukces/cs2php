@@ -32,7 +32,7 @@ namespace Lang.Php.Compiler.Translator
 
         protected override IPhpStatement VisitPhpCodeBlock(PhpCodeBlock node)
         {
-            PhpCodeBlock newNode = new PhpCodeBlock();
+            var newNode = new PhpCodeBlock();
             foreach (var i in node.GetPlain())
             {
                 newNode.Statements.Add(Simplify(i));
@@ -43,7 +43,7 @@ namespace Lang.Php.Compiler.Translator
             {
                 //newNode.Statements.Clear();
                 {
-                    for (int i = 1; i < newNode.Statements.Count; i++)
+                    for (var i = 1; i < newNode.Statements.Count; i++)
                     {
                         var e1 = GetPhpNativeMethodCall(newNode.Statements[i - 1], "echo");
                         if (e1 == null) continue;
@@ -74,7 +74,7 @@ namespace Lang.Php.Compiler.Translator
                     {
                         var a = newNode.Statements[i];
                         if (a is PhpSourceBase)
-                            newNode.Statements[i] = this.Visit(a as PhpSourceBase);
+                            newNode.Statements[i] = Visit(a as PhpSourceBase);
                     }
                 }
             }

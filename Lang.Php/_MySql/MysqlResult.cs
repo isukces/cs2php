@@ -23,16 +23,43 @@ mysql_query() will also fail and return FALSE if the user does not have permissi
 }
      */
     [Skip]
-    public class MysqlResult : IDisposable
+    public  class MysqlResult : IDisposable
     {
-        #region Methods
+		#region Constructors 
 
-        // Public Methods 
+        ~MysqlResult()
+        {
+            Dispose(false);
+        }
+
+		#endregion Constructors 
+
+		#region Static Methods 
+
+		// Private Methods 
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                // Zwolnij zasoby zarządzalne
+            }
+            // Zwolnij zasoby niezarządzalne,
+            // których właścicielem jest wyłącznie ten obiekt    
+        }
+
+		#endregion Static Methods 
+
+		#region Methods 
+
+		// Public Methods 
 
         [DirectCall("XXX", "this")]
         public void Dispose()
         {
-            throw new NotImplementedException();
+            // ta metoda MUSI zawsze wyglądać tak samo
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
 
         /// <summary>
@@ -66,7 +93,6 @@ mysql_query() will also fail and return FALSE if the user does not have permissi
             throw new NotSupportedException();
         }
 
-
         [DirectCall("mysql_fetch_assoc", "0,this", 0)]
         public virtual bool FetchAssoc<T>(out T row)
         {
@@ -93,23 +119,23 @@ mysql_query() will also fail and return FALSE if the user does not have permissi
             // bool ibase_free_result ( resource $result_identifier )
             _phpLevelDisposed = true;
         }
-        // Protected Methods 
+		// Protected Methods 
 
         protected virtual int getNumRows()
         {
             throw new NotSupportedException();
         }
 
-        #endregion Methods
+		#endregion Methods 
 
-        #region Fields
+		#region Fields 
 
         protected bool _ok;
         protected bool _phpLevelDisposed;
 
-        #endregion Fields
+		#endregion Fields 
 
-        #region Properties
+		#region Properties 
 
         [UseBinaryExpression("!==", "this", "false")]
         public bool IsOk
@@ -129,6 +155,6 @@ mysql_query() will also fail and return FALSE if the user does not have permissi
             }
         }
 
-        #endregion Properties
+		#endregion Properties 
     }
 }

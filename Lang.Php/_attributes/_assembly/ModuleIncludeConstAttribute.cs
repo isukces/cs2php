@@ -59,7 +59,7 @@ namespace Lang.Php
         /// </summary>
         public ModuleIncludeConstAttribute(string ConstOrVarName)
         {
-            this.constOrVarName = ConstOrVarName;
+            constOrVarName = ConstOrVarName;
         }
 
         #endregion Constructors

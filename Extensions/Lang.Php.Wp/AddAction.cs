@@ -13,7 +13,7 @@ namespace Lang.Php.Wp
         /// </summary>
         /// <param name="function_to_add"></param>
         /// <param name="priority"></param>
-        [HookAttribute(Hooks.AdminInit)]
+        [Hook(Hooks.AdminInit)]
         public static void AdminInit(Action function_to_add, int priority = 10)
         {
             throw new MockMethodException();
@@ -25,21 +25,21 @@ namespace Lang.Php.Wp
         /// </summary>
         /// <param name="function_to_add"></param>
         /// <param name="priority"></param>
-        [HookAttribute(Hooks.AdminMenu)]
+        [Hook(Hooks.AdminMenu)]
         public static void AdminMenu(Action function_to_add, int priority = 10)
         {
             throw new MockMethodException();
         }
 
     
-        [HookAttribute(Hooks.AdminHead)]
+        [Hook(Hooks.AdminHead)]
         public static void AdminHead(Action function_to_add, int priority = 10)
         {
             throw new MockMethodException();
         }
 
 
-        [HookAttribute(Hooks.WpHead)]
+        [Hook(Hooks.WpHead)]
         public static void WpHead(Action function_to_add, int priority = 10)
         {
             throw new MockMethodException();
@@ -51,13 +51,13 @@ namespace Lang.Php.Wp
         /// </summary>
         /// <param name="functionToAdd"></param>
         /// <param name="priority"></param>
-        [HookAttribute(Hooks.WpLoaded)]
+        [Hook(Hooks.WpLoaded)]
         public static void WpLoaded(Action functionToAdd, int priority = 10)
         {
             throw new MockMethodException();
         }
 
-        [HookAttribute(Hooks.AdminEnqueueScripts)]
+        [Hook(Hooks.AdminEnqueueScripts)]
         public static void AdminEnqueueScripts(Action functionToAdd, int priority = 10)
         {
             throw new MockMethodException();
@@ -72,14 +72,14 @@ namespace Lang.Php.Wp
         /// Runs whenever a post or page is created or updated, which could be from an import, post/page edit form, xmlrpc, or post by email. 
         /// Action function arguments: post ID and post object.
         /// </summary>
-        [HookAttribute(Hooks.SavePost)]
+        [Hook(Hooks.SavePost)]
         public static void SavePost(Action<int> function_to_add, int priority = 10)
         {
             throw new MockMethodException();
         }
 
 
-        [HookAttribute(Hooks.SavePage)]
+        [Hook(Hooks.SavePage)]
         public static void SavePage(Action<int> function_to_add, int priority = 10)
         {
             throw new MockMethodException();

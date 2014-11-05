@@ -13,7 +13,7 @@ namespace Lang.Php
         public ResourcesDirectoryAttribute(string Source)
         {
             this.Source = Source;
-            this.Destination = "";
+            Destination = "";
         }
 
         public ResourcesDirectoryAttribute(string Source, string Destination)

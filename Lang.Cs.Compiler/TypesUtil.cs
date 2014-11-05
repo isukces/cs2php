@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -17,14 +18,14 @@ namespace Lang.Cs.Compiler
             //{
 
             //}
-            if (srcType == typeof(System.Collections.IEnumerable))
+            if (srcType == typeof(IEnumerable))
                 return typeof(object);
             if (srcType.IsArray)
                 return srcType.GetElementType();
             if (srcType.IsGenericType)
             {
                 var generic = srcType.GetGenericTypeDefinition();
-                var definitionTypes = srcType.GetGenericArguments();
+                Type[] definitionTypes = srcType.GetGenericArguments();
                 if (generic == typeof(Dictionary<,>))
                     return typeof(KeyValuePair<,>).MakeGenericType(definitionTypes);
                 if (generic == typeof(List<>))
@@ -218,8 +219,8 @@ namespace Lang.Cs.Compiler
 
         public static Type GetMemberType(IValue expression, string name)
         {
-            if (expression is LangType)
-                return GetMemberType(expression as LangType, name, true);
+          //  if (expression is LangType)
+            //     return GetMemberType(expression as LangType, name, true);
             throw new NotSupportedException();
         }
     }

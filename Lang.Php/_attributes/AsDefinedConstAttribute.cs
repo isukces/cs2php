@@ -62,7 +62,7 @@ namespace Lang.Php
         /// </summary>
         public AsDefinedConstAttribute(string DefinedConstName)
         {
-            this.definedConstName = DefinedConstName;
+            definedConstName = DefinedConstName;
         }
 
         #endregion Constructors

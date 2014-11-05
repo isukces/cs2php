@@ -30,7 +30,7 @@ namespace Lang.Php
         /// <param name="name">Name in script</param>
         public ScriptNameAttribute(string name)
         {
-            this.Name = name;
+            Name = name;
         }
 
         #endregion Constructors

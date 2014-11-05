@@ -84,8 +84,8 @@ namespace Lang.Php.Compiler.Source
         /// </summary>
         public PhpInstanceFieldAccessExpression(string FieldName, IPhpValue TargetObject, PhpCodeModuleName IncludeModule)
         {
-            this.fieldName = FieldName;
-            this.targetObject = TargetObject;
+            fieldName = FieldName;
+            targetObject = TargetObject;
             this.IncludeModule = IncludeModule;
         }
 

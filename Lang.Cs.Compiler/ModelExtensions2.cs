@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -12,7 +13,7 @@ namespace Lang.Cs.Compiler
         {
             var typeInfo = ModelExtensions.GetTypeInfo(model, expression);
             if (typeInfo.ConvertedType == null)
-                System.Diagnostics.Debug.Write("");
+                Debug.Write("");
             var g = new MyInfo
             {
                 Conversion1 = typeInfo.ConvertedType != null

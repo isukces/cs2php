@@ -23,8 +23,8 @@ namespace Lang.Php.Compiler.Source
         {
             if (key_values.Length % 2 == 1)
                 throw new ArgumentException("key_values");
-            List<IPhpValue> a = new List<IPhpValue>();
-            for (int i = 1; i < key_values.Length; i += 2)
+            var a = new List<IPhpValue>();
+            for (var i = 1; i < key_values.Length; i += 2)
             {
                 if (key_values[i] == null)
                     continue;
@@ -55,7 +55,7 @@ namespace Lang.Php.Compiler.Source
         {
             if (initializers == null || initializers.Length == 0)
                 return new ICodeRequest[0];
-            List<ICodeRequest> l = new List<ICodeRequest>();
+            var l = new List<ICodeRequest>();
             foreach (var i in initializers)
             {
                 var ll = i.GetCodeRequests();
@@ -73,12 +73,12 @@ namespace Lang.Php.Compiler.Source
             var www = style.Compression == EmitStyleCompression.Beauty ? " => " : "=>";
 
 
-            List<string> list = new List<string>();
+            var list = new List<string>();
             foreach (var initializeValue in initializers)
             {
                 if (initializeValue is PhpAssignExpression)
                 {
-                    PhpAssignExpression assignExpression = initializeValue as PhpAssignExpression;
+                    var assignExpression = initializeValue as PhpAssignExpression;
                     if (!string.IsNullOrEmpty(assignExpression.OptionalOperator))
                         throw new NotSupportedException();
 
@@ -87,7 +87,7 @@ namespace Lang.Php.Compiler.Source
                         var left = assignExpression.Left as PhpArrayAccessExpression;
                         if (left.PhpArray is PhpThisExpression)
                         {
-                            string o = left.Index + www + assignExpression.Right;
+                            var o = left.Index + www + assignExpression.Right;
                             list.Add(o);
                             continue;
                         }
@@ -98,13 +98,13 @@ namespace Lang.Php.Compiler.Source
                     {
                         var l1 = assignExpression.Left as PhpInstanceFieldAccessExpression;
                         var fn = new PhpConstValue(l1.FieldName);
-                        string o = fn.GetPhpCode(style) + www + assignExpression.Right;
+                        var o = fn.GetPhpCode(style) + www + assignExpression.Right;
                         list.Add(o);
                         continue;
                     }
                     else
                     {
-                        string o = assignExpression.Left.GetPhpCode(style) + www + assignExpression.Right;
+                        var o = assignExpression.Left.GetPhpCode(style) + www + assignExpression.Right;
                         list.Add(o);
                         continue;
                     }

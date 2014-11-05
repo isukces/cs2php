@@ -22,7 +22,7 @@ namespace Lang.Php
         /// <param name="name">Name of module that contains cs2php related configuration</param>
         public ConfigModuleAttribute(string name)
         {
-            this.Name = name;
+            Name = name;
         }
         public const string DEFAULT = "cs2php";
         /// <summary>

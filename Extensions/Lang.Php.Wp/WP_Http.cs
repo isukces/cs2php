@@ -40,7 +40,7 @@ namespace Lang.Php.Wp
 
             public Request_Array(Response response)
             {
-                this.Response = response;
+                Response = response;
             }
         }
         [AsArray]

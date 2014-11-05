@@ -32,7 +32,7 @@ namespace Lang.Php.Compiler.Source
         public List<IPhpStatement> GetPlain()
         {
             var o = new List<IPhpStatement>();
-            if (this.statements == null || this.statements.Count == 0)
+            if (statements == null || statements.Count == 0)
                 return o;
             foreach (var i in statements)
             {
@@ -45,7 +45,7 @@ namespace Lang.Php.Compiler.Source
         }
         public PhpCodeBlock(IPhpStatement other)
         {
-            this.statements.Add(other);
+            statements.Add(other);
         }
 
         public PhpCodeBlock()
@@ -95,8 +95,8 @@ namespace Lang.Php.Compiler.Source
         {
             if (statements.Count == 0)
                 return;
-            ShowBracketsEnum bracketStyle = style == null ? ShowBracketsEnum.IfManyItems : style.Brackets;
-            bool brack =
+            var bracketStyle = style == null ? ShowBracketsEnum.IfManyItems : style.Brackets;
+            var brack =
                 bracketStyle == ShowBracketsEnum.Never
                 ? false
                 : bracketStyle == ShowBracketsEnum.Always
@@ -131,7 +131,7 @@ namespace Lang.Php.Compiler.Source
         {
             if (statements.Count == 0)
                 return new ICodeRequest[0];
-            List<ICodeRequest> r = new List<ICodeRequest>();
+            var r = new List<ICodeRequest>();
             foreach (var i in statements)
                 r.AddRange(i.GetCodeRequests());
             return r;

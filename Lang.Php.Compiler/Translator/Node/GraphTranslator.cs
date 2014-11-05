@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Lang.Php.Graph;
 
 
 namespace Lang.Php.Compiler.Translator.Node
@@ -13,7 +14,7 @@ namespace Lang.Php.Compiler.Translator.Node
     {
         public IPhpValue TranslateToPhp(IExternalTranslationContext ctx, ClassFieldAccessExpression src)
         {
-            if (src.Member.DeclaringType == typeof(Lang.Php.Graph.Font))
+            if (src.Member.DeclaringType == typeof(Font))
             {
                 var name = src.Member.Name;
                 if (name =="Font1" || name =="Font2" || name =="Font3" || name =="Font4" || name =="Font5" ) {

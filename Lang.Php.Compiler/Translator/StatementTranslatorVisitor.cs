@@ -13,7 +13,7 @@ namespace Lang.Php.Compiler.Translator
 
         public IPhpStatement[] TranslateStatements(IEnumerable<IStatement> x)
         {
-            List<IPhpStatement> re = new List<IPhpStatement>();
+            var re = new List<IPhpStatement>();
             foreach (var i in x)
             {
                 var j = TranslateStatement(i);
@@ -24,7 +24,7 @@ namespace Lang.Php.Compiler.Translator
         }
         protected override IPhpStatement[] VisitCodeBlock(CodeBlock src)
         {
-            PhpCodeBlock res = new PhpCodeBlock();
+            var res = new PhpCodeBlock();
             res.Statements.AddRange(TranslateStatements(src.Items));
             return MkArray(res);
         }
@@ -118,7 +118,7 @@ namespace Lang.Php.Compiler.Translator
         protected override IPhpStatement[] VisitVariableDeclaration(VariableDeclaration src)
         {
             //throw new Exception("DELETE THIS ??????");
-            List<IPhpStatement> s = new List<IPhpStatement>();
+            var s = new List<IPhpStatement>();
             foreach (var i in src.Declarators)
             {
                 var l = new PhpVariableExpression(PhpVariableExpression.AddDollar(i.Name), PhpVariableKind.Local);
@@ -136,7 +136,7 @@ namespace Lang.Php.Compiler.Translator
         protected override IPhpStatement[] VisitAssignExpression(CsharpAssignExpression src)
         {
 
-            IPhpValue translatedValue = TransValue(src as IValue);
+            var translatedValue = TransValue(src as IValue);
             return MkArray(translatedValue);
         }
 
@@ -166,8 +166,8 @@ namespace Lang.Php.Compiler.Translator
             var condition = TransValue(src.Condition);
             var statement = TranslateStatementOne(src.Statement);
             var incrementors = TranslateStatements(src.Incrementors);
-            IPhpStatement[] declarations = TranslateStatement(src.Declaration).ToArray();
-            List<PhpAssignExpression> phpDeclarations = new List<PhpAssignExpression>();
+            var declarations = TranslateStatement(src.Declaration).ToArray();
+            var phpDeclarations = new List<PhpAssignExpression>();
             foreach (object declaration in declarations)
             {
                 var d = declaration;
@@ -236,7 +236,7 @@ namespace Lang.Php.Compiler.Translator
 
         protected override IPhpStatement[] VisitLocalDeclarationStatement(LocalDeclarationStatement src)
         {
-            List<IPhpStatement> s = new List<IPhpStatement>();
+            var s = new List<IPhpStatement>();
             foreach (var i in src.Declaration.Declarators)
             {
                 /// to jest przypadek z c# 'int x;', dla php można to pominąć

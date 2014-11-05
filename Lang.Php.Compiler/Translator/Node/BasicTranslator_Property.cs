@@ -25,7 +25,7 @@ namespace Lang.Php.Compiler.Translator.Node
             var t = TranslatorBase.GetGenericTypeDefinition(src.Member.DeclaringType);
             if (t == typeof(KeyValuePair<,>))
                 return _KeyValuePair();
-            if (t == typeof(System.Nullable<>))
+            if (t == typeof(Nullable<>))
                 return _Nullable();
             if (t == typeof(Array))
                 return _Array();

@@ -1,4 +1,5 @@
-﻿using System.Web.UI;
+﻿using System.Web;
+using System.Web.UI;
 using Lang.Php.Compiler.Source;
 using Lang.Php.Runtime;
 using System;
@@ -55,8 +56,8 @@ namespace Lang.Php.Compiler.Translator
 
         bool SameCode(IPhpValue a, IPhpValue b)
         {
-            string codeA = a == null ? "" : a.GetPhpCode(null);
-            string codeB = a == null ? "" : b.GetPhpCode(null);
+            var codeA = a == null ? "" : a.GetPhpCode(null);
+            var codeB = a == null ? "" : b.GetPhpCode(null);
             return codeA == codeB;
         }
         IPhpValue ReturnSubst(IPhpValue old, IPhpValue @new)
@@ -81,7 +82,7 @@ namespace Lang.Php.Compiler.Translator
 
 
 
-                        for (int i = 1; i < c.Count; i++)
+                        for (var i = 1; i < c.Count; i++)
                         {
                             var L = c[i - 1];
                             var R = c[i];
@@ -119,7 +120,7 @@ namespace Lang.Php.Compiler.Translator
 #endif
                             }
                         }
-                        IPhpValue result = c[0];
+                        var result = c[0];
                         if (c.Count > 1)
                             foreach (var x2 in c.Skip(1))
                                 result = new PhpBinaryOperatorExpression(".", result, x2);
@@ -188,9 +189,9 @@ namespace Lang.Php.Compiler.Translator
                     else if (cv is string)
                     {
                         if (node.Name == "_urlencode_")
-                            cv = System.Web.HttpUtility.UrlEncode(cv as string);
+                            cv = HttpUtility.UrlEncode(cv as string);
                         else
-                            cv = System.Web.HttpUtility.HtmlEncode(cv as string);
+                            cv = HttpUtility.HtmlEncode(cv as string);
                     }
                     else
                         throw new NotSupportedException();
@@ -199,7 +200,7 @@ namespace Lang.Php.Compiler.Translator
             }
             {
                 var list1 = node.Arguments.Select(Simplify).Cast<PhpMethodInvokeValue>().ToList();
-                IPhpValue to = node.TargetObject == null ? null : Simplify(node.TargetObject);
+                var to = node.TargetObject == null ? null : Simplify(node.TargetObject);
                 if (PhpSourceBase.EqualCode_List(list1, node.Arguments) && PhpSourceBase.EqualCode(to, node.TargetObject))
                     return node;
                 var xx = new PhpMethodCallExpression(node.Name)

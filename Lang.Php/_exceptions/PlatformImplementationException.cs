@@ -5,6 +5,7 @@ using System.Text;
 
 namespace Lang.Php
 {
+    [Serializable]
     public class PlatformImplementationException : Exception
     {
         public PlatformImplementationException(Type t, string method, string msg)

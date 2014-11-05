@@ -23,7 +23,7 @@ namespace Lang.Php.Compiler
                 //var setup = AppDomain.CurrentDomain.SetupInformation;
                 //_appDomain = AppDomain.CreateDomain("sandbox" + Guid.NewGuid(), evidence, setup);
 
-                string domainName = "sandbox" + Guid.NewGuid();
+                var domainName = "sandbox" + Guid.NewGuid();
                 var domainSetup = new AppDomainSetup
                 {
                     ApplicationName = domainName,
@@ -251,6 +251,7 @@ namespace Lang.Php.Compiler
 
         #region Fields
 
+        [NonSerialized]
         private AppDomain _appDomain;
         private readonly Dictionary<string, AssemblyWrapper> _loaded =
             new Dictionary<string, AssemblyWrapper>(StringComparer.OrdinalIgnoreCase);

@@ -41,14 +41,14 @@ namespace Lang.Php.Compiler.Source
         public void Refactor()
         {
             // return;
-            var groups = this.GetCodeRequests()
+            var groups = GetCodeRequests()
                   .OfType<LocalVariableRequest>()
                   .Where(i => !string.IsNullOrEmpty(i.VariableName))
                   .GroupBy(i => i.VariableName)
                   .Select(i => i.ToArray())
                  .ToArray();
 
-            int ii = 0;
+            var ii = 0;
             foreach (var group in groups)
             {
                 if (group.Where(i => i.IsArgument).Any())

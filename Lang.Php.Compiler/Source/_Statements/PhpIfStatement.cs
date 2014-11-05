@@ -45,7 +45,7 @@ namespace Lang.Php.Compiler.Source
             }
             writer.DecIndent();
             if (!ifFalseAny) return;
-            bool oneLine = _ifFalse is PhpIfStatement;
+            var oneLine = _ifFalse is PhpIfStatement;
             var oldIndent = writer.Intent;
             {
                 if (oneLine)

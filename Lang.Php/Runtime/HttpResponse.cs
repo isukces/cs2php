@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Text;
@@ -60,7 +61,7 @@ namespace Lang.Php.Runtime
                 d = d.ToLocalTime();
             d = d.ToUniversalTime();
             // Sun, 17 Nov 2013 09:02:29 GMT
-            return d.ToString("ddd, dd MMM yyyy HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture.DateTimeFormat) + " GMT";
+            return d.ToString("ddd, dd MMM yyyy HH:mm:ss", CultureInfo.InvariantCulture.DateTimeFormat) + " GMT";
             /*
              * tring.Format("{0:y yy yyy yyyy}", dt);  // "8 08 008 2008"   year
 String.Format("{0:M MM MMM MMMM}", dt);  // "3 03 Mar March"  month

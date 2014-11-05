@@ -13,8 +13,8 @@ namespace Lang.Php.Examples.BasicFeaturesExample
 
         public ComplexNumber(double real, double imaginary)
         {
-            this.Real = real;
-            this.Imaginary = imaginary;
+            Real = real;
+            Imaginary = imaginary;
         }
 
         #endregion Constructors

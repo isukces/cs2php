@@ -54,7 +54,7 @@ namespace Lang.Php
         /// </summary>
         public ModulesSubDirAttribute(string SubdirectoryName)
         {
-            this.subdirectoryName = SubdirectoryName;
+            subdirectoryName = SubdirectoryName;
         }
 
         #endregion Constructors

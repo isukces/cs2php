@@ -101,7 +101,7 @@ namespace Lang.Php.Compiler.Translator.Node
 
         private static PhpMethodCallExpression MakeFilter(IExternalTranslationContext ctx, CsharpMethodCallExpression src, KnownFilters filter)
         {
-            List<IPhpValue> v = new List<IPhpValue>();
+            var v = new List<IPhpValue>();
             v.Add(new PhpDefinedConstExpression("INPUT_SERVER", null));
             v.Add(ctx.TranslateValue(src.Arguments[0]));
             v.Add(new PhpConstValue(filter));

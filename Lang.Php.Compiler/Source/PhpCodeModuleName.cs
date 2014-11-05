@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 
@@ -106,9 +107,9 @@ namespace Lang.Php.Compiler.Source
                 PhpIncludePathExpression = null;
                 return;
             }
-            List<IPhpValue> pathItems = new List<IPhpValue>();
+            var pathItems = new List<IPhpValue>();
             {
-                IPhpValue assemblyPath = _assemblyInfo.PhpIncludePathExpression;
+                var assemblyPath = _assemblyInfo.PhpIncludePathExpression;
                 if (assemblyPath != null)
                     pathItems.Add(assemblyPath);
             }
@@ -146,7 +147,7 @@ namespace Lang.Php.Compiler.Source
 
         public string MakeEmitPath(string basePath, int dupa)
         {
-            var p = System.IO.Path.Combine(basePath, Name.Replace("/", "\\") + _extension);
+            var p = Path.Combine(basePath, Name.Replace("/", "\\") + _extension);
             return p;
         }
 
@@ -225,7 +226,7 @@ namespace Lang.Php.Compiler.Source
         {
             var p1 = Split(name);
             var p2 = Split(relatedTo);
-            int common = 0;
+            var common = 0;
             for (int i = 0, max = Math.Min(p1.Length, p2.Length); i < max; i++)
                 if (p1[i] == p2[i])
                     common++;
@@ -236,8 +237,8 @@ namespace Lang.Php.Compiler.Source
                 p1 = p1.Skip(common).ToArray();
                 p2 = p2.Skip(common).ToArray();
             }
-            List<string> aa = new List<string>();
-            for (int i = 0; i < p2.Length - 1; i++)
+            var aa = new List<string>();
+            for (var i = 0; i < p2.Length - 1; i++)
                 aa.Add("..");
             aa.AddRange(p1);
             var g = string.Join("/", aa);
@@ -359,7 +360,7 @@ namespace Lang.Php.Compiler.Source
         public override int GetHashCode()
         {
             // Good implementation suggested by Josh Bloch
-            int _hash_ = 17;
+            var _hash_ = 17;
             _hash_ = _hash_ * 31 + ((Library == (object)null) ? 0 : Library.GetHashCode());
             _hash_ = _hash_ * 31 + _name.GetHashCode();
             return _hash_;

@@ -1,4 +1,5 @@
-﻿using Lang.Cs.Compiler;
+﻿using System.Diagnostics;
+using Lang.Cs.Compiler;
 using Lang.Cs.Compiler.Sandbox;
 using Lang.Php.Compiler.Source;
 using Lang.Php;
@@ -49,7 +50,7 @@ namespace Lang.Php.Compiler.Translator.Node
             if (src.IsDelegate)
                 return _Delegate(ctx, src);
 
-            if (src.MethodInfo.DeclaringType == typeof(Lang.Php.Html))
+            if (src.MethodInfo.DeclaringType == typeof(Html))
             {
                 var tmp = new Lang__Php__Html__Methods().TranslateToPhp(ctx, src);
                 if (tmp != null)
@@ -124,7 +125,7 @@ namespace Lang.Php.Compiler.Translator.Node
                 if (b == null)
                     throw new NotImplementedException();
                 if (b.Expression is PhpParenthesizedExpression)
-                    System.Diagnostics.Debug.Write("");
+                    Debug.Write("");
                 if (skipRefIndexList != null && skipRefIndexList.Contains(parameterIdx))
                     b.ByRef = false;
                 dstMethod.Arguments.Add(b);

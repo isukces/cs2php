@@ -1,4 +1,5 @@
-﻿using Lang.Cs.Compiler;
+﻿using System.Diagnostics;
+using Lang.Cs.Compiler;
 using Lang.Php.Compiler.Source;
 using System;
 using System.Collections.Generic;
@@ -155,7 +156,7 @@ namespace Lang.Php.Compiler
             FieldTranslationInfo fti;
             if (_fieldTranslations.TryGetValue(fieldInfo, out fti)) return fti;
             if (fieldInfo.Name == "PHP_EOL")
-                System.Diagnostics.Debug.Write("");
+                Debug.Write("");
             fti = _fieldTranslations[fieldInfo] = FieldTranslationInfo.FromFieldInfo(fieldInfo, this);
             if (OnTranslationInfoCreated != null)
                 OnTranslationInfoCreated(this, new TranslationInfoCreatedEventArgs

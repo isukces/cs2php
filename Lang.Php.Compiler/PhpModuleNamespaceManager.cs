@@ -31,7 +31,7 @@ namespace Lang.Php.Compiler
 
         private static Item GetItemForNamespace(List<Item> list, PhpNamespace name)
         {
-            Item item = list.Any() ? list.Last() : null;
+            var item = list.Any() ? list.Last() : null;
             if (item == null || item.Name != name)
             {
                 item = new Item(name);
@@ -61,7 +61,7 @@ namespace Lang.Php.Compiler
             if (statement is PhpNamespaceStatement)
             {
                 var tmp = statement as PhpNamespaceStatement;
-                Item item = GetItemForNamespace(container, tmp.Name);
+                var item = GetItemForNamespace(container, tmp.Name);
                 item.Items.AddRange(tmp.Code.Statements);
             }
             else if (statement is PhpClassDefinition)
@@ -69,12 +69,12 @@ namespace Lang.Php.Compiler
                 var tmp = statement as PhpClassDefinition;
                 if (tmp.IsEmpty)
                     return;
-                Item item = GetItemForNamespace(container, tmp.Name.Namespace);
+                var item = GetItemForNamespace(container, tmp.Name.Namespace);
                 item.Items.Add(statement);
             }
             else
             {
-                Item item = GetItemForNamespace(container, PhpNamespace.Root);
+                var item = GetItemForNamespace(container, PhpNamespace.Root);
                 item.Items.Add(statement);
             }
         }
@@ -93,7 +93,7 @@ namespace Lang.Php.Compiler
             public Item(PhpNamespace Name)
             {
                 this.Name = Name;
-                this.Items = new List<IEmitable>(); ;
+                Items = new List<IEmitable>(); ;
             }
 
             #endregion Constructors

@@ -30,7 +30,7 @@ namespace Lang.Php.Compiler.Source
         public override void Emit(PhpSourceCodeEmiter emiter, PhpSourceCodeWriter writer, PhpEmitStyle style)
         {
             style = style ?? new PhpEmitStyle();
-            string header = string.Format("while({0})", _condition.GetPhpCode(style));
+            var header = string.Format("while({0})", _condition.GetPhpCode(style));
             EmitHeaderStatement(emiter, writer, style, header, _statement);
         }
 

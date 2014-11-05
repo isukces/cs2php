@@ -62,7 +62,7 @@ namespace Lang.Php
         /// </summary>
         public GlobalVariableAttribute(string GlobalVariableName)
         {
-            this.globalVariableName = GlobalVariableName;
+            globalVariableName = GlobalVariableName;
         }
 
         #endregion Constructors

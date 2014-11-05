@@ -77,13 +77,13 @@ namespace Lang.Php.Compiler
         /// </summary>
         object ICloneable.Clone()
         {
-            PhpEmitStyle myClone = new PhpEmitStyle();
-            myClone.AsIncrementor = this.AsIncrementor;
-            myClone.Brackets = this.Brackets;
-            myClone.Compression = this.Compression;
-            myClone.UseBracketsEvenIfNotNecessary = this.UseBracketsEvenIfNotNecessary;
-            myClone.CurrentNamespace = this.CurrentNamespace;
-            myClone.CurrentClass = this.CurrentClass;
+            var myClone = new PhpEmitStyle();
+            myClone.AsIncrementor = AsIncrementor;
+            myClone.Brackets = Brackets;
+            myClone.Compression = Compression;
+            myClone.UseBracketsEvenIfNotNecessary = UseBracketsEvenIfNotNecessary;
+            myClone.CurrentNamespace = CurrentNamespace;
+            myClone.CurrentClass = CurrentClass;
             return myClone;
         }
 

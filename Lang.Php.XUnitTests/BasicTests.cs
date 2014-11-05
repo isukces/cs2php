@@ -40,10 +40,10 @@ namespace Lang.Php.XUnitTests
 
                         var types = new[]
                         {
-                            typeof (System.Func<,>),
-                            typeof (Lang.Php.Compiler.EmitContext),
-                            typeof (Lang.Cs.Compiler.ThisExpression),
-                            typeof (Lang.Cs2Php.CompilerEngine)
+                            typeof (Func<,>),
+                            typeof (EmitContext),
+                            typeof (ThisExpression),
+                            typeof (CompilerEngine)
                         };
                         {
                             var tmp =

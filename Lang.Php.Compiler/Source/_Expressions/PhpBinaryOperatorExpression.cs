@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Lang.Php.Compiler.Translator;
 
 namespace Lang.Php.Compiler.Source
 {
@@ -59,7 +60,7 @@ namespace Lang.Php.Compiler.Source
             }
             if (result != null)
             {
-                var simplifier = new Lang.Php.Compiler.Translator.ExpressionSimplifier(new OptimizeOptions());
+                var simplifier = new ExpressionSimplifier(new OptimizeOptions());
                 result = simplifier.Simplify(result);
             }
             return result;
@@ -102,11 +103,11 @@ namespace Lang.Php.Compiler.Source
         /// </summary>
         public PhpBinaryOperatorExpression(string Operator, IPhpValue Left, IPhpValue Right)
         {
-            this.left = Left;
-            this.right = Right;
+            left = Left;
+            right = Right;
             if (left == null) throw new ArgumentNullException("left");
             if (right == null) throw new ArgumentNullException("right");
-            this._operator = Operator;
+            _operator = Operator;
         }
 
         #endregion Constructors

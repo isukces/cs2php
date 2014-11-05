@@ -1,4 +1,5 @@
-﻿using Lang.Cs.Compiler.Sandbox;
+﻿using Lang.Cs.Compiler;
+using Lang.Cs.Compiler.Sandbox;
 using System;
 using System.Linq;
 
@@ -18,7 +19,7 @@ namespace Lang.Php.Compiler.Translator
     smartClassEnd
     */
     
-    public partial class TranslationState : IExternalTranslationContext
+    public sealed partial class TranslationState : IExternalTranslationContext
     {
 		#region Methods 
 
@@ -29,7 +30,7 @@ namespace Lang.Php.Compiler.Translator
             var type = srcType;
             if (type.IsGenericType)
                 type = type.GetGenericTypeDefinition();
-            ClassReplaceInfo[] replacers = ClassReplacers.Where(i => i.SourceType == type).ToArray();
+            var replacers = ClassReplacers.Where(i => i.SourceType == type).ToArray();
             if (!replacers.Any()) return null;
             if (replacers.Length > 1)
                 throw new Exception(string.Format("wise gecko, class replacers has more than 1 replacer for {0}", type.FullName));
@@ -50,12 +51,12 @@ namespace Lang.Php.Compiler.Translator
             return _principles;
         }
 
-        IPhpValue IExternalTranslationContext.TranslateValue(Lang.Cs.Compiler.IValue srcValue)
+        IPhpValue IExternalTranslationContext.TranslateValue(IValue srcValue)
         {
             //var aa = new ExpressionSimplifier(new OptimizeOptions());
             //srcValue = aa.Simplify(srcValue);
 
-            PhpValueTranslator t = new PhpValueTranslator(this);
+            var t = new PhpValueTranslator(this);
             var g = t.TransValue(srcValue);
           
             return g;

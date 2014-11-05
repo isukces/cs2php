@@ -39,7 +39,8 @@ namespace Lang.Php.Compiler
             List<NodeTranslatorBound> x;
             if (!_items.TryGetValue(typeof(T), out x))
                 return null;
-            var hh = x.OrderBy(i => i.Priority).ToArray();
+            var hh = x.OrderBy(GetNodeTranslatorBoundPriority).ToArray();
+            // ReSharper disable once LoopCanBeConvertedToQuery
             foreach (var i in hh)
             {
                 var y = i.Translate(ctx, node);
@@ -47,6 +48,12 @@ namespace Lang.Php.Compiler
                     return y;
             }
             return null;
+        }
+
+        private static int? GetNodeTranslatorBoundPriority(NodeTranslatorBound i)
+        {
+            // use this named method insead of lambda for performace reasons
+            return i.Priority;
         }
 
         #endregion Methods

@@ -13,8 +13,8 @@ namespace Lang.Php.Compiler.Source
         {
             if ((a is IPhpValue || a == null) && (b is IPhpValue || b == null))
             {
-                string codeA = a == null ? "" : (a as IPhpValue).GetPhpCode(null);
-                string codeB = a == null ? "" : (b as IPhpValue).GetPhpCode(null);
+                var codeA = a == null ? "" : (a as IPhpValue).GetPhpCode(null);
+                var codeB = a == null ? "" : (b as IPhpValue).GetPhpCode(null);
                 return codeA == codeB;
             }
             if (a == null && b == null) return true;
@@ -26,7 +26,7 @@ namespace Lang.Php.Compiler.Source
             if (a == null && b == null) return true;
             if (a == null || b == null) return false;
             if (a.Length != b.Length) return false;
-            for (int i = 0; i < a.Length; i++)
+            for (var i = 0; i < a.Length; i++)
                 if (!EqualCode(a[i], b[i]))
                     return false;
             return true;
@@ -36,7 +36,7 @@ namespace Lang.Php.Compiler.Source
             if (a == null && b == null) return true;
             if (a == null || b == null) return false;
             if (a.Count != b.Count) return false;
-            for (int i = 0; i < a.Count; i++)
+            for (var i = 0; i < a.Count; i++)
                 if (!EqualCode(a[i], b[i]))
                     return false;
             return true;

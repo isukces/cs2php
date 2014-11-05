@@ -21,11 +21,11 @@ namespace Lang.Cs.Compiler
 
     }
 
-    partial class ConstValue
+    sealed partial class ConstValue
     {
         public override string ToString()
         {
-            if (this.myValue == null)
+            if (myValue == null)
                 return "null";
             if (myValue is string)
                 return "\"" + myValue + "\"";
@@ -42,11 +42,11 @@ namespace Lang.Cs.Compiler
             }
         }
     }
-    partial class FunctionArgument
+    sealed partial class FunctionArgument
     {
         public override string ToString()
         {
-            return string.Format("{0} {1}", this.refOrOutKeyword, myValue).Trim();
+            return string.Format("{0} {1}", refOrOutKeyword, myValue).Trim();
         }
         Type IValue.ValueType
         {
@@ -61,7 +61,7 @@ namespace Lang.Cs.Compiler
         }
     }
 
-    partial class InvocationExpression
+    sealed partial class InvocationExpression
     {
         public override string ToString()
         {
@@ -73,11 +73,11 @@ namespace Lang.Cs.Compiler
         }
     }
 
-    partial class MemberAccessExpression
+    sealed partial class MemberAccessExpression
     {
         public override string ToString()
         {
-            return string.Format("{0}.{1}", this.Expression, this.memberName);
+            return string.Format("{0}.{1}", Expression, memberName);
         }
 
         Type IValue.ValueType
@@ -150,12 +150,12 @@ namespace Lang.Cs.Compiler
         {
             get
             {
-                return this.type.DotnetType;
+                return type.DotnetType;
             }
         }
         public override string ToString()
         {
-            return this.name;
+            return name;
         }
     }
 
@@ -187,7 +187,7 @@ namespace Lang.Cs.Compiler
     {
         Type IValue.ValueType
         {
-            get { return this.type.DotnetType; }
+            get { return type.DotnetType; }
         }
         public override string ToString()
         {
@@ -209,7 +209,7 @@ namespace Lang.Cs.Compiler
     {
         public bool Has(string x)
         {
-            return this.items.Where(u => u == x).Any();
+            return items.Where(u => u == x).Any();
         }
         public override string ToString()
         {
@@ -238,7 +238,7 @@ namespace Lang.Cs.Compiler
         }
     }
 
-    partial class CsharpMethodCallExpression
+    sealed partial class CsharpMethodCallExpression
     {
         Type IValue.ValueType
         {
@@ -254,7 +254,7 @@ namespace Lang.Cs.Compiler
                     rank = rt.GetArrayRank();
                     rt = rt.GetElementType();
                 }
-                var b = this.methodInfo.GetGenericArguments();
+                var b = methodInfo.GetGenericArguments();
                 for (int i = 0; i < b.Length; i++)
                 {
                     if (rt == b[i])
@@ -286,7 +286,7 @@ namespace Lang.Cs.Compiler
     {
         public override string ToString()
         {
-            return string.Format("{0} {1};", this.type, string.Join(", ", this.declarators.Select(i => i.ToString())));
+            return string.Format("{0} {1};", type, string.Join(", ", declarators.Select(i => i.ToString())));
         }
     }
 
@@ -312,8 +312,8 @@ namespace Lang.Cs.Compiler
         }
         public override string ToString()
         {
-            if (this.optionalGenericTypes == null || optionalGenericTypes.Length == 0)
-                return this.identifier;
+            if (optionalGenericTypes == null || optionalGenericTypes.Length == 0)
+                return identifier;
             return string.Format("{0}<{1}>", identifier, string.Join(",", optionalGenericTypes as IEnumerable<IValue>));
         }
     }
@@ -341,7 +341,7 @@ namespace Lang.Cs.Compiler
         }
         public override string ToString()
         {
-            return string.Format("({0})", this.expression);
+            return string.Format("({0})", expression);
         }
     }
 
@@ -406,7 +406,7 @@ namespace Lang.Cs.Compiler
         {
             get
             {
-                return this.dotnetType;
+                return dotnetType;
 
             }
         }
@@ -447,7 +447,7 @@ namespace Lang.Cs.Compiler
 
         public Type ValueType
         {
-            get { return this.arrayType; }
+            get { return arrayType; }
         }
     }
     public partial class LambdaExpression : IValue
@@ -499,7 +499,7 @@ namespace Lang.Cs.Compiler
         {
             if (isDefault)
                 return "default";
-            return this.expression.ToString();
+            return expression.ToString();
         }
     }
 }

@@ -14,7 +14,7 @@ namespace Lang.Php.Compiler.Source
 
         public override void Emit(PhpSourceCodeEmiter emiter, PhpSourceCodeWriter writer, PhpEmitStyle style)
         {
-            EmitStyleCompression s = style == null ? EmitStyleCompression.Beauty : style.Compression;
+            var s = style == null ? EmitStyleCompression.Beauty : style.Compression;
             if (s == EmitStyleCompression.NearCrypto)
                 writer.Write("continue;");
             else

@@ -64,7 +64,7 @@ namespace Lang.Php.Compiler.Source
         {
             style = style ?? new PhpEmitStyle();
             var arrayOperator = style.Compression == EmitStyleCompression.Beauty ? " => " : "=>";
-            string header = OneVariable ? "foreach({0} as {3})" : "foreach({0} as {1}{2}{3})";
+            var header = OneVariable ? "foreach({0} as {3})" : "foreach({0} as {1}{2}{3})";
             header = string.Format(header,
                 collection.GetPhpCode(style),
                 keyVarname, arrayOperator, valueVarname);
