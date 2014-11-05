@@ -50,7 +50,7 @@ namespace Lang.Php
         [DirectCall("array_merge")]
         public static Dictionary<TKey, TValue> array_merge<TKey, TValue>(params Dictionary<TKey, TValue>[] arrays)
         {
-            Dictionary<TKey, TValue> r = new Dictionary<TKey, TValue>();
+            var r = new Dictionary<TKey, TValue>();
             foreach (var i in arrays.Where(u => u != null))
             {
                 foreach (var j in i)
@@ -281,7 +281,7 @@ namespace Lang.Php
         public static void header(string _string)
         {
             _string = (_string ?? "");
-            int i = _string.IndexOf(':');
+            var i = _string.IndexOf(':');
             if (i < 0)
                 return; // just ignore;
             var key = _string.Substring(0, i);
@@ -524,23 +524,21 @@ namespace Lang.Php
         }
 
         [DirectCall("preg_match")]
-        public static int preg_match(string pattern, string subject)
+        public static PregMatchResult preg_match(string pattern, string subject)
         {
             var delimiter = pattern[0];
             var i = pattern.LastIndexOf(delimiter);
-            var _pattern = pattern.Substring(1, i - 1);
-            var _options = pattern.Substring(i + 1);
-            if (_options != "")
+            var pattern1 = pattern.Substring(1, i - 1);
+            var options = pattern.Substring(i + 1);
+            if (options != "")
                 throw new NotImplementedException();
-            Regex re = new Regex(_pattern);
-            if (re.IsMatch(subject))
-                return 1;
-            return 0;
+            var re = new Regex(pattern1);
+            return re.IsMatch(subject) ? PregMatchResult.Success : PregMatchResult.Fail;
             // string pattern , string subject [, array &$matches [, int $flags = 0 [, int $offset = 0 ]]] 
         }
 
-        [DirectCall("preg_match")]
-        public static int preg_match(string pattern, string subject, out Dictionary<object, string> matches)
+        [DirectCall("preg_match", SkipRefOrOut = "matches")]
+        public static PregMatchResult preg_match(string pattern, string subject, out Dictionary<object, string> matches)
         {
             throw new NotImplementedException();
             // string pattern , string subject [, array &$matches [, int $flags = 0 [, int $offset = 0 ]]] 

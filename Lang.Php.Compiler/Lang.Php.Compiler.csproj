@@ -133,6 +133,7 @@
     <Compile Include="Translator\Node\StringBuilderTranslator.cs" />
     <Compile Include="Translator\Node\StringExtensionsTranslator.cs" />
     <Compile Include="Translator\Node\TimeSpanTranslator.cs" />
+    <Compile Include="Translator\PregTranslator.cs" />
     <Compile Include="Translator\StatementSimplifier.cs" />
     <Compile Include="AppConfigManipulator.cs" />
     <Compile Include="_CodeRequests\ClassCodeRequest.cs" />
@@ -262,7 +263,7 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties BuildVersion_StartDate="2000/1/1" BuildVersion_UpdateFileVersion="True" BuildVersion_UpdateAssemblyVersion="True" BuildVersion_BuildVersioningStyle="None.None.DeltaBaseDateInDays.Increment" />
+      <UserProperties BuildVersion_BuildVersioningStyle="None.None.DeltaBaseDateInDays.Increment" BuildVersion_UpdateAssemblyVersion="True" BuildVersion_UpdateFileVersion="True" BuildVersion_StartDate="2000/1/1" />
     </VisualStudio>
   </ProjectExtensions>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

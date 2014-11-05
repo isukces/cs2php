@@ -63,7 +63,7 @@ namespace Lang.Php.Compiler.Translator.Node
                 var directCallAttribute = src.Info.GetCustomAttributes<DirectCallAttribute>().FirstOrDefault();
                 if (directCallAttribute == null) return null;
                 var result = DotnetMethodCallTranslator.CreateExpressionFromDirectCallAttribute(
-                    ctx, directCallAttribute, null, src.Arguments);
+                    ctx, directCallAttribute, null, src.Arguments, src.Info);
                 return result;
             }
         }

@@ -23,7 +23,7 @@ namespace Lang.Php.Compiler.Translator.Node
         {
             if (src.TargetObject == null)
                 throw new NotSupportedException();
-            var args = new List<IPhpValue> {ctx.TranslateValue(src.TargetObject)};
+            var args = new List<IPhpValue> { ctx.TranslateValue(src.TargetObject) };
             foreach (var i in src.Arguments)
                 args.Add(ctx.TranslateValue(i.MyValue));
 
@@ -59,7 +59,7 @@ namespace Lang.Php.Compiler.Translator.Node
             src = SubstituteByReplacerMethod(ctx, src);
             #region Konwersja atrybutami
             {
-                IPhpValue value = Try_DirectCallAttribute(ctx, src);
+                var value = Try_DirectCallAttribute(ctx, src);
                 if (value != null)
                     return value;
                 value = Try_UseExpressionAttribute(ctx, src);
@@ -81,7 +81,7 @@ namespace Lang.Php.Compiler.Translator.Node
                     phpMethod.SetClassName(a, mti);
                 }
                 phpMethod.TargetObject = ctx.TranslateValue(src.TargetObject);
-                CopyArguments(ctx, src.Arguments, phpMethod);
+                CopyArguments(ctx, src.Arguments, phpMethod, null);
 
                 if (cti.DontIncludeModuleForClassMembers)
                     phpMethod.DontIncludeClass = true;
@@ -114,9 +114,10 @@ namespace Lang.Php.Compiler.Translator.Node
         }
         // Private Methods 
 
-        private static void CopyArguments(IExternalTranslationContext ctx, IEnumerable<FunctionArgument> srcParameters, PhpMethodCallExpression dstMethod)
+        private static void CopyArguments(IExternalTranslationContext ctx, IEnumerable<FunctionArgument> srcParameters, PhpMethodCallExpression dstMethod, List<int> skipRefIndexList)
         {
-            foreach (FunctionArgument functionArgument in srcParameters)
+            var parameterIdx = 0;
+            foreach (var functionArgument in srcParameters)
             {
                 var a = ctx.TranslateValue(functionArgument);
                 var b = a as PhpMethodInvokeValue;
@@ -124,7 +125,10 @@ namespace Lang.Php.Compiler.Translator.Node
                     throw new NotImplementedException();
                 if (b.Expression is PhpParenthesizedExpression)
                     System.Diagnostics.Debug.Write("");
+                if (skipRefIndexList != null && skipRefIndexList.Contains(parameterIdx))
+                    b.ByRef = false;
                 dstMethod.Arguments.Add(b);
+                parameterIdx++;
             }
         }
 
@@ -139,7 +143,7 @@ namespace Lang.Php.Compiler.Translator.Node
             if (classReplacer == null)
                 return src;
             var otherClass = classReplacer.ReplaceBy;
-            BindingFlags flags = src.MethodInfo.IsStatic ? BindingFlags.Static : BindingFlags.Instance;
+            var flags = src.MethodInfo.IsStatic ? BindingFlags.Static : BindingFlags.Instance;
             var search = src.MethodInfo.ToString();
             var found = otherClass.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | flags).Where(i => i.ToString() == search).FirstOrDefault();
             if (found == null)
@@ -157,10 +161,10 @@ namespace Lang.Php.Compiler.Translator.Node
         /// <returns></returns>
         private static IPhpValue Try_DirectCallAttribute(IExternalTranslationContext ctx, CsharpMethodCallExpression src)
         {
-            DirectCallAttribute directCallAttribute = src.MethodInfo.GetDirectCallAttribute();
+            var directCallAttribute = src.MethodInfo.GetDirectCallAttribute();
             if (directCallAttribute == null)
                 return null;
-            return CreateExpressionFromDirectCallAttribute(ctx, directCallAttribute, src.TargetObject, src.Arguments);
+            return CreateExpressionFromDirectCallAttribute(ctx, directCallAttribute, src.TargetObject, src.Arguments, src.MethodInfo);
 
         }
 
@@ -173,7 +177,7 @@ namespace Lang.Php.Compiler.Translator.Node
         /// <param name="targetObject"></param>
         /// <param name="arguments"></param>
         /// <returns></returns>
-        public static IPhpValue CreateExpressionFromDirectCallAttribute(IExternalTranslationContext ctx, DirectCallAttribute directCallAttribute, IValue targetObject, FunctionArgument[] arguments)
+        public static IPhpValue CreateExpressionFromDirectCallAttribute(IExternalTranslationContext ctx, DirectCallAttribute directCallAttribute, IValue targetObject, FunctionArgument[] arguments, MethodBase methodInfo)
         {
 
             if (directCallAttribute.CallType == MethodCallStyles.Static)
@@ -193,8 +197,7 @@ namespace Lang.Php.Compiler.Translator.Node
                     return ctx.TranslateValue(targetObject);
                 }
                 //  return phpMethod.Arguments[ma[0]].Expression
-                else
-                    return ctx.TranslateValue(arguments[ma[0]].MyValue);
+                return ctx.TranslateValue(arguments[ma[0]].MyValue);
             }
             var name = directCallAttribute.Name;
 
@@ -206,11 +209,31 @@ namespace Lang.Php.Compiler.Translator.Node
                     throw new NotSupportedException("gray horse 3");
                 phpMethod.TargetObject = ctx.TranslateValue(targetObject);
             }
-            CopyArguments(ctx, arguments, phpMethod);
+
+            {
+                List<int> skipRefIndexList = null;
+                if (methodInfo != null)
+                {
+                    var skipRefOrOutArray = directCallAttribute.SkipRefOrOutArray;
+                    if (skipRefOrOutArray.Any())
+                    {
+                        var parameters = methodInfo.GetParameters();
+                        for (var index = 0; index < parameters.Length; index++)
+                        {
+                            if (!skipRefOrOutArray.Contains(parameters[index].Name)) continue;
+                            if (skipRefIndexList == null)
+                                skipRefIndexList = new List<int>();
+                            skipRefIndexList.Add(index);
+                        }
+                    }
+                }
+                CopyArguments(ctx, arguments, phpMethod, skipRefIndexList);
+            }
+
             #region Mapping
             if (directCallAttribute.HasMapping)
             {
-                PhpMethodInvokeValue[] phpArguments = phpMethod.Arguments.ToArray();
+                var phpArguments = phpMethod.Arguments.ToArray();
                 phpMethod.Arguments.Clear();
                 foreach (var argNr in directCallAttribute.MapArray)
                 {

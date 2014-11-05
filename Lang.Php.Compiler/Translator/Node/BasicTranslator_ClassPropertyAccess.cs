@@ -38,7 +38,7 @@ namespace Lang.Php.Compiler.Translator.Node
             //ctx.GetTranslationInfo().GetOrMakeTranslationInfo(src.Member);
             if (!pti.GetSetByMethod)
             {
-                var fieldAccessExpression = new PhpClassFieldAccessExpression()
+                var fieldAccessExpression = new PhpClassFieldAccessExpression
                 {
                     FieldName = pti.FieldScriptName
                 };
@@ -48,7 +48,7 @@ namespace Lang.Php.Compiler.Translator.Node
                 fieldAccessExpression.SetClassName(phpClassName, classTi);
                 return fieldAccessExpression;
             }
-            throw new NotImplementedException();
+            throw new NotImplementedException(string.Format("Unable to translate ClassPropertyAccessExpression {0}.{1}", src.Member.DeclaringType, src.Member.Name));
         }
 
         #endregion Methods

@@ -33,8 +33,8 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.1.5384.8")]
-[assembly: AssemblyFileVersion("1.1.5384.8")]
+[assembly: AssemblyVersion("1.1.14309.10")]
+[assembly: AssemblyFileVersion("1.1.14309.10")]
 
 
 [assembly: Lang.Php.RequiredTranslator("Lang.Php.Wp.Compile, Version=1.0.0.0, Culture=neutral, PublicKeyToken=98135ffa69f3e2e6")]

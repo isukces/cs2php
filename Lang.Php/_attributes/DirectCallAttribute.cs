@@ -91,6 +91,11 @@ namespace Lang.Php
             }
 
         }
+        /// <summary>
+        /// Ignore "ref" and "out" modifiers for specified members while translation. 
+        /// Comma-separated list of member names is allowed here.
+        /// </summary>
+        public string SkipRefOrOut { get; set; }
 
         public ClassMembers MemberToCall { get; private set; }
 
@@ -102,5 +107,15 @@ namespace Lang.Php
         public int OutNr { get; private set; }
 
         #endregion Properties
+
+        public string[] SkipRefOrOutArray
+        {
+            get
+            {
+                return string.IsNullOrEmpty(SkipRefOrOut)
+                    ? new string[0]
+                    : SkipRefOrOut.Split(',').Select(i => i.Trim()).Distinct().ToArray();
+            }
+        }
     }
 }

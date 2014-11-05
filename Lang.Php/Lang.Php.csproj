@@ -188,6 +188,7 @@
       <LastGenOutput>UnixFilePermissions.cs</LastGenOutput>
     </None>
     <Compile Include="_exceptions\MockMethodException.cs" />
+    <Compile Include="_Regex\PregMatchResult.cs" />
     <Compile Include="_ResponseHeader\ResponseHeader.cs" />
     <Compile Include="_Server.cs" />
   </ItemGroup>
@@ -213,7 +214,7 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties BuildVersion_BuildVersioningStyle="None.None.DeltaBaseDateInDays.Increment" BuildVersion_UpdateAssemblyVersion="True" BuildVersion_UpdateFileVersion="True" BuildVersion_StartDate="2000/1/1" />
+      <UserProperties BuildVersion_StartDate="2000/1/1" BuildVersion_UpdateFileVersion="True" BuildVersion_UpdateAssemblyVersion="True" BuildVersion_BuildVersioningStyle="None.None.DeltaBaseDateInDays.Increment" />
     </VisualStudio>
   </ProjectExtensions>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
