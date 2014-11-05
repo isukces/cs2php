@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.30501.0
+VisualStudioVersion = 12.0.30723.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lang.Php", "Lang.PHP\Lang.Php.csproj", "{ED717576-B7B9-4775-8236-1855E20E52D5}"
 EndProject
@@ -46,6 +46,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "E05_Firebird", "_Examples\E05_Firebird\E05_Firebird.csproj", "{4F044D55-BD37-4AE9-9766-ABDFEA2666BC}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WP01_BasicFeatures", "_Examples\WP01_BasicFeatures\WP01_BasicFeatures.csproj", "{4B118B73-ED81-45E8-B335-F7EB6C3EF231}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "E06_Regex", "_Examples\E06_Regex\E06_Regex.csproj", "{279B2D30-0536-4FD5-979B-1596D124FA0F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -121,6 +123,10 @@ Global
 		{4B118B73-ED81-45E8-B335-F7EB6C3EF231}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4B118B73-ED81-45E8-B335-F7EB6C3EF231}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4B118B73-ED81-45E8-B335-F7EB6C3EF231}.Release|Any CPU.Build.0 = Release|Any CPU
+		{279B2D30-0536-4FD5-979B-1596D124FA0F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{279B2D30-0536-4FD5-979B-1596D124FA0F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{279B2D30-0536-4FD5-979B-1596D124FA0F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{279B2D30-0536-4FD5-979B-1596D124FA0F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -143,5 +149,6 @@ Global
 		{4B7F2DC2-2B7A-495D-A309-5E1976595C5C} = {90BEC0DE-D2CA-4168-9E45-5D842B79B58B}
 		{4F044D55-BD37-4AE9-9766-ABDFEA2666BC} = {90BEC0DE-D2CA-4168-9E45-5D842B79B58B}
 		{4B118B73-ED81-45E8-B335-F7EB6C3EF231} = {90BEC0DE-D2CA-4168-9E45-5D842B79B58B}
+		{279B2D30-0536-4FD5-979B-1596D124FA0F} = {90BEC0DE-D2CA-4168-9E45-5D842B79B58B}
 	EndGlobalSection
 EndGlobal
