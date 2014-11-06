@@ -17,6 +17,17 @@ namespace Lang.Php.Test.Code
             var d = (a + b) / Math.PI;
         }
 
+        public static void PregTest()
+        {
+            Dictionary<object, PregMatchWithOffset> matchWithOffsets;
+            Dictionary<object, string> matches;
+            var a = Preg.Match("/hello/i", "a Hello x", out matches, 2);
+            var b = Preg.Match("/hello/i", "a Hello x");
+            var c = Preg.MatchWithOffset("/hello/i", "ó Hello world", out matchWithOffsets);
+            PhpDummy.echo("We have " + matchWithOffsets[0].Value + " at " + matchWithOffsets[0].Offset);
+
+        }
+
         public static void CostantsAndVariables()
         {
             object a = null;
@@ -27,7 +38,7 @@ namespace Lang.Php.Test.Code
             string jacob = @"\anything";
 
             var x = "test {h}";
-        }        
+        }
 
         public static void Collections()
         {
@@ -63,13 +74,13 @@ namespace Lang.Php.Test.Code
             int x = 3;
             var a = "a" + "b";
             var b = "a" + (x / 2 < 10 ? "b" : "c");
-            var c = "a" + (x/2 < 10 ? "b" : "c") + "d";
+            var c = "a" + (x / 2 < 10 ? "b" : "c") + "d";
         }
 
         public static void SimpleEquations()
         {
-            
+
         }
- 
+
     }
 }

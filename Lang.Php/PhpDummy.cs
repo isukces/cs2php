@@ -525,24 +525,17 @@ namespace Lang.Php
         }
 
         [DirectCall("preg_match")]
+        [Obsolete("Use Preg.Match method")]
         public static PregMatchResult preg_match(string pattern, string subject)
         {
-            var delimiter = pattern[0];
-            var i = pattern.LastIndexOf(delimiter);
-            var pattern1 = pattern.Substring(1, i - 1);
-            var options = pattern.Substring(i + 1);
-            if (options != "")
-                throw new NotImplementedException();
-            var re = new Regex(pattern1);
-            return re.IsMatch(subject) ? PregMatchResult.Success : PregMatchResult.Fail;
-            // string pattern , string subject [, array &$matches [, int $flags = 0 [, int $offset = 0 ]]] 
+            return Preg.Match(pattern, subject);
         }
 
+        [Obsolete("Use Preg.Match method")]
         [DirectCall("preg_match", SkipRefOrOut = "matches")]
         public static PregMatchResult preg_match(string pattern, string subject, out Dictionary<object, string> matches)
         {
-            throw new NotImplementedException();
-            // string pattern , string subject [, array &$matches [, int $flags = 0 [, int $offset = 0 ]]] 
+            return Preg.Match(pattern, subject, out matches);
         }
 
         [DirectCall("preg_replace")]

@@ -97,6 +97,9 @@
   <ItemGroup>
     <EmbeddedResource Include="php\module-Lang_Php_Test_Code_IncludeShouldNotIncludeOther.txt" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="php\MyCodePhp_PregTest.txt" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
     <VisualStudio>

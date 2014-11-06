@@ -1,0 +1,6 @@
+public static function PregTest() {
+    $a = preg_match('/hello/i', 'a Hello x', $matches, 2);
+    $b = preg_match('/hello/i', 'a Hello x');
+    $c = preg_match('/hello/i', 'ó Hello world', $matchWithOffsets, PREG_OFFSET_CAPTURE);
+    echo 'We have ' . $matchWithOffsets[0][0] . ' at ' . $matchWithOffsets[0][1];
+}
