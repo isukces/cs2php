@@ -106,7 +106,6 @@
     <Compile Include="PhpMath.cs" />
     <Compile Include="PhpDummy.cs" />
     <Compile Include="PhpString.cs" />
-    <Compile Include="Runtime\HttpRequest.cs" />
     <Compile Include="Runtime\HttpResponse.cs" />
     <Compile Include="Runtime\PhpStringBuilder.cs" />
     <Compile Include="Runtime\PhpValues.cs" />
@@ -165,7 +164,6 @@
     <Compile Include="OutputCallbackDelegates.cs" />
     <Compile Include="_enums\PathInfoOptions.cs" />
     <Compile Include="_Files\PathInfoResult.cs" />
-    <Compile Include="Request.cs" />
     <Compile Include="Response.cs" />
     <Compile Include="Script.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -216,7 +214,7 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties BuildVersion_BuildVersioningStyle="None.None.DeltaBaseDateInDays.Increment" BuildVersion_UpdateAssemblyVersion="True" BuildVersion_UpdateFileVersion="True" BuildVersion_StartDate="2000/1/1" />
+      <UserProperties BuildVersion_StartDate="2000/1/1" BuildVersion_UpdateFileVersion="True" BuildVersion_UpdateAssemblyVersion="True" BuildVersion_BuildVersioningStyle="None.None.DeltaBaseDateInDays.Increment" />
     </VisualStudio>
   </ProjectExtensions>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

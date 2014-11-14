@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Lang.Php.Runtime
+namespace Lang.Php.Webserver
 {
 
 
@@ -33,7 +30,7 @@ namespace Lang.Php.Runtime
     property RequestUri string 
     smartClassEnd
     */
-
+    
     public partial class HttpRequest
     {
         private string ReadPart(ref string text, string separator)
@@ -60,15 +57,15 @@ namespace Lang.Php.Runtime
         {
 
             // GET / HTTP/1.1
-            method = ReadPart(ref line, " ").ToLower();
+            _method = ReadPart(ref line, " ").ToLower();
             if (string.IsNullOrEmpty(line))
                 throw new NotSupportedException();
-            requestUri = ReadPart(ref line, " ");
+            _requestUri = ReadPart(ref line, " ");
 
             {
                 // parsowanie uri
-                string txt = requestUri;
-                script = ReadPart(ref txt, "?");
+                string txt = _requestUri;
+                _script = ReadPart(ref txt, "?");
                 if (!string.IsNullOrEmpty(txt))
                 {
                     var get = ReadPart(ref txt, "#");
@@ -77,7 +74,7 @@ namespace Lang.Php.Runtime
                     {
                         var keyValue = getItem.Split('=');
                         if (keyValue.Length < 2) continue;
-                        this.get[keyValue[0]] = keyValue[1];
+                        this._get[keyValue[0]] = keyValue[1];
                     }
                 }
 
@@ -106,7 +103,7 @@ namespace Lang.Php.Runtime
                     int i1 = line.IndexOf(":");
                     if (i1 < 0)
                         throw new NotSupportedException();
-                    r.head[line.Substring(0, i1)] = line.Substring(i1 + 1).TrimStart();
+                    r._head[line.Substring(0, i1)] = line.Substring(i1 + 1).TrimStart();
 
                 }
 
@@ -130,16 +127,16 @@ namespace Lang.Php.Runtime
 
         public void Update()
         {
-            var i = script.LastIndexOf("/");
+            var i = _script.LastIndexOf("/");
             if (i < 0)
-                server.ContextPrefix = "/";
+                _server.ContextPrefix = "/";
             else
-                server.ContextPrefix = script.Substring(0, i + 1);
+                _server.ContextPrefix = _script.Substring(0, i + 1);
 
-            if (server.DocumentRoot != null)
-                server.ContextDocumentRoot = Path.Combine(
-                    server.DocumentRoot.Replace("/", "\\"),
-                    server.ContextPrefix.Substring(1).Replace("/", "\\"))
+            if (_server.DocumentRoot != null)
+                _server.ContextDocumentRoot = Path.Combine(
+                    _server.DocumentRoot.Replace("/", "\\"),
+                    _server.ContextPrefix.Substring(1).Replace("/", "\\"))
                     .Replace("\\","/")
                     ;
         }
@@ -214,12 +211,12 @@ Accept-Language: pl-PL,pl;q=0.8,en-US;q=0.6,en;q=0.4
 
 
 
-// -----:::::##### smartClass embedded code begin #####:::::----- generated 2013-11-24 22:55
-// File generated automatically ver 2013-07-10 08:43
+// -----:::::##### smartClass embedded code begin #####:::::----- generated 2014-11-14 08:52
+// File generated automatically ver 2014-09-01 19:00
 // Smartclass.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0c4d5d36fb5eb4ac
-namespace Lang.Php.Runtime
+namespace Lang.Php.Webserver
 {
-    public partial class HttpRequest
+    public partial class HttpRequest 
     {
         /*
         /// <summary>
@@ -243,31 +240,31 @@ namespace Lang.Php.Runtime
         /// <summary>
         /// Nazwa własności Method; 
         /// </summary>
-        public const string PROPERTYNAME_METHOD = "Method";
+        public const string PropertyNameMethod = "Method";
         /// <summary>
         /// Nazwa własności Head; 
         /// </summary>
-        public const string PROPERTYNAME_HEAD = "Head";
+        public const string PropertyNameHead = "Head";
         /// <summary>
         /// Nazwa własności Get; 
         /// </summary>
-        public const string PROPERTYNAME_GET = "Get";
+        public const string PropertyNameGet = "Get";
         /// <summary>
         /// Nazwa własności Post; 
         /// </summary>
-        public const string PROPERTYNAME_POST = "Post";
+        public const string PropertyNamePost = "Post";
         /// <summary>
         /// Nazwa własności Script; 
         /// </summary>
-        public const string PROPERTYNAME_SCRIPT = "Script";
+        public const string PropertyNameScript = "Script";
         /// <summary>
         /// Nazwa własności Server; 
         /// </summary>
-        public const string PROPERTYNAME_SERVER = "Server";
+        public const string PropertyNameServer = "Server";
         /// <summary>
         /// Nazwa własności RequestUri; 
         /// </summary>
-        public const string PROPERTYNAME_REQUESTURI = "RequestUri";
+        public const string PropertyNameRequestUri = "RequestUri";
         #endregion Constants
 
         #region Methods
@@ -281,60 +278,60 @@ namespace Lang.Php.Runtime
         {
             get
             {
-                return method;
+                return _method;
             }
             set
             {
                 value = (value ?? String.Empty).Trim();
-                method = value;
+                _method = value;
             }
         }
-        private string method = string.Empty;
+        private string _method = string.Empty;
         /// <summary>
         /// 
         /// </summary>
-        public Dictionary<string, object> Head
+        public Dictionary<string,object> Head
         {
             get
             {
-                return head;
+                return _head;
             }
             set
             {
-                head = value;
+                _head = value;
             }
         }
-        private Dictionary<string, object> head = new Dictionary<string, object>();
+        private Dictionary<string,object> _head = new Dictionary<string,object>();
         /// <summary>
         /// 
         /// </summary>
-        public Dictionary<string, object> Get
+        public Dictionary<string,object> Get
         {
             get
             {
-                return get;
+                return _get;
             }
             set
             {
-                get = value;
+                _get = value;
             }
         }
-        private Dictionary<string, object> get = new Dictionary<string, object>();
+        private Dictionary<string,object> _get = new Dictionary<string,object>();
         /// <summary>
         /// 
         /// </summary>
-        public Dictionary<string, object> Post
+        public Dictionary<string,object> Post
         {
             get
             {
-                return post;
+                return _post;
             }
             set
             {
-                post = value;
+                _post = value;
             }
         }
-        private Dictionary<string, object> post = new Dictionary<string, object>();
+        private Dictionary<string,object> _post = new Dictionary<string,object>();
         /// <summary>
         /// Własność jest tylko do odczytu.
         /// </summary>
@@ -342,10 +339,10 @@ namespace Lang.Php.Runtime
         {
             get
             {
-                return script;
+                return _script;
             }
         }
-        private string script = string.Empty;
+        private string _script = string.Empty;
         /// <summary>
         /// 
         /// </summary>
@@ -353,14 +350,14 @@ namespace Lang.Php.Runtime
         {
             get
             {
-                return server;
+                return _server;
             }
             set
             {
-                server = value;
+                _server = value;
             }
         }
-        private _Server server = new _Server();
+        private _Server _server = new _Server();
         /// <summary>
         /// 
         /// </summary>
@@ -368,15 +365,15 @@ namespace Lang.Php.Runtime
         {
             get
             {
-                return requestUri;
+                return _requestUri;
             }
             set
             {
                 value = (value ?? String.Empty).Trim();
-                requestUri = value;
+                _requestUri = value;
             }
         }
-        private string requestUri = string.Empty;
+        private string _requestUri = string.Empty;
         #endregion Properties
 
     }
