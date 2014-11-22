@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using Lang.Php;
+using Lang.Php.Filters;
 
 namespace Lang.Php.Test.Code
 {
@@ -38,6 +39,24 @@ namespace Lang.Php.Test.Code
             string jacob = @"\anything";
 
             var x = "test {h}";
+        }
+
+        public static void Filters()
+        {
+
+            var a = FilterVar.ValidateIp(Script.Get["ipAddress"]);
+            var b = FilterVar.ValidateIp(Script.Get["ipAddress"], IpFlags.IpV4 | IpFlags.IpV6);
+            var defaultValue = new IpOptions() { Default = "1.2.3.4" };
+            //defaultValue.Default = "255.255.255.255";
+            var c1 = FilterVar.ValidateIp(Script.Get["ipAddress"], IpFlags.IpV4 | IpFlags.IpV6, defaultValue);
+            var c = FilterVar.ValidateIp(Script.Get["ipAddress"], IpFlags.IpV4 | IpFlags.IpV6, new IpOptions { Default = "1.2.3.4" });
+
+            var d = FilterVar.ValidateBoolean(Script.Post["aaa"]);
+            var e = FilterVar.ValidateBoolean(Script.Post["aaa"], false);
+
+            var clientIp = FilterInputServer.ValidateIp( ServerVariables.HttpClientIp);
+            var other = FilterInput.ValidateIp(FilterInput.Type.Get, "Somename",IpFlags.IpV4);
+
         }
 
         public static void Collections()

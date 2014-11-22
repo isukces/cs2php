@@ -1,0 +1,12 @@
+public static function Filters() {
+    global $_GET, $_POST;
+    $a = filter_var($_GET['ipAddress'], FILTER_VALIDATE_IP);
+    $b = filter_var($_GET['ipAddress'], FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 | FILTER_FLAG_IPV6);
+    $defaultValue = array('default' => '1.2.3.4');
+    $c1 = filter_var($_GET['ipAddress'], FILTER_VALIDATE_IP, array('options' => $defaultValue, 'flags' => FILTER_FLAG_IPV4 | FILTER_FLAG_IPV6));
+    $c = filter_var($_GET['ipAddress'], FILTER_VALIDATE_IP, array('options' => array('default' => '1.2.3.4'), 'flags' => FILTER_FLAG_IPV4 | FILTER_FLAG_IPV6));
+    $d = filter_var($_POST['aaa'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+    $e = filter_var($_POST['aaa'], FILTER_VALIDATE_BOOLEAN, array('default' => false));
+    $clientIp = filter_input(INPUT_SERVER, 'HTTP_CLIENT_IP', FILTER_VALIDATE_IP);
+    $other = filter_input(INPUT_GET, 'Somename', FILTER_VALIDATE_IP, FILTER_FLAG_IPV4);
+}

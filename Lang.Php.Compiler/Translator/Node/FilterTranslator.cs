@@ -45,6 +45,20 @@ namespace Lang.Php.Compiler.Translator.Node
                       FILTER_VALIDATE_BOOLEAN,
                       options);
             }
+            if (fn == "System.String ValidateIp(Type, System.String, Lang.Php.Filters.IpFlags, Lang.Php.Filters.IpOptions)")
+            {
+                //     var other = FilterInput.ValidateIp(FilterInput.Type.Get, "Somename",IpFlags.IpV4);
+                // not tested well
+                // var options = PhpArrayCreateExpression.MakeKeyValue(
+                // new PhpConstValue("default"), ctx.TranslateValue(src.Arguments[2].MyValue));
+                var options = MakeOptionsFlags(
+                    src.Arguments.Length > 2 ? ctx.TranslateValue(src.Arguments[2]) : null,
+                    src.Arguments.Length > 3 ? ctx.TranslateValue(src.Arguments[3]) : null);
+                return Make_FilterInput(
+                     ctx.TranslateValue(src.Arguments[0]), ctx.TranslateValue(src.Arguments[1]),
+                     FILTER_VALIDATE_IP,
+                     options);
+            }
             throw new NotImplementedException();
         }
 
@@ -91,11 +105,19 @@ namespace Lang.Php.Compiler.Translator.Node
         private static IPhpValue Make_FilterVar(IPhpValue value, IPhpValue filter, IPhpValue options, IPhpValue flags = null)
         {
             // mixed filter_var ( mixed $variable [, int $filter = FILTER_DEFAULT [, mixed $options ]] )
-            var result = new PhpMethodCallExpression("filter_var",
-                value,
-                filter,
-                MakeOptionsFlags(options, flags)
-                );
+            IPhpValue result;
+            if (options != null || flags != null)
+                result = new PhpMethodCallExpression("filter_var",
+                    value,
+                    filter,
+                    MakeOptionsFlags(options, flags)
+                    );
+            else
+                result = new PhpMethodCallExpression("filter_var",
+                    value,
+                    filter
+                    );
+
             return result;
         }
 
@@ -105,7 +127,8 @@ namespace Lang.Php.Compiler.Translator.Node
             v.Add(new PhpDefinedConstExpression("INPUT_SERVER", null));
             v.Add(ctx.TranslateValue(src.Arguments[0]));
             v.Add(new PhpConstValue(filter));
-            v.Add(ctx.TranslateValue(src.Arguments[1]));
+            if (src.Arguments.Length > 1)
+                v.Add(ctx.TranslateValue(src.Arguments[1]));
 
             if (src.Arguments.Length > 2)
                 v.Add(ctx.TranslateValue(src.Arguments[2]));
@@ -179,12 +202,15 @@ namespace Lang.Php.Compiler.Translator.Node
             if (fn == "System.String ValidateIp(System.Object, Lang.Php.Filters.IpFlags, Lang.Php.Filters.IpOptions)")
             {
                 IPhpValue flags = null;
+                IPhpValue def = null;
                 if (src.Arguments.Length > 1)
                     flags = ctx.TranslateValue(src.Arguments[1].MyValue);
+                if (src.Arguments.Length > 2)
+                    def = ctx.TranslateValue(src.Arguments[2].MyValue);
                 return Make_FilterVar(
                      ctx.TranslateValue(src.Arguments[0].MyValue),
                      FILTER_VALIDATE_IP,
-                     null,
+                     def,
                      flags);
                 //PhpArrayCreateExpression.MakeKeyValue(
                 //new PhpConstValue("default"), 

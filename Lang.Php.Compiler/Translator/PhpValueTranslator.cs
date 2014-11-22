@@ -630,6 +630,16 @@ namespace Lang.Php.Compiler.Translator
         protected override IPhpValue VisitMethodCallExpression(CsharpMethodCallExpression src)
         {
             var x = state.Principles.NodeTranslators.Translate(state, src);
+            if (x is PhpMethodCallExpression)
+            {
+                var t = (PhpMethodCallExpression)x;
+                if (t.Arguments != null && t.Arguments.Any())
+                {
+                    foreach (var i in t.Arguments)
+                        if (i.Expression == null)
+                            throw new Exception("Invalid translation");
+                }
+            }
             if (x != null)
                 return SimplifyPhpExpression(x);
             state.Principles.NodeTranslators.Translate(state, src);

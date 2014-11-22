@@ -100,6 +100,9 @@
   <ItemGroup>
     <EmbeddedResource Include="php\MyCodePhp_PregTest.txt" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="php\MyCodePhp_Filters.txt" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
     <VisualStudio>

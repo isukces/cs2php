@@ -860,6 +860,8 @@ namespace Lang.Cs.Compiler.Visitors
 
         FunctionArgument[] _internalVisitArgumentList(BaseArgumentListSyntax list)
         {
+            if (list  == null)
+                return new FunctionArgument[0];
             var aa = list.Arguments.Select(i => Visit(i) as FunctionArgument).ToArray();
 #if DEBUG
             Debug.Assert(aa.Where(i => i == null).Count() == 0);
