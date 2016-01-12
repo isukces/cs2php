@@ -3,6 +3,8 @@ cs2php
 
 C# to PHP compiler package
 
+There is only short description of the project. Please read http://www.cs2php.com/how-to-begin.htm before you start using cs2php.
+
 ###Translate existing C# code into native PHP code###
 
 Three scenarios have been prepared for translation process:
