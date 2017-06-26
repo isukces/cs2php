@@ -2,13 +2,10 @@
 {
     public struct PregMatchResult
     {
-        #region Fields
-
-        private readonly int _value;
-
-        #endregion Fields
-
-        #region Properties
+        private PregMatchResult(int value)
+        {
+            _value = value;
+        }
 
 
         internal static PregMatchResult Error
@@ -19,6 +16,11 @@
         internal static PregMatchResult Fail
         {
             get { return new PregMatchResult(0); }
+        }
+
+        internal static PregMatchResult Success
+        {
+            get { return new PregMatchResult(1); }
         }
 
 
@@ -40,20 +42,6 @@
             get { return _value == 1; }
         }
 
-        internal static PregMatchResult Success
-        {
-            get { return new PregMatchResult(1); }
-        }
-
-        #endregion Properties
-
-        #region Methods
-
-        private PregMatchResult(int value)
-        {
-            _value = value;
-        }
-
-        #endregion Methods
+        private readonly int _value;
     }
 }

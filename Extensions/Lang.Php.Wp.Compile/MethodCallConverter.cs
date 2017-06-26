@@ -36,7 +36,7 @@ namespace Lang.Php.Wp.Compile
         {
             var methodName = src.MethodInfo.Name;
             WpTags tag;
-            if (Enum.TryParse<WpTags>(methodName, out tag))
+            if (Enum.TryParse(methodName, out tag))
             {
                 var tt = typeof(WpTags);
                 var methodCallExpression = new PhpMethodCallExpression("add_filter");

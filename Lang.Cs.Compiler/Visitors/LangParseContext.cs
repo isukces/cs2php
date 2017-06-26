@@ -468,7 +468,7 @@ namespace Lang.Cs.Compiler.Visitors
 
                         switch (type.TypeKind)
                         {
-                            case TypeKind.ArrayType:
+                            case TypeKind.Array:
                                 {
                                     var arrayTypeSymbol = type as IArrayTypeSymbol;
                                     var elementType = Roslyn_ResolveType(arrayTypeSymbol.ElementType);

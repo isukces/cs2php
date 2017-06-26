@@ -188,8 +188,10 @@ namespace Lang.Cs.Compiler.Visitors
 
         protected override IValue VisitCaseSwitchLabel(SwitchLabelSyntax node)
         {
-            var value = Visit(node.Value);
-            return new CsharpSwichLabel(value, false);
+            // todo: update
+            throw new NotImplementedException();
+            //var value = Visit(node.Value);
+            //return new CsharpSwichLabel(value, false);
         }
 
         protected override IValue VisitCastExpression(CastExpressionSyntax node)
@@ -513,7 +515,7 @@ namespace Lang.Cs.Compiler.Visitors
         protected override IValue VisitLogicalNotExpression(PrefixUnaryExpressionSyntax node)
         {
             var operand = Visit(node.Operand);
-            Debug.Assert(node.OperatorToken.CSharpKind() == SyntaxKind.ExclamationToken);
+            Debug.Assert(node.OperatorToken.Kind() == SyntaxKind.ExclamationToken);
             Type t;
             if (operand.ValueType == typeof(bool))
                 t = operand.ValueType;
@@ -611,13 +613,13 @@ namespace Lang.Cs.Compiler.Visitors
             {
                 if (node.Initializer != null)
                 {
-                    var _initializer = Visit(node.Initializer);
-                    if (_initializer == null)
-                        throw new ArgumentNullException("_initializer");
-                    if (_initializer is IValueTable2_PseudoValue)
-                        initializer = (_initializer as IValueTable2_PseudoValue).Items.OfType<IValue>().ToArray();
-                    else if (_initializer is IValueTable_PseudoValue)
-                        initializer = (_initializer as IValueTable_PseudoValue).Items;
+                    var initializer1 = Visit(node.Initializer);
+                    if (initializer1 == null)
+                        throw new ArgumentNullException(nameof(initializer1));
+                    if (initializer1 is IValueTable2_PseudoValue)
+                        initializer = (initializer1 as IValueTable2_PseudoValue).Items.OfType<IValue>().ToArray();
+                    else if (initializer1 is IValueTable_PseudoValue)
+                        initializer = (initializer1 as IValueTable_PseudoValue).Items;
                     else
                         throw new NotSupportedException();
                 }

@@ -114,7 +114,7 @@ namespace Lang.Php.XUnitTests
 
                 {
                     // in other cases some referenced libraries are ignored
-                    var refToRemove = comp.CSharpProject.MetadataReferences.OfType<MetadataFileReference>().ToList();
+                    var refToRemove = comp.CSharpProject.MetadataReferences.OfType<PortableExecutableReference>().ToList();
                     foreach (var i in refToRemove)
                         comp.RemoveMetadataReferences(i);
                     var ref1 = refToRemove.Select(i => i.FilePath).ToList();
@@ -138,8 +138,8 @@ namespace Lang.Php.XUnitTests
                 #endregion
 
                 foreach (var fileName in filenames)
-                {
-                    var g = new MetadataFileReference(fileName, MetadataReferenceProperties.Assembly);
+                {                    
+                    var g = MetadataReference.CreateFromFile(fileName, MetadataReferenceProperties.Assembly);
                     comp.AddMetadataReferences(g);
                     Console.WriteLine("  Add reference     {0}", g.Display);
                 }

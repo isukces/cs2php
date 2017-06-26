@@ -85,7 +85,7 @@ namespace Lang.Cs2Php
             // ReSharper disable once CSharpWarnings::CS1030
 #warning 'Be careful in LINUX'
             var files = new DirectoryInfo(ExeDir).GetFiles("*.*").ToDictionary(a => a.Name.ToLower(), a => a.FullName);
-            var metadataFileReferences = comp.CSharpProject.MetadataReferences.OfType<MetadataFileReference>()
+            var PortableExecutableReferences = comp.CSharpProject.MetadataReferences.OfType<PortableExecutableReference>()
                 .Select(
                     reference => new
                     {
@@ -96,14 +96,14 @@ namespace Lang.Cs2Php
 
 
 
-            foreach (var fileReference in metadataFileReferences)
+            foreach (var fileReference in PortableExecutableReferences)
             {
                 string fileFullName;
                 if (!files.TryGetValue(fileReference.FileShortName, out fileFullName))
                     continue;
 
                 var remove = fileReference.Reference;
-                var add = new MetadataFileReference(fileFullName, MetadataReferenceProperties.Assembly);
+                var add = MetadataReference.CreateFromFile(fileFullName, MetadataReferenceProperties.Assembly);
                 if (remove.Display == add.Display)
                     continue;
                 comp.RemoveMetadataReferences(remove);
@@ -195,7 +195,7 @@ namespace Lang.Cs2Php
             {
                 // in other cases some referenced libraries are ignored
                 var refToRemove =
-                    comp.CSharpProject.MetadataReferences.OfType<MetadataFileReference>().ToList();
+                    comp.CSharpProject.MetadataReferences.OfType<PortableExecutableReference>().ToList();
                 foreach (var i in refToRemove)
                     comp.RemoveMetadataReferences(i);
                 var ref1 = refToRemove.Select(i => i.FilePath).Union(_referenced).ToList();
@@ -207,7 +207,7 @@ namespace Lang.Cs2Php
             #endregion
 
             foreach (var fileName in filenames)
-                comp.AddMetadataReferences(new MetadataFileReference(fileName, MetadataReferenceProperties.Assembly));
+                comp.AddMetadataReferences(MetadataReference.CreateFromFile(fileName, MetadataReferenceProperties.Assembly));
 
 
             Swap(comp);

@@ -14,7 +14,7 @@ namespace Lang.Cs.Compiler.Visitors
         {
 			if (node == null)
 				return VisitNull();
-            switch (node.CSharpKind())
+            switch (node.Kind())
             {
                 case SyntaxKind.IfDirectiveTrivia:
                       return VisitIfDirectiveTrivia(node as IfDirectiveTriviaSyntax);
@@ -366,7 +366,7 @@ namespace Lang.Cs.Compiler.Visitors
                       return VisitGenericName(node as GenericNameSyntax);
                 case SyntaxKind.ForEachStatement:
                       return VisitForEachStatement(node as ForEachStatementSyntax);
-                default: throw new NotSupportedException(node.CSharpKind().ToString() + "," + node.GetType().Name);
+                default: throw new NotSupportedException($"{node.Kind()},{node.GetType().Name}");
             }
         }
 

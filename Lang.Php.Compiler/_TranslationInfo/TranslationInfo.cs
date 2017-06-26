@@ -107,7 +107,7 @@ namespace Lang.Php.Compiler
         /// <returns></returns>
         public FullInterfaceDeclaration[] GetInterfaces()
         {
-            var q = from compiled in Compiled
+               var q = from compiled in Compiled
                     from nsDeclaration in compiled.NamespaceDeclarations
                     from classDeclaration in nsDeclaration.Members.OfType<InterfaceDeclaration>()
                     let fullName = nsDeclaration.Name + "." + classDeclaration.Name

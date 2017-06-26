@@ -30,8 +30,8 @@ namespace Lang.Cs.Compiler
             // wywalili  SyntaxKind.DocumentationCommentTrivia
             var documentationCommentTrivia =
                       node.GetLeadingTrivia()
-                      .SingleOrDefault(t => t.CSharpKind() == (SyntaxKind)0/* SyntaxKind.DocumentationCommentTrivia */);
-            if (documentationCommentTrivia.CSharpKind() == SyntaxKind.None)
+                      .SingleOrDefault(t => t.Kind() == (SyntaxKind)0/* SyntaxKind.DocumentationCommentTrivia */);
+            if (documentationCommentTrivia.Kind() == SyntaxKind.None)
                 return null;
             var result = new DeclarationItemDescription();
             {

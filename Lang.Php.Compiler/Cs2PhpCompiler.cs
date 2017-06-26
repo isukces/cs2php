@@ -390,12 +390,12 @@ namespace Lang.Php.Compiler
 
         private Type[] GetKnownTypes()
         {
-
+            
             if (_compiledAssembly == null)
                 throw new Exception("Assembly is not compiled yet");
             var assemblies = _cSharpProject.MetadataReferences.Select(i =>
             {
-                var g = i as MetadataFileReference;
+                var g = i as PortableExecutableReference;
                 if (g != null)
                     return _sandbox.LoadByFullFilename(g.FilePath).WrappedAssembly;
                 throw new NotSupportedException(i.GetType().FullName);
