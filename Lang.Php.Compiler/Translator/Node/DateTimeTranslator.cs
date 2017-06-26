@@ -166,7 +166,7 @@ namespace Lang.Php.Compiler.Translator.Node
         }
         // Private Methods 
 
-        private IPhpValue GetDatePart(IPhpValue to, string phpDatePart)
+        private static IPhpValue GetDatePart(IPhpValue to, string phpDatePart)
         {
             if (to.ToString() == "new DateTime()")
             {
@@ -183,25 +183,25 @@ namespace Lang.Php.Compiler.Translator.Node
             }
         }
 
-        IPhpValue GetIntervalString(IExternalTranslationContext ctx, IValue v, int mnoznik)
+        static IPhpValue GetIntervalString(IExternalTranslationContext ctx, IValue v, int mnoznik)
         {
-            IPhpValue iphp;
             if (v is FunctionArgument)
                 v = (v as FunctionArgument).MyValue;
 
             if (v is ConstValue)
             {
                 var vv = (v as ConstValue).MyValue;
+                IPhpValue iphp;
                 if (vv is double)
                 {
-                    var phpString = mk((double)vv * mnoznik);
+                    var phpString = Mk((double)vv * mnoznik);
                     IValue cs = new ConstValue(phpString);
                     iphp = ctx.TranslateValue(cs);
                     return iphp;
                 }
                 if (vv is int)
                 {
-                    var phpString = mk((int)vv * mnoznik);
+                    var phpString = Mk((int)vv * mnoznik);
                     IValue cs = new ConstValue(phpString);
                     iphp = ctx.TranslateValue(cs);
                     return iphp;
@@ -211,12 +211,12 @@ namespace Lang.Php.Compiler.Translator.Node
             throw new NotSupportedException();
         }
 
-        IPhpValue MakeInt(IPhpValue x)
+        static IPhpValue MakeInt(IPhpValue x)
         {
             return new PhpMethodCallExpression("intval", x);
         }
 
-        string mk(double sec)
+        static string Mk(double sec)
         {
             var sec1 = (int)Math.Round(sec);
             if (sec1 % SecPerDay == 0)
@@ -228,7 +228,7 @@ namespace Lang.Php.Compiler.Translator.Node
             return string.Format("PT{0}S", sec1);
         }
 
-        private IPhpValue TranslateAddInterval(IExternalTranslationContext ctx, CsharpMethodCallExpression src, int mnoznik)
+        private static IPhpValue TranslateAddInterval(IExternalTranslationContext ctx, CsharpMethodCallExpression src, int mnoznik)
         {
             var intervalString = GetIntervalString(ctx, src.Arguments[0], mnoznik);
             var interval = PhpMethodCallExpression.MakeConstructor("DateInterval", null, intervalString);

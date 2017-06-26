@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Lang.Php;
-
-namespace Lang.Php.Examples.HelloWorld
+﻿namespace Lang.Php.Examples.HelloWorld
 {
 
     [Page("index")]

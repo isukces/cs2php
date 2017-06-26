@@ -1,5 +1,4 @@
 ﻿#define _UNUSED
-using Lang.Cs.Compiler.Sandbox;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -418,26 +417,19 @@ namespace Lang.Cs.Compiler.Visitors
             return _OptimizeIValue(TMP);
         }
 #endif
+
         protected override object VisitMethodDeclaration(MethodDeclarationSyntax node)
         {
             // FunctionDeclarationParameter[] Parameters;
             var doc = DeclarationItemDescription.Parse(node);
-            //if (doc != null)
-            //    throw new NotSupportedException();
+            var headerInfo = context.GetMethodMethodHeaderInfo(node);
 
-
-            var methodSymbol = (IMethodSymbol)ModelExtensions.GetDeclaredSymbol(context.RoslynModel, node);
-
-
-            var mi = context.Roslyn_ResolveMethod(methodSymbol) as MethodInfo;
-            if (mi == null)
-                throw new NotSupportedException();
 
 #warning 'Zarejestrować nazwy parametrów'
             var body = Visit(node.Body) as IStatement;
 
 
-            return new MethodDeclaration(mi, body);
+            return new MethodDeclaration(headerInfo.MethodInfo, body);
 #if OLD
             Parameters = rVisit(methodSymbol.Parameters.AsEnumerable());
 
@@ -644,12 +636,12 @@ namespace Lang.Cs.Compiler.Visitors
         }
         // Private Methods 
 
-        string _Name(SyntaxToken a)
+        static string _Name(SyntaxToken a)
         {
             return a.ValueText;
         }
 
-        IValue _OptimizeIValue(IValue n)
+        static IValue _OptimizeIValue(IValue n)
         {
             n = ExpressionConverterVisitor.Visit(n);
             return n;
@@ -697,14 +689,14 @@ namespace Lang.Cs.Compiler.Visitors
             return s.Select(i => rVisit(i)).ToArray();
         }
 
-        Modifiers rVisit(RefKind refKind)
+        static Modifiers rVisit(RefKind refKind)
         {
             switch (refKind)
             {
                 case RefKind.Out:
-                    return new Modifiers(new string[] { "out" });
+                    return new Modifiers(new[] { "out" });
                 case RefKind.Ref:
-                    return new Modifiers(new string[] { "ref" });
+                    return new Modifiers(new[] { "ref" });
                 default:
                     return new Modifiers(new string[0]);
             }
@@ -777,7 +769,7 @@ namespace Lang.Cs.Compiler.Visitors
             return res.ToArray();
         }
 
-        Modifiers VisitModifiers(SyntaxTokenList mod)
+        static Modifiers VisitModifiers(SyntaxTokenList mod)
         {
             //var isStatic = mod.Where(u => u.ValueText == "static").Any();
             //var isPublic = mod.Where(u => u.ValueText == "public").Any();
@@ -793,5 +785,4 @@ namespace Lang.Cs.Compiler.Visitors
 
         #endregion Fields
     }
-
 }

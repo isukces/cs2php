@@ -1,147 +1,120 @@
-﻿using Lang.Cs.Compiler;
-using Lang.Php.Compiler.Source;
-using Lang.Php;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Lang.Cs.Compiler;
+using Lang.Php.Compiler.Source;
 
 namespace Lang.Php.Compiler.Translator.Node
 {
-    class Lang__Php__Html__Methods
+    internal class Lang__Php__Html__Methods
     {
-        #region Methods
-
         // Public Methods 
 
         public IPhpValue TranslateToPhp(IExternalTranslationContext ctx, CsharpMethodCallExpression src)
         {
             if (src.MethodInfo.DeclaringType == typeof(Html))
             {
-                this.ctx = ctx;
-                list = new List<IPhpValue>();
+                _ctx = ctx;
+                _list = new List<IPhpValue>();
                 var methodName = src.MethodInfo.Name;
                 var isecho = methodName.StartsWith("Echo");
                 if (isecho)
                     methodName = methodName.Substring(4);
-                if (methodName == "TagBound")
+                switch (methodName)
                 {
-                    FillTagOpen(2, ctx, src, ">");
-                    Append(src.Arguments[1]);
-                    FillTagEnd(src.Arguments[0]);
-                    return MakeEchoIfNecessary(isecho);
-                }
-                if (methodName == "Attributes")
-                {
-                    for (var i = 1; i < src.Arguments.Length; i += 2)
-                    {
-                        var key = src.Arguments[i - 1];
-                        var value = src.Arguments[i];
-                        Append(" ");
-                        Append(key);
-                        Append("=\"");
-                        Append(value);
-                        Append("\"");
-                    }
-                    return MakeEchoIfNecessary(isecho);
-                }
-                if (methodName == "TagOpen" || methodName == "TagSingle")
-                {
-                    var end = methodName == "TagOpen" ? ">" : " />";
-                    FillTagOpen(1, ctx, src, end);
-                    return MakeEchoIfNecessary(isecho);
-                }
-                if (methodName == "TagOpenOpen")
-                {
-                    FillTagOpen(1, ctx, src, "");
-                    return MakeEchoIfNecessary(isecho);
-                }
-                if (methodName == "TagClose")
-                {
-                    FillTagEnd(src.Arguments[0]);
-                    if (src.Arguments.Length == 2)
-                    {
+                    case "TagBound":
+                        FillTagOpen(2, ctx, src, ">");
+                        Append(src.Arguments[1]);
+                        FillTagEnd(src.Arguments[0]);
+                        return MakeEchoIfNecessary(isecho);
+                    case "Attributes":
+                        for (var i = 1; i < src.Arguments.Length; i += 2)
+                        {
+                            var key = src.Arguments[i - 1];
+                            var value = src.Arguments[i];
+                            Append(" ");
+                            Append(key);
+                            Append("=\"");
+                            Append(value);
+                            Append("\"");
+                        }
+                        return MakeEchoIfNecessary(isecho);
+                    case "TagOpen":
+                    case "TagSingle":
+                        var end = methodName == "TagOpen" ? ">" : " />";
+                        FillTagOpen(1, ctx, src, end);
+                        return MakeEchoIfNecessary(isecho);
+                    case "TagOpenOpen":
+                        FillTagOpen(1, ctx, src, "");
+                        return MakeEchoIfNecessary(isecho);
+                    case "TagClose":
+                        FillTagEnd(src.Arguments[0]);
+                        if (src.Arguments.Length == 2)
+                        {
 //                        throw new NotSupportedException();
-                        Append("\r\n");
-                    }
-                    return MakeEchoIfNecessary(isecho);
-                }
-                if (methodName == "Comment")
-                {
-                    Append("<!-- ");
-                    Append(src.Arguments[0]);
-                    Append(" -->");
-                    return MakeEchoIfNecessary(isecho);
-                }
-                if (methodName == "Pixels" || methodName == "Percent")
-                {
-                    Append(src.Arguments[0]);
-                    Append(methodName == "Pixels" ? "px" : "%");
-                    return MakeEchoIfNecessary(isecho);
-                }
-                if (methodName == "Mm")
-                {
-                    Append(src.Arguments[0]);
-                    Append("mm");
-                    return MakeEchoIfNecessary(isecho);
+                            Append("\r\n");
+                        }
+                        return MakeEchoIfNecessary(isecho);
+                    case "Comment":
+                        Append("<!-- ");
+                        Append(src.Arguments[0]);
+                        Append(" -->");
+                        return MakeEchoIfNecessary(isecho);
+                    case "Pixels":
+                    case "Percent":
+                        Append(src.Arguments[0]);
+                        Append(methodName == "Pixels" ? "px" : "%");
+                        return MakeEchoIfNecessary(isecho);
+                    case "Mm":
+                        Append(src.Arguments[0]);
+                        Append("mm");
+                        return MakeEchoIfNecessary(isecho);
+                    case "Css":
+                        for (var i = 1; i < src.Arguments.Length; i += 2)
+                        {
+                            var key = src.Arguments[i - 1];
+                            var value = src.Arguments[i];
+                            Append(key);
+                            Append(":");
+                            Append(value);
+                            Append(";");
+                        }
+                        return MakeEchoIfNecessary(isecho);
+                    case "CssBorder":
+                        Append(src.Arguments[0]);
+                        Append(" ");
+                        Append(src.Arguments[1]);
+                        Append(" ");
+                        Append(src.Arguments[2]);
+                        return MakeEchoIfNecessary(isecho);
                 }
 
-                if (methodName == "Css")
-                {
-                    for (var i = 1; i < src.Arguments.Length; i += 2)
-                    {
-                        var key = src.Arguments[i - 1];
-                        var value = src.Arguments[i];
-                        Append(key);
-                        Append(":");
-                        Append(value);
-                        Append(";");
-                    }
-                    return MakeEchoIfNecessary(isecho);
-                }
-                if (methodName == "CssBorder")
-                {
-                    Append(src.Arguments[0]);
-                    Append(" ");
-                    Append(src.Arguments[1]);
-                    Append(" ");
-                    Append(src.Arguments[2]);
-                    return MakeEchoIfNecessary(isecho);
-                }
                 throw new NotSupportedException();
             }
             return null;
-        }
-
-        private void FillTagEnd(FunctionArgument tagname)
-        {
-            Append("</");
-            Append(tagname);
-            Append(">");
         }
         // Private Methods 
 
         private IPhpValue _JoinArray()
         {
-            if (list.Count == 1)
-                return list[0];
-            var e = list[0];
-            for (var i = 1; i < list.Count; i++)
+            if (_list.Count == 1)
+                return _list[0];
+            var e = _list[0];
+            for (var i = 1; i < _list.Count; i++)
             {
-                var a = list[i];
+                var a = _list[i];
                 e = new PhpBinaryOperatorExpression(".", e, a);
             }
             return e;
         }
 
-        void Append(string text)
+        private void Append(string text)
         {
             if (string.IsNullOrEmpty(text))
                 return;
-            if (list.Count > 0 && list.Last() is PhpConstValue)
+            if (_list.Count > 0 && _list.Last() is PhpConstValue)
             {
-                var lastValue = (PhpConstValue)list.Last();
+                var lastValue = (PhpConstValue)_list.Last();
                 if (lastValue.Value is string)
                 {
                     lastValue.Value = (string)lastValue.Value + text;
@@ -153,20 +126,19 @@ namespace Lang.Php.Compiler.Translator.Node
                     return;
                 }
             }
-            list.Add(new PhpConstValue(text));
+            _list.Add(new PhpConstValue(text));
         }
 
-        void Append(FunctionArgument arg)
+        private void Append(FunctionArgument arg)
         {
-            var v = ctx.TranslateValue(arg.MyValue);
+            var v = _ctx.TranslateValue(arg.MyValue);
             Append(v);
         }
 
-        void Append(IPhpValue value)
+        private void Append(IPhpValue value)
         {
-            if (value is PhpBinaryOperatorExpression)
+            if (value is PhpBinaryOperatorExpression v1)
             {
-                var v1 = value as PhpBinaryOperatorExpression;
                 if (v1.Operator == ".")
                 {
                     Append(v1.Left);
@@ -174,9 +146,8 @@ namespace Lang.Php.Compiler.Translator.Node
                     return;
                 }
             }
-            if (value is PhpConstValue)
+            if (value is PhpConstValue vv)
             {
-                var vv = (PhpConstValue)value;
                 if (vv.Value is string)
                 {
                     Append((string)vv.Value);
@@ -194,10 +165,18 @@ namespace Lang.Php.Compiler.Translator.Node
                 Append(p);
                 return;
             }
-            list.Add(value);
+            _list.Add(value);
         }
 
-        private void FillTagOpen(int argsFrom, IExternalTranslationContext ctx, CsharpMethodCallExpression src, string end)
+        private void FillTagEnd(FunctionArgument tagname)
+        {
+            Append("</");
+            Append(tagname);
+            Append(">");
+        }
+
+        private void FillTagOpen(int argsFrom, IExternalTranslationContext ctx, CsharpMethodCallExpression src,
+            string end)
         {
             var tagName = src.Arguments[0];
             Append("<");
@@ -213,7 +192,6 @@ namespace Lang.Php.Compiler.Translator.Node
                 Append("\"");
             }
             Append(end);
-
         }
 
         private IPhpValue MakeEchoIfNecessary(bool isecho)
@@ -224,13 +202,7 @@ namespace Lang.Php.Compiler.Translator.Node
             return v;
         }
 
-        #endregion Methods
-
-        #region Fields
-
-        IExternalTranslationContext ctx;
-        List<IPhpValue> list;
-
-        #endregion Fields
+        private IExternalTranslationContext _ctx;
+        private List<IPhpValue> _list;
     }
 }

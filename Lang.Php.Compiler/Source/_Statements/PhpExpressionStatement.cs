@@ -92,7 +92,7 @@ namespace Lang.Php.Compiler.Source
         }
         // Private Methods 
 
-        IPhpValue AAA(IPhpValue x)
+        static IPhpValue Aaa(IPhpValue x)
         {
             var constExpression = x as PhpDefinedConstExpression;
             if (constExpression == null) return x;
@@ -180,7 +180,7 @@ namespace Lang.Php.Compiler.Source
                     return null;
                 foreach (var xx in methodCall.Arguments)
                     values.AddRange(ExpressionSimplifier.ExplodeConcats(xx, "."));
-                values = values.Select(AAA).ToList();
+                values = values.Select(Aaa).ToList();
 
                 #region Łączenie const string
 

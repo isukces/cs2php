@@ -1,15 +1,11 @@
 ﻿using System.Diagnostics;
 using Lang.Cs.Compiler;
-using Lang.Cs.Compiler.Sandbox;
 using Lang.Php.Compiler.Source;
-using Lang.Php;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 
 namespace Lang.Php.Compiler.Translator.Node
@@ -138,7 +134,7 @@ namespace Lang.Php.Compiler.Translator.Node
         /// </summary>
         /// <param name="src"></param>
         /// <returns></returns>
-        private CsharpMethodCallExpression SubstituteByReplacerMethod(IExternalTranslationContext ctx, CsharpMethodCallExpression src)
+        private static CsharpMethodCallExpression SubstituteByReplacerMethod(IExternalTranslationContext ctx, CsharpMethodCallExpression src)
         {
             var classReplacer = ctx.FindOneClassReplacer(src.MethodInfo.DeclaringType);
             if (classReplacer == null)
@@ -146,7 +142,7 @@ namespace Lang.Php.Compiler.Translator.Node
             var otherClass = classReplacer.ReplaceBy;
             var flags = src.MethodInfo.IsStatic ? BindingFlags.Static : BindingFlags.Instance;
             var search = src.MethodInfo.ToString();
-            var found = otherClass.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | flags).Where(i => i.ToString() == search).FirstOrDefault();
+            var found = otherClass.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | flags).FirstOrDefault(i => i.ToString() == search);
             if (found == null)
 
                 throw new Exception(string.Format("Klasa {0} nie zawiera metody lustrzanej {1}\r\nDodaj\r\n{2}", otherClass, search, src.MethodInfo.GetMethodHeader()));

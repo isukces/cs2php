@@ -1,12 +1,4 @@
-﻿using Lang.Cs.Compiler;
-using Lang.Php.Compiler;
-using Lang.Php.Compiler.Source;
-using Lang.Php;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace Lang.Php.Framework.Replacers
 {

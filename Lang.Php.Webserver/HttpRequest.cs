@@ -4,38 +4,49 @@ using System.IO;
 
 namespace Lang.Php.Webserver
 {
-
-
-    /*
-    smartClass
-    option NoAdditionalFile
-    
-    property Method string 
-    
-    property Head Dictionary<string,object> 
-    	init #
-    
-    property Get Dictionary<string,object> 
-    	init #
-    
-    property Post Dictionary<string,object> 
-    	init #
-    
-    property Script string 
-    	read only
-    
-    property Server _Server 
-    	init #
-    
-    property RequestUri string 
-    smartClassEnd
-    */
-    
-    public partial class HttpRequest
+    public class HttpRequest
     {
-        private string ReadPart(ref string text, string separator)
+        // Public Methods 
+
+        public static HttpRequest Parse(string txt)
         {
-            int idx = text.IndexOf(separator);
+            var r = new HttpRequest();
+
+            var ln = 0;
+
+            void Pl(string line)
+            {
+                if (ln++ == 0)
+                    r.ParseFirstLine(line);
+                else
+                {
+                    if (string.IsNullOrEmpty(line))
+                        return;
+                    var i1 = line.IndexOf(":");
+                    if (i1 < 0)
+                        throw new NotSupportedException();
+                    r.Head[line.Substring(0, i1)] = line.Substring(i1 + 1).TrimStart();
+                }
+            }
+
+            while (!string.IsNullOrEmpty(txt))
+            {
+                var idx = txt.IndexOf("\r\n", StringComparison.Ordinal);
+                if (idx < 0)
+                {
+                    Pl(txt);
+                    break;
+                }
+                Pl(txt.Substring(0, idx));
+                txt = txt.Substring(idx + 2);
+            }
+            r.Update();
+            return r;
+        }
+
+        private static string ReadPart(ref string text, string separator)
+        {
+            var idx = text.IndexOf(separator, StringComparison.Ordinal);
             if (idx < 0)
             {
                 var t = text;
@@ -50,12 +61,26 @@ namespace Lang.Php.Webserver
                     text = text.TrimStart();
                 return t;
             }
+        }
 
+        public void Update()
+        {
+            var i = Script.LastIndexOf("/");
+            if (i < 0)
+                Server.ContextPrefix = "/";
+            else
+                Server.ContextPrefix = Script.Substring(0, i + 1);
+
+            if (Server.DocumentRoot != null)
+                Server.ContextDocumentRoot = Path.Combine(
+                            Server.DocumentRoot.Replace("/", "\\"),
+                            Server.ContextPrefix.Substring(1).Replace("/", "\\"))
+                        .Replace("\\", "/")
+                    ;
         }
 
         private void ParseFirstLine(string line)
         {
-
             // GET / HTTP/1.1
             _method = ReadPart(ref line, " ").ToLower();
             if (string.IsNullOrEmpty(line))
@@ -64,8 +89,8 @@ namespace Lang.Php.Webserver
 
             {
                 // parsowanie uri
-                string txt = _requestUri;
-                _script = ReadPart(ref txt, "?");
+                var txt = _requestUri;
+                Script = ReadPart(ref txt, "?");
                 if (!string.IsNullOrEmpty(txt))
                 {
                     var get = ReadPart(ref txt, "#");
@@ -74,84 +99,11 @@ namespace Lang.Php.Webserver
                     {
                         var keyValue = getItem.Split('=');
                         if (keyValue.Length < 2) continue;
-                        this._get[keyValue[0]] = keyValue[1];
+                        Get[keyValue[0]] = keyValue[1];
                     }
                 }
-
             }
-
         }
-
-        #region Static Methods
-
-        // Public Methods 
-
-        public static HttpRequest Parse(string txt)
-        {
-
-            HttpRequest r = new HttpRequest();
-
-            int ln = 0;
-            Action<string> pl = (string line) =>
-            {
-                if (ln++ == 0)
-                    r.ParseFirstLine(line);
-                else
-                {
-                    if (string.IsNullOrEmpty(line))
-                        return;
-                    int i1 = line.IndexOf(":");
-                    if (i1 < 0)
-                        throw new NotSupportedException();
-                    r._head[line.Substring(0, i1)] = line.Substring(i1 + 1).TrimStart();
-
-                }
-
-            };
-
-            while (!string.IsNullOrEmpty(txt))
-            {
-                int idx = txt.IndexOf("\r\n");
-                if (idx < 0)
-                {
-                    pl(txt);
-                    break;
-                }
-                pl(txt.Substring(0, idx));
-                txt = txt.Substring(idx + 2);
-
-            }
-            r.Update();
-            return r;
-        }
-
-        public void Update()
-        {
-            var i = _script.LastIndexOf("/");
-            if (i < 0)
-                _server.ContextPrefix = "/";
-            else
-                _server.ContextPrefix = _script.Substring(0, i + 1);
-
-            if (_server.DocumentRoot != null)
-                _server.ContextDocumentRoot = Path.Combine(
-                    _server.DocumentRoot.Replace("/", "\\"),
-                    _server.ContextPrefix.Substring(1).Replace("/", "\\"))
-                    .Replace("\\","/")
-                    ;
-        }
-
-        #endregion Static Methods
-
-        public const string
- Example = @"GET / HTTP/1.1
-Host: localhost:11000
-Connection: keep-alive
-Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8
-User-Agent: Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/31.0.1650.57 Safari/537.36
-Accept-Encoding: gzip,deflate,sdch
-Accept-Language: pl-PL,pl;q=0.8,en-US;q=0.6,en;q=0.4
-";
 
         /*
 array (size=41)
@@ -197,9 +149,59 @@ array (size=41)
   'REQUEST_TIME_FLOAT' => float 1385333088.592
   'REQUEST_TIME' => int 1385333088 */
 
+
+        /// <summary>
+        /// </summary>
+        public string Method
+        {
+            get { return _method; }
+            set { _method = value?.Trim() ?? string.Empty; }
+        }
+
+        /// <summary>
+        /// </summary>
+        public Dictionary<string, object> Head { get; set; } = new Dictionary<string, object>();
+
+        /// <summary>
+        /// </summary>
+        public Dictionary<string, object> Get { get; set; } = new Dictionary<string, object>();
+
+        /// <summary>
+        /// </summary>
+        public Dictionary<string, object> Post { get; set; } = new Dictionary<string, object>();
+
+        /// <summary>
+        ///     Własność jest tylko do odczytu.
+        /// </summary>
+        public string Script { get; private set; } = string.Empty;
+
+        /// <summary>
+        /// </summary>
+        public _Server Server { get; set; } = new _Server();
+
+        /// <summary>
+        /// </summary>
+        public string RequestUri
+        {
+            get { return _requestUri; }
+            set { _requestUri = value?.Trim() ?? string.Empty; }
+        }
+
+        private string _method = string.Empty;
+        private string _requestUri = string.Empty;
+
+        public const string
+            Example = @"GET / HTTP/1.1
+Host: localhost:11000
+Connection: keep-alive
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8
+User-Agent: Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/31.0.1650.57 Safari/537.36
+Accept-Encoding: gzip,deflate,sdch
+Accept-Language: pl-PL,pl;q=0.8,en-US;q=0.6,en;q=0.4
+";
     }
-}
-/*
+
+    /*
 GET / HTTP/1.1
 Host: localhost:11000
 Connection: keep-alive
@@ -208,173 +210,4 @@ User-Agent: Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like 
 Accept-Encoding: gzip,deflate,sdch
 Accept-Language: pl-PL,pl;q=0.8,en-US;q=0.6,en;q=0.4
 */
-
-
-
-// -----:::::##### smartClass embedded code begin #####:::::----- generated 2014-11-14 08:52
-// File generated automatically ver 2014-09-01 19:00
-// Smartclass.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0c4d5d36fb5eb4ac
-namespace Lang.Php.Webserver
-{
-    public partial class HttpRequest 
-    {
-        /*
-        /// <summary>
-        /// Tworzy instancję obiektu
-        /// </summary>
-        public HttpRequest()
-        {
-        }
-
-        Przykłady użycia
-
-        implement INotifyPropertyChanged
-        implement INotifyPropertyChanged_Passive
-        implement ToString ##Method## ##Head## ##Get## ##Post## ##Script## ##Server## ##RequestUri##
-        implement ToString Method=##Method##, Head=##Head##, Get=##Get##, Post=##Post##, Script=##Script##, Server=##Server##, RequestUri=##RequestUri##
-        implement equals Method, Head, Get, Post, Script, Server, RequestUri
-        implement equals *
-        implement equals *, ~exclude1, ~exclude2
-        */
-        #region Constants
-        /// <summary>
-        /// Nazwa własności Method; 
-        /// </summary>
-        public const string PropertyNameMethod = "Method";
-        /// <summary>
-        /// Nazwa własności Head; 
-        /// </summary>
-        public const string PropertyNameHead = "Head";
-        /// <summary>
-        /// Nazwa własności Get; 
-        /// </summary>
-        public const string PropertyNameGet = "Get";
-        /// <summary>
-        /// Nazwa własności Post; 
-        /// </summary>
-        public const string PropertyNamePost = "Post";
-        /// <summary>
-        /// Nazwa własności Script; 
-        /// </summary>
-        public const string PropertyNameScript = "Script";
-        /// <summary>
-        /// Nazwa własności Server; 
-        /// </summary>
-        public const string PropertyNameServer = "Server";
-        /// <summary>
-        /// Nazwa własności RequestUri; 
-        /// </summary>
-        public const string PropertyNameRequestUri = "RequestUri";
-        #endregion Constants
-
-        #region Methods
-        #endregion Methods
-
-        #region Properties
-        /// <summary>
-        /// 
-        /// </summary>
-        public string Method
-        {
-            get
-            {
-                return _method;
-            }
-            set
-            {
-                value = (value ?? String.Empty).Trim();
-                _method = value;
-            }
-        }
-        private string _method = string.Empty;
-        /// <summary>
-        /// 
-        /// </summary>
-        public Dictionary<string,object> Head
-        {
-            get
-            {
-                return _head;
-            }
-            set
-            {
-                _head = value;
-            }
-        }
-        private Dictionary<string,object> _head = new Dictionary<string,object>();
-        /// <summary>
-        /// 
-        /// </summary>
-        public Dictionary<string,object> Get
-        {
-            get
-            {
-                return _get;
-            }
-            set
-            {
-                _get = value;
-            }
-        }
-        private Dictionary<string,object> _get = new Dictionary<string,object>();
-        /// <summary>
-        /// 
-        /// </summary>
-        public Dictionary<string,object> Post
-        {
-            get
-            {
-                return _post;
-            }
-            set
-            {
-                _post = value;
-            }
-        }
-        private Dictionary<string,object> _post = new Dictionary<string,object>();
-        /// <summary>
-        /// Własność jest tylko do odczytu.
-        /// </summary>
-        public string Script
-        {
-            get
-            {
-                return _script;
-            }
-        }
-        private string _script = string.Empty;
-        /// <summary>
-        /// 
-        /// </summary>
-        public _Server Server
-        {
-            get
-            {
-                return _server;
-            }
-            set
-            {
-                _server = value;
-            }
-        }
-        private _Server _server = new _Server();
-        /// <summary>
-        /// 
-        /// </summary>
-        public string RequestUri
-        {
-            get
-            {
-                return _requestUri;
-            }
-            set
-            {
-                value = (value ?? String.Empty).Trim();
-                _requestUri = value;
-            }
-        }
-        private string _requestUri = string.Empty;
-        #endregion Properties
-
-    }
 }

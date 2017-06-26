@@ -222,7 +222,7 @@ namespace Lang.Php.Compiler.Source
         }
         // Private Methods 
 
-        private string ProcessPath(string name, string relatedTo)
+        private static string ProcessPath(string name, string relatedTo)
         {
             var p1 = Split(name);
             var p2 = Split(relatedTo);

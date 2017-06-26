@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
-using Lang.Php;
 using Lang.Php.Filters;
 
 namespace Lang.Php.Test.Code

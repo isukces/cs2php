@@ -715,7 +715,7 @@ namespace Lang.Php.Compiler.Translator
         }
         // Private Methods 
 
-        IPhpValue SimplifyPhpExpression(IPhpValue v)
+        static IPhpValue SimplifyPhpExpression(IPhpValue v)
         {
             var s = new ExpressionSimplifier(new OptimizeOptions());
             if (v is PhpSourceBase)

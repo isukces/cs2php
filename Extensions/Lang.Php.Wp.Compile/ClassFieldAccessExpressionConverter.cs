@@ -1,12 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Lang.Php;
-using Lang.Php.Compiler;
+﻿using Lang.Php.Compiler;
 using Lang.Cs.Compiler;
-using System.Reflection;
 using Lang.Php.Compiler.Source;
 
 namespace Lang.Php.Wp.Compile

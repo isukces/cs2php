@@ -1,12 +1,8 @@
 ﻿using System.Web;
-using System.Web.UI;
 using Lang.Php.Compiler.Source;
 using Lang.Php.Runtime;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Lang.Php.Compiler.Translator
 {
@@ -54,13 +50,14 @@ namespace Lang.Php.Compiler.Translator
             return new IPhpValue[] { x };
         }
 
-        bool SameCode(IPhpValue a, IPhpValue b)
+        static bool SameCode(IPhpValue a, IPhpValue b)
         {
             var codeA = a == null ? "" : a.GetPhpCode(null);
             var codeB = a == null ? "" : b.GetPhpCode(null);
             return codeA == codeB;
         }
-        IPhpValue ReturnSubst(IPhpValue old, IPhpValue @new)
+
+        static IPhpValue ReturnSubst(IPhpValue old, IPhpValue @new)
         {
             if (SameCode(old, @new))
                 return old;

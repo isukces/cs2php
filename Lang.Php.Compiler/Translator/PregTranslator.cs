@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Lang.Cs.Compiler;
 using Lang.Php.Compiler.Source;
 
@@ -33,12 +30,14 @@ namespace Lang.Php.Compiler.Translator
             return null;
         }
 
-        PhpMethodCallExpression Make(IExternalTranslationContext ctx, CsharpMethodCallExpression src, bool addoffset)
+        static PhpMethodCallExpression Make(IExternalTranslationContext ctx, CsharpMethodCallExpression src, bool addoffset)
         {
-            var p = new List<IPhpValue>(src.Arguments.Length + 1);
+            var p = new List<IPhpValue>(src.Arguments.Length + 1)
+            {
+                ctx.TranslateValue(src.Arguments[0].MyValue),
+                ctx.TranslateValue(src.Arguments[1].MyValue)
+            };
 
-            p.Add(ctx.TranslateValue(src.Arguments[0].MyValue));
-            p.Add(ctx.TranslateValue(src.Arguments[1].MyValue));
 
             for (int i = 2; i < src.Arguments.Length; i++)
             {
@@ -69,7 +68,6 @@ namespace Lang.Php.Compiler.Translator
                 default:
                     return null;
             }
-            return null;
         }
 
         public int GetPriority()

@@ -1,9 +1,7 @@
 ﻿using Lang.Php.Compiler;
 using Lang.Php.Compiler.Source;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Reflection;
 
 namespace Lang.Php.Wp.Compile

@@ -1,12 +1,7 @@
-﻿using Lang.Php;
-using Lang.Php.Runtime;
+﻿using Lang.Php.Runtime;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace Lang.Php.Compiler.Source
 {

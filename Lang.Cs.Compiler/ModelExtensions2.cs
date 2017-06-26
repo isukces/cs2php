@@ -36,7 +36,7 @@ namespace Lang.Cs.Compiler
                 get
                 {
                     var myConversions = new[] { Conversion1, Conversion2 }.Where(a => a.HasValue && !a.Value.IsIdentity).Distinct().ToArray();
-                    return myConversions.Any() ? string.Join("=>", myConversions) : "no conversion";
+                    return myConversions.Any() ? String.Join("=>", myConversions) : "no conversion";
                 }
             }
 
@@ -55,6 +55,18 @@ namespace Lang.Cs.Compiler
                         throw new Exception("Too many method symbols");
                 }
             }
+        }
+
+        public static T FindParentNode<T>(this SyntaxNode node) where T:SyntaxNode
+        {
+            while (node != null)
+            {
+                var n2 = node as T;
+                if (n2 != null)
+                    return n2;
+                node = node.Parent;
+            }
+            return null;
         }
     }
 }

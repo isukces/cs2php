@@ -35,7 +35,7 @@ namespace Lang.Cs2Php
                 processingContext.Engine.OutDir = processingContext.files.Last();
 
 
-                using (var a = new AppConfigManipulator())
+                using (new AppConfigManipulator())
                 {
                     DoCompilation(processingContext.Engine, ref showUsage);
                 }

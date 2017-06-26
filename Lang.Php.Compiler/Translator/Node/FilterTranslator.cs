@@ -2,11 +2,7 @@
 using Lang.Php.Filters;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Lang.Php.Compiler.Source;
-using Lang.Php.Runtime;
 
 namespace Lang.Php.Compiler.Translator.Node
 {
@@ -173,7 +169,7 @@ namespace Lang.Php.Compiler.Translator.Node
         }
         // Private Methods 
 
-        private IPhpValue _FilterVar(IExternalTranslationContext ctx, CsharpMethodCallExpression src)
+        private static IPhpValue _FilterVar(IExternalTranslationContext ctx, CsharpMethodCallExpression src)
         {
             var mn = src.MethodInfo.Name;
             var fn = src.MethodInfo.ToString();

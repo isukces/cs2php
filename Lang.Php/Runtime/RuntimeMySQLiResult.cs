@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Data.Common;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 
 namespace Lang.Php.Runtime
 {
@@ -14,8 +13,8 @@ namespace Lang.Php.Runtime
 
         public RuntimeMySQLiResult(MySQLi owner, MySqlDataReader reader)
         {
-            this.owner = owner;
-            this.reader = reader;
+            this._owner = owner;
+            this._reader = reader;
             _SetFromDR(reader);
             owner.OpenResult = _results.Count == 0 ? null : this;
         }
@@ -28,7 +27,7 @@ namespace Lang.Php.Runtime
 
         public override bool Fetch<T>(out T row)
         {
-            if (_phpLevelDisposed || _cursor >= _results.Count || owner.OpenResult != this)
+            if (_phpLevelDisposed || _cursor >= _results.Count || _owner.OpenResult != this)
             {
                 row = default(T);
                 return false;
@@ -87,8 +86,8 @@ namespace Lang.Php.Runtime
 
         public override void Free()
         {
-            if (owner.OpenResult == this)
-                owner.OpenResult = null;
+            if (_owner.OpenResult == this)
+                _owner.OpenResult = null;
             _phpLevelDisposed = true;
         }
         // Internal Methods 
@@ -115,10 +114,10 @@ namespace Lang.Php.Runtime
         int _cursor = 0;
         private string[] _fieldNames;
         bool _phpLevelDisposed;
-        private List<object[]> _results = new List<object[]>();
+        private readonly List<object[]> _results = new List<object[]>();
         private string[] _types;
-        MySQLi owner;
-        MySqlDataReader reader;
+        readonly MySQLi _owner;
+        MySqlDataReader _reader;
 
         #endregion Fields
 

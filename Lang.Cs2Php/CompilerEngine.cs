@@ -129,7 +129,7 @@ namespace Lang.Cs2Php
                     return;
             }
             Console.ResetColor();
-            Console.WriteLine(": " + diag.GetMessage());
+            Console.WriteLine(": {0}{1}", diag.GetMessage(), diag.Location);
         }
 
         #endregion Static Methods

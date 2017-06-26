@@ -1,9 +1,10 @@
-﻿using Lang.Cs.Compiler.Sandbox;
-using Microsoft.CodeAnalysis;
+﻿using Microsoft.CodeAnalysis;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Compilation = Microsoft.CodeAnalysis.Compilation;
 using MethodKind = Microsoft.CodeAnalysis.MethodKind;
 using SemanticModel = Microsoft.CodeAnalysis.SemanticModel;
@@ -135,6 +136,7 @@ namespace Lang.Cs.Compiler.Visitors
 
         public MethodBase Roslyn_ResolveMethod(IMethodSymbol method)
         {
+            if (method == null) throw new ArgumentNullException("method");
             var m = Roslyn_ResolveMethodInternal(method);
             //Console.WriteLine("M  {0} => {1}", method, m);
             //Console.WriteLine("   {0}", m.DeclaringType);
@@ -180,7 +182,7 @@ namespace Lang.Cs.Compiler.Visitors
             MethodInfo[] AllMethods = hostType.GetMethods(reflectionFlags).Where(i => i.Name == method.Name).ToArray();
             var
                 AllMethods1 = (from i in AllMethods
-                               where cs(method, i)
+                               where ParameterNamesEqual(method, i)
                                select i
                                    ).ToArray();
             if (typeArguments.Length == 0)
@@ -342,7 +344,7 @@ namespace Lang.Cs.Compiler.Visitors
             return pTypes;
         }
 
-        private bool cs(IMethodSymbol a, MethodInfo b)
+        private static bool ParameterNamesEqual(IMethodSymbol a, MethodInfo b)
         {
             if (a.Name != b.Name)
                 return false;
@@ -484,7 +486,8 @@ namespace Lang.Cs.Compiler.Visitors
                                     var b = a.Where(i => i.DeclaringMethod.Name == type1.DeclaringMethod.Name).ToArray();
 
                                     MethodInfo mi;
-                                    // mi.GetGenericArguments()
+                                    if (b.Length == 1)
+                                        return b[0];
                                     return null;
                                 }
                         }
@@ -537,11 +540,16 @@ namespace Lang.Cs.Compiler.Visitors
                     }
                 default:
                     throw new NotSupportedException(type.ToString());
-            }
-
-            
-           
+            }                      
         }
+
+        readonly ConcurrentDictionary<MethodDeclarationSyntax, MethodHeaderInfo> _getMethodMethodHeaderInfoCache = new ConcurrentDictionary<MethodDeclarationSyntax, MethodHeaderInfo>();
+
+        internal MethodHeaderInfo GetMethodMethodHeaderInfo(MethodDeclarationSyntax tmp)
+        {
+            return _getMethodMethodHeaderInfoCache.GetOrAdd(tmp, tmp1 => MethodHeaderInfo.Get(this, tmp1));
+        }
+
 
         #endregion Methods
 
@@ -746,5 +754,6 @@ namespace Lang.Cs.Compiler.Visitors
         private SemanticModel _roslynModel;
         #endregion Properties
 
+      
     }
 }

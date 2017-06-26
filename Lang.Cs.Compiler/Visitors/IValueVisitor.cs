@@ -576,6 +576,30 @@ namespace Lang.Cs.Compiler.Visitors
         {
             var nodeInfo = ModelExtensions.GetSymbolInfo(Model, node);
             // var t = model.GetTypeInfo(node);
+            if (nodeInfo.Symbol == null)
+            {
+                var tmp = node.FindParentNode<MethodDeclarationSyntax>();
+                if (tmp != null)
+                {
+                    var headerInfo = context.GetMethodMethodHeaderInfo(tmp);
+                    var ti = ModelExtensions.GetTypeInfo(state.Context.RoslynModel, node);
+                    var ti2 = ti.Type;
+                    if (ti2 != null)
+                    {
+                        var ti3 = context.Roslyn_ResolveType(ti2);
+                        if (ti3 != null)
+                        {
+                            var g = headerInfo.TypeParameterConstraints.FirstOrDefault(a => a.Type == ti3);
+                            if (g != null && g.RequiresParameterlessConstructor)
+                            {
+                                headerInfo.PassTypeName(ti3); 
+                                // var pl = g.Constr.Where(a=>a.Kind== MethodHeaderInfo.ConstraintKind.ParameterlessConstructor)
+                            }
+                        }
+                    }
+                }
+                throw new NullReferenceException("nodeInfo.Symbol");
+            }
             var methodSymbol = nodeInfo.Symbol as IMethodSymbol;
 
             var constructorInfo = context.Roslyn_ResolveMethod(methodSymbol) as ConstructorInfo;
@@ -860,16 +884,16 @@ namespace Lang.Cs.Compiler.Visitors
 
         FunctionArgument[] _internalVisitArgumentList(BaseArgumentListSyntax list)
         {
-            if (list  == null)
+            if (list == null)
                 return new FunctionArgument[0];
             var aa = list.Arguments.Select(i => Visit(i) as FunctionArgument).ToArray();
 #if DEBUG
-            Debug.Assert(aa.Where(i => i == null).Count() == 0);
+            Debug.Assert(aa.All(i => i != null));
 #endif
             return aa;
         }
 
-        private IValue _Make_DotnetMethodCall(MethodBase mi, IValue targetObject, FunctionArgument[] functionArguments, Type[] genericTypes)
+        private static IValue _Make_DotnetMethodCall(MethodBase mi, IValue targetObject, FunctionArgument[] functionArguments, Type[] genericTypes)
         {
             if (mi == null)
                 throw new ArgumentNullException("mi");

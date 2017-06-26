@@ -41,6 +41,7 @@
   <ItemGroup>
     <Compile Include="ComplexNumber.cs" />
     <Compile Include="ComplexNumberTest.cs" />
+    <Compile Include="Generics.cs" />
     <Compile Include="Index.cs" />
     <Compile Include="MultiplicationTable.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

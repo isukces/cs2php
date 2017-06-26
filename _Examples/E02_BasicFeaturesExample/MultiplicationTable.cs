@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Lang.Php;
-
-namespace Lang.Php.Examples.BasicFeaturesExample
+﻿namespace Lang.Php.Examples.BasicFeaturesExample
 {
 
     [Module("class.multiplication-table")]

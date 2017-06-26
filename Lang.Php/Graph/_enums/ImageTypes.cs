@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Lang.Php;
-
-namespace Lang.Php.Graph
+﻿namespace Lang.Php.Graph
 {
     public enum ImageTypes
     {
