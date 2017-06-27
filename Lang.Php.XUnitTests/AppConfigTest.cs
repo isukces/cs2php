@@ -3,7 +3,7 @@ using Xunit;
 
 namespace Lang.Php.XUnitTests
 {
-    class AppConfigTest
+    public class AppConfigTest
     {
         [Fact]
         public static void Basic()

@@ -5,19 +5,6 @@ using System.Linq;
 namespace Lang.Php.Compiler.Translator
 {
 
-    /*
-    smartClass
-    option NoAdditionalFile
-    implement Constructor Principles
-    
-    property Principles TranslationInfo 
-    	read only
-    
-    property PhpVersion Version 
-    	init new Version(5,3,0)
-    smartClassEnd
-    */
-    
     public sealed partial class TranslationState : IExternalTranslationContext
     {
 		#region Methods 

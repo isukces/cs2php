@@ -1,228 +1,38 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
-  <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{ED717576-B7B9-4775-8236-1855E20E52D5}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Lang.Php</RootNamespace>
-    <AssemblyName>Lang.Php</AssemblyName>
-    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <TargetFrameworkProfile />
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup>
-    <SignAssembly>true</SignAssembly>
-  </PropertyGroup>
-  <PropertyGroup>
-    <AssemblyOriginatorKeyFile>key.snk</AssemblyOriginatorKeyFile>
-  </PropertyGroup>
-  <ItemGroup>
-    <Reference Include="MySql.Data, Version=6.9.9.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL">
-      <HintPath>..\packages\MySql.Data.6.9.9\lib\net45\MySql.Data.dll</HintPath>
-    </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Web" />
-    <Reference Include="System.Data" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="Data\FieldGroupAttribute.cs" />
-    <Compile Include="Falsable.cs" />
-    <Compile Include="Filters\FilterInputServer.cs" />
-    <Compile Include="Filters\FilterVar.cs" />
-    <Compile Include="Filters\KnownFilters.cs" />
-    <Compile Include="Filters\ServerVariables.cs" />
-    <Compile Include="Filters\_options\EmailOptions.cs" />
-    <Compile Include="Filters\_options\FloatOptions.cs" />
-    <Compile Include="Filters\_flags\IntFlags.cs" />
-    <Compile Include="Filters\_options\IntOptions.cs" />
-    <Compile Include="Filters\_flags\IpFlags.cs" />
-    <Compile Include="Filters\_options\IpOptions.cs" />
-    <Compile Include="Filters\_flags\UrlFlags.cs" />
-    <Compile Include="Filters\_options\RegExpOptions.cs" />
-    <Compile Include="Filters\_options\UrlOptions.cs" />
-    <Compile Include="Graph\Color.cs" />
-    <Compile Include="Graph\Font.cs" />
-    <Compile Include="Graph\Image.cs" />
-    <Compile Include="Graph\ImageInfo.cs" />
-    <Compile Include="Graph\_enums\ImageTypes.cs" />
-    <Compile Include="Html.cs" />
-    <Compile Include="Filters\FilterInput.cs" />
-    <Compile Include="MbPhpString.cs" />
-    <Compile Include="OutputBuffer.cs" />
-    <Compile Include="PhpErrorTable.cs" />
-    <Compile Include="PhpIni.cs" />
-    <Compile Include="PhpVersions.cs" />
-    <Compile Include="_attributes\BuiltInAttribute.cs" />
-    <Compile Include="_enums\ErrorLevel.cs" />
-    <Compile Include="_Firebird\Firebird.cs" />
-    <Compile Include="_Firebird\FirebirdResult.cs" />
-    <Compile Include="_Firebird\IbaseTransactionOptions.cs" />
-    <Compile Include="_Posix\Posix.cs" />
-    <Compile Include="_Posix\PosixGroupInfo.cs" />
-    <Compile Include="_Posix\PosixUserInfo.cs" />
-    <Compile Include="Runtime\PhpCodeValue.cs" />
-    <Compile Include="Runtime\RuntimeMySQLiResult.cs" />
-    <Compile Include="Runtime\RuntimePhpDirectory.cs" />
-    <Compile Include="_attributes\_assembly\DefaultTimezoneAttribute.cs" />
-    <Compile Include="_attributes\_assembly\PhpPackageSourceAttribute.cs" />
-    <Compile Include="_attributes\RequireOnceAttribute.cs" />
-    <Compile Include="_attributes\_assembly\ResourcesDirectoryAttribute.cs" />
-    <Compile Include="_attributes\_assembly\RootPathAttribute.cs" />
-    <Compile Include="_attributes\_assembly\ConfigModuleAttribute.cs" />
-    <Compile Include="_DateTime\UnixTimestamp.cs" />
-    <Compile Include="_enums\ClassMembers.cs" />
-    <Compile Include="_enums\MethodCallStyles.cs" />
-    <Compile Include="_enums\Timezones.cs" />
-    <Compile Include="_enums\UnixFilePermissions.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>UnixFilePermissions.tt</DependentUpon>
-    </Compile>
-    <Compile Include="_Files\PhpDirectoryEntry.cs" />
-    <Compile Include="_Files\PhpDirectory.cs" />
-    <Compile Include="PhpMath.cs" />
-    <Compile Include="PhpDummy.cs" />
-    <Compile Include="PhpString.cs" />
-    <Compile Include="Runtime\HttpResponse.cs" />
-    <Compile Include="Runtime\PhpStringBuilder.cs" />
-    <Compile Include="Runtime\PhpValues.cs" />
-    <Compile Include="Runtime\RuntimeMysqlResult.cs" />
-    <Compile Include="_attributes\AsDefinedConstAttribute.cs" />
-    <Compile Include="_attributes\GlobalVariableAttribute.cs" />
-    <Compile Include="_attributes\AsValueAttribute.cs" />
-    <Compile Include="_attributes\EnumRenderAttribute.cs" />
-    <Compile Include="_attributes\_assembly\ModuleIncludeConstAttribute.cs" />
-    <Compile Include="_attributes\TranslatorAttribute.cs" />
-    <Compile Include="_attributes\UseBinaryExpressionAttribute.cs" />
-    <Compile Include="_attributes\_assembly\ModulesSubDirAttribute.cs" />
-    <Compile Include="_attributes\_assembly\PriovidesTranslatorAttribute.cs" />
-    <Compile Include="_attributes\_assembly\RequiredTranslatorAttribute.cs" />
-    <Compile Include="_enums\Enums.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Enums.tt</DependentUpon>
-    </Compile>
-    <Compile Include="_enums\CssMediaTypes.cs" />
-    <Compile Include="_enums\Css.cs" />
-    <Compile Include="_enums\EnumRenderOptions.cs" />
-    <Compile Include="_enums\FileStreamOpenModes.cs" />
-    <Compile Include="_enums\FormEncodings.cs" />
-    <Compile Include="_enums\FormMethods.cs" />
-    <Compile Include="_enums\HttpEnums.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>HttpEnums.tt</DependentUpon>
-    </Compile>
-    <Compile Include="_enums\RoundMode.cs" />
-    <Compile Include="_exceptions\PlatformImplementationException.cs" />
-    <Compile Include="_extensions\DateTimeExtension.cs" />
-    <Compile Include="_extensions\StringExtension.cs" />
-    <Compile Include="IntOrFalse.cs" />
-    <Compile Include="PhpFileStream.cs" />
-    <Compile Include="_attributes\UseOperatorAttribute.cs" />
-    <Compile Include="_enums\Charsets.cs" />
-    <Compile Include="_Files\PhpFile.cs" />
-    <Compile Include="_Files\PhpFiles.cs" />
-    <Compile Include="GlobalMethods.cs" />
-    <Compile Include="HtmlEntitiesFlags.cs" />
-    <Compile Include="_MySQLi\MySQLi.cs" />
-    <Compile Include="_MySQLi\MySQLiCharsetInfo.cs" />
-    <Compile Include="_MySQLi\MySQLiFieldInfo.cs" />
-    <Compile Include="_MySQLi\MySQLiParam.cs" />
-    <Compile Include="_MySQLi\MySQLiResult.cs" />
-    <Compile Include="_MySQLi\MySQLiResultMode.cs" />
-    <Compile Include="_MySQLi\MySQLiStatement.cs" />
-    <Compile Include="_MySQLi\MySQLiWarning.cs" />
-    <Compile Include="_MySql\MySQL.cs" />
-    <Compile Include="_MySql\MySqlDateTime.cs" />
-    <Compile Include="_MySql\MySQLFieldTypes.cs" />
-    <Compile Include="_MySql\MySQLFlags.cs" />
-    <Compile Include="_MySql\MysqlResult.cs" />
-    <Compile Include="OutputCallbackDelegates.cs" />
-    <Compile Include="_enums\PathInfoOptions.cs" />
-    <Compile Include="_Files\PathInfoResult.cs" />
-    <Compile Include="Response.cs" />
-    <Compile Include="Script.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SLFSupport.cs" />
-    <Compile Include="_Files\UploadFileInfo.cs" />
-    <Compile Include="_attributes\DirectCallAttribute.cs" />
-    <Compile Include="_attributes\AsArrayAttribute.cs" />
-    <Compile Include="_attributes\IgnoreNamespaceAttribute.cs" />
-    <Compile Include="_attributes\PageAttribute.cs" />
-    <Compile Include="_attributes\RenderValueAttribute.cs" />
-    <Compile Include="_attributes\PhpValueMapperAttribute.cs" />
-    <Compile Include="_attributes\ModuleAttribute.cs" />
-    <Compile Include="_attributes\ReplaceAttribute.cs" />
-    <Compile Include="_attributes\ScriptNameAttribute.cs" />
-    <Compile Include="_attributes\SinceAttribute.cs" />
-    <Compile Include="_attributes\SkipAttribute.cs" />
-    <Compile Include="_enums\UnixFileGroupPermissions.cs" />
-    <None Include="app.config" />
-    <None Include="packages.config" />
-    <None Include="_enums\UnixFilePermissions.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>UnixFilePermissions.cs</LastGenOutput>
-    </None>
-    <Compile Include="_exceptions\MockMethodException.cs" />
-    <Compile Include="_Regex\Preg.cs" />
-    <Compile Include="_Regex\PregMatchResult.cs" />
-    <Compile Include="_Regex\PregMatchWithOffset.cs" />
-    <Compile Include="_ResponseHeader\ResponseHeader.cs" />
-    <Compile Include="_Server.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="key.snk" />
-    <None Include="_enums\Enums.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>Enums.cs</LastGenOutput>
-    </None>
-    <None Include="_enums\HttpEnums.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>HttpEnums.cs</LastGenOutput>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Data\_attributes\" />
-    <Folder Include="_interfaces\" />
-  </ItemGroup>
-  <ItemGroup>
-    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <ProjectExtensions>
-    <VisualStudio>
-      <UserProperties BuildVersion_StartDate="2000/1/1" BuildVersion_UpdateFileVersion="True" BuildVersion_UpdateAssemblyVersion="True" BuildVersion_BuildVersioningStyle="None.None.DeltaBaseDateInDays.Increment" />
-    </VisualStudio>
-  </ProjectExtensions>
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
+﻿<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <VersionPrefix>1.2.1.1</VersionPrefix>
+        <TargetFramework>net462</TargetFramework>
+        <AssemblyName>Lang.Php</AssemblyName>
+        <PackageId>Lang.Php</PackageId>
+        <Description>Native PHP functions</Description>
+        <Title>Native PHP functions mapped to .NET</Title>
+        <GenerateAssemblyTitleAttribute>true</GenerateAssemblyTitleAttribute>
+        <GenerateAssemblyDescriptionAttribute>true</GenerateAssemblyDescriptionAttribute>
+        <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
+        <GenerateAssemblyProductAttribute>true</GenerateAssemblyProductAttribute>
+        <GenerateAssemblyCopyrightAttribute>false</GenerateAssemblyCopyrightAttribute>
+        <GenerateAssemblyDescriptionAttribute>true</GenerateAssemblyDescriptionAttribute>
+        <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
+        <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
+        <GenerateAssemblyTrademarkAttribute>false</GenerateAssemblyTrademarkAttribute>
+        <GenerateNeutralResourcesLanguageAttribute>false</GenerateNeutralResourcesLanguageAttribute>
+        <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    </PropertyGroup>
+    <PropertyGroup>
+        <DocumentationFile>bin\$(Configuration)\net462\$(ProjectName).xml</DocumentationFile>
+    </PropertyGroup>
+    <ItemGroup>
+        <PackageReference Include="MySql.Data" Version="6.9.9" />
+    </ItemGroup>
+    <ItemGroup>
+        <Reference Include="System.Web" />
+    </ItemGroup>
+    <ItemGroup>
+        <Folder Include="Properties" />
+    </ItemGroup>
+    <ItemGroup>
+        <Compile Include="..\CommonAssemblyInfo.cs">
+            <Link>CommonAssemblyInfo.cs</Link>
+        </Compile>
+    </ItemGroup>
 </Project>

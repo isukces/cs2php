@@ -16,8 +16,6 @@ namespace Lang.Php.XUnitTests
 #if !CS2PHP
     public class Base
     {
-        #region Static Methods
-
         // Private Methods 
 
         private static string GetCode(IEmitable method)
@@ -138,7 +136,7 @@ namespace Lang.Php.XUnitTests
                 #endregion
 
                 foreach (var fileName in filenames)
-                {                    
+                {
                     var g = MetadataReference.CreateFromFile(fileName, MetadataReferenceProperties.Assembly);
                     comp.AddMetadataReferences(g);
                     Console.WriteLine("  Add reference     {0}", g.Display);
@@ -171,8 +169,6 @@ namespace Lang.Php.XUnitTests
                 return _translator;
             }
         }
-
-        #endregion Static Methods
 
         #region Methods
 
@@ -245,9 +241,16 @@ namespace Lang.Php.XUnitTests
             {
                 // C:\programs\_CS2PHP\PUBLIC\Lang.Php.Test\bin\Debug
                 var directoryInfo = new DirectoryInfo(Directory.GetCurrentDirectory());
-                var proj = Path.Combine(directoryInfo.FullName, "..", "..", "..", "Lang.Php.Test", "Lang.Php.Test.csproj");
-                directoryInfo = new DirectoryInfo(proj);
-                return directoryInfo.FullName;
+                while (true)
+                {
+                    // 
+                    if (new FileInfo(Path.Combine(directoryInfo.FullName, "CSToPHP.sln")).Exists)
+                    {
+                        var proj = Path.Combine(directoryInfo.FullName, "Lang.Php.Test", "Lang.Php.Test.OLD.csproj");
+                        return proj;
+                    }
+                    directoryInfo = directoryInfo.Parent;
+                }
             }
         }
 

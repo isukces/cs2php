@@ -8,16 +8,10 @@
     [ScriptName("mPDF")]
     public class Mpdf
     {
-        #region Constructors
-
         public Mpdf(string mode, string format, double fontSize, string fontFamily, double mLeft, double mRight, double mTop, double mBottom, double mHeader, double mFooter, PageOrientation orientation)
         {
 
         }
-
-        #endregion Constructors
-
-        #region Methods
 
         // Public Methods 
 
@@ -26,20 +20,18 @@
 
         }
 
+        // ReSharper disable once InconsistentNaming
         public void SetWatermarkText(string txt = "", double alpha = -1)
         {
             if (alpha >= 0) watermarkTextAlpha = alpha;
             watermarkText = txt;
         }
 
+        // ReSharper disable once InconsistentNaming
         public void WriteHTML(string html, int sub = 0, bool init = true, bool close = true)
         {
 
         }
-
-        #endregion Methods
-
-        #region Fields
 
         public string author;
         [AsValue]
@@ -52,8 +44,6 @@
         public string watermark_font;
         public string watermarkText = "";
         public double watermarkTextAlpha = 0;
-
-        #endregion Fields
     }
 }
 /*

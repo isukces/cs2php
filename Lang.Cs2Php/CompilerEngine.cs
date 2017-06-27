@@ -13,30 +13,6 @@ using Microsoft.CodeAnalysis;
 namespace Lang.Cs2Php
 {
 
-    /*
-    smartClass
-    option NoAdditionalFile
-    
-    property CsProject string 
-    
-    property OutDir string 
-    
-    property Referenced List<string> 
-    	init #
-    
-    property TranlationHelpers List<string> 
-    	init #
-    
-    property ReferencedPhpLibsLocations Dictionary<string,string> Location of referenced libraries in PHP, taken from compiler commandline option
-    	init new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase)
-    
-    property Configuration string i.e. DEBUG, RELEASE
-    	init "RELEASE"
-    
-    property BinaryOutputDir string 
-    smartClassEnd
-    */
-
     public partial class CompilerEngine : MarshalByRefObject, IConfigData
     {
         #region Static Methods
@@ -47,7 +23,7 @@ namespace Lang.Cs2Php
         {
 
             if (compilerEngineAction == null)
-                throw new ArgumentNullException("compilerEngineAction");
+                throw new ArgumentNullException(nameof(compilerEngineAction));
 
             var appDomain = forceDomain;
             if (appDomain == null)
