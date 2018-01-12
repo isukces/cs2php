@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Lang.Cs2Php": {
+      "commandName": "Project",
+      "commandLineArgs": "c:\\programs\\_CS2PHP\\PUBLIC\\_Examples\\E01_HelloWorld\\E01_HelloWorld.csproj c:\\temp\\hello-world-php"
+    }
+  }
+}

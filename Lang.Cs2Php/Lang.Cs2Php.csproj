@@ -2,7 +2,7 @@
   <PropertyGroup>
     <VersionPrefix>1.2.1.1</VersionPrefix>
     <TargetFramework>net462</TargetFramework>
-    <AssemblyName>Lang.Cs2Php</AssemblyName>
+    <AssemblyName>cs2php</AssemblyName>
     <PackageId>Lang.Cs2Php</PackageId>
     <Title>C# to PHP compiler</Title>
     <Description>C# to PHP compiler</Description>
@@ -17,6 +17,9 @@
     <GenerateAssemblyTrademarkAttribute>false</GenerateAssemblyTrademarkAttribute>
     <GenerateNeutralResourcesLanguageAttribute>false</GenerateNeutralResourcesLanguageAttribute>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <ApplicationIcon />
+    <OutputType>Exe</OutputType>
+    <StartupObject />
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="..\CommonAssemblyInfo.cs">

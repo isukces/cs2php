@@ -32,7 +32,7 @@ namespace Lang.Php.XUnitTests
 #if DEBUG
                         ce.Configuration = "DEBUG";
 #else
-        ce.Configuration = "RELEASE";
+                        ce.Configuration = "RELEASE";
 #endif
                         ce.CsProject = LangPhpTestCsProj;
                         ce.OutDir = ce.BinaryOutputDir = Path.GetTempPath();
@@ -110,7 +110,7 @@ namespace Lang.Php.XUnitTests
 
 
         [Fact]
-        public static string CSharpProject()
+        public string CSharpProject()
         {
             var csproj = LangPhpTestCsProj;
             Assert.True(File.Exists(csproj), "C# project not found");

@@ -253,7 +253,9 @@ namespace Lang.Php.Compiler
                 Console.WriteLine("Loading {0}", csProj);
 
             var buildWorkspace = MSBuildWorkspace.Create();
-            _cSharpProject = buildWorkspace.OpenProjectAsync(csProj).Result;
+            var cSharpProjectTask = buildWorkspace.OpenProjectAsync(csProj);
+            cSharpProjectTask.Wait();
+            _cSharpProject = cSharpProjectTask.Result;
             _solution = _cSharpProject.Solution;
 
             var parseOptions = (CSharpParseOptions)_cSharpProject.ParseOptions;

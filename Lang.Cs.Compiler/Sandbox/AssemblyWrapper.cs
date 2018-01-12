@@ -70,7 +70,7 @@ namespace Lang.Cs.Compiler.Sandbox
                 //AppDomain.CurrentDomain.AssemblyLoad += y;
 
                 // Console.WriteLine("Loading {0} B" , assemblyPath);
-                _wrappedAssembly = Assembly.Load(assemblyPath);
+                _wrappedAssembly = Assembly.LoadFile(assemblyPath);
                 //Console.WriteLine("Loading {0} E", assemblyPath);
                 var ass = AppDomain.CurrentDomain.GetAssemblies();
                 //Console.WriteLine("Current domain contains {0} assemblies", ass.Length);

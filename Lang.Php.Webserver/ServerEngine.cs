@@ -12,35 +12,9 @@ using Lang.Php.Webserver.Properties;
 
 namespace Lang.Php.Webserver
 {
-
-    /*
-    smartClass
-    option NoAdditionalFile
-    implement Singleton Instance
-    
-    property Assemblies List<Assembly> 
-    	init #
-    
-    property Pages Dictionary<string, Type> 
-    	init #
-    
-    property IndexOrder string 
-    	init "index.php index.htm index.html"
-    
-    property ListenPort int 
-    	init 81
-    
-    property OutupEncoding Encoding 
-    	init Encoding.UTF8
-    
-    property DocumentRoot string 
-    smartClassEnd
-    */
-    
+ 
     public partial class ServerEngine
     {
-        #region Static Methods
-
         // Private Methods 
 
         private static void Send(Socket handler, byte[] byteData)
@@ -69,10 +43,7 @@ namespace Lang.Php.Webserver
             }
         }
 
-        #endregion Static Methods
-
         private readonly TranslationInfo _translationInfo = new TranslationInfo(new AssemblySandbox(null));
-        #region Methods
 
         // Public Methods 
 
@@ -159,7 +130,7 @@ namespace Lang.Php.Webserver
                     httpRequest.Update();
                 }
                 var resp = ProcessRequest(httpRequest);
-                var byteContent = resp.GetComplete(_outupEncoding);
+                var byteContent = resp.GetComplete(OutupEncoding);
                 // All the data has been read from the 
                 // client. Display it on the console.
                 Console.WriteLine("Read {0} bytes from socket. \n Data : {1}", content.Length, content);
@@ -282,69 +253,21 @@ namespace Lang.Php.Webserver
             return a.Any() ? a.First().Value : null;
         }
 
-        #endregion Methods
-
-        #region Static Fields
-
         public static ManualResetEvent allDone = new ManualResetEvent(false);
 
-        #endregion Static Fields
-
-        #region Fields
-
         bool _work;
-
-        #endregion Fields
-
-        #region Delegates and Events
 
         // Events 
 
         public event EventHandler<OnLogEventArgs> OnLog;
 
-        #endregion Delegates and Events
-
-        #region Nested Classes
-
 
         public class OnLogEventArgs : EventArgs
         {
-            #region Fields
-
             public string Text { get; set; }
-
-            #endregion Fields
-        }
-        #endregion Nested Classes
-    }
-}
-
-
-// -----:::::##### smartClass embedded code begin #####:::::----- generated 2014-09-02 19:41
-// File generated automatically ver 2013-07-10 08:43
-// Smartclass.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0c4d5d36fb5eb4ac
-namespace Lang.Php.Webserver
-{
-    public partial class ServerEngine 
-    {
-        /*
-        /// <summary>
-        /// Tworzy instancję obiektu
-        /// </summary>
-        public ServerEngine()
-        {
         }
 
-        Przykłady użycia
 
-        implement INotifyPropertyChanged
-        implement INotifyPropertyChanged_Passive
-        implement ToString ##Assemblies## ##Pages## ##IndexOrder## ##ListenPort## ##OutupEncoding## ##DocumentRoot##
-        implement ToString Assemblies=##Assemblies##, Pages=##Pages##, IndexOrder=##IndexOrder##, ListenPort=##ListenPort##, OutupEncoding=##OutupEncoding##, DocumentRoot=##DocumentRoot##
-        implement equals Assemblies, Pages, IndexOrder, ListenPort, OutupEncoding, DocumentRoot
-        implement equals *
-        implement equals *, ~exclude1, ~exclude2
-        */
         /// <summary>
         /// Pole statyczne dla singletona
         /// </summary>
@@ -378,7 +301,6 @@ namespace Lang.Php.Webserver
             }
         }
 
-        #region Constructors
         /// <summary>
         /// Tworzy instancję obiektu - metoda prywatna z uwagi na użycie wzorca Singleton
         /// </summary>
@@ -386,9 +308,6 @@ namespace Lang.Php.Webserver
         {
         }
 
-        #endregion Constructors
-
-        #region Constants
         /// <summary>
         /// Nazwa własności Assemblies; 
         /// </summary>
@@ -413,12 +332,7 @@ namespace Lang.Php.Webserver
         /// Nazwa własności DocumentRoot; 
         /// </summary>
         public const string PropertyNameDocumentRoot = "DocumentRoot";
-        #endregion Constants
 
-        #region Methods
-        #endregion Methods
-
-        #region Properties
         /// <summary>
         /// 
         /// </summary>
@@ -468,33 +382,13 @@ namespace Lang.Php.Webserver
         /// <summary>
         /// 
         /// </summary>
-        public int ListenPort
-        {
-            get
-            {
-                return _listenPort;
-            }
-            set
-            {
-                _listenPort = value;
-            }
-        }
-        private int _listenPort = 81;
+        public int ListenPort { get; set; } = 81;
+
         /// <summary>
         /// 
         /// </summary>
-        public Encoding OutupEncoding
-        {
-            get
-            {
-                return _outupEncoding;
-            }
-            set
-            {
-                _outupEncoding = value;
-            }
-        }
-        private Encoding _outupEncoding = Encoding.UTF8;
+        public Encoding OutupEncoding { get; set; } = Encoding.UTF8;
+
         /// <summary>
         /// 
         /// </summary>
@@ -511,7 +405,5 @@ namespace Lang.Php.Webserver
             }
         }
         private string _documentRoot = string.Empty;
-        #endregion Properties
-
     }
 }
