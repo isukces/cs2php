@@ -5,19 +5,13 @@ namespace Lang.Php.Compiler
 {
     public class PhpSourceCodeWriter
     {
-		#region Constructors 
-
         public PhpSourceCodeWriter()
         {
             code.AppendLine("<?php");
             IntentString = "";
         }
 
-		#endregion Constructors 
-
-		#region Methods 
-
-		// Public Methods 
+        // Public Methods 
 
         public void AppendLastLine(string x)
         {
@@ -107,17 +101,9 @@ namespace Lang.Php.Compiler
             SkipIndent = false;
         }
 
-		#endregion Methods 
-
-		#region Fields 
-
         protected StringBuilder code = new StringBuilder();
         int intent;
         public bool SkipIndent;
-
-		#endregion Fields 
-
-		#region Properties 
 
         public int Intent
         {
@@ -144,7 +130,5 @@ namespace Lang.Php.Compiler
                 return code.Length;
             }
         }
-
-		#endregion Properties 
     }
 }

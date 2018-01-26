@@ -6,7 +6,7 @@ namespace Lang.Php.Compiler
     {
         PhpSourceCodeWriter _code = new PhpSourceCodeWriter();
 
-        public static string GetAccessModifiers(IClassMember m)
+        public static string GetAccessModifiers(IPhpClassMember m)
         {
             var modifiers = new List<string>();
             switch (m.Visibility)

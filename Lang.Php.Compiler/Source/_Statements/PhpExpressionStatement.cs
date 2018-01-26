@@ -1,31 +1,35 @@
-﻿using Lang.Php.Compiler.Translator;
-using Lang.Php.Runtime;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Lang.Php.Compiler.Translator;
+using Lang.Php.Runtime;
 
 namespace Lang.Php.Compiler.Source
 {
-
-    /*
-    smartClass
-    option NoAdditionalFile
-    implement Constructor *
-    
-    property Expression IPhpValue 
-    smartClassEnd
-    */
-
     /// <summary>
-    /// Opakowuje expression jako statement, np. postincrementacja, wywołanie metody itp.
+    ///     Opakowuje expression jako statement, np. postincrementacja, wywołanie metody itp.
     /// </summary>
-    public partial class PhpExpressionStatement : IPhpStatementBase
+    public class PhpExpressionStatement : PhpStatementBase
     {
-        #region Static Methods
-
+        /// <summary>
+        ///     Tworzy instancję obiektu
+        ///     <param name="expression"></param>
+        /// </summary>
+        public PhpExpressionStatement(IPhpValue expression)
+        {
+            Expression = expression;
+        }
         // Private Methods 
 
-        static IEnumerable<string> SplitToLines(string code)
+        private static IPhpValue Aaa(IPhpValue x)
+        {
+            var constExpression = x as PhpDefinedConstExpression;
+            if (constExpression == null) return x;
+            return constExpression.DefinedConstName == "PHP_EOL" ? new PhpConstValue("\r\n") : x;
+        }
+        // Private Methods 
+
+        private static IEnumerable<string> SplitToLines(string code)
         {
             var result = new List<string>();
             while (code.IndexOf("\r\n", StringComparison.Ordinal) > 0)
@@ -34,14 +38,11 @@ namespace Lang.Php.Compiler.Source
                 result.Add(code.Substring(0, idx));
                 code = code.Substring(idx);
             }
+
             if (code != "")
                 result.Add(code);
             return result.ToArray();
         }
-
-        #endregion Static Methods
-
-        #region Methods
 
         // Public Methods 
 
@@ -49,27 +50,25 @@ namespace Lang.Php.Compiler.Source
         {
             style = PhpEmitStyle.xClone(style);
             if (!style.AsIncrementor)
-                if (_expression is PhpMethodCallExpression)
+                if (Expression is PhpMethodCallExpression)
                 {
-                    var methodCallExpression = _expression as PhpMethodCallExpression;
+                    var methodCallExpression = Expression as PhpMethodCallExpression;
                     if (methodCallExpression.CallType == MethodCallStyles.Procedural
                         && methodCallExpression.Name == "echo")
                         if (EmitInlineHtml(writer, style))
                             return;
                 }
-            var code = _expression.GetPhpCode(style);
+
+            var code = Expression.GetPhpCode(style);
             if (style.AsIncrementor)
-            {
                 writer.Write(code);
-            }
             else
                 writer.WriteLn(code + ";");
-
         }
 
         public override IEnumerable<ICodeRequest> GetCodeRequests()
         {
-            return GetCodeRequests(_expression);
+            return GetCodeRequests(Expression);
         }
 
         public override StatementEmitInfo GetStatementEmitInfo(PhpEmitStyle style)
@@ -88,24 +87,15 @@ namespace Lang.Php.Compiler.Source
 
         public override string ToString()
         {
-            return _expression + ";";
-        }
-        // Private Methods 
-
-        static IPhpValue Aaa(IPhpValue x)
-        {
-            var constExpression = x as PhpDefinedConstExpression;
-            if (constExpression == null) return x;
-            return constExpression.DefinedConstName == "PHP_EOL" ? new PhpConstValue("\r\n") : x;
+            return Expression + ";";
         }
 
-        bool EmitInlineHtml(PhpSourceCodeWriter writer, PhpEmitStyle style)
+        private bool EmitInlineHtml(PhpSourceCodeWriter writer, PhpEmitStyle style)
         {
             // return false;
             var values = GetEchoItems(style);
             //if (Values.Length == 1)
             //    return false;
-            #region Emisja
             {
                 foreach (var i in values)
                 {
@@ -113,6 +103,7 @@ namespace Lang.Php.Compiler.Source
                         throw new NotSupportedException();
                     writer.WriteLn("echo " + i.Code + ";");
                 }
+
                 return true;
             }
 #if VERSION1
@@ -165,24 +156,21 @@ namespace Lang.Php.Compiler.Source
                 }
             } 
 #endif
-            #endregion
         }
 
         private EchoEmitItem[] GetEchoItems(PhpEmitStyle style)
         {
             var values = new List<IPhpValue>();
-            #region Przygotowanie listy elementów do wyświetlenia
             {
-                var methodCall = _expression as PhpMethodCallExpression;
-                if (methodCall == null) return
-                      null;
+                var methodCall = Expression as PhpMethodCallExpression;
+                if (methodCall == null)
+                    return
+                        null;
                 if (methodCall.CallType != MethodCallStyles.Procedural || methodCall.Name != "echo")
                     return null;
                 foreach (var xx in methodCall.Arguments)
                     values.AddRange(ExpressionSimplifier.ExplodeConcats(xx, "."));
                 values = values.Select(Aaa).ToList();
-
-                #region Łączenie const string
 
                 for (var i = 1; i < values.Count; i++)
                 {
@@ -199,13 +187,10 @@ namespace Lang.Php.Compiler.Source
                     values.RemoveAt(i);
                     i--;
                 }
-
-                #endregion
             }
-            #endregion
             {
-                IPhpValue echoArguments = null;
-                Action<IPhpValue> vv = u =>
+                IPhpValue         echoArguments = null;
+                Action<IPhpValue> vv            = u =>
                 {
                     // ReSharper disable once AccessToModifiedClosure
                     echoArguments = echoArguments == null ? u : new PhpBinaryOperatorExpression(".", echoArguments, u);
@@ -216,14 +201,12 @@ namespace Lang.Php.Compiler.Source
                 {
                     if (value is PhpConstValue)
                     {
-                        var constValue = (value as PhpConstValue).Value;
+                        var constValue       = (value as PhpConstValue).Value;
                         var constStringValue = constValue as string;
                         if (constStringValue != null)
                         {
-                            #region Const-string
                             var lines = SplitToLines(constStringValue);
                             foreach (var i in lines)
-                            {
                                 if (i.EndsWith("\r\n"))
                                 {
                                     vv(new PhpConstValue(i.Substring(0, i.Length - 2)));
@@ -233,29 +216,28 @@ namespace Lang.Php.Compiler.Source
                                     echoArguments = null;
                                 }
                                 else
+                                {
                                     vv(new PhpConstValue(i));
-                            }
+                                }
+
                             continue;
-                            #endregion
                         }
                     }
+
                     vv(value);
                 }
+
                 if (echoArguments != null)
                     result.Add(new EchoEmitItem(echoArguments.GetPhpCode(style), false));
                 return result.ToArray();
             }
         }
 
-        #endregion Methods
-
-        #region Properties
-
         private bool IsEcho
         {
             get
             {
-                var callExpression = _expression as PhpMethodCallExpression;
+                var callExpression = Expression as PhpMethodCallExpression;
                 // ProceduralStyleMethodCall checks if expression is PhpMethodCallExpression
                 // ReSharper disable once PossibleNullReferenceException
                 return IsProceduralStyleMethodCall && callExpression.Name == "echo";
@@ -266,29 +248,24 @@ namespace Lang.Php.Compiler.Source
         {
             get
             {
-                var callExpression = _expression as PhpMethodCallExpression;
+                var callExpression = Expression as PhpMethodCallExpression;
                 return callExpression != null && callExpression.CallType == MethodCallStyles.Procedural;
             }
         }
 
-        #endregion Properties
 
-        #region Nested Classes
+        /// <summary>
+        /// </summary>
+        public IPhpValue Expression { get; set; }
 
 
         public class EchoEmitItem
         {
-            #region Constructors
-
             public EchoEmitItem(string code, bool plainHtml)
             {
-                Code = code;
+                Code      = code;
                 PlainHtml = plainHtml;
             }
-
-            #endregion Constructors
-
-            #region Methods
 
             // Public Methods 
 
@@ -299,87 +276,9 @@ namespace Lang.Php.Compiler.Source
                 return "echo " + Code + ";";
             }
 
-            #endregion Methods
-
-            #region Properties
-
             public string Code { get; private set; }
 
             public bool PlainHtml { get; private set; }
-
-            #endregion Properties
         }
-        #endregion Nested Classes
-    }
-}
-
-
-// -----:::::##### smartClass embedded code begin #####:::::----- generated 2014-09-08 18:08
-// File generated automatically ver 2014-09-01 19:00
-// Smartclass.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0c4d5d36fb5eb4ac
-namespace Lang.Php.Compiler.Source
-{
-    public partial class PhpExpressionStatement
-    {
-        /*
-        /// <summary>
-        /// Tworzy instancję obiektu
-        /// </summary>
-        public PhpExpressionStatement()
-        {
-        }
-        Przykłady użycia
-        implement INotifyPropertyChanged
-        implement INotifyPropertyChanged_Passive
-        implement ToString ##Expression##
-        implement ToString Expression=##Expression##
-        implement equals Expression
-        implement equals *
-        implement equals *, ~exclude1, ~exclude2
-        */
-
-
-        #region Constructors
-        /// <summary>
-        /// Tworzy instancję obiektu
-        /// <param name="expression"></param>
-        /// </summary>
-        public PhpExpressionStatement(IPhpValue expression)
-        {
-            Expression = expression;
-        }
-
-        #endregion Constructors
-
-
-        #region Constants
-        /// <summary>
-        /// Nazwa własności Expression; 
-        /// </summary>
-        public const string PropertyNameExpression = "Expression";
-        #endregion Constants
-
-
-        #region Methods
-        #endregion Methods
-
-
-        #region Properties
-        /// <summary>
-        /// 
-        /// </summary>
-        public IPhpValue Expression
-        {
-            get
-            {
-                return _expression;
-            }
-            set
-            {
-                _expression = value;
-            }
-        }
-        private IPhpValue _expression;
-        #endregion Properties
     }
 }

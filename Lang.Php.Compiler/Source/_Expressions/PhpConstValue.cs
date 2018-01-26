@@ -5,23 +5,27 @@ using Lang.Php.Runtime;
 
 namespace Lang.Php.Compiler.Source
 {
-
-    /*
-    smartClass
-    option NoAdditionalFile
-    implement Constructor Value
-    implement Constructor Value, UseGlue
-    
-    property Value Object 
-    
-    property UseGlue bool 
-    smartClassEnd
-    */
-
-    public partial class PhpConstValue : IPhpValueBase
+    public class PhpConstValue : PhpValueBase
     {
-        #region Static Methods
+        /// <summary>
+        ///     Tworzy instancję obiektu
+        ///     <param name="Value"></param>
+        /// </summary>
+        public PhpConstValue(object Value)
+        {
+            this.Value = Value;
+        }
 
+        /// <summary>
+        ///     Tworzy instancję obiektu
+        ///     <param name="Value"></param>
+        ///     <param name="UseGlue"></param>
+        /// </summary>
+        public PhpConstValue(object Value, bool UseGlue)
+        {
+            this.Value   = Value;
+            this.UseGlue = UseGlue;
+        }
         // Public Methods 
 
         public static PhpConstValue FromPhpValue(string code)
@@ -32,21 +36,15 @@ namespace Lang.Php.Compiler.Source
                 var value = int.Parse(code);
                 return new PhpConstValue(value);
             }
+
             throw new NotImplementedException("Only integer values are supported. Sorry.");
         }
-
-
-
 
 
         private static string EscapeSingleQuote(string x)
         {
             return "'" + x.Replace("\\", "\\\\").Replace("'", "\\'") + "'";
         }
-
-        #endregion Static Methods
-
-        #region Methods
 
         // Public Methods 
 
@@ -58,7 +56,7 @@ namespace Lang.Php.Compiler.Source
         public override string GetPhpCode(PhpEmitStyle style)
         {
             var b = style != null && style.Compression != EmitStyleCompression.Beauty;
-            var a = PhpValues.ToPhpCodeValue(_value, b);
+            var a = PhpValues.ToPhpCodeValue(Value, b);
             switch (a.Kind)
             {
                 case PhpCodeValue.Kinds.Null:
@@ -84,119 +82,13 @@ namespace Lang.Php.Compiler.Source
             //return _value.ToString();
         }
 
-        #endregion Methods
-
-        #region Static Fields
-
-
-
-        #endregion Static Fields
-
-        #region Fields
-
-   
-
-        #endregion Fields
-    }
-}
-
-
-// -----:::::##### smartClass embedded code begin #####:::::----- generated 2013-11-13 17:35
-// File generated automatically ver 2013-07-10 08:43
-// Smartclass.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0c4d5d36fb5eb4ac
-namespace Lang.Php.Compiler.Source
-{
-    public partial class PhpConstValue
-    {
-        /*
-        /// <summary>
-        /// Tworzy instancję obiektu
-        /// </summary>
-        public PhpConstValue()
-        {
-        }
-        Przykłady użycia
-        implement INotifyPropertyChanged
-        implement INotifyPropertyChanged_Passive
-        implement ToString ##Value## ##UseGlue##
-        implement ToString Value=##Value##, UseGlue=##UseGlue##
-        implement equals Value, UseGlue
-        implement equals *
-        implement equals *, ~exclude1, ~exclude2
-        */
-
-
-        #region Constructors
-        /// <summary>
-        /// Tworzy instancję obiektu
-        /// <param name="Value"></param>
-        /// </summary>
-        public PhpConstValue(Object Value)
-        {
-            this.Value = Value;
-        }
 
         /// <summary>
-        /// Tworzy instancję obiektu
-        /// <param name="Value"></param>
-        /// <param name="UseGlue"></param>
         /// </summary>
-        public PhpConstValue(Object Value, bool UseGlue)
-        {
-            this.Value = Value;
-            this.UseGlue = UseGlue;
-        }
+        public object Value { get; set; }
 
-        #endregion Constructors
-
-
-        #region Constants
         /// <summary>
-        /// Nazwa własności Value; 
         /// </summary>
-        public const string PROPERTYNAME_VALUE = "Value";
-        /// <summary>
-        /// Nazwa własności UseGlue; 
-        /// </summary>
-        public const string PROPERTYNAME_USEGLUE = "UseGlue";
-        #endregion Constants
-
-
-        #region Methods
-        #endregion Methods
-
-
-        #region Properties
-        /// <summary>
-        /// 
-        /// </summary>
-        public Object Value
-        {
-            get
-            {
-                return _value;
-            }
-            set
-            {
-                _value = value;
-            }
-        }
-        private Object _value;
-        /// <summary>
-        /// 
-        /// </summary>
-        public bool UseGlue
-        {
-            get
-            {
-                return useGlue;
-            }
-            set
-            {
-                useGlue = value;
-            }
-        }
-        private bool useGlue;
-        #endregion Properties
+        public bool UseGlue { get; set; }
     }
 }

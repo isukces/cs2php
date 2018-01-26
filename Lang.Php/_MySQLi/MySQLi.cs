@@ -36,8 +36,7 @@ namespace Lang.Php
                 PhpIni.TryGetValue("mysqli.default_pw", out passwd);
             if (port == default_port)
             {
-                string portStr;
-                if (PhpIni.TryGetValue("mysqli.default_port", out portStr))
+                if (PhpIni.TryGetValue("mysqli.default_port", out var portStr))
                     port = int.Parse(portStr);
                 else
                     port = PhpIni.MYSQL_DEFAULT_PORT;

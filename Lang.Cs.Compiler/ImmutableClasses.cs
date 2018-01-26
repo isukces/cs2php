@@ -469,9 +469,10 @@ namespace Lang.Cs.Compiler
       private IValue[] initializers;
     } // end of CallConstructor
     public sealed partial class FunctionArgument : CSharpBase, IValue {
-      public FunctionArgument(string RefOrOutKeyword, IValue MyValue){
+      public FunctionArgument(string RefOrOutKeyword, IValue MyValue, string ExplicitName){
         this.refOrOutKeyword = RefOrOutKeyword;
         this.myValue = MyValue;
+        this.explicitName = ExplicitName;
       }
       public string RefOrOutKeyword {
         get {
@@ -485,6 +486,12 @@ namespace Lang.Cs.Compiler
         }
       }
       private IValue myValue;
+      public string ExplicitName {
+        get {
+          return explicitName;
+        }
+      }
+      private string explicitName;
     } // end of FunctionArgument
     public sealed partial class Modifiers : CSharpBase {
       public Modifiers(string[] Items){

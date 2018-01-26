@@ -28,7 +28,7 @@ namespace Lang.Php.Compiler.Translator.Node
 
         private static CsharpMethodCallExpression _PhpFormat(FunctionArgument functionArgument)
         {
-            var a2 = new FunctionArgument("", new ConstValue(DateTimeFormats.HttpHeader));
+            var a2 = new FunctionArgument("", new ConstValue(DateTimeFormats.HttpHeader), null);
             var methodInfo = typeof(DateTimeExtension)
                 .GetMethods(BindingFlags.Static | BindingFlags.Public)
                 .Single(i => i.ToString() == "System.String PhpFormat(System.DateTime, Lang.Php.DateTimeFormats)");

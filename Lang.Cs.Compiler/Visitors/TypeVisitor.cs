@@ -7,19 +7,13 @@ namespace Lang.Cs.Compiler.Visitors
 {
     public class TypeVisitor : CodeVisitor<Type>
     {
-        #region Constructors
-
         public TypeVisitor(CompileState ts)
         {
             if (ts == null)
                 ts = new CompileState();
-            state = ts;
+            _state = ts;
             context = ts.Context;
         }
-
-        #endregion Constructors
-
-        #region Methods
 
         // Protected Methods 
 
@@ -47,10 +41,10 @@ namespace Lang.Cs.Compiler.Visitors
 
 #if ROSLYN
             // wzięte z [FAQ(1)]
-            var model = state.Context.RoslynModel;
+            var model = _state.Context.RoslynModel;
             var i1 = model.GetTypeInfo(node);
             ITypeSymbol type = i1.Type;
-            var netType = state.Context.Roslyn_ResolveType(type);
+            var netType = _state.Context.Roslyn_ResolveType(type);
             //var i2 = model.GetSymbolInfo(node); // alternatywnie
             //type = (TypeSymbol)i2.Symbol;
             return netType;
@@ -61,8 +55,8 @@ namespace Lang.Cs.Compiler.Visitors
 
         protected override Type VisitNullableType(NullableTypeSyntax node)
         {
-            var t = state.Context.RoslynModel.GetTypeInfo(node);
-            var tt = state.Context.Roslyn_ResolveType(t.Type);
+            var t = _state.Context.RoslynModel.GetTypeInfo(node);
+            var tt = _state.Context.Roslyn_ResolveType(t.Type);
             return tt;
         }
 
@@ -85,12 +79,6 @@ namespace Lang.Cs.Compiler.Visitors
         //    return types.First();
         //}
 
-        #endregion Methods
-
-        #region Fields
-
-        CompileState state;
-
-        #endregion Fields
+        private readonly CompileState _state;
     }
 }

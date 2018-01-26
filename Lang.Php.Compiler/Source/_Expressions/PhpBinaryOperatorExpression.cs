@@ -4,38 +4,19 @@ using Lang.Php.Compiler.Translator;
 
 namespace Lang.Php.Compiler.Source
 {
-
-    /*
-    smartClass
-    option NoAdditionalFile
-    implement Constructor  Operator,   Left,   Right
-    
-    property Left IPhpValue 
-    	read only
-    	OnChange if(value==null) throw new ArgumentNullException("Left");
-    
-    property Right IPhpValue 
-    	read only
-    	OnChange if(value==null) throw new ArgumentNullException("Right");
-    
-    property Operator string 
-    	read only
-    smartClassEnd
-    */
-
-    public partial class PhpBinaryOperatorExpression : IPhpValueBase
+    public class PhpBinaryOperatorExpression : PhpValueBase
     {
 
         public override string GetPhpCode(PhpEmitStyle style)
         {
             if (style == null || style.Compression == EmitStyleCompression.Beauty)
-                return string.Format("{0} {1} {2}", left.GetPhpCode(style), _operator, right.GetPhpCode(style));
-            return string.Format("{0}{1}{2}", left.GetPhpCode(style), _operator, right.GetPhpCode(style));
+                return string.Format("{0} {1} {2}", Left.GetPhpCode(style), Operator, Right.GetPhpCode(style));
+            return string.Format("{0}{1}{2}", Left.GetPhpCode(style), Operator, Right.GetPhpCode(style));
         }
 
         public override IEnumerable<ICodeRequest> GetCodeRequests()
         {
-            return IPhpStatementBase.GetCodeRequests(left, right);
+            return PhpStatementBase.GetCodeRequests(Left, Right);
         }
    
 
@@ -62,106 +43,36 @@ namespace Lang.Php.Compiler.Source
             }
             return result;
         }
-    }
-}
 
 
-// -----:::::##### smartClass embedded code begin #####:::::----- generated 2013-11-25 22:21
-// File generated automatically ver 2013-07-10 08:43
-// Smartclass.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0c4d5d36fb5eb4ac
-namespace Lang.Php.Compiler.Source
-{
-    public partial class PhpBinaryOperatorExpression
-    {
-        /*
         /// <summary>
         /// Tworzy instancję obiektu
-        /// </summary>
-        public PhpBinaryOperatorExpression()
-        {
-        }
-
-        Przykłady użycia
-
-        implement INotifyPropertyChanged
-        implement INotifyPropertyChanged_Passive
-        implement ToString ##Left## ##Right## ##Operator##
-        implement ToString Left=##Left##, Right=##Right##, Operator=##Operator##
-        implement equals Left, Right, Operator
-        implement equals *
-        implement equals *, ~exclude1, ~exclude2
-        */
-        #region Constructors
-        /// <summary>
-        /// Tworzy instancję obiektu
-        /// <param name="Left"></param>
-        /// <param name="Right"></param>
+        /// <param name="left"></param>
+        /// <param name="right"></param>
         /// <param name="Operator"></param>
         /// </summary>
-        public PhpBinaryOperatorExpression(string Operator, IPhpValue Left, IPhpValue Right)
+        public PhpBinaryOperatorExpression(string Operator, IPhpValue left, IPhpValue right)
         {
-            left = Left;
-            right = Right;
-            if (left == null) throw new ArgumentNullException("left");
-            if (right == null) throw new ArgumentNullException("right");
-            _operator = Operator;
+            if (Left == null) throw new ArgumentNullException(nameof(left));
+            if (Right == null) throw new ArgumentNullException(nameof(right));
+            Left = left;
+            Right = right;
+            this.Operator = Operator;
         }
 
-        #endregion Constructors
-
-        #region Constants
-        /// <summary>
-        /// Nazwa własności Left; 
-        /// </summary>
-        public const string PROPERTYNAME_LEFT = "Left";
-        /// <summary>
-        /// Nazwa własności Right; 
-        /// </summary>
-        public const string PROPERTYNAME_RIGHT = "Right";
-        /// <summary>
-        /// Nazwa własności Operator; 
-        /// </summary>
-        public const string PROPERTYNAME_OPERATOR = "Operator";
-        #endregion Constants
-
-        #region Methods
-        #endregion Methods
-
-        #region Properties
         /// <summary>
         /// Własność jest tylko do odczytu.
         /// </summary>
-        public IPhpValue Left
-        {
-            get
-            {
-                return left;
-            }
-        }
-        private IPhpValue left;
-        /// <summary>
-        /// Własność jest tylko do odczytu.
-        /// </summary>
-        public IPhpValue Right
-        {
-            get
-            {
-                return right;
-            }
-        }
-        private IPhpValue right;
-        /// <summary>
-        /// Własność jest tylko do odczytu.
-        /// </summary>
-        public string Operator
-        {
-            get
-            {
-                return _operator;
-            }
-        }
-        private string _operator = string.Empty;
-        #endregion Properties
+        public IPhpValue Left { get; }
 
+        /// <summary>
+        /// Własność jest tylko do odczytu.
+        /// </summary>
+        public IPhpValue Right { get; }
+
+        /// <summary>
+        /// Własność jest tylko do odczytu.
+        /// </summary>
+        public string Operator { get; } = string.Empty;
     }
 }

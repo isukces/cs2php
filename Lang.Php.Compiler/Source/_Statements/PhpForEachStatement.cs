@@ -4,46 +4,40 @@ using System.Linq;
 
 namespace Lang.Php.Compiler.Source
 {
-
-    /*
-    smartClass
-    option NoAdditionalFile
-    implement Constructor KeyVarname, ValueVarname, Collection, Statement
-    implement Constructor ValueVarname, Collection, Statement
-    
-    property KeyVarname string 
-    	preprocess value = ad(value);
-    
-    property ValueVarname string 
-    	preprocess value = ad(value);
-    
-    property OneVariable bool 
-    	read only string.IsNullOrEmpty(keyVarname)
-    
-    property Collection IPhpValue 
-    
-    property Statement IPhpStatement 
-    smartClassEnd
-    */
-
-    public partial class PhpForEachStatement : IPhpStatementBase
+    public class PhpForEachStatement : PhpStatementBase
     {
-
-        public override IPhpStatement Simplify(IPhpSimplifier s)
+        /// <summary>
+        ///     Tworzy instancję obiektu
+        ///     <param name="keyVarname"></param>
+        ///     <param name="valueVarname"></param>
+        ///     <param name="collection"></param>
+        ///     <param name="statement"></param>
+        /// </summary>
+        public PhpForEachStatement(string keyVarname, string valueVarname, IPhpValue collection,
+            IPhpStatement                 statement)
         {
-            var __collection = s.Simplify(collection);
-            var __statement = s.Simplify(statement);
-            if (__collection == collection && __statement == statement)
-                return this;
-            if (string.IsNullOrEmpty(keyVarname))
-                return new PhpForEachStatement(valueVarname, __collection, __statement);
-            return new PhpForEachStatement(keyVarname, valueVarname, __collection, __statement);
+            KeyVarname   = keyVarname;
+            ValueVarname = valueVarname;
+            Collection   = collection;
+            Statement    = statement;
         }
-        #region Static Methods
+
+        /// <summary>
+        ///     Tworzy instancję obiektu
+        ///     <param name="valueVarname"></param>
+        ///     <param name="collection"></param>
+        ///     <param name="statement"></param>
+        /// </summary>
+        public PhpForEachStatement(string valueVarname, IPhpValue collection, IPhpStatement statement)
+        {
+            ValueVarname = valueVarname;
+            Collection   = collection;
+            Statement    = statement;
+        }
 
         // Private Methods 
 
-        static string ad(string value)
+        private static string Ad(string value)
         {
             if (string.IsNullOrEmpty(value))
                 throw new NotSupportedException();
@@ -51,213 +45,92 @@ namespace Lang.Php.Compiler.Source
             return value.StartsWith("$") ? value : "$" + value;
         }
 
-        #endregion Static Methods
-
-        #region Methods
-
         // Public Methods 
 
         //LangType ItemType, string VarName, IValue Collection, IStatement Statement
         public override void Emit(PhpSourceCodeEmiter emiter, PhpSourceCodeWriter writer, PhpEmitStyle style)
         {
-            style = style ?? new PhpEmitStyle();
+            style             = style ?? new PhpEmitStyle();
             var arrayOperator = style.Compression == EmitStyleCompression.Beauty ? " => " : "=>";
-            var header = OneVariable ? "foreach({0} as {3})" : "foreach({0} as {1}{2}{3})";
-            header = string.Format(header,
-                collection.GetPhpCode(style),
-                keyVarname, arrayOperator, valueVarname);
-            EmitHeaderStatement(emiter, writer, style, header, statement);
+            var header        = OneVariable ? "foreach({0} as {3})" : "foreach({0} as {1}{2}{3})";
+            header            = string.Format(header,
+                Collection.GetPhpCode(style),
+                _keyVarname, arrayOperator, _valueVarname);
+            EmitHeaderStatement(emiter, writer, style, header, Statement);
         }
 
         public override IEnumerable<ICodeRequest> GetCodeRequests()
         {
-            var t = GetCodeRequests(collection, statement).ToList();
-            if (!string.IsNullOrEmpty(keyVarname))
+            var t = GetCodeRequests(Collection, Statement).ToList();
+            if (!string.IsNullOrEmpty(_keyVarname))
             {
-                var a = new LocalVariableRequest(keyVarname, false,
-                    (nv) =>
-                    {
-                        keyVarname = nv;
-                    });
+                var a                   = new LocalVariableRequest(_keyVarname, false,
+                    nv => { _keyVarname = nv; });
                 t.Add(a);
             }
-            if (!string.IsNullOrEmpty(valueVarname))
+
+            if (!string.IsNullOrEmpty(_valueVarname))
             {
-                var a = new LocalVariableRequest(valueVarname, false,
-                    (nv) =>
-                    {
-                        valueVarname = nv;
-                    });
+                var a                     = new LocalVariableRequest(_valueVarname, false,
+                    nv => { _valueVarname = nv; });
                 t.Add(a);
             }
+
             return t;
         }
 
-        #endregion Methods
-    }
-}
-
-
-// -----:::::##### smartClass embedded code begin #####:::::----- generated 2013-11-07 12:45
-// File generated automatically ver 2013-07-10 08:43
-// Smartclass.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0c4d5d36fb5eb4ac
-namespace Lang.Php.Compiler.Source
-{
-    partial class PhpForEachStatement
-    {
-        /*
-        /// <summary>
-        /// Tworzy instancję obiektu
-        /// </summary>
-        public PhpForEachStatement()
+        public override IPhpStatement Simplify(IPhpSimplifier s)
         {
-        }
-        Przykłady użycia
-        implement INotifyPropertyChanged
-        implement INotifyPropertyChanged_Passive
-        implement ToString ##KeyVarname## ##ValueVarname## ##OneVariable## ##Collection## ##Statement##
-        implement ToString KeyVarname=##KeyVarname##, ValueVarname=##ValueVarname##, OneVariable=##OneVariable##, Collection=##Collection##, Statement=##Statement##
-        implement equals KeyVarname, ValueVarname, OneVariable, Collection, Statement
-        implement equals *
-        implement equals *, ~exclude1, ~exclude2
-        */
-
-
-        #region Constructors
-        /// <summary>
-        /// Tworzy instancję obiektu
-        /// <param name="KeyVarname"></param>
-        /// <param name="ValueVarname"></param>
-        /// <param name="Collection"></param>
-        /// <param name="Statement"></param>
-        /// </summary>
-        public PhpForEachStatement(string KeyVarname, string ValueVarname, IPhpValue Collection, IPhpStatement Statement)
-        {
-            this.KeyVarname = KeyVarname;
-            this.ValueVarname = ValueVarname;
-            this.Collection = Collection;
-            this.Statement = Statement;
+            var collection = s.Simplify(Collection);
+            var statement  = s.Simplify(Statement);
+            if (collection == Collection && statement == Statement)
+                return this;
+            if (string.IsNullOrEmpty(_keyVarname))
+                return new PhpForEachStatement(_valueVarname, collection,    statement);
+            return new PhpForEachStatement(_keyVarname,       _valueVarname, collection, statement);
         }
 
-        /// <summary>
-        /// Tworzy instancję obiektu
-        /// <param name="ValueVarname"></param>
-        /// <param name="Collection"></param>
-        /// <param name="Statement"></param>
-        /// </summary>
-        public PhpForEachStatement(string ValueVarname, IPhpValue Collection, IPhpStatement Statement)
-        {
-            this.ValueVarname = ValueVarname;
-            this.Collection = Collection;
-            this.Statement = Statement;
-        }
 
-        #endregion Constructors
-
-
-        #region Constants
         /// <summary>
-        /// Nazwa własności KeyVarname; 
-        /// </summary>
-        public const string PROPERTYNAME_KEYVARNAME = "KeyVarname";
-        /// <summary>
-        /// Nazwa własności ValueVarname; 
-        /// </summary>
-        public const string PROPERTYNAME_VALUEVARNAME = "ValueVarname";
-        /// <summary>
-        /// Nazwa własności OneVariable; 
-        /// </summary>
-        public const string PROPERTYNAME_ONEVARIABLE = "OneVariable";
-        /// <summary>
-        /// Nazwa własności Collection; 
-        /// </summary>
-        public const string PROPERTYNAME_COLLECTION = "Collection";
-        /// <summary>
-        /// Nazwa własności Statement; 
-        /// </summary>
-        public const string PROPERTYNAME_STATEMENT = "Statement";
-        #endregion Constants
-
-
-        #region Methods
-        #endregion Methods
-
-
-        #region Properties
-        /// <summary>
-        /// 
         /// </summary>
         public string KeyVarname
         {
-            get
-            {
-                return keyVarname;
-            }
+            get => _keyVarname;
             set
             {
-                value = (value ?? String.Empty).Trim();
-                value = ad(value);
-                keyVarname = value;
+                value       = (value ?? string.Empty).Trim();
+                value       = Ad(value);
+                _keyVarname = value;
             }
         }
-        private string keyVarname = string.Empty;
+
         /// <summary>
-        /// 
         /// </summary>
         public string ValueVarname
         {
-            get
-            {
-                return valueVarname;
-            }
+            get => _valueVarname;
             set
             {
-                value = (value ?? String.Empty).Trim();
-                value = ad(value);
-                valueVarname = value;
+                value         = (value ?? string.Empty).Trim();
+                value         = Ad(value);
+                _valueVarname = value;
             }
         }
-        private string valueVarname = string.Empty;
+
         /// <summary>
-        /// Własność jest tylko do odczytu.
+        ///     Własność jest tylko do odczytu.
         /// </summary>
-        public bool OneVariable
-        {
-            get
-            {
-                return string.IsNullOrEmpty(keyVarname);
-            }
-        }
+        public bool OneVariable => string.IsNullOrEmpty(_keyVarname);
+
         /// <summary>
-        /// 
         /// </summary>
-        public IPhpValue Collection
-        {
-            get
-            {
-                return collection;
-            }
-            set
-            {
-                collection = value;
-            }
-        }
-        private IPhpValue collection;
+        public IPhpValue Collection { get; set; }
+
         /// <summary>
-        /// 
         /// </summary>
-        public IPhpStatement Statement
-        {
-            get
-            {
-                return statement;
-            }
-            set
-            {
-                statement = value;
-            }
-        }
-        private IPhpStatement statement;
-        #endregion Properties
+        public IPhpStatement Statement { get; set; }
+
+        private string _keyVarname   = string.Empty;
+        private string _valueVarname = string.Empty;
     }
 }

@@ -4,7 +4,7 @@ using System.Linq;
 // ReSharper disable once CheckNamespace
 namespace Lang.Php.Compiler.Source
 {
-    public abstract class IPhpStatementBase : PhpSourceBase, IPhpStatement
+    public abstract class PhpStatementBase : PhpSourceBase, IPhpStatement
     {
         #region Static Methods
 

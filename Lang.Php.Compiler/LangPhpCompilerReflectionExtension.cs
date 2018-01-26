@@ -35,7 +35,7 @@ namespace Lang.Php.Compiler
         public static DirectCallAttribute GetDirectCallAttribute(this MethodInfo methodInfo)
         {
             if (methodInfo == null)
-                throw new ArgumentNullException("methodInfo");
+                throw new ArgumentNullException(nameof(methodInfo));
             return GetAttribute<DirectCallAttribute>(methodInfo);
         }
     }

@@ -1,91 +1,40 @@
-﻿using System.Globalization;
-using Lang.Cs.Compiler;
-using Lang.Php.Compiler.Source;
-using System;
+﻿using System;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
+using Lang.Cs.Compiler;
+using Lang.Php.Compiler.Source;
 
 namespace Lang.Php.Compiler
 {
-
-    /*
-    smartClass
-    option NoAdditionalFile
-    
-    property Type Type 
-    	read only
-    
-    property ParsedCode CompilationUnit 
-    
-    property IgnoreNamespace bool 
-    	read only GetIgnoreNamespace()
-    
-    property ScriptName PhpQualifiedName 
-    	read only GetScriptName()
-    
-    property IsPage bool czy klasa ma wygenerować moduł z odpalaną metodą PHPMain
-    	read only GetIsPage()
-    
-    property Skip bool czy pominąć generowanie klasy
-    	read only GetSkip()
-    
-    property BuildIn bool class from host application i.e. wordpress
-    	read only GetBuildIn()
-    
-    property DontIncludeModuleForClassMembers bool czy pominąć includowanie modułu z klasą
-    	read only GetDontIncludeModuleForClassMembers()
-    
-    property PageMethod MethodInfo metoda generowana jako kod strony
-    	read only GetPageMethod()
-    
-    property ModuleName PhpCodeModuleName 
-    	read only GetModuleName()
-    
-    property IncludeModule PhpCodeModuleName 
-    	read only GetIncluideModule()
-    
-    property IsReflected bool Infomacja pochodzi jedynie z refleksji a nie z kodu tłumaczonego (prawdopodobnie dotyczy typu z referencyjnej biblioteki)
-    	read only GetIsReflected()
-    
-    property IsArray bool Czy klasa posiada atrybut ARRAY
-    	read only GetIsArray()
-    smartClassEnd
-    */
-
-    public partial class ClassTranslationInfo
+    public class ClassTranslationInfo
     {
-        #region Constructors
-
         /// <summary>
-        /// Tworzy instancję obiektu
-        /// <param name="type"></param>
+        ///     Tworzy instancję obiektu
+        ///     <param name="type"></param>
         /// </summary>
         public ClassTranslationInfo(Type type, TranslationInfo info)
         {
-            _type = type;
+            Type  = type;
             _info = info;
         }
 
-        #endregion Constructors
-
-        #region Static Methods
-
         // Private Methods 
 
-        static string DotNetNameToPhpName(string fullName)
+        private static string DotNetNameToPhpName(string fullName)
         {
             if (fullName == null)
-                throw new ArgumentNullException("fullName");
+                throw new ArgumentNullException(nameof(fullName));
             fullName = fullName.Replace("`", "__");
 
             return string.Join("",
-                    from i in fullName.Replace("+", ".").Split('.')
-                    select PhpQualifiedName.TokenNsSeparator + PhpQualifiedName.SanitizePhpName(i));
+                from i in fullName.Replace("+", ".").Split('.')
+                select PhpQualifiedName.TokenNsSeparator + PhpQualifiedName.SanitizePhpName(i));
         }
 
-        static MethodInfo FindPhpMainMethod(Type type)
+        private static MethodInfo FindPhpMainMethod(Type type)
         {
-            var a = type.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+            var a  = type.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
             var aa = a.FirstOrDefault(i => i.Name == "PhpMain");
             if (aa != null) return aa;
             aa = a.FirstOrDefault(i => i.Name == "PHPMain");
@@ -96,31 +45,27 @@ namespace Lang.Php.Compiler
             throw new Exception(string.Format("tearful leopard: Type {0} has no PhpMain method", type.FullName));
         }
 
-        #endregion Static Methods
-
-        #region Methods
-
         // Public Methods 
 
         public override string ToString()
         {
-            return string.Format("{0} => {1}@{2}", _type.FullName, _scriptName, _moduleName);
+            return string.Format("{0} => {1}@{2}", Type.FullName, _scriptName, _moduleName);
+        }
+
+        private bool GetBuildIn()
+        {
+            Update();
+            return _buildIn;
         }
         // Private Methods 
 
         private bool GetDontIncludeModuleForClassMembers()
         {
             Update();
-            return _skip || _isArray || _type.IsEnum;
+            return _skip || _isArray || Type.IsEnum;
         }
 
-        bool GetBuildIn()
-        {
-            Update();
-            return _buildIn;
-        }
-
-        bool GetIgnoreNamespace()
+        private bool GetIgnoreNamespace()
         {
             Update();
             return _ignoreNamespace;
@@ -132,13 +77,13 @@ namespace Lang.Php.Compiler
             return _isArray || _skip ? null : _moduleName;
         }
 
-        bool GetIsArray()
+        private bool GetIsArray()
         {
             Update();
             return _isArray;
         }
 
-        bool GetIsPage()
+        private bool GetIsPage()
         {
             Update();
             return _isPage;
@@ -168,340 +113,192 @@ namespace Lang.Php.Compiler
             return _scriptName;
         }
 
-        bool GetSkip()
+        private bool GetSkip()
         {
             Update();
             return _skip;
         }
 
-        void Update()
+        private void Update()
         {
             if (_initialized) return;
             _initialized = true;
 
+            var ati = _info.GetOrMakeTranslationInfo(Type.Assembly);
 
-            var ati = _info.GetOrMakeTranslationInfo(_type.Assembly);
-
-
-            var declaringTypeTranslationInfo = (object)_type.DeclaringType == null
+            var declaringTypeTranslationInfo = (object)Type.DeclaringType == null
                 ? null
-                : _info.GetOrMakeTranslationInfo(_type.DeclaringType);
-            var ats = _type.GetCustomAttributes(false);
+                : _info.GetOrMakeTranslationInfo(Type.DeclaringType);
+            var ats          = Type.GetCustomAttributes(false);
             _ignoreNamespace = ats.OfType<IgnoreNamespaceAttribute>().Any();
 
             #region ScriptName
+
             {
                 if (_ignoreNamespace)
-                    _scriptName = (PhpQualifiedName)PhpQualifiedName.SanitizePhpName(_type.Name); // only short name without namespace
-                else if (_type.IsGenericType)
-                    _scriptName = (PhpQualifiedName)DotNetNameToPhpName(_type.FullName ?? _type.Name); // beware of generic types
+                    _scriptName =
+                        (PhpQualifiedName)PhpQualifiedName
+                            .SanitizePhpName(Type.Name); // only short name without namespace
+                else if (Type.IsGenericType)
+                    _scriptName =
+                        (PhpQualifiedName)DotNetNameToPhpName(Type.FullName ?? Type.Name); // beware of generic types
                 else
-                    _scriptName = (PhpQualifiedName)DotNetNameToPhpName(_type.FullName ?? _type.Name);
+                    _scriptName = (PhpQualifiedName)DotNetNameToPhpName(Type.FullName ?? Type.Name);
 
                 var scriptNameAttribute = ats.OfType<ScriptNameAttribute>().FirstOrDefault();
                 if (scriptNameAttribute != null)
-                {
-                    if (scriptNameAttribute.Name.StartsWith(PhpQualifiedName.TokenNsSeparator.ToString(CultureInfo.InvariantCulture)))
+                    if (scriptNameAttribute.Name.StartsWith(
+                        PhpQualifiedName.TokenNsSeparator.ToString(CultureInfo.InvariantCulture)))
                         _scriptName = (PhpQualifiedName)scriptNameAttribute.Name;
                     else if (IgnoreNamespace)
                         _scriptName = (PhpQualifiedName)(PhpQualifiedName.TokenNsSeparator + scriptNameAttribute.Name);
                     else
                         _scriptName =
                             (PhpQualifiedName)
-                                (DotNetNameToPhpName(_type.FullName) + PhpQualifiedName.TokenNsSeparator +
-                                 scriptNameAttribute.Name);
-                }
+                            (DotNetNameToPhpName(Type.FullName) + PhpQualifiedName.TokenNsSeparator +
+                             scriptNameAttribute.Name);
                 if (declaringTypeTranslationInfo != null)
-                    _scriptName = (PhpQualifiedName)(declaringTypeTranslationInfo.ScriptName + "__" + _type.Name); // parent clas followed by __ and short name
+                    _scriptName =
+                        (PhpQualifiedName)(declaringTypeTranslationInfo.ScriptName + "__" +
+                                           Type.Name); // parent clas followed by __ and short name
             }
+
             #endregion
+
             #region Module name
+
             {
                 //if (declaringTypeTranslationInfo != null && declaringTypeTranslationInfo.ModuleName != null)
-                _moduleName = new PhpCodeModuleName(_type, ati, declaringTypeTranslationInfo);
+                _moduleName = new PhpCodeModuleName(Type, ati, declaringTypeTranslationInfo);
             }
+
             #endregion
+
             #region PageAttribute
+
             {
                 var pageAttribute = ats.OfType<PageAttribute>().FirstOrDefault();
-                _isPage = pageAttribute != null;
-                _pageMethod = _isPage ? FindPhpMainMethod(_type) : null;
+                _isPage           = pageAttribute != null;
+                _pageMethod       = _isPage ? FindPhpMainMethod(Type) : null;
             }
+
             #endregion
+
             #region AsArrayAttribute
+
             {
                 var asArrayAttribute = ats.OfType<AsArrayAttribute>().FirstOrDefault();
-                _isArray = asArrayAttribute != null;
+                _isArray             = asArrayAttribute != null;
             }
+
             #endregion
+
             #region SkipAttribute
+
             {
                 var skipAttribute = ats.OfType<SkipAttribute>().FirstOrDefault();
                 if (skipAttribute != null)
                     _skip = true;
             }
+
             #endregion
+
             #region BuiltInAttribute
+
             {
                 var builtInAttribute = ats.OfType<BuiltInAttribute>().FirstOrDefault();
                 if (builtInAttribute != null)
                     _buildIn = true;
             }
+
             #endregion
 
             if (_skip && _buildIn)
-                throw new Exception("Don't mix SkipAttribute and BuiltInAttribute for type " + _type.ExcName());
+                throw new Exception("Don't mix SkipAttribute and BuiltInAttribute for type " + Type.ExcName());
             if (_buildIn)
                 _skip = true;
-            if (_type.IsGenericParameter)
+            if (Type.IsGenericParameter)
                 _skip = true;
             if (_isArray)
                 _skip = true;
         }
 
-            #endregion Methods
 
-        #region Fields
+        /// <summary>
+        ///     Własność jest tylko do odczytu.
+        /// </summary>
+        public Type Type { get; }
 
-        private bool _buildIn;
-        private bool _ignoreNamespace;
-        private readonly TranslationInfo _info;
-        bool _initialized;
-        private bool _isArray;
-        private bool _isPage;
-        private bool _isReflected;
-        private PhpCodeModuleName _moduleName;
-        private MethodInfo _pageMethod;
-        private PhpQualifiedName _scriptName;
-        private bool _skip;
+        /// <summary>
+        /// </summary>
+        public CompilationUnit ParsedCode { get; set; }
 
-        #endregion Fields
-    }
-}
+        /// <summary>
+        ///     Własność jest tylko do odczytu.
+        /// </summary>
+        public bool IgnoreNamespace => GetIgnoreNamespace();
 
+        /// <summary>
+        ///     Własność jest tylko do odczytu.
+        /// </summary>
+        public PhpQualifiedName ScriptName => GetScriptName();
 
-// -----:::::##### smartClass embedded code begin #####:::::----- generated 2014-09-27 11:28
-// File generated automatically ver 2014-09-01 19:00
-// Smartclass.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0c4d5d36fb5eb4ac
-namespace Lang.Php.Compiler
-{
-    public partial class ClassTranslationInfo
-    {
-        /*
         /// <summary>
-        /// Tworzy instancję obiektu
+        ///     czy klasa ma wygenerować moduł z odpalaną metodą PHPMain; własność jest tylko do odczytu.
         /// </summary>
-        public ClassTranslationInfo()
-        {
-        }
-        Przykłady użycia
-        implement INotifyPropertyChanged
-        implement INotifyPropertyChanged_Passive
-        implement ToString ##Type## ##ParsedCode## ##IgnoreNamespace## ##ScriptName## ##IsPage## ##Skip## ##BuildIn## ##DontIncludeModuleForClassMembers## ##PageMethod## ##ModuleName## ##IncludeModule## ##IsReflected## ##IsArray##
-        implement ToString Type=##Type##, ParsedCode=##ParsedCode##, IgnoreNamespace=##IgnoreNamespace##, ScriptName=##ScriptName##, IsPage=##IsPage##, Skip=##Skip##, BuildIn=##BuildIn##, DontIncludeModuleForClassMembers=##DontIncludeModuleForClassMembers##, PageMethod=##PageMethod##, ModuleName=##ModuleName##, IncludeModule=##IncludeModule##, IsReflected=##IsReflected##, IsArray=##IsArray##
-        implement equals Type, ParsedCode, IgnoreNamespace, ScriptName, IsPage, Skip, BuildIn, DontIncludeModuleForClassMembers, PageMethod, ModuleName, IncludeModule, IsReflected, IsArray
-        implement equals *
-        implement equals *, ~exclude1, ~exclude2
-        */
+        public bool IsPage => GetIsPage();
 
+        /// <summary>
+        ///     czy pominąć generowanie klasy; własność jest tylko do odczytu.
+        /// </summary>
+        public bool Skip => GetSkip();
 
-        #region Constants
         /// <summary>
-        /// Nazwa własności Type; 
+        ///     class from host application i.e. wordpress; własność jest tylko do odczytu.
         /// </summary>
-        public const string PropertyNameType = "Type";
-        /// <summary>
-        /// Nazwa własności ParsedCode; 
-        /// </summary>
-        public const string PropertyNameParsedCode = "ParsedCode";
-        /// <summary>
-        /// Nazwa własności IgnoreNamespace; 
-        /// </summary>
-        public const string PropertyNameIgnoreNamespace = "IgnoreNamespace";
-        /// <summary>
-        /// Nazwa własności ScriptName; 
-        /// </summary>
-        public const string PropertyNameScriptName = "ScriptName";
-        /// <summary>
-        /// Nazwa własności IsPage; czy klasa ma wygenerować moduł z odpalaną metodą PHPMain
-        /// </summary>
-        public const string PropertyNameIsPage = "IsPage";
-        /// <summary>
-        /// Nazwa własności Skip; czy pominąć generowanie klasy
-        /// </summary>
-        public const string PropertyNameSkip = "Skip";
-        /// <summary>
-        /// Nazwa własności BuildIn; class from host application i.e. wordpress
-        /// </summary>
-        public const string PropertyNameBuildIn = "BuildIn";
-        /// <summary>
-        /// Nazwa własności DontIncludeModuleForClassMembers; czy pominąć includowanie modułu z klasą
-        /// </summary>
-        public const string PropertyNameDontIncludeModuleForClassMembers = "DontIncludeModuleForClassMembers";
-        /// <summary>
-        /// Nazwa własności PageMethod; metoda generowana jako kod strony
-        /// </summary>
-        public const string PropertyNamePageMethod = "PageMethod";
-        /// <summary>
-        /// Nazwa własności ModuleName; 
-        /// </summary>
-        public const string PropertyNameModuleName = "ModuleName";
-        /// <summary>
-        /// Nazwa własności IncludeModule; 
-        /// </summary>
-        public const string PropertyNameIncludeModule = "IncludeModule";
-        /// <summary>
-        /// Nazwa własności IsReflected; Infomacja pochodzi jedynie z refleksji a nie z kodu tłumaczonego (prawdopodobnie dotyczy typu z referencyjnej biblioteki)
-        /// </summary>
-        public const string PropertyNameIsReflected = "IsReflected";
-        /// <summary>
-        /// Nazwa własności IsArray; Czy klasa posiada atrybut ARRAY
-        /// </summary>
-        public const string PropertyNameIsArray = "IsArray";
-        #endregion Constants
+        public bool BuildIn => GetBuildIn();
 
+        /// <summary>
+        ///     czy pominąć includowanie modułu z klasą; własność jest tylko do odczytu.
+        /// </summary>
+        public bool DontIncludeModuleForClassMembers => GetDontIncludeModuleForClassMembers();
 
-        #region Methods
-        #endregion Methods
+        /// <summary>
+        ///     metoda generowana jako kod strony; własność jest tylko do odczytu.
+        /// </summary>
+        public MethodInfo PageMethod => GetPageMethod();
 
+        /// <summary>
+        ///     Własność jest tylko do odczytu.
+        /// </summary>
+        public PhpCodeModuleName ModuleName => GetModuleName();
 
-        #region Properties
         /// <summary>
-        /// Własność jest tylko do odczytu.
+        ///     Własność jest tylko do odczytu.
         /// </summary>
-        public Type Type
-        {
-            get
-            {
-                return _type;
-            }
-        }
-        private Type _type;
+        public PhpCodeModuleName IncludeModule => GetIncluideModule();
+
         /// <summary>
-        /// 
+        ///     Infomacja pochodzi jedynie z refleksji a nie z kodu tłumaczonego (prawdopodobnie dotyczy typu z referencyjnej
+        ///     biblioteki); własność jest tylko do odczytu.
         /// </summary>
-        public CompilationUnit ParsedCode
-        {
-            get
-            {
-                return _parsedCode;
-            }
-            set
-            {
-                _parsedCode = value;
-            }
-        }
-        private CompilationUnit _parsedCode;
+        public bool IsReflected => GetIsReflected();
+
         /// <summary>
-        /// Własność jest tylko do odczytu.
+        ///     Czy klasa posiada atrybut ARRAY; własność jest tylko do odczytu.
         /// </summary>
-        public bool IgnoreNamespace
-        {
-            get
-            {
-                return GetIgnoreNamespace();
-            }
-        }
-        /// <summary>
-        /// Własność jest tylko do odczytu.
-        /// </summary>
-        public PhpQualifiedName ScriptName
-        {
-            get
-            {
-                return GetScriptName();
-            }
-        }
-        /// <summary>
-        /// czy klasa ma wygenerować moduł z odpalaną metodą PHPMain; własność jest tylko do odczytu.
-        /// </summary>
-        public bool IsPage
-        {
-            get
-            {
-                return GetIsPage();
-            }
-        }
-        /// <summary>
-        /// czy pominąć generowanie klasy; własność jest tylko do odczytu.
-        /// </summary>
-        public bool Skip
-        {
-            get
-            {
-                return GetSkip();
-            }
-        }
-        /// <summary>
-        /// class from host application i.e. wordpress; własność jest tylko do odczytu.
-        /// </summary>
-        public bool BuildIn
-        {
-            get
-            {
-                return GetBuildIn();
-            }
-        }
-        /// <summary>
-        /// czy pominąć includowanie modułu z klasą; własność jest tylko do odczytu.
-        /// </summary>
-        public bool DontIncludeModuleForClassMembers
-        {
-            get
-            {
-                return GetDontIncludeModuleForClassMembers();
-            }
-        }
-        /// <summary>
-        /// metoda generowana jako kod strony; własność jest tylko do odczytu.
-        /// </summary>
-        public MethodInfo PageMethod
-        {
-            get
-            {
-                return GetPageMethod();
-            }
-        }
-        /// <summary>
-        /// Własność jest tylko do odczytu.
-        /// </summary>
-        public PhpCodeModuleName ModuleName
-        {
-            get
-            {
-                return GetModuleName();
-            }
-        }
-        /// <summary>
-        /// Własność jest tylko do odczytu.
-        /// </summary>
-        public PhpCodeModuleName IncludeModule
-        {
-            get
-            {
-                return GetIncluideModule();
-            }
-        }
-        /// <summary>
-        /// Infomacja pochodzi jedynie z refleksji a nie z kodu tłumaczonego (prawdopodobnie dotyczy typu z referencyjnej biblioteki); własność jest tylko do odczytu.
-        /// </summary>
-        public bool IsReflected
-        {
-            get
-            {
-                return GetIsReflected();
-            }
-        }
-        /// <summary>
-        /// Czy klasa posiada atrybut ARRAY; własność jest tylko do odczytu.
-        /// </summary>
-        public bool IsArray
-        {
-            get
-            {
-                return GetIsArray();
-            }
-        }
-        #endregion Properties
+        public bool IsArray => GetIsArray();
+
+        private          bool              _buildIn;
+        private          bool              _ignoreNamespace;
+        private readonly TranslationInfo   _info;
+        private          bool              _initialized;
+        private          bool              _isArray;
+        private          bool              _isPage;
+        private          bool              _isReflected;
+        private          PhpCodeModuleName _moduleName;
+        private          MethodInfo        _pageMethod;
+        private          PhpQualifiedName  _scriptName;
+        private          bool              _skip;
     }
 }

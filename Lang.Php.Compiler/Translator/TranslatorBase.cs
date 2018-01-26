@@ -38,7 +38,7 @@ namespace Lang.Php.Compiler.Translator
         public TranslatorBase(TranslationState state)
         {
             if (state == null)
-                throw new ArgumentNullException("state");
+                throw new ArgumentNullException(nameof(state));
             this.state = state;
         }
 

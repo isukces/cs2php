@@ -2,7 +2,7 @@
 
 namespace Lang.Php.Compiler.Source
 {
-    public class PhpContinueStatement : IPhpStatementBase
+    public class PhpContinueStatement : PhpStatementBase
     {
 		#region Methods 
 

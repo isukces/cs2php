@@ -1,40 +1,47 @@
-﻿using Lang.Cs.Compiler;
-using System;
+﻿using System;
 using System.Linq;
+using Lang.Cs.Compiler;
 
 namespace Lang.Php.Compiler.Translator
 {
-
-    public sealed partial class TranslationState : IExternalTranslationContext
+    public sealed class TranslationState : IExternalTranslationContext
     {
-		#region Methods 
-
-		// Public Methods 
+        /// <summary>
+        ///     Tworzy instancję obiektu
+        ///     <param name="principles"></param>
+        /// </summary>
+        public TranslationState(TranslationInfo principles)
+        {
+            Principles = principles;
+        }
+        // Public Methods 
 
         public ClassReplaceInfo FindOneClassReplacer(Type srcType)
         {
             var type = srcType;
             if (type.IsGenericType)
-                type = type.GetGenericTypeDefinition();
+                type      = type.GetGenericTypeDefinition();
             var replacers = ClassReplacers.Where(i => i.SourceType == type).ToArray();
             if (!replacers.Any()) return null;
             if (replacers.Length > 1)
-                throw new Exception(string.Format("wise gecko, class replacers has more than 1 replacer for {0}", type.FullName));
+                throw new Exception(string.Format("wise gecko, class replacers has more than 1 replacer for {0}",
+                    type.FullName));
             var atype = replacers[0];
 
             if (srcType.IsGenericType)
             {
-                var a = srcType.GetGenericArguments();
+                var a     = srcType.GetGenericArguments();
                 var gtype = atype.ReplaceBy.MakeGenericType(a);
-                atype = new ClassReplaceInfo(srcType, gtype);
+                atype     = new ClassReplaceInfo(srcType, gtype);
             }
+
             return atype;
         }
-		// Private Methods 
+        // Private Methods 
 
         TranslationInfo IExternalTranslationContext.GetTranslationInfo()
         {
-            return _principles;
+            return Principles;
         }
 
         IPhpValue IExternalTranslationContext.TranslateValue(IValue srcValue)
@@ -44,118 +51,29 @@ namespace Lang.Php.Compiler.Translator
 
             var t = new PhpValueTranslator(this);
             var g = t.TransValue(srcValue);
-          
+
             return g;
         }
 
-		#endregion Methods 
-
-		#region Fields 
-
-        ClassReplaceInfo[] _cl;
-
-		#endregion Fields 
-
-		#region Properties 
-
-        public ClassReplaceInfo[] ClassReplacers
-        {
-            get
-            {
-                return _cl ?? (_cl = (from assembly in _principles.TranslationAssemblies
-                    from type in assembly.GetTypes()
-                    let attributes = type.GetCustomAttributes(false).OfType<ReplaceAttribute>().ToArray()
-                    where attributes != null && attributes.Any()
-                    from attribute in attributes
-                    select new ClassReplaceInfo(attribute.ReplacedType, type)
-                    ).Distinct().ToArray());
-            }
-        }
-
-		#endregion Properties 
-    }
-}
+        public ClassReplaceInfo[] ClassReplacers => _cl ?? (_cl = (from assembly in Principles.TranslationAssemblies
+                                                        from type in assembly.GetTypes()
+                                                        let attributes = type.GetCustomAttributes(false)
+                                                            .OfType<ReplaceAttribute>().ToArray()
+                                                        where attributes != null && attributes.Any()
+                                                        from attribute in attributes
+                                                        select new ClassReplaceInfo(attribute.ReplacedType, type)
+                                                    ).Distinct().ToArray());
 
 
-// -----:::::##### smartClass embedded code begin #####:::::----- generated 2014-09-03 18:12
-// File generated automatically ver 2014-09-01 19:00
-// Smartclass.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0c4d5d36fb5eb4ac
-namespace Lang.Php.Compiler.Translator
-{
-    public partial class TranslationState 
-    {
-        /*
         /// <summary>
-        /// Tworzy instancję obiektu
+        ///     Własność jest tylko do odczytu.
         /// </summary>
-        public TranslationState()
-        {
-        }
+        public TranslationInfo Principles { get; }
 
-        Przykłady użycia
-
-        implement INotifyPropertyChanged
-        implement INotifyPropertyChanged_Passive
-        implement ToString ##Principles## ##PhpVersion##
-        implement ToString Principles=##Principles##, PhpVersion=##PhpVersion##
-        implement equals Principles, PhpVersion
-        implement equals *
-        implement equals *, ~exclude1, ~exclude2
-        */
-        #region Constructors
         /// <summary>
-        /// Tworzy instancję obiektu
-        /// <param name="principles"></param>
         /// </summary>
-        public TranslationState(TranslationInfo principles)
-        {
-            _principles = principles;
-        }
+        public Version PhpVersion { get; set; } = new Version(5, 3, 0);
 
-        #endregion Constructors
-
-        #region Constants
-        /// <summary>
-        /// Nazwa własności Principles; 
-        /// </summary>
-        public const string PropertyNamePrinciples = "Principles";
-        /// <summary>
-        /// Nazwa własności PhpVersion; 
-        /// </summary>
-        public const string PropertyNamePhpVersion = "PhpVersion";
-        #endregion Constants
-
-        #region Methods
-        #endregion Methods
-
-        #region Properties
-        /// <summary>
-        /// Własność jest tylko do odczytu.
-        /// </summary>
-        public TranslationInfo Principles
-        {
-            get
-            {
-                return _principles;
-            }
-        }
-        private TranslationInfo _principles;
-        /// <summary>
-        /// 
-        /// </summary>
-        public Version PhpVersion
-        {
-            get
-            {
-                return _phpVersion;
-            }
-            set
-            {
-                _phpVersion = value;
-            }
-        }
-        private Version _phpVersion = new Version(5,3,0);
-        #endregion Properties
-
+        private ClassReplaceInfo[] _cl;
     }
 }

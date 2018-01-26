@@ -2,7 +2,7 @@
 
 namespace Lang.Php.Compiler.Source
 {
-    public class PhpBreakStatement : IPhpStatementBase
+    public class PhpBreakStatement : PhpStatementBase
     {
         public override void Emit(PhpSourceCodeEmiter emiter, PhpSourceCodeWriter writer, PhpEmitStyle style)
         {

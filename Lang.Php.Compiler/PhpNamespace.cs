@@ -1,30 +1,16 @@
-﻿using System;
-
-namespace Lang.Php.Compiler
+﻿namespace Lang.Php.Compiler
 {
-
-    /*
-    smartClass
-    option NoAdditionalFile
-    implement Constructor Name
-    implement Equals Name
-    
-    property Name string 
-    	init ROOT_NAME
-    	preprocess value = Prepare(value);
-    	OnChange isRoot = IsRootNamespace(name);
-    
-    property IsRoot bool 
-    	init true
-    	read only
-    smartClassEnd
-    */
-
-    public partial class PhpNamespace
+    public class PhpNamespace
     {
-		#region Static Methods 
-
-		// Public Methods 
+        /// <summary>
+        ///     Tworzy instancję obiektu
+        ///     <param name="Name"></param>
+        /// </summary>
+        public PhpNamespace(string Name)
+        {
+            this.Name = Name;
+        }
+        // Public Methods 
 
         public static bool IsRootNamespace(string name)
         {
@@ -45,93 +31,35 @@ namespace Lang.Php.Compiler
             return ns;
         }
 
-		#endregion Static Methods 
-
-		#region Methods 
-
-		// Public Methods 
+        // Public Methods 
 
         public override string ToString()
         {
             return name;
         }
 
-		#endregion Methods 
-
-		#region Fields 
+        public static PhpNamespace Root => new PhpNamespace(ROOT_NAME);
 
         public const string ROOT_NAME = PathUtil.WIN_SEP;
 
-		#endregion Fields 
-
-		#region Static Properties 
-
-        public static PhpNamespace Root
-        {
-            get
-            {
-                return new PhpNamespace(ROOT_NAME);
-            }
-        }
-
-		#endregion Static Properties 
-    }
-}
-
-
-// -----:::::##### smartClass embedded code begin #####:::::----- generated 2014-01-03 12:53
-// File generated automatically ver 2013-07-10 08:43
-// Smartclass.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0c4d5d36fb5eb4ac
-namespace Lang.Php.Compiler
-{
-    public partial class PhpNamespace : IEquatable<PhpNamespace>
-    {
-        /*
-        /// <summary>
-        /// Tworzy instancję obiektu
-        /// </summary>
-        public PhpNamespace()
-        {
-        }
-        Przykłady użycia
-        implement INotifyPropertyChanged
-        implement INotifyPropertyChanged_Passive
-        implement ToString ##Name## ##IsRoot##
-        implement ToString Name=##Name##, IsRoot=##IsRoot##
-        implement equals Name, IsRoot
-        implement equals *
-        implement equals *, ~exclude1, ~exclude2
-        */
-
-
-        #region Constructors
-        /// <summary>
-        /// Tworzy instancję obiektu
-        /// <param name="Name"></param>
-        /// </summary>
-        public PhpNamespace(string Name)
-        {
-            this.Name = Name;
-        }
-
-        #endregion Constructors
-
 
         #region Constants
+
         /// <summary>
-        /// Nazwa własności Name; 
+        ///     Nazwa własności Name;
         /// </summary>
         public const string PROPERTYNAME_NAME = "Name";
+
         /// <summary>
-        /// Nazwa własności IsRoot; 
+        ///     Nazwa własności IsRoot;
         /// </summary>
         public const string PROPERTYNAME_ISROOT = "IsRoot";
+
         #endregion Constants
 
 
-        #region Methods
         /// <summary>
-        /// Sprawdza, czy wskazany obiekt jest równy bieżącemu
+        ///     Sprawdza, czy wskazany obiekt jest równy bieżącemu
         /// </summary>
         /// <param name="obj">obiekt do porównania z obiektem bieżącym</param>
         /// <returns><c>true</c> jeśli wskazany obiekt jest równy bieżącemu; w przeciwnym wypadku<c>false</c></returns>
@@ -141,7 +69,7 @@ namespace Lang.Php.Compiler
         }
 
         /// <summary>
-        /// Sprawdza, czy wskazany obiekt jest równy bieżącemu
+        ///     Sprawdza, czy wskazany obiekt jest równy bieżącemu
         /// </summary>
         /// <param name="obj">obiekt do porównania z obiektem bieżącym</param>
         /// <returns><c>true</c> jeśli wskazany obiekt jest równy bieżącemu; w przeciwnym wypadku<c>false</c></returns>
@@ -152,7 +80,7 @@ namespace Lang.Php.Compiler
         }
 
         /// <summary>
-        /// Zwraca kod HASH obiektu
+        ///     Zwraca kod HASH obiektu
         /// </summary>
         /// <returns>kod HASH obiektu</returns>
         public override int GetHashCode()
@@ -160,12 +88,9 @@ namespace Lang.Php.Compiler
             return name.GetHashCode();
         }
 
-        #endregion Methods
 
-
-        #region Operators
         /// <summary>
-        /// Realizuje operator ==
+        ///     Realizuje operator ==
         /// </summary>
         /// <param name="left">lewa strona porównania</param>
         /// <param name="right">prawa strona porównania</param>
@@ -178,7 +103,7 @@ namespace Lang.Php.Compiler
         }
 
         /// <summary>
-        /// Realizuje operator !=
+        ///     Realizuje operator !=
         /// </summary>
         /// <param name="left">lewa strona porównania</param>
         /// <param name="right">prawa strona porównania</param>
@@ -190,40 +115,27 @@ namespace Lang.Php.Compiler
             return left.name != right.name;
         }
 
-        #endregion Operators
 
-
-        #region Properties
         /// <summary>
-        /// 
         /// </summary>
         public string Name
         {
-            get
-            {
-                return name;
-            }
+            get => name;
             set
             {
-                value = (value ?? String.Empty).Trim();
+                value = (value ?? string.Empty).Trim();
                 value = Prepare(value);
                 if (value == name) return;
-                name = value;
-                isRoot = IsRootNamespace(name);
+                name   = value;
+                IsRoot = IsRootNamespace(name);
             }
         }
+
         private string name = ROOT_NAME;
+
         /// <summary>
-        /// Własność jest tylko do odczytu.
+        ///     Własność jest tylko do odczytu.
         /// </summary>
-        public bool IsRoot
-        {
-            get
-            {
-                return isRoot;
-            }
-        }
-        private bool isRoot = true;
-        #endregion Properties
+        public bool IsRoot { get; private set; } = true;
     }
 }

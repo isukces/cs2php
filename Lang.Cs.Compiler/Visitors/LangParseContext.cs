@@ -1,87 +1,93 @@
-﻿using Microsoft.CodeAnalysis;
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Compilation = Microsoft.CodeAnalysis.Compilation;
-using MethodKind = Microsoft.CodeAnalysis.MethodKind;
-using SemanticModel = Microsoft.CodeAnalysis.SemanticModel;
-using TypeKind = Microsoft.CodeAnalysis.TypeKind;
 
 namespace Lang.Cs.Compiler.Visitors
 {
-    /*
-    smartClass
-    option NoAdditionalFile
-    
-    property CurrentNamespace string 
-    
-    property ImportedNamespaces List<ImportNamespace> 
-    	init #
-    
-    property ClassNames Stack<string> 
-    	init #
-    
-    property KnownTypes Type[] 
-    
-    property LocalVariables List<NameType> 
-    	init #
-    
-    property Arguments List<FunctionDeclarationParameter> 
-    	init #
-    
-    property RoslynCompilation Compilation 
-    	OnChange ClearCache();
-    
-    property RoslynModel SemanticModel 
-    	OnChange ClearCache();
-    smartClassEnd
-    */
-    
-    public partial class LangParseContext
+    public class LangParseContext
     {
-        #region Methods
+        private static bool CompareArrayTypes(ParameterInfo[] a, Type[] b)
+        {
+            if (a.Length != b.Length) return false;
+            for (int i = 0; i < a.Length; i++)
+            {
+                var g = a[i].ParameterType;
+                var bb = b[i];
+                if (g != bb)
+                    return false;
+            }
 
+            return true;
+        }
+
+        /// <summary>
+        ///     it is only workaround method
+        /// </summary>
+        /// <param name="a"></param>
+        /// <param name="b"></param>
+        /// <param name="ignoreAssemblyVersion"></param>
+        /// <returns></returns>
+        private static bool CompareTypes(Type a, Type b, bool ignoreAssemblyVersion)
+        {
+            if (a == b)
+                return true;
+            if (!ignoreAssemblyVersion)
+                return false;
+            return a.FullName == b.FullName;
+        }
+
+        private static bool ParameterNamesEqual(IMethodSymbol a, MethodInfo b)
+        {
+            if (a.Name != b.Name)
+                return false;
+            var c = a.Parameters.AsEnumerable().Select(i => i.Name).ToArray();
+            var d = b.GetParameters().Select(i => i.Name).ToArray();
+            var cc = string.Join("\r\n", c);
+            var dd = string.Join("\r\n", d);
+            return cc == dd;
+        }
         // Public Methods 
 
         public void DoWithLocalVariables(VariableDeclaration declaration, Action action)
         {
-            var savedVariables = _localVariables.ToArray();
+            var savedVariables = LocalVariables.ToArray();
             try
             {
                 if (declaration != null)
                     foreach (var i in declaration.Declarators)
-                        _localVariables.Add(new NameType(i.Name, declaration.Type));
+                        LocalVariables.Add(new NameType(i.Name, declaration.Type));
                 action();
             }
             finally
             {
-                _localVariables = savedVariables.ToList();
+                LocalVariables = savedVariables.ToList();
             }
         }
 
         public T DoWithLocalVariables<T>(VariableDeclaration declaration, Func<T> action)
         {
-            var savedVariables = _localVariables.ToArray();
+            var savedVariables = LocalVariables.ToArray();
             try
             {
-                if (declaration == null) 
+                if (declaration == null)
                     return action();
                 foreach (var i in declaration.Declarators)
-                    _localVariables.Add(new NameType(i.Name, declaration.Type));
+                    LocalVariables.Add(new NameType(i.Name, declaration.Type));
                 return action();
             }
             finally
             {
-                _localVariables = savedVariables.ToList();
+                LocalVariables = savedVariables.ToList();
             }
         }
 
         public NameType GetLocalVariableByName(string variableName)
         {
-            var g = _localVariables.Where(u => u.Name == variableName).ToArray();
+            var g = LocalVariables.Where(u => u.Name == variableName).ToArray();
             if (g.Length == 1)
                 return g.First();
             throw new Exception("rough salamander, unable to find local variable " + variableName);
@@ -93,20 +99,20 @@ namespace Lang.Cs.Compiler.Visitors
                 name += "`" + gen;
 
             if (TypesUtil.PRIMITIVE_TYPES.ContainsKey(name))
-                return new[] { TypesUtil.PRIMITIVE_TYPES[name] };
+                return new[] {TypesUtil.PRIMITIVE_TYPES[name]};
             var t1 = KnownTypes.Where(i => i.FullName == name).ToArray();
             if (t1.Length == 1)
                 return t1;
             if (t1.Length > 1)
                 throw new Exception("pink sparrow");
 
-            var fullNames = _importedNamespaces.Select(i => i.Name + "." + name).Distinct().ToList();
+            var fullNames = ImportedNamespaces.Select(i => i.Name + "." + name).Distinct().ToList();
             if (!string.IsNullOrEmpty(_currentNamespace))
                 fullNames.Add(_currentNamespace + "." + name);
             var types = (from fullname in fullNames.Distinct()
-                         join type in KnownTypes
-                         on fullname equals type.FullName
-                         select type).ToArray();
+                join type in KnownTypes
+                    on fullname equals type.FullName
+                select type).ToArray();
 
             return types;
         }
@@ -117,8 +123,8 @@ namespace Lang.Cs.Compiler.Visitors
                 m = _roslynCompilation.GlobalNamespace;
             var a = m.GetTypeMembers().ToArray();
             var b = (from mm in m.GetNamespaceMembers()
-                     from h in Roslyn_GetNamedTypeSymbols(mm)
-                     select h).ToArray();
+                from h in Roslyn_GetNamedTypeSymbols(mm)
+                select h).ToArray();
             return a.Union(b).ToArray();
         }
 
@@ -127,7 +133,6 @@ namespace Lang.Cs.Compiler.Visitors
 #warning 'Dorobić const'
             var f = type.IsStatic ? BindingFlags.Static : BindingFlags.Instance;
             f |= BindingFlags.Public | BindingFlags.NonPublic;
-
 
             var ct = Roslyn_ResolveType(type.ContainingType);
             var fi = ct.GetField(type.Name, f);
@@ -151,7 +156,6 @@ namespace Lang.Cs.Compiler.Visitors
             var ttt = tt.GetProperty(type.Name);
             return ttt;
             throw new NotSupportedException();
-
         }
 
         public Type Roslyn_ResolveType(ITypeSymbol type)
@@ -163,6 +167,11 @@ namespace Lang.Cs.Compiler.Visitors
             _cacheRoslynResolveType[type] = t;
             return t;
         }
+
+        internal MethodHeaderInfo GetMethodMethodHeaderInfo(MethodDeclarationSyntax tmp)
+        {
+            return _getMethodMethodHeaderInfoCache.GetOrAdd(tmp, tmp1 => MethodHeaderInfo.Get(this, tmp1));
+        }
         // Private Methods 
 
         private MethodBase _Resolve_OrdinaryMethod(IMethodSymbol method)
@@ -172,7 +181,7 @@ namespace Lang.Cs.Compiler.Visitors
 
             var rt = Roslyn_ResolveType(method.ReturnType);
             var _typeArguments = method.TypeArguments.ToArray();
-            if (_typeArguments == null) 
+            if (_typeArguments == null)
                 throw new ArgumentNullException("_typeArguments");
             var typeArguments = _typeArguments.Select(Roslyn_ResolveType).ToArray();
             var rType = Roslyn_ResolveType(method.ReturnType);
@@ -182,26 +191,27 @@ namespace Lang.Cs.Compiler.Visitors
             MethodInfo[] AllMethods = hostType.GetMethods(reflectionFlags).Where(i => i.Name == method.Name).ToArray();
             var
                 AllMethods1 = (from i in AllMethods
-                               where ParameterNamesEqual(method, i)
-                               select i
-                                   ).ToArray();
+                    where ParameterNamesEqual(method, i)
+                    select i
+                ).ToArray();
             if (typeArguments.Length == 0)
             {
                 if (AllMethods.Length == 1)
                     return AllMethods[0];
                 {
                     var a = AllMethods
-                            .Where(i =>
-                                i.Name == method.Name
-                                && !i.IsGenericMethodDefinition
-                                && CompareArrayTypes(i.GetParameters(), pTypes)).ToArray();
+                        .Where(i =>
+                            i.Name == method.Name
+                            && !i.IsGenericMethodDefinition
+                            && CompareArrayTypes(i.GetParameters(), pTypes)).ToArray();
                     if (a.Length > 0)
                     {
                         // throw new Exception(string.Format("Unable to find method {1}.{0}", method.Name,  hostType.FullName));
                         if (a.Length == 1)
                             return a.First();
                         if (a.Length == 0)
-                            throw new Exception(string.Format("Unable to find method {1}.{0}", method.Name, hostType.FullName));
+                            throw new Exception(string.Format("Unable to find method {1}.{0}", method.Name,
+                                hostType.FullName));
                         a = a.Where(i => i.ReturnType == rType).ToArray();
                         if (a.Length == 1)
                             return a.First();
@@ -216,6 +226,7 @@ namespace Lang.Cs.Compiler.Visitors
                 {
                     m = null;
                 }
+
                 if (m != null)
                     return m;
                 throw new Exception();
@@ -227,29 +238,30 @@ namespace Lang.Cs.Compiler.Visitors
                 {
                     //metody generyczne w niegenerycznej klasie
                     pTypes1 = (from i in pTypes
-                               select i.IsGenericType && !i.IsGenericTypeDefinition
-                               ? i.GetGenericTypeDefinition()
-                               : i
-                                   ).ToArray();
+                        select i.IsGenericType && !i.IsGenericTypeDefinition
+                            ? i.GetGenericTypeDefinition()
+                            : i
+                    ).ToArray();
                     if (rType.IsGenericType && !rType.IsGenericTypeDefinition)
                         rType = rType.GetGenericTypeDefinition();
                 }
+
                 var arity = typeArguments.Length;
                 var am = hostType.GetMethods(reflectionFlags);
                 var am1 = (from i in am
-                           where
-                           i.Name == method.Name
-                           && i.IsGenericMethodDefinition
-                           && i.GetGenericArguments().Length == arity
-                           let aa = i.MakeGenericMethod(typeArguments)
-                           // where aa.ReturnType == rt
-                           select new
-                           {
-                               Method = i,
-                               GMethod = aa,
-                               Rt = aa.ReturnType
-                           }
-                               ).ToArray();
+                    where
+                        i.Name == method.Name
+                        && i.IsGenericMethodDefinition
+                        && i.GetGenericArguments().Length == arity
+                    let aa = i.MakeGenericMethod(typeArguments)
+                    // where aa.ReturnType == rt
+                    select new
+                    {
+                        Method = i,
+                        GMethod = aa,
+                        Rt = aa.ReturnType
+                    }
+                ).ToArray();
                 MethodInfo[] a = (from i in am1 where CompareTypes(i.Rt, rt, true) select i.Method).ToArray();
                 //var am1 = am.Where(i => i.Name == method.Name && i.IsGenericMethodDefinition)
                 //    .Select(i => new { Method = i, GA = i.GetGenericArguments() })
@@ -261,19 +273,20 @@ namespace Lang.Cs.Compiler.Visitors
                 //                  select i.Method
                 //                      ).ToArray();
                 if (a.Length == 0)
-                    throw new Exception(string.Format("Unable to find method {2}.{0} with arity {1}", method.Name, arity, hostType.FullName));
+                    throw new Exception(string.Format("Unable to find method {2}.{0} with arity {1}", method.Name,
+                        arity, hostType.FullName));
                 if (a.Length == 1)
                 {
                     var yy = a[0].MakeGenericMethod(typeArguments);
                     return yy;
                 }
+
                 {
                     var method2 = hostType.GetMethod(
                         method.Name, reflectionFlags,
                         null,
                         pTypes,
                         null);
-
                 }
                 var hh = method.IsDefinition;
                 var ggg = method.IsGenericMethod;
@@ -295,39 +308,10 @@ namespace Lang.Cs.Compiler.Visitors
             }
         }
 
-        void ClearCache()
+        private void ClearCache()
         {
             _roslynAllNamedTypeSymbols = null;
             _cacheRoslynResolveType.Clear();
-        }
-
-        /// <summary>
-        /// it is only workaround method
-        /// </summary>
-        /// <param name="a"></param>
-        /// <param name="b"></param>
-        /// <param name="ignoreAssemblyVersion"></param>
-        /// <returns></returns>
-        private static bool CompareTypes(Type a, Type b, bool ignoreAssemblyVersion)
-        {
-            if (a == b)
-                return true;
-            if (!ignoreAssemblyVersion)
-                return false;
-            return a.FullName == b.FullName;
-        }
-
-        private static bool CompareArrayTypes(ParameterInfo[] a, Type[] b)
-        {
-            if (a.Length != b.Length) return false;
-            for (int i = 0; i < a.Length; i++)
-            {
-                var g = a[i].ParameterType;
-                var bb = b[i];
-                if (g != bb)
-                    return false;
-            }
-            return true;
         }
 
         private Type[] ConvertParameterTypes(IList<IParameterSymbol> parameters)
@@ -337,22 +321,11 @@ namespace Lang.Cs.Compiler.Visitors
                 for (var i = 0; i < pTypes.Length; i++)
                 {
                     if ((object)pTypes[i] == null) continue;
-                    if (parameters[i].RefKind !=  RefKind.None)
+                    if (parameters[i].RefKind != RefKind.None)
                         pTypes[i] = pTypes[i].MakeByRefType();
                 }
             }
             return pTypes;
-        }
-
-        private static bool ParameterNamesEqual(IMethodSymbol a, MethodInfo b)
-        {
-            if (a.Name != b.Name)
-                return false;
-            var c = a.Parameters.AsEnumerable().Select(i => i.Name).ToArray();
-            var d = b.GetParameters().Select(i => i.Name).ToArray();
-            var cc = string.Join("\r\n", c);
-            var dd = string.Join("\r\n", d);
-            return cc == dd;
         }
 
         private Type MKK(Type rt)
@@ -367,14 +340,14 @@ namespace Lang.Cs.Compiler.Visitors
             switch (method.MethodKind)
             {
                 case MethodKind.Constructor: // 1 Konstruktor
-                    {
-                        var hostType = Roslyn_ResolveType(method.ContainingType);
-                        var pTypes = ConvertParameterTypes(method.Parameters.ToArray());
-                        var ci = hostType.GetConstructor(pTypes);
-                        if (ci != null)
-                            return ci;
-                        throw new NotSupportedException();
-                    }
+                {
+                    var hostType = Roslyn_ResolveType(method.ContainingType);
+                    var pTypes = ConvertParameterTypes(method.Parameters.ToArray());
+                    var ci = hostType.GetConstructor(pTypes);
+                    if (ci != null)
+                        return ci;
+                    throw new NotSupportedException();
+                }
                 case MethodKind.ReducedExtension: // 13 An extension method with the "this" parameter removed.
                     if (method.ReducedFrom != null)
                     {
@@ -390,11 +363,13 @@ namespace Lang.Cs.Compiler.Visitors
                     goto case MethodKind.Ordinary;
                 case MethodKind.Conversion: // 2 A user-defined conversion.
                 case MethodKind.DelegateInvoke: // 3 The invoke method of a delegate.
-                case MethodKind.UserDefinedOperator:// 9 A user-defined operator
-                   
+                case MethodKind.UserDefinedOperator: // 9 A user-defined operator
+
                 case MethodKind.Ordinary: // 10 A normal method.
                     return _Resolve_OrdinaryMethod(method);
-            };
+            }
+
+            ;
             throw new NotSupportedException(method.MethodKind.ToString());
 
             /*        //
@@ -427,34 +402,33 @@ namespace Lang.Cs.Compiler.Visitors
         // Summary:
         //     A static constructor. The return type is always void.
         StaticConstructor = 14,*/
-
         }
 
-        Type Roslyn_ResolveType_internal(ITypeSymbol type)
+        private Type Roslyn_ResolveType_internal(ITypeSymbol type)
         {
             // throw new NotSupportedException(type.ToString());
-            
+
             // var aaaa = roslynCompilation.GetSpecialType(type.SpecialType);
             switch (type.SpecialType)
             {
                 case SpecialType.System_String:
                     return typeof(string);
                 case SpecialType.System_Double:
-                    return typeof(Double);
+                    return typeof(double);
                 case SpecialType.System_Decimal:
-                    return typeof(Decimal);
+                    return typeof(decimal);
                 case SpecialType.System_Int16:
-                    return typeof(Int16);
+                    return typeof(short);
                 case SpecialType.System_Int32:
-                    return typeof(Int32);
+                    return typeof(int);
                 case SpecialType.System_Int64:
-                    return typeof(Int64);
+                    return typeof(long);
                 case SpecialType.System_Object:
-                    return typeof(Object);
+                    return typeof(object);
                 case SpecialType.System_Boolean:
-                    return typeof(Boolean);
+                    return typeof(bool);
                 case SpecialType.System_Char:
-                    return typeof(Char);
+                    return typeof(char);
                 case SpecialType.System_Void:
                     return typeof(void);
                 case SpecialType.System_Array:
@@ -462,271 +436,121 @@ namespace Lang.Cs.Compiler.Visitors
                 case SpecialType.System_DateTime:
                     return typeof(DateTime);
                 case SpecialType.System_Enum:
-                    return typeof(Enum);             
+                    return typeof(Enum);
                 case SpecialType.None:
+                {
+                    switch (type.TypeKind)
                     {
-
-                        switch (type.TypeKind)
+                        case TypeKind.Array:
                         {
-                            case TypeKind.Array:
-                                {
-                                    var arrayTypeSymbol = type as IArrayTypeSymbol;
-                                    var elementType = Roslyn_ResolveType(arrayTypeSymbol.ElementType);
-                                    var result = arrayTypeSymbol.Rank == 1
-                                        ? elementType.MakeArrayType()
-                                        : elementType.MakeArrayType(arrayTypeSymbol.Rank);
-                                    return result;
-                                }
-                            case TypeKind.Error:
-                                return null;
-                            case TypeKind.TypeParameter:
-                                {
-                                    var type1 = (ITypeParameterSymbol)type;
-                                    var a = _knownTypes.Where(i => i.IsGenericParameter && i.DeclaringMethod != null).ToArray();
-                                    var b = a.Where(i => i.DeclaringMethod.Name == type1.DeclaringMethod.Name).ToArray();
-
-                                    MethodInfo mi;
-                                    if (b.Length == 1)
-                                        return b[0];
-                                    return null;
-                                }
+                            var arrayTypeSymbol = type as IArrayTypeSymbol;
+                            var elementType = Roslyn_ResolveType(arrayTypeSymbol.ElementType);
+                            var result = arrayTypeSymbol.Rank == 1
+                                ? elementType.MakeArrayType()
+                                : elementType.MakeArrayType(arrayTypeSymbol.Rank);
+                            return result;
                         }
-                        //var a = type.ToDisplayString();
-                        //var v = roslynCompilation.GlobalNamespace.GetNamespaceMembers().ToArray(); //.GetTypeByMetadataName(a);
-                        //var v5 = v[5].GetTypeMembers();
-                        if (_roslynAllNamedTypeSymbols == null)
-                            _roslynAllNamedTypeSymbols = Roslyn_GetNamedTypeSymbols(null);
-
-                        if (type is INamedTypeSymbol)
+                        case TypeKind.Error:
+                            return null;
+                        case TypeKind.TypeParameter:
                         {
-                            var b = type as INamedTypeSymbol;
-                            //if (b.ContainingType != null)
-                            //    throw new NotSupportedException();
-                            if (b.IsGenericType)
-                            {
-                                var reflectionSearch = b.ToDisplayString();
-                                // var reflectionSearchMd = b.OriginalDefinition.MetadataName;
-                                // var reflectionSearchXx = b.ConstructUnboundGenericType();
-                                var reflectionSearch2 = b.ConstructedFrom.ToDisplayString();
-                                if (reflectionSearch != reflectionSearch2)
-                                    reflectionSearch = reflectionSearch2;
-                                reflectionSearch = reflectionSearch.Substring(0, reflectionSearch.IndexOf("<", StringComparison.Ordinal)) + "`" + b.Arity.ToString();
-                                Type reflected = KnownTypes.Single(i => i.FullName == reflectionSearch);
+                            var type1 = (ITypeParameterSymbol)type;
+                            var a = KnownTypes.Where(i => i.IsGenericParameter && i.DeclaringMethod != null).ToArray();
+                            var b = a.Where(i => i.DeclaringMethod.Name == type1.DeclaringMethod.Name).ToArray();
 
-
-                                Type[] typeArguments = b.TypeArguments.AsEnumerable().Select(Roslyn_ResolveType).ToArray();
-                                var reflected2 = reflected.MakeGenericType(typeArguments);
-                                return reflected2;
-                            }
-                            if (b.ContainingType != null)
-                            {
-                                var ct = Roslyn_ResolveType(b.ContainingType);
-                                var kt = KnownTypes.Where(i => i.DeclaringType == ct).ToArray();
-                                var reflectionSearch = b.ContainingType.ToDisplayString() + "+" + b.Name;
-                                var reflected = KnownTypes.Single(i => i.FullName == reflectionSearch);
-                                return reflected;
-                            }
-                            else
-                            {
-                                var reflectionSearch = b.ToDisplayString();
-                                var reflected = KnownTypes.Single(i => i.FullName == reflectionSearch);
-                                return reflected;
-
-                            }
+                            MethodInfo mi;
+                            if (b.Length == 1)
+                                return b[0];
+                            return null;
                         }
-
-
-                        throw new NotSupportedException(type.ToString());
                     }
+
+                    //var a = type.ToDisplayString();
+                    //var v = roslynCompilation.GlobalNamespace.GetNamespaceMembers().ToArray(); //.GetTypeByMetadataName(a);
+                    //var v5 = v[5].GetTypeMembers();
+                    if (_roslynAllNamedTypeSymbols == null)
+                        _roslynAllNamedTypeSymbols = Roslyn_GetNamedTypeSymbols(null);
+
+                    if (type is INamedTypeSymbol)
+                    {
+                        var b = type as INamedTypeSymbol;
+                        //if (b.ContainingType != null)
+                        //    throw new NotSupportedException();
+                        if (b.IsGenericType)
+                        {
+                            var reflectionSearch = b.ToDisplayString();
+                            // var reflectionSearchMd = b.OriginalDefinition.MetadataName;
+                            // var reflectionSearchXx = b.ConstructUnboundGenericType();
+                            var reflectionSearch2 = b.ConstructedFrom.ToDisplayString();
+                            if (reflectionSearch != reflectionSearch2)
+                                reflectionSearch = reflectionSearch2;
+                            reflectionSearch =
+                                reflectionSearch.Substring(0, reflectionSearch.IndexOf("<", StringComparison.Ordinal)) +
+                                "`" + b.Arity;
+                            Type reflected = KnownTypes.Single(i => i.FullName == reflectionSearch);
+
+                            Type[] typeArguments = b.TypeArguments.AsEnumerable().Select(Roslyn_ResolveType).ToArray();
+                            var reflected2 = reflected.MakeGenericType(typeArguments);
+                            return reflected2;
+                        }
+
+                        if (b.ContainingType != null)
+                        {
+                            var ct = Roslyn_ResolveType(b.ContainingType);
+                            var kt = KnownTypes.Where(i => i.DeclaringType == ct).ToArray();
+                            var reflectionSearch = b.ContainingType.ToDisplayString() + "+" + b.Name;
+                            var reflected = KnownTypes.Single(i => i.FullName == reflectionSearch);
+                            return reflected;
+                        }
+                        else
+                        {
+                            var reflectionSearch = b.ToDisplayString();
+                            var reflected = KnownTypes.Single(i => i.FullName == reflectionSearch);
+                            return reflected;
+                        }
+                    }
+
+                    throw new NotSupportedException(type.ToString());
+                }
                 default:
                     throw new NotSupportedException(type.ToString());
-            }                      
-        }
-
-        readonly ConcurrentDictionary<MethodDeclarationSyntax, MethodHeaderInfo> _getMethodMethodHeaderInfoCache = new ConcurrentDictionary<MethodDeclarationSyntax, MethodHeaderInfo>();
-
-        internal MethodHeaderInfo GetMethodMethodHeaderInfo(MethodDeclarationSyntax tmp)
-        {
-            return _getMethodMethodHeaderInfoCache.GetOrAdd(tmp, tmp1 => MethodHeaderInfo.Get(this, tmp1));
+            }
         }
 
 
-        #endregion Methods
-
-        #region Fields
-
-        readonly Dictionary<ITypeSymbol, Type> _cacheRoslynResolveType = new Dictionary<ITypeSymbol, Type>();
-        ITypeSymbol[] _roslynAllNamedTypeSymbols;
-
-        #endregion Fields
-    }
-}
-
-
-// -----:::::##### smartClass embedded code begin #####:::::----- generated 2014-09-03 15:13
-// File generated automatically ver 2014-09-01 19:00
-// Smartclass.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0c4d5d36fb5eb4ac
-namespace Lang.Cs.Compiler.Visitors
-{
-    public partial class LangParseContext 
-    {
-        /*
         /// <summary>
-        /// Tworzy instancję obiektu
-        /// </summary>
-        public LangParseContext()
-        {
-        }
-
-        Przykłady użycia
-
-        implement INotifyPropertyChanged
-        implement INotifyPropertyChanged_Passive
-        implement ToString ##CurrentNamespace## ##ImportedNamespaces## ##ClassNames## ##KnownTypes## ##LocalVariables## ##Arguments## ##RoslynCompilation## ##RoslynModel##
-        implement ToString CurrentNamespace=##CurrentNamespace##, ImportedNamespaces=##ImportedNamespaces##, ClassNames=##ClassNames##, KnownTypes=##KnownTypes##, LocalVariables=##LocalVariables##, Arguments=##Arguments##, RoslynCompilation=##RoslynCompilation##, RoslynModel=##RoslynModel##
-        implement equals CurrentNamespace, ImportedNamespaces, ClassNames, KnownTypes, LocalVariables, Arguments, RoslynCompilation, RoslynModel
-        implement equals *
-        implement equals *, ~exclude1, ~exclude2
-        */
-        #region Constants
-        /// <summary>
-        /// Nazwa własności CurrentNamespace; 
-        /// </summary>
-        public const string PropertyNameCurrentNamespace = "CurrentNamespace";
-        /// <summary>
-        /// Nazwa własności ImportedNamespaces; 
-        /// </summary>
-        public const string PropertyNameImportedNamespaces = "ImportedNamespaces";
-        /// <summary>
-        /// Nazwa własności ClassNames; 
-        /// </summary>
-        public const string PropertyNameClassNames = "ClassNames";
-        /// <summary>
-        /// Nazwa własności KnownTypes; 
-        /// </summary>
-        public const string PropertyNameKnownTypes = "KnownTypes";
-        /// <summary>
-        /// Nazwa własności LocalVariables; 
-        /// </summary>
-        public const string PropertyNameLocalVariables = "LocalVariables";
-        /// <summary>
-        /// Nazwa własności Arguments; 
-        /// </summary>
-        public const string PropertyNameArguments = "Arguments";
-        /// <summary>
-        /// Nazwa własności RoslynCompilation; 
-        /// </summary>
-        public const string PropertyNameRoslynCompilation = "RoslynCompilation";
-        /// <summary>
-        /// Nazwa własności RoslynModel; 
-        /// </summary>
-        public const string PropertyNameRoslynModel = "RoslynModel";
-        #endregion Constants
-
-        #region Methods
-        #endregion Methods
-
-        #region Properties
-        /// <summary>
-        /// 
         /// </summary>
         public string CurrentNamespace
         {
-            get
-            {
-                return _currentNamespace;
-            }
-            set
-            {
-                value = (value ?? String.Empty).Trim();
-                _currentNamespace = value;
-            }
+            get => _currentNamespace;
+            set => _currentNamespace = (value ?? string.Empty).Trim();
         }
-        private string _currentNamespace = string.Empty;
+
         /// <summary>
-        /// 
         /// </summary>
-        public List<ImportNamespace> ImportedNamespaces
-        {
-            get
-            {
-                return _importedNamespaces;
-            }
-            set
-            {
-                _importedNamespaces = value;
-            }
-        }
-        private List<ImportNamespace> _importedNamespaces = new List<ImportNamespace>();
+        public List<ImportNamespace> ImportedNamespaces { get; set; } = new List<ImportNamespace>();
+
         /// <summary>
-        /// 
         /// </summary>
-        public Stack<string> ClassNames
-        {
-            get
-            {
-                return _classNames;
-            }
-            set
-            {
-                _classNames = value;
-            }
-        }
-        private Stack<string> _classNames = new Stack<string>();
+        public Stack<string> ClassNames { get; set; } = new Stack<string>();
+
         /// <summary>
-        /// 
         /// </summary>
-        public Type[] KnownTypes
-        {
-            get
-            {
-                return _knownTypes;
-            }
-            set
-            {
-                _knownTypes = value;
-            }
-        }
-        private Type[] _knownTypes;
+        public Type[] KnownTypes { get; set; }
+
         /// <summary>
-        /// 
         /// </summary>
-        public List<NameType> LocalVariables
-        {
-            get
-            {
-                return _localVariables;
-            }
-            set
-            {
-                _localVariables = value;
-            }
-        }
-        private List<NameType> _localVariables = new List<NameType>();
+        public List<NameType> LocalVariables { get; set; } = new List<NameType>();
+
         /// <summary>
-        /// 
         /// </summary>
-        public List<FunctionDeclarationParameter> Arguments
-        {
-            get
-            {
-                return _arguments;
-            }
-            set
-            {
-                _arguments = value;
-            }
-        }
-        private List<FunctionDeclarationParameter> _arguments = new List<FunctionDeclarationParameter>();
+        public List<FunctionDeclarationParameter> Arguments { get; set; } = new List<FunctionDeclarationParameter>();
+
         /// <summary>
-        /// 
         /// </summary>
         public Compilation RoslynCompilation
         {
-            get
-            {
-                return _roslynCompilation;
-            }
+            get => _roslynCompilation;
             set
             {
                 if (value == _roslynCompilation) return;
@@ -734,16 +558,12 @@ namespace Lang.Cs.Compiler.Visitors
                 ClearCache();
             }
         }
-        private Compilation _roslynCompilation;
+
         /// <summary>
-        /// 
         /// </summary>
         public SemanticModel RoslynModel
         {
-            get
-            {
-                return _roslynModel;
-            }
+            get => _roslynModel;
             set
             {
                 if (value == _roslynModel) return;
@@ -751,9 +571,15 @@ namespace Lang.Cs.Compiler.Visitors
                 ClearCache();
             }
         }
-        private SemanticModel _roslynModel;
-        #endregion Properties
 
-      
+        private readonly ConcurrentDictionary<MethodDeclarationSyntax, MethodHeaderInfo> _getMethodMethodHeaderInfoCache
+            = new ConcurrentDictionary<MethodDeclarationSyntax, MethodHeaderInfo>();
+
+
+        private readonly Dictionary<ITypeSymbol, Type> _cacheRoslynResolveType = new Dictionary<ITypeSymbol, Type>();
+        private ITypeSymbol[] _roslynAllNamedTypeSymbols;
+        private string _currentNamespace = string.Empty;
+        private Compilation _roslynCompilation;
+        private SemanticModel _roslynModel;
     }
 }

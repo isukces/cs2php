@@ -2,14 +2,13 @@
 {
     public class TranslationMessage
     {
-        public TranslationMessage(string Text, MessageLevels Level)
+        public TranslationMessage(string text, MessageLevels level)
         {
-            this.Text = Text;
-            this.Level = Level;
+            Text  = text;
+            Level = level;
         }
-        public string Text { get; private set; }
+        public string        Text  { get; private set; }
         public MessageLevels Level { get; private set; }
-
 
     }
 

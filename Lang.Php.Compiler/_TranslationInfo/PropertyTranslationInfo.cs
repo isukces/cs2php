@@ -3,28 +3,9 @@ using System.Linq;
 using System.Reflection;
 
 namespace Lang.Php.Compiler
-{
-
-    /*
-    smartClass
-    option NoAdditionalFile
-    
-    property FieldScriptName string 
-    
-    property GetSetByMethod bool 
-    
-    property SetMethodName string 
-    
-    property GetMethodName string 
-    
-    property IsStatic bool 
-    smartClassEnd
-    */
-
-    public partial class PropertyTranslationInfo
+{ 
+    public  class PropertyTranslationInfo
     {
-        #region Static Methods
-
         // Public Methods 
 
         public static PropertyTranslationInfo FromPropertyInfo(PropertyInfo propInfo)
@@ -34,9 +15,9 @@ namespace Lang.Php.Compiler
             var sm = propInfo.GetSetMethod();
             if (gm == null && sm == null)
                 throw new Exception(string.Format("Unable to get getter or setter for {0}", propInfo));
-            result._isStatic = (gm != null && gm.IsStatic)
+            result.IsStatic = (gm != null && gm.IsStatic)
                                || (sm != null && sm.IsStatic);
-            var autoImplemented = IsAutoProperty(propInfo, result._isStatic);
+            var autoImplemented = IsAutoProperty(propInfo, result.IsStatic);
             if (autoImplemented)
                 result.FieldScriptName = propInfo.Name; // just field with the same name 
             else
@@ -51,11 +32,11 @@ namespace Lang.Php.Compiler
             }
             if (autoImplemented)
             {
-                result._getSetByMethod = false;
+                result.GetSetByMethod = false;
             }
             else
             {
-                result._getSetByMethod = true;
+                result.GetSetByMethod = true;
                 if (propInfo.CanRead)
                     result.GetMethodName = propInfo.GetGetMethod().Name;
                 if (propInfo.CanWrite)
@@ -77,109 +58,30 @@ namespace Lang.Php.Compiler
             return prop.DeclaringType.GetFields(d)
                                      .Any(f => f.Name.Contains("<" + prop.Name + ">"));
         }
+ 
+       
 
-        #endregion Static Methods
-    }
-}
-
-
-// -----:::::##### smartClass embedded code begin #####:::::----- generated 2014-09-03 17:57
-// File generated automatically ver 2014-09-01 19:00
-// Smartclass.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0c4d5d36fb5eb4ac
-namespace Lang.Php.Compiler
-{
-    public partial class PropertyTranslationInfo
-    {
-        /*
-        /// <summary>
-        /// Tworzy instancję obiektu
-        /// </summary>
-        public PropertyTranslationInfo()
-        {
-        }
-
-        Przykłady użycia
-
-        implement INotifyPropertyChanged
-        implement INotifyPropertyChanged_Passive
-        implement ToString ##FieldScriptName## ##GetSetByMethod## ##SetMethodName## ##GetMethodName## ##IsStatic##
-        implement ToString FieldScriptName=##FieldScriptName##, GetSetByMethod=##GetSetByMethod##, SetMethodName=##SetMethodName##, GetMethodName=##GetMethodName##, IsStatic=##IsStatic##
-        implement equals FieldScriptName, GetSetByMethod, SetMethodName, GetMethodName, IsStatic
-        implement equals *
-        implement equals *, ~exclude1, ~exclude2
-        */
-        #region Constants
-        /// <summary>
-        /// Nazwa własności FieldScriptName; 
-        /// </summary>
-        public const string PropertyNameFieldScriptName = "FieldScriptName";
-        /// <summary>
-        /// Nazwa własności GetSetByMethod; 
-        /// </summary>
-        public const string PropertyNameGetSetByMethod = "GetSetByMethod";
-        /// <summary>
-        /// Nazwa własności SetMethodName; 
-        /// </summary>
-        public const string PropertyNameSetMethodName = "SetMethodName";
-        /// <summary>
-        /// Nazwa własności GetMethodName; 
-        /// </summary>
-        public const string PropertyNameGetMethodName = "GetMethodName";
-        /// <summary>
-        /// Nazwa własności IsStatic; 
-        /// </summary>
-        public const string PropertyNameIsStatic = "IsStatic";
-        #endregion Constants
-
-        #region Methods
-        #endregion Methods
-
-        #region Properties
         /// <summary>
         /// 
         /// </summary>
         public string FieldScriptName
         {
-            get
-            {
-                return _fieldScriptName;
-            }
-            set
-            {
-                value = (value ?? String.Empty).Trim();
-                _fieldScriptName = value;
-            }
+            get => _fieldScriptName;
+            set => _fieldScriptName = (value ?? String.Empty).Trim();
         }
         private string _fieldScriptName = string.Empty;
         /// <summary>
         /// 
         /// </summary>
-        public bool GetSetByMethod
-        {
-            get
-            {
-                return _getSetByMethod;
-            }
-            set
-            {
-                _getSetByMethod = value;
-            }
-        }
-        private bool _getSetByMethod;
+        public bool GetSetByMethod { get; set; }
+
         /// <summary>
         /// 
         /// </summary>
         public string SetMethodName
         {
-            get
-            {
-                return _setMethodName;
-            }
-            set
-            {
-                value = (value ?? String.Empty).Trim();
-                _setMethodName = value;
-            }
+            get => _setMethodName;
+            set => _setMethodName = (value ?? String.Empty).Trim();
         }
         private string _setMethodName = string.Empty;
         /// <summary>
@@ -187,33 +89,13 @@ namespace Lang.Php.Compiler
         /// </summary>
         public string GetMethodName
         {
-            get
-            {
-                return _getMethodName;
-            }
-            set
-            {
-                value = (value ?? String.Empty).Trim();
-                _getMethodName = value;
-            }
+            get => _getMethodName;
+            set => _getMethodName = (value ?? String.Empty).Trim();
         }
         private string _getMethodName = string.Empty;
         /// <summary>
         /// 
         /// </summary>
-        public bool IsStatic
-        {
-            get
-            {
-                return _isStatic;
-            }
-            set
-            {
-                _isStatic = value;
-            }
-        }
-        private bool _isStatic;
-        #endregion Properties
-
+        public bool IsStatic { get; set; }
     }
 }

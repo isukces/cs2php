@@ -57,7 +57,7 @@ namespace Lang.Cs.Compiler
 	MakeClass("LangType", "", "Type DotnetType;Typ .NET");
 
 	MakeClass("CallConstructor", "IValue", "ConstructorInfo Info", "FunctionArgument[] Arguments", "IValue[] Initializers");
-	MakeClass("FunctionArgument", "IValue", "string RefOrOutKeyword", "IValue MyValue");
+	MakeClass("FunctionArgument", "IValue", "string RefOrOutKeyword", "IValue MyValue", "string ExplicitName");
 	MakeClass("Modifiers", "", "string[] Items");
 	MakeClass("FunctionDeclarationParameter", "", "string Name", "Modifiers Modifiers", "LangType Type", "IValue Initial");
 	MakeClass("CodeBlock", "IStatement", "IStatement[] Items");

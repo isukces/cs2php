@@ -4,7 +4,7 @@ using System.Collections.Generic;
 // ReSharper disable once CheckNamespace
 namespace Lang.Php.Compiler.Source
 {
-    public abstract class IPhpValueBase : PhpSourceBase, IPhpValue
+    public abstract class PhpValueBase : PhpSourceBase, IPhpValue
     {
         #region Methods
 

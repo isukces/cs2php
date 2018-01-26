@@ -1,29 +1,21 @@
-﻿using Lang.Cs.Compiler;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Lang.Cs.Compiler;
 
 // ReSharper disable once CheckNamespace
 namespace Lang.Php.Compiler
 {
-
-
-    /*
-    smartClass
-    option NoAdditionalFile
-    
-    property Items Dictionary<Type, List<NodeTranslatorBound>> 
-    	init #
-    smartClassEnd
-    */
-
     /// <summary>
-    /// Przechowuje kolekcje translatorów dla różnych typów gałęzi
+    ///     Przechowuje kolekcje translatorów dla różnych typów gałęzi
     /// </summary>
     public class NodeTranslatorsContainer
     {
-        #region Methods
-
+        private static int? GetNodeTranslatorBoundPriority(NodeTranslatorBound i)
+        {
+            // use this named method insead of lambda for performace reasons
+            return i.Priority;
+        }
         // Public Methods 
 
         public void Add(Type t, NodeTranslatorBound b)
@@ -47,22 +39,11 @@ namespace Lang.Php.Compiler
                 if (y != null)
                     return y;
             }
+
             return null;
         }
 
-        private static int? GetNodeTranslatorBoundPriority(NodeTranslatorBound i)
-        {
-            // use this named method insead of lambda for performace reasons
-            return i.Priority;
-        }
-
-        #endregion Methods
-
-        #region Fields
-
-        private readonly Dictionary<Type, List<NodeTranslatorBound>> _items = new Dictionary<Type, List<NodeTranslatorBound>>();
-
-        #endregion Fields
+        private readonly Dictionary<Type, List<NodeTranslatorBound>> _items =
+            new Dictionary<Type, List<NodeTranslatorBound>>();
     }
 }
-

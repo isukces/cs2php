@@ -12,8 +12,6 @@ namespace Lang.Cs.Compiler.Visitors
 {
     public class LangVisitor : CodeVisitor<object>
     {
-        #region Constructors
-
         public LangVisitor(CompileState ts)
         {
             if (ts == null)
@@ -22,20 +20,12 @@ namespace Lang.Cs.Compiler.Visitors
             context = ts.Context;
         }
 
-        #endregion Constructors
-
-        #region Static Methods
-
         // Private Methods 
 
         private static QualifiedNameVisitor.R _Name(NameSyntax namr)
         {
             return new QualifiedNameVisitor().Visit(namr);
         }
-
-        #endregion Static Methods
-
-        #region Methods
 
         // Public Methods 
 
@@ -393,7 +383,7 @@ namespace Lang.Cs.Compiler.Visitors
 
         protected override object VisitInvocationExpression(InvocationExpressionSyntax node)
         {
-            return new IValueVisitor(state).Visit(node);
+            return new ValueVisitor(state).Visit(node);
         }
 
         protected override object VisitLocalDeclarationStatement(LocalDeclarationStatementSyntax node)
@@ -662,7 +652,7 @@ namespace Lang.Cs.Compiler.Visitors
 
         IValue _VisitExpression(SyntaxNode n)
         {
-            IValueVisitor vv = new IValueVisitor(state);
+            ValueVisitor vv = new ValueVisitor(state);
             var tmp = vv.Visit(n);
             return tmp;
         }
@@ -777,12 +767,6 @@ namespace Lang.Cs.Compiler.Visitors
             return new Modifiers(mod.Select(i => i.ValueText).ToArray());
         }
 
-        #endregion Methods
-
-        #region Fields
-
         private CompileState state;
-
-        #endregion Fields
     }
 }

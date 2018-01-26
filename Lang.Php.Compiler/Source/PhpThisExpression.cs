@@ -2,7 +2,7 @@
 
 namespace Lang.Php.Compiler.Source
 {
-    public class PhpThisExpression : IPhpValueBase
+    public class PhpThisExpression : PhpValueBase
     {
         public override string GetPhpCode(PhpEmitStyle style)
         {
