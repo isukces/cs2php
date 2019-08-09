@@ -7,12 +7,12 @@ namespace Lang.Php.Compiler.Source
         /// <summary>
         ///     Tworzy instancję obiektu
         ///     <param name="variableName"></param>
-        ///     <param name="kind"></param>
+        ///     <param name="variableKind"></param>
         /// </summary>
-        public PhpVariableExpression(string variableName, PhpVariableKind kind)
+        public PhpVariableExpression(string variableName, PhpVariableKind variableKind)
         {
             VariableName = variableName;
-            Kind         = kind;
+            VariableKind         = variableKind;
         }
         // Public Methods 
 
@@ -38,14 +38,14 @@ namespace Lang.Php.Compiler.Source
 
         public override IEnumerable<ICodeRequest> GetCodeRequests()
         {
-            if (Kind == PhpVariableKind.Global)
+            if (VariableKind == PhpVariableKind.Global)
             {
                 yield return new GlobalVariableRequest(_variableName);
             }
             else
             {
                 var a = new LocalVariableRequest(_variableName,
-                    Kind == PhpVariableKind.LocalArgument,
+                    VariableKind == PhpVariableKind.LocalArgument,
                     newName => { VariableName = newName; });
                 yield return a;
             }
@@ -67,7 +67,7 @@ namespace Lang.Php.Compiler.Source
 
         /// <summary>
         /// </summary>
-        public PhpVariableKind Kind { get; set; }
+        public PhpVariableKind VariableKind { get; set; }
 
         private string _variableName = string.Empty;
     }

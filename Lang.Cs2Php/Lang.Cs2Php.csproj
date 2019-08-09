@@ -31,13 +31,7 @@
     <Reference Include="System.Linq" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Lang.Php.Compiler\Lang.Php.Compiler.csproj">
-      <Project>{88A316A0-0CC6-486D-8323-1966CD501BF8}</Project>
-      <Name>Lang.Php.Compiler</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Lang.Php.Framework\Lang.Php.Framework.csproj">
-      <Project>{1F0D844C-80DC-45E5-92C4-3D50D67B164E}</Project>
-      <Name>Lang.Php.Framework</Name>
-    </ProjectReference>
+    <ProjectReference Include="..\Lang.Php.Compiler\Lang.Php.Compiler.csproj" />
+    <ProjectReference Include="..\Lang.Php.Framework\Lang.Php.Framework.csproj" />
   </ItemGroup>
 </Project>

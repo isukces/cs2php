@@ -22,18 +22,10 @@
     <DocumentationFile>bin\$(Configuration)\net462\$(ProjectName).xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Lang.PHP\Lang.Php.csproj">
-      <Project>{ED717576-B7B9-4775-8236-1855E20E52D5}</Project>
-      <Name>Lang.Php</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Lang.Php.Compiler\Lang.Php.Compiler.csproj">
-      <Project>{88A316A0-0CC6-486D-8323-1966CD501BF8}</Project>
-      <Name>Lang.Php.Compiler</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Lang.Php.Wp\Lang.Php.Wp.csproj">
-      <Project>{D79A6A64-F00B-4EE1-80F2-7C155CC1BBE0}</Project>
-      <Name>Lang.Php.Wp</Name>
-    </ProjectReference>
+    <ProjectReference Include="..\..\Lang.Cs.Compiler\Lang.Cs.Compiler.csproj" />
+    <ProjectReference Include="..\..\Lang.PHP\Lang.Php.csproj" />
+    <ProjectReference Include="..\..\Lang.Php.Compiler\Lang.Php.Compiler.csproj" />
+    <ProjectReference Include="..\Lang.Php.Wp\Lang.Php.Wp.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\..\CommonAssemblyInfo.cs">

@@ -39,13 +39,7 @@
     <PackageReference Include="System.ValueTuple" Version="4.3.1" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Lang.Cs.Compiler\Lang.Cs.Compiler.csproj">
-      <Project>{DB0BF6B7-ADEA-496B-AF49-F4A0CD39ADA9}</Project>
-      <Name>Lang.Cs.Compiler</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Lang.PHP\Lang.Php.csproj">
-      <Project>{ED717576-B7B9-4775-8236-1855E20E52D5}</Project>
-      <Name>Lang.Php</Name>
-    </ProjectReference>
+    <ProjectReference Include="..\Lang.Cs.Compiler\Lang.Cs.Compiler.csproj" />
+    <ProjectReference Include="..\Lang.PHP\Lang.Php.csproj" />
   </ItemGroup>
 </Project>

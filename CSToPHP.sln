@@ -3,47 +3,47 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26430.14
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lang.Php", "Lang.PHP\Lang.Php.csproj", "{ED717576-B7B9-4775-8236-1855E20E52D5}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Engine", "Engine", "{7A3AD925-DEAF-42AB-984D-457049620DC6}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Examples", "Examples", "{90BEC0DE-D2CA-4168-9E45-5D842B79B58B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lang.Php.Compiler", "Lang.Php.Compiler\Lang.Php.Compiler.csproj", "{88A316A0-0CC6-486D-8323-1966CD501BF8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lang.Php.Compiler", "Lang.Php.Compiler\Lang.Php.Compiler.csproj", "{88A316A0-0CC6-486D-8323-1966CD501BF8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lang.Php.Framework", "Lang.Php.Framework\Lang.Php.Framework.csproj", "{1F0D844C-80DC-45E5-92C4-3D50D67B164E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lang.Php.Framework", "Lang.Php.Framework\Lang.Php.Framework.csproj", "{1F0D844C-80DC-45E5-92C4-3D50D67B164E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lang.Php.Wp", "Extensions\Lang.Php.Wp\Lang.Php.Wp.csproj", "{D79A6A64-F00B-4EE1-80F2-7C155CC1BBE0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lang.Php.Wp", "Extensions\Lang.Php.Wp\Lang.Php.Wp.csproj", "{D79A6A64-F00B-4EE1-80F2-7C155CC1BBE0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lang.Php.Wp.Compile", "Extensions\Lang.Php.Wp.Compile\Lang.Php.Wp.Compile.csproj", "{D9FECFA8-12BB-44B6-8583-2D8A8A22EC9B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lang.Php.Wp.Compile", "Extensions\Lang.Php.Wp.Compile\Lang.Php.Wp.Compile.csproj", "{D9FECFA8-12BB-44B6-8583-2D8A8A22EC9B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lang.Cs2Php", "Lang.Cs2Php\Lang.Cs2Php.csproj", "{573007F1-9612-452C-8532-F54D18DE1724}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lang.Cs2Php", "Lang.Cs2Php\Lang.Cs2Php.csproj", "{573007F1-9612-452C-8532-F54D18DE1724}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lang.Cs.Compiler", "Lang.Cs.Compiler\Lang.Cs.Compiler.csproj", "{DB0BF6B7-ADEA-496B-AF49-F4A0CD39ADA9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lang.Cs.Compiler", "Lang.Cs.Compiler\Lang.Cs.Compiler.csproj", "{DB0BF6B7-ADEA-496B-AF49-F4A0CD39ADA9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "E01_HelloWorld", "_Examples\E01_HelloWorld\E01_HelloWorld.csproj", "{CB3A20F2-7912-41D1-B48F-580033692B65}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "E01_HelloWorld", "_Examples\E01_HelloWorld\E01_HelloWorld.csproj", "{CB3A20F2-7912-41D1-B48F-580033692B65}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "E02_BasicFeaturesExample", "_Examples\E02_BasicFeaturesExample\E02_BasicFeaturesExample.csproj", "{67F3CCD5-0FB8-4D31-BEF9-5C617D24458B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "E02_BasicFeaturesExample", "_Examples\E02_BasicFeaturesExample\E02_BasicFeaturesExample.csproj", "{67F3CCD5-0FB8-4D31-BEF9-5C617D24458B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lang.Php.Mpdf", "Extensions\Lang.Php.Mpdf\Lang.Php.Mpdf.csproj", "{B17C6A4D-D985-404F-B286-7D229B388D56}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lang.Php.Mpdf", "Extensions\Lang.Php.Mpdf\Lang.Php.Mpdf.csproj", "{B17C6A4D-D985-404F-B286-7D229B388D56}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Extensions", "Extensions", "{7A921F0E-6E36-4AE7-9497-C78AA373529E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "E03_ReferencedLibrary", "_Examples\E03_ReferencedLibrary\E03_ReferencedLibrary.csproj", "{6A6753C8-7092-4F35-ADAC-7B6E06312F22}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "E03_ReferencedLibrary", "_Examples\E03_ReferencedLibrary\E03_ReferencedLibrary.csproj", "{6A6753C8-7092-4F35-ADAC-7B6E06312F22}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Test", "Test", "{B2D467BB-EED3-4DB6-9F5D-ACF1359A03F4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lang.Php.Test", "Lang.Php.Test\Lang.Php.Test.csproj", "{8BE2B47E-389A-433D-BEA1-CB7655B8D1DC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lang.Php.Test", "Lang.Php.Test\Lang.Php.Test.csproj", "{8BE2B47E-389A-433D-BEA1-CB7655B8D1DC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lang.Php.XUnitTests", "Lang.Php.XUnitTests\Lang.Php.XUnitTests.csproj", "{1BDD493E-5646-4481-B030-3FFC9851D644}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lang.Php.XUnitTests", "Lang.Php.XUnitTests\Lang.Php.XUnitTests.csproj", "{1BDD493E-5646-4481-B030-3FFC9851D644}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "E04_Graphics", "_Examples\E04_Graphics\E04_Graphics.csproj", "{4B7F2DC2-2B7A-495D-A309-5E1976595C5C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "E04_Graphics", "_Examples\E04_Graphics\E04_Graphics.csproj", "{4B7F2DC2-2B7A-495D-A309-5E1976595C5C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "E05_Firebird", "_Examples\E05_Firebird\E05_Firebird.csproj", "{4F044D55-BD37-4AE9-9766-ABDFEA2666BC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "E05_Firebird", "_Examples\E05_Firebird\E05_Firebird.csproj", "{4F044D55-BD37-4AE9-9766-ABDFEA2666BC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WP01_BasicFeatures", "_Examples\WP01_BasicFeatures\WP01_BasicFeatures.csproj", "{4B118B73-ED81-45E8-B335-F7EB6C3EF231}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WP01_BasicFeatures", "_Examples\WP01_BasicFeatures\WP01_BasicFeatures.csproj", "{4B118B73-ED81-45E8-B335-F7EB6C3EF231}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "E06_Regex", "_Examples\E06_Regex\E06_Regex.csproj", "{279B2D30-0536-4FD5-979B-1596D124FA0F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "E06_Regex", "_Examples\E06_Regex\E06_Regex.csproj", "{279B2D30-0536-4FD5-979B-1596D124FA0F}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lang.Php", "Lang.Php\Lang.Php.csproj", "{9ECD2EA3-6E85-44ED-9BDE-E20D6BE66C03}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -51,10 +51,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{ED717576-B7B9-4775-8236-1855E20E52D5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{ED717576-B7B9-4775-8236-1855E20E52D5}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{ED717576-B7B9-4775-8236-1855E20E52D5}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{ED717576-B7B9-4775-8236-1855E20E52D5}.Release|Any CPU.Build.0 = Release|Any CPU
 		{88A316A0-0CC6-486D-8323-1966CD501BF8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{88A316A0-0CC6-486D-8323-1966CD501BF8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{88A316A0-0CC6-486D-8323-1966CD501BF8}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -119,12 +115,15 @@ Global
 		{279B2D30-0536-4FD5-979B-1596D124FA0F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{279B2D30-0536-4FD5-979B-1596D124FA0F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{279B2D30-0536-4FD5-979B-1596D124FA0F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9ECD2EA3-6E85-44ED-9BDE-E20D6BE66C03}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9ECD2EA3-6E85-44ED-9BDE-E20D6BE66C03}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9ECD2EA3-6E85-44ED-9BDE-E20D6BE66C03}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9ECD2EA3-6E85-44ED-9BDE-E20D6BE66C03}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{ED717576-B7B9-4775-8236-1855E20E52D5} = {7A3AD925-DEAF-42AB-984D-457049620DC6}
 		{88A316A0-0CC6-486D-8323-1966CD501BF8} = {7A3AD925-DEAF-42AB-984D-457049620DC6}
 		{1F0D844C-80DC-45E5-92C4-3D50D67B164E} = {7A3AD925-DEAF-42AB-984D-457049620DC6}
 		{D79A6A64-F00B-4EE1-80F2-7C155CC1BBE0} = {7A921F0E-6E36-4AE7-9497-C78AA373529E}
@@ -141,5 +140,9 @@ Global
 		{4F044D55-BD37-4AE9-9766-ABDFEA2666BC} = {90BEC0DE-D2CA-4168-9E45-5D842B79B58B}
 		{4B118B73-ED81-45E8-B335-F7EB6C3EF231} = {90BEC0DE-D2CA-4168-9E45-5D842B79B58B}
 		{279B2D30-0536-4FD5-979B-1596D124FA0F} = {90BEC0DE-D2CA-4168-9E45-5D842B79B58B}
+		{9ECD2EA3-6E85-44ED-9BDE-E20D6BE66C03} = {7A3AD925-DEAF-42AB-984D-457049620DC6}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {D4817784-801E-4E8D-B1E7-96B6C4590191}
 	EndGlobalSection
 EndGlobal

@@ -27,9 +27,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Lang.PHP\Lang.Php.csproj">
-      <Project>{ED717576-B7B9-4775-8236-1855E20E52D5}</Project>
-      <Name>Lang.Php</Name>
-    </ProjectReference>
+    <ProjectReference Include="..\..\Lang.PHP\Lang.Php.csproj" />
   </ItemGroup>
 </Project>

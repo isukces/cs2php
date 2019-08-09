@@ -49,7 +49,7 @@ namespace Lang.Php.Compiler.Translator.Node
                 if (targetObject is PhpVariableExpression)
                 {
                     var to2 = targetObject as PhpVariableExpression;
-                    var a = new PhpVariableExpression(to2.VariableName + "@" + _src.Member.Name, to2.Kind);
+                    var a = new PhpVariableExpression(to2.VariableName + "@" + _src.Member.Name, to2.VariableKind);
                     return a;
                 }
                 return null;
