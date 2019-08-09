@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <VersionPrefix>1.2.1.1</VersionPrefix>
-    <TargetFramework>net462</TargetFramework>
+    <TargetFramework>net472</TargetFramework>
     <AssemblyName>cs2php</AssemblyName>
     <PackageId>Lang.Cs2Php</PackageId>
     <Title>C# to PHP compiler</Title>
@@ -25,10 +25,6 @@
     <Compile Include="..\CommonAssemblyInfo.cs">
       <Link>CommonAssemblyInfo.cs</Link>
     </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Include="System" />
-    <Reference Include="System.Linq" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Lang.Php.Compiler\Lang.Php.Compiler.csproj" />

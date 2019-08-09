@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <VersionPrefix>1.2.1.1</VersionPrefix>
-    <TargetFramework>net462</TargetFramework>
+    <TargetFramework>net472</TargetFramework>
     <AssemblyName>E05_Firebird</AssemblyName>
     <PackageId>E05_Firebird</PackageId>
     <AssemblyName>E05_Firebird</AssemblyName>
@@ -19,7 +19,7 @@
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
   </PropertyGroup>
   <PropertyGroup>
-    <DocumentationFile>bin\$(Configuration)\net462\$(ProjectName).xml</DocumentationFile>
+    <DocumentationFile>bin\$(Configuration)\net472\$(ProjectName).xml</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup>
     <DefineConstants>$(DefineConstants);ROSLYN</DefineConstants>

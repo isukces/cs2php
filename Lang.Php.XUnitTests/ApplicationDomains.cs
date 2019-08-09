@@ -49,8 +49,8 @@ const string x = "DEBUG";
 
             const string fileToLoad1 =
                 "C:\\Program Files (x86)\\Reference Assemblies\\Microsoft\\Framework\\.NETFramework\\v4.5\\Microsoft.CSharp.dll";
-            string fileToLoad = string.Format("..\\..\\..\\..\\Lang.Php\\bin\\{0}\\net462\\Lang.Php.Dll", x);
-            // C:\programs\_CS2PHP\PUBLIC\Lang.Php.XUnitTests\bin\Debug\net462
+            string fileToLoad = string.Format("..\\..\\..\\..\\Lang.Php\\bin\\{0}\\net472\\Lang.Php.Dll", x);
+            // C:\programs\_CS2PHP\PUBLIC\Lang.Php.XUnitTests\bin\Debug\net472
             AppDomain d = AppDomain.CreateDomain("testDomain");
             try
             {

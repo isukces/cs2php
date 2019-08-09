@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <VersionPrefix>1.2.1.1</VersionPrefix>
-    <TargetFramework>net462</TargetFramework>
+    <TargetFramework>net472</TargetFramework>
     <AssemblyName>Lang.Php.Wp.Compile</AssemblyName>
     <PackageId>Lang.Php.Wp.Compile</PackageId>
     <Description>WordPress API compile time support</Description>
@@ -19,7 +19,7 @@
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
   </PropertyGroup>
   <PropertyGroup>
-    <DocumentationFile>bin\$(Configuration)\net462\$(ProjectName).xml</DocumentationFile>
+    <DocumentationFile>bin\$(Configuration)\net472\$(ProjectName).xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Lang.Cs.Compiler\Lang.Cs.Compiler.csproj" />

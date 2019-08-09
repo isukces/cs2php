@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <VersionPrefix>1.2.1.1</VersionPrefix>
-    <TargetFramework>net462</TargetFramework>
+    <TargetFramework>net472</TargetFramework>
     <AssemblyName>Lang.Cs.Compiler</AssemblyName>
     <PackageId>Lang.Cs.Compiler</PackageId>
     <Title>C# parsing library</Title>
@@ -19,13 +19,13 @@
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
   </PropertyGroup>
   <PropertyGroup>
-    <DocumentationFile>bin\$(Configuration)\net462\$(ProjectName).xml</DocumentationFile>
+    <DocumentationFile>bin\$(Configuration)\net472\$(ProjectName).xml</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup>
     <DefineConstants>$(DefineConstants);ROSLYN</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.CodeAnalysis" Version="2.2.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis" Version="3.2.1" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\CommonAssemblyInfo.cs">

@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <VersionPrefix>1.2.1.1</VersionPrefix>
-        <TargetFramework>net462</TargetFramework>
+        <TargetFramework>net472</TargetFramework>
         <AssemblyName>Lang.Php</AssemblyName>
         <PackageId>Lang.Php</PackageId>
         <Description>Native PHP functions</Description>
@@ -19,10 +19,10 @@
         <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     </PropertyGroup>
     <PropertyGroup>
-        <DocumentationFile>bin\$(Configuration)\net462\$(ProjectName).xml</DocumentationFile>
+        <DocumentationFile>bin\$(Configuration)\net472\$(ProjectName).xml</DocumentationFile>
     </PropertyGroup>
     <ItemGroup>
-        <PackageReference Include="MySql.Data" Version="6.9.9" />
+        <PackageReference Include="MySql.Data" Version="8.0.17" />
     </ItemGroup>
     <ItemGroup>
         <Reference Include="System.Web" />

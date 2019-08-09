@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <VersionPrefix>1.2.1.1</VersionPrefix>
-    <TargetFramework>net462</TargetFramework>
+    <TargetFramework>net472</TargetFramework>
     <AssemblyName>Lang.Php.Mpdf</AssemblyName>
     <PackageId>Lang.Php.Mpdf</PackageId>
     <AssemblyName>Lang.Php.Mpdf</AssemblyName>
@@ -20,7 +20,7 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
   <PropertyGroup>
-    <DocumentationFile>bin\$(Configuration)\net462\$(ProjectName).xml</DocumentationFile>
+    <DocumentationFile>bin\$(Configuration)\net472\$(ProjectName).xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="..\..\CommonAssemblyInfo.cs">

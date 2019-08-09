@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <VersionPrefix>1.2.1.1</VersionPrefix>
-    <TargetFramework>net462</TargetFramework>
+    <TargetFramework>net472</TargetFramework>
     <AssemblyName>Lang.Php.Compiler</AssemblyName>
     <PackageId>Lang.Php.Compiler</PackageId>
     <Title>C# to Php compiler main library</Title>
@@ -19,7 +19,7 @@
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
   </PropertyGroup>
   <PropertyGroup>
-    <DocumentationFile>bin\$(Configuration)\net462\$(ProjectName).xml</DocumentationFile>
+    <DocumentationFile>bin\$(Configuration)\net472\$(ProjectName).xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System.Configuration" />
@@ -33,9 +33,11 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Build" Version="15.1.1012" />
     <PackageReference Include="Microsoft.Build.Tasks.Core" Version="15.1.1012" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Features" Version="2.2.0" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="2.2.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Features" Version="3.2.1" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="3.2.1" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" Version="3.2.1" />
     <PackageReference Include="System.Composition.TypedParts" Version="1.0.31" />
+    <PackageReference Include="System.IO.Compression" Version="4.3.0" />
     <PackageReference Include="System.ValueTuple" Version="4.3.1" />
   </ItemGroup>
   <ItemGroup>

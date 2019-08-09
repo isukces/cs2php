@@ -5,7 +5,7 @@ How to use this example?
 ========================
 1. Make sure that CS2PHP solution is compiled in RELEASE mode. 
    We need following files
-   a) Lang.Cs2Php\bin\Release\net462\cs2php.exe
+   a) Lang.Cs2Php\bin\Release\net472\cs2php.exe
    b) Extensions\Lang.Php.Mpdf\bin\Release\Lang.Php.Mpdf.dll 
 2. Run compile.bat
    Two projects will be compiled
