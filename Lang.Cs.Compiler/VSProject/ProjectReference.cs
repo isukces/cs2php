@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Xml.Linq;
 
 namespace Lang.Cs.Compiler.VSProject
@@ -12,11 +13,18 @@ namespace Lang.Cs.Compiler.VSProject
        <Name>Lang.Php</Name>
      </ProjectReference>*/
             var ns = e.Name.Namespace;
+            var path = (string)e.Attribute("Include");
+            var name = e.Element(ns + "Name")?.Value;
+            if (string.IsNullOrEmpty(name))
+            {
+                name = path.Split('/', '\\').Last();
+                if (name.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase))
+                    name = name.Substring(0, name.Length - 7);
+            }
             return new ProjectReference
             {
-                _path       = (string)e.Attribute("Include"),
-                ProjectGuid = Guid.Parse(e.Element(ns + "Project").Value),
-                _name       = e.Element(ns + "Name").Value
+                _path       = path,
+                _name       = name
             };
         }
 
@@ -28,9 +36,11 @@ namespace Lang.Cs.Compiler.VSProject
             set => _path = (value ?? string.Empty).Trim();
         }
 
+        /*
         /// <summary>
         /// </summary>
         public Guid ProjectGuid { get; set; }
+        */
 
         /// <summary>
         /// </summary>
